@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-29 16:06:23
- * @LastEditTime: 2024-12-04 16:24:18
+ * @LastEditTime: 2024-12-04 16:33:33
  * @LastEditors: mulingyuer
  * @Description: 顶栏
  * @FilePath: \frontend\src\layout\admin-layout\components\Header\index.vue
@@ -15,6 +15,7 @@
 		</div>
 		<div class="admin-header-right">
 			<ComplexitySetting />
+			<LightDarkToggle />
 			<FullScreen />
 		</div>
 	</el-header>
@@ -26,6 +27,7 @@ import MenuCollapse from "./MenuCollapse.vue";
 import Breadcrumb from "./Breadcrumb.vue";
 import FullScreen from "./FullScreen.vue";
 import ComplexitySetting from "./ComplexitySetting.vue";
+import LightDarkToggle from "./LightDarkToggle.vue";
 
 const appStore = useAppStore();
 const headerClass = computed(() => {

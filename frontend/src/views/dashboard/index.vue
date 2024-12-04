@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:39:40
- * @LastEditTime: 2024-12-04 15:45:36
+ * @LastEditTime: 2024-12-04 17:16:42
  * @LastEditors: mulingyuer
  * @Description: 仪表盘
  * @FilePath: \frontend\src\views\dashboard\index.vue

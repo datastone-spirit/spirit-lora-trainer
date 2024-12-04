@@ -9,11 +9,15 @@ import "@/styles/index.scss";
 // plugins
 import { ElementPlusPlugin } from "@/plugins/element-plus";
 
+// directives
+import directives from "@/directives";
+
 async function setupApp() {
 	const app = createApp(App);
 
 	app.use(ElementPlusPlugin);
 	app.use(piniaStore);
+	app.use(directives);
 	await setupRouter(app);
 
 	app.mount("#app");

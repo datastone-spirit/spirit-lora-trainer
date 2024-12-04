@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-30 09:24:09
- * @LastEditTime: 2024-09-30 17:36:52
+ * @LastEditTime: 2024-12-04 17:33:34
  * @LastEditors: mulingyuer
  * @Description: 用户
- * @FilePath: \spirit-app-microservice-admin\src\layout\admin-layout\components\Header\User.vue
+ * @FilePath: \frontend\src\layout\admin-layout\components\Header\User.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -40,7 +40,7 @@ async function onLogout() {
 }
 .admin-user {
 	height: 100%;
-	padding: 12px;
+	padding: $padding;
 	cursor: pointer;
 	display: flex;
 	align-items: center;

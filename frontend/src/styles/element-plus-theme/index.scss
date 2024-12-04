@@ -1,3 +1,5 @@
+@use "../variables.scss" as *;
+
 $--colors: (
 	"primary": (
 		"base": #1b84ff
@@ -20,7 +22,10 @@ $--colors: (
 );
 
 @forward "element-plus/theme-chalk/src/common/var.scss" with (
-	$colors: $--colors
+	$colors: $--colors,
+	$card: (
+		"padding": $padding
+	)
 );
 
 @use "./dark.scss" as *;

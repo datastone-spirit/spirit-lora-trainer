@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-29 16:06:23
- * @LastEditTime: 2024-12-04 16:33:33
+ * @LastEditTime: 2024-12-04 17:33:30
  * @LastEditors: mulingyuer
  * @Description: 顶栏
  * @FilePath: \frontend\src\layout\admin-layout\components\Header\index.vue
@@ -68,6 +68,6 @@ const headerClass = computed(() => {
 	align-items: center;
 }
 .admin-header-right {
-	padding-right: 12px;
+	padding-right: $padding;
 }
 </style>

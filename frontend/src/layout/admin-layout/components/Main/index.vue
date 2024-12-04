@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-29 17:00:46
- * @LastEditTime: 2024-12-04 15:57:35
+ * @LastEditTime: 2024-12-04 17:33:46
  * @LastEditors: mulingyuer
  * @Description: main
  * @FilePath: \frontend\src\layout\admin-layout\components\Main\index.vue
@@ -53,7 +53,7 @@ const mainClass = computed(() => {
 	}
 }
 .admin-main-content {
-	padding: 12px;
+	padding: $padding;
 	height: 100%;
 	overflow: hidden;
 }

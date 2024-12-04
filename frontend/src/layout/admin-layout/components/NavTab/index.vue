@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-30 10:23:21
- * @LastEditTime: 2024-10-11 17:09:39
+ * @LastEditTime: 2024-12-04 17:33:41
  * @LastEditors: mulingyuer
  * @Description: 导航tab
- * @FilePath: \element-admin-template\src\layout\admin-layout\components\NavTab\index.vue
+ * @FilePath: \frontend\src\layout\admin-layout\components\NavTab\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -195,7 +195,7 @@ watch(
 			display: none;
 		}
 		.el-tabs__item:nth-child(2) {
-			margin-left: 12px;
+			margin-left: $padding;
 		}
 		.el-tabs__item {
 			border: 1px solid var(--el-border-color-light);
@@ -223,7 +223,7 @@ watch(
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding-left: 12px;
+	padding-left: $padding;
 	padding-right: 9px;
 }
 .nav-tab-close {

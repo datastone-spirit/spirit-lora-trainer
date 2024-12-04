@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_restful import Api
 from .resources.file import File
 from .resources.upload import Upload
@@ -8,7 +9,8 @@ from .resources.execute import ExecuteCommand
 from flasgger import Swagger
 
 app = Flask(__name__)
-swagger = Swagger(app)
+Swagger(app)
+CORS(app, resources=r"/*")
 api = Api(app, prefix="/api")
 
 

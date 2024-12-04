@@ -1,0 +1,52 @@
+// 样式重置
+
+:root {
+	box-sizing: border-box;
+	font-size: 14px;
+	font-family:
+		Inter,
+		-apple-system,
+		BlinkMacSystemFont,
+		PingFang SC,
+		Hiragino Sans GB,
+		noto sans,
+		Microsoft YaHei,
+		Helvetica Neue,
+		Helvetica,
+		Arial,
+		sans-serif;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: transparent;
+	text-rendering: optimizelegibility;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+	padding: 0;
+	margin: 0;
+}
+
+/** 谷歌浏览器自动填充背景色处理 */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+	-webkit-text-fill-color: #606266 !important;
+	-webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+	background-color: transparent;
+	background-image: none;
+	transition: background-color 50000s ease-in-out 0s;
+}

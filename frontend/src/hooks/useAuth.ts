@@ -7,24 +7,19 @@
  * @FilePath: \spirit-app-microservice-admin\src\hooks\useAuth.ts
  * 怎么可能会有bug！！！
  */
-import { useUserStore, useNavTabStore } from "@/stores";
+import { useUserStore } from "@/stores";
 
 export function useAuth() {
 	const userStore = useUserStore();
-	const navTabStore = useNavTabStore();
 
 	/** 登录通用处理 */
 	async function login(token: string) {
-		navTabStore.clearNavTabList();
 		userStore.setToken(token);
 	}
 
 	/** 退出通用处理 */
 	async function logout() {
 		userStore.clearToken();
-		setTimeout(() => {
-			navTabStore.clearNavTabList();
-		});
 	}
 
 	return {

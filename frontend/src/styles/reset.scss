@@ -40,6 +40,10 @@ p {
 	margin: 0;
 }
 
+body {
+	overflow-y: scroll;
+}
+
 /** 谷歌浏览器自动填充背景色处理 */
 input:-webkit-autofill,
 textarea:-webkit-autofill,

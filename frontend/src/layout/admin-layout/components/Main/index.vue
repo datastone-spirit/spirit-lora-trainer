@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-29 17:00:46
- * @LastEditTime: 2024-12-04 17:33:46
+ * @LastEditTime: 2024-12-05 15:17:55
  * @LastEditors: mulingyuer
  * @Description: main
  * @FilePath: \frontend\src\layout\admin-layout\components\Main\index.vue
@@ -41,7 +41,7 @@ const mainClass = computed(() => {
 <style lang="scss" scoped>
 .admin-main {
 	padding: 0;
-	padding-top: calc($header-height + $nav-tab-height);
+	padding-top: calc($header-height);
 	padding-left: $aside-width;
 	transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	&.is-mobile-collapse,

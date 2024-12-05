@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="complexity-setting">
-		<el-radio-group v-model="complexityValue" size="small">
+		<el-radio-group v-model="complexityValue" size="default">
 			<el-radio-button label="简单" :value="ComplexityEnum.BEGINNER" />
 			<el-radio-button label="专家" :value="ComplexityEnum.EXPERT" />
 		</el-radio-group>

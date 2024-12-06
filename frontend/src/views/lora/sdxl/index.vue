@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-06 11:02:38
+ * @LastEditTime: 2024-12-06 16:39:50
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -41,12 +41,29 @@
 								placeholder="请选择训练用的底模"
 							/>
 						</PopoverFormItem>
+						<PopoverFormItem
+							v-if="isExpert"
+							label="从某个 save_state 保存的中断状态继续训练"
+							prop="resume"
+							popover-content="resume"
+						>
+							<FolderSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
+						</PopoverFormItem>
 						<PopoverFormItem label="VAE" prop="vae" popover-content="vae">
 							<FolderSelector v-model="ruleForm.vae" placeholder="请选择VAE" />
 						</PopoverFormItem>
 						<PopoverFormItem label="LoRA 保存路径" prop="output_dir" popover-content="output_dir">
 							<FolderSelector v-model="ruleForm.output_dir" placeholder="请选择LoRA保存路径" />
 						</PopoverFormItem>
+						<template v-if="isExpert">
+							<ModelSaveFormatSelector v-model="ruleForm.save_model_as" prop="save_model_as" />
+							<ModelSavePrecisionSelector v-model="ruleForm.save_precision" prop="save_precision" />
+							<SaveEveryNEpochsNumber
+								v-model="ruleForm.save_every_n_epochs"
+								prop="save_every_n_epochs"
+							/>
+							<SaveStateSwitch v-model="ruleForm.save_state" prop="save_state" />
+						</template>
 					</Collapse>
 					<Collapse v-model="openStep2" title="第2步：训练用的数据">
 						<DatasetDirSelector v-model:dir="ruleForm.train_data_dir" dir-prop="train_data_dir" />
@@ -89,8 +106,11 @@
 							bucket-reso-steps-prop="bucket_reso_steps"
 						/>
 					</Collapse>
-					<Collapse v-model="openStep3" title="第3步：训练参数配置">
-						<div style="height: 2000px">xx</div>
+					<Collapse v-model="openStep3" title="第3步：模型参数调教">
+						<TrainingOptions v-model="ruleForm" />
+						<LRAndOptimizer v-model="ruleForm" />
+						<NetworkConfig v-model="ruleForm" />
+						<div style="height: 1200px"></div>
 					</Collapse>
 				</el-form>
 			</div>
@@ -104,36 +124,11 @@
 <script setup lang="ts">
 import type { FormInstance, FormRules } from "element-plus";
 import ARB from "./components/ARB.vue";
+import TrainingOptions from "./components/TrainingOptions.vue";
+import LRAndOptimizer from "./components/LRAndOptimizer.vue";
+import NetworkConfig from "./components/NetworkConfig.vue";
 import { useSettingsStore } from "@/stores";
-
-interface RuleForm {
-	/** lora名称 */
-	output_name: string;
-	/** 触发词 */
-	class_tokens: string;
-	/** 底模 */
-	pretrained_model_name_or_path: string;
-	/** vae */
-	vae: string;
-	/** lora保存路径 */
-	output_dir: string;
-	/** 数据集目录 */
-	train_data_dir: string;
-	/** 每个图像重复训练次数 */
-	num_repeats: number;
-	/** 图片尺寸-宽度 */
-	resolution_width: number;
-	/** 图片尺寸-高度 */
-	resolution_height: number;
-	/** 启用 arb 桶以允许非固定宽高比的图片 */
-	enable_bucket: boolean;
-	/** arb 桶最小分辨率 */
-	min_bucket_reso: number;
-	/** arb 桶最大分辨率 */
-	max_bucket_reso: number;
-	/** arb 桶分辨率划分单位，SDXL 可以使用 32 (SDXL低于32时失效) */
-	bucket_reso_steps: number;
-}
+import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 
@@ -142,8 +137,13 @@ const ruleForm = ref<RuleForm>({
 	output_name: "",
 	class_tokens: "",
 	pretrained_model_name_or_path: "",
+	resume: "",
 	vae: "",
 	output_dir: "",
+	save_model_as: "safetensors",
+	save_precision: "fp16",
+	save_every_n_epochs: 2,
+	save_state: false,
 	train_data_dir: "",
 	num_repeats: 10,
 	resolution_width: 512,
@@ -151,7 +151,22 @@ const ruleForm = ref<RuleForm>({
 	enable_bucket: true,
 	min_bucket_reso: 256,
 	max_bucket_reso: 1024,
-	bucket_reso_steps: 64
+	bucket_reso_steps: 64,
+	max_train_epochs: 10,
+	train_batch_size: 1,
+	gradient_checkpointing: false,
+	gradient_accumulation_steps: undefined,
+	network_train_unet_only: false,
+	network_train_text_encoder_only: false,
+	learning_rate: "1e-4",
+	unet_lr: "1e-4",
+	text_encoder_lr: "1e-4",
+	lr_scheduler: "cosine_with_restarts",
+	lr_warmup_steps: 0,
+	lr_scheduler_num_cycles: 1,
+	optimizer_type: "AdamW8bit",
+	min_snr_gamma: undefined,
+	optimizer_args_custom: []
 });
 const rules = reactive<FormRules<RuleForm>>({
 	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
@@ -160,6 +175,11 @@ const rules = reactive<FormRules<RuleForm>>({
 		{ required: true, message: "请选择训练用的底模", trigger: "change" }
 	],
 	output_dir: [{ required: true, message: "请选择LoRA保存路径", trigger: "blur" }],
+	save_model_as: [{ required: true, message: "请选择模型保存格式", trigger: "change" }],
+	save_precision: [{ required: true, message: "请选择模型保存精度", trigger: "change" }],
+	save_every_n_epochs: [
+		{ required: true, message: "请输入每 N epoch（轮）自动保存一次模型", trigger: "blur" }
+	],
 	train_data_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }],
 	num_repeats: [{ required: true, message: "请输入每个图像重复训练次数", trigger: "blur" }],
 	resolution_width: [{ required: true, message: "请输入图片尺寸-宽度", trigger: "blur" }],
@@ -168,8 +188,8 @@ const rules = reactive<FormRules<RuleForm>>({
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 
-const openStep1 = ref(true);
-const openStep2 = ref(true);
+const openStep1 = ref(false);
+const openStep2 = ref(false);
 const openStep3 = ref(true);
 </script>
 

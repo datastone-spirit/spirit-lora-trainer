@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:08:09
- * @LastEditTime: 2024-12-04 17:19:11
+ * @LastEditTime: 2024-12-06 14:37:36
  * @LastEditors: mulingyuer
  * @Description: 难易度设置
  * @FilePath: \frontend\src\layout\admin-layout\components\Header\ComplexitySetting.vue
@@ -10,7 +10,7 @@
 <template>
 	<div class="complexity-setting">
 		<el-radio-group v-model="complexityValue" size="default">
-			<el-radio-button label="简单" :value="ComplexityEnum.BEGINNER" />
+			<el-radio-button label="新手" :value="ComplexityEnum.BEGINNER" />
 			<el-radio-button label="专家" :value="ComplexityEnum.EXPERT" />
 		</el-radio-group>
 	</div>

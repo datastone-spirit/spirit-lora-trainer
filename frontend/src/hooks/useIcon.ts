@@ -7,7 +7,7 @@
  * @FilePath: \element-admin-template\src\hooks\useIcon.ts
  * 怎么可能会有bug！！！
  */
-import Icon from "@/components/Icon.vue";
+import Icon from "@/components/Icon/Icon.vue";
 
 export interface UseIconProps {
 	/** 图标名称 */

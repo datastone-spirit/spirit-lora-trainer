@@ -1,15 +1,21 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-29 11:01:54
- * @LastEditTime: 2024-10-15 11:54:33
+ * @LastEditTime: 2024-12-06 08:51:11
  * @LastEditors: mulingyuer
  * @Description: icon
- * @FilePath: \element-admin-template\src\components\Icon.vue
+ * @FilePath: \frontend\src\components\Icon\Icon.vue
  * 怎么可能会有bug！！！
 -->
 <script lang="ts">
 import { ElIcon } from "element-plus";
 import iconPath from "@/assets/icons/remixicon.symbol.svg";
+
+export interface IconProps {
+	name: string;
+	size?: string | number;
+	color?: string;
+}
 
 export default defineComponent({
 	name: "Icon",

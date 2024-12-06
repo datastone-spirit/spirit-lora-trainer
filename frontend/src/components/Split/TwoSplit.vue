@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 10:13:40
- * @LastEditTime: 2024-12-05 15:07:00
+ * @LastEditTime: 2024-12-05 16:38:54
  * @LastEditors: mulingyuer
  * @Description: 2分割组件
  * @FilePath: \frontend\src\components\Split\TwoSplit.vue
@@ -123,18 +123,18 @@ watch([() => props.direction, () => props.sizes], () => {
 		border-bottom-left-radius: 0;
 	}
 }
-.two-split.vertical {
-	flex-direction: column;
-	padding-right: 12px;
-	flex-direction: column-reverse;
-	.two-split-left,
-	.two-split-right {
-		width: 100%;
-		height: auto;
-	}
-	.two-split-left .two-split-card {
-	}
-}
+// .two-split.vertical {
+// 	flex-direction: column;
+// 	padding-right: 12px;
+// 	flex-direction: column-reverse;
+// 	.two-split-left,
+// 	.two-split-right {
+// 		width: 100%;
+// 		height: auto;
+// 	}
+// 	.two-split-left .two-split-card {
+// 	}
+// }
 
 .two-split-card {
 	height: 100%;
@@ -162,5 +162,15 @@ watch([() => props.direction, () => props.sizes], () => {
 .two-split :deep(.gutter.gutter-vertical) {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=");
 	cursor: col-resize;
+}
+</style>
+<style lang="scss">
+html.dark {
+	.two-split .gutter {
+		background-color: var(--el-bg-color);
+		&:hover {
+			background-color: var(--el-bg-color-overlay);
+		}
+	}
 }
 </style>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:29:28
- * @LastEditTime: 2024-12-04 15:50:35
+ * @LastEditTime: 2024-12-06 16:50:12
  * @LastEditors: mulingyuer
  * @Description: logo
  * @FilePath: \frontend\src\layout\admin-layout\components\Aside\Logo.vue
@@ -31,7 +31,7 @@ const logoTitle = import.meta.env.VITE_APP_TITLE;
 	height: 56px;
 	white-space: nowrap;
 	text-decoration: none;
-	color: $zl-color;
+	color: var(--el-color-primary);
 	&:active {
 		opacity: 0.7;
 	}

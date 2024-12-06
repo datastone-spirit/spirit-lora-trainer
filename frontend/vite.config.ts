@@ -29,7 +29,11 @@ export default defineConfig(({ mode }) => {
 			vueDevTools(),
 			AutoImport({
 				imports: ["vue", "vue-router", "pinia", "@vueuse/core"],
-				resolvers: [ElementPlusResolver()],
+				resolvers: [
+					ElementPlusResolver({
+						importStyle: "sass"
+					})
+				],
 				dts: "types/auto-imports.d.ts",
 				eslintrc: {
 					enabled: true,

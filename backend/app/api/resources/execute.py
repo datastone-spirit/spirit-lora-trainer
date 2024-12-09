@@ -7,14 +7,13 @@ import time
 class ExecuteCommand(Resource):
     def post(self):
         """
-        执行 Shell 命令并返回日志信息
-
+        启动训练
         ---
         parameters:
           - name: command
             in: body
             required: true
-            description: 要执行的 Shell 命令
+            description: 要执行的启动命令
             type: string
 
         responses:

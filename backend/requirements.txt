@@ -1,3 +1,7 @@
+transformers
+accelerate
+tensorboard
+pillow
 flask >= 3.1.0
 flask-restful == 0.3.10
 python-dotenv == 1.0.1

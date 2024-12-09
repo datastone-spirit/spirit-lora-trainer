@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 15:29:23
- * @LastEditTime: 2024-12-05 16:33:50
+ * @LastEditTime: 2024-12-09 08:53:52
  * @LastEditors: mulingyuer
  * @Description: 折叠面板
  * @FilePath: \frontend\src\components\Collapse\Collapse.vue
@@ -12,7 +12,7 @@
 		<div class="collapse-header">
 			<h2 class="collapse-title">{{ title }}</h2>
 			<span class="collapse-arrow" :class="{ closed: !isCollapse }" @click="onToggleCollapse">
-				<Icon name="ri-arrow-down-s-line" class="collapse-arrow-icon" size="25"></Icon>
+				<Icon name="ri-arrow-up-s-line" class="collapse-arrow-icon" :size="arrowSize"></Icon>
 			</span>
 		</div>
 		<el-divider class="collapse-divider" />
@@ -25,11 +25,16 @@
 </template>
 
 <script setup lang="ts">
+import type { IconProps } from "@/components/Icon/Icon.vue";
+
 export interface CollapseProps {
 	title: string;
+	arrowSize?: IconProps["size"];
 }
 
-defineProps<CollapseProps>();
+withDefaults(defineProps<CollapseProps>(), {
+	arrowSize: 28
+});
 const isCollapse = defineModel({ type: Boolean, required: true });
 
 function onToggleCollapse() {
@@ -60,7 +65,7 @@ function onToggleCollapse() {
 	align-items: center;
 	color: var(--el-text-color-primary);
 	transition: all 0.2s;
-	border-radius: 50%;
+	border-radius: var(--el-border-radius-base);
 	cursor: pointer;
 	@include no-select();
 	&:hover {

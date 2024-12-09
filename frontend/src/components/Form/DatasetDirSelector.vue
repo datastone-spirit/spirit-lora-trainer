@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2024-12-06 11:09:04
+ * @LastEditTime: 2024-12-09 09:54:32
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -13,7 +13,7 @@
 			<PopoverFormItem :label="dirLabel" :prop="dirProp" :popover-content="dirPopoverContent">
 				<FolderSelector v-model="dir" :placeholder="dirPlaceholder" />
 			</PopoverFormItem>
-			<el-form-item :label="taggerLabel">
+			<el-form-item :label="taggerLabel" :prop="taggerProp">
 				<el-select v-model="taggerModel" :placeholder="taggerPlaceholder">
 					<el-option
 						v-for="item in options"
@@ -41,7 +41,7 @@
 export interface DatasetDirSelectorProps {
 	dirLabel?: string;
 	dirProp?: string;
-	dirPopoverContent?: string;
+	dirPopoverContent: string;
 	dirPlaceholder?: string;
 	taggerLabel?: string;
 	taggerProp?: string;
@@ -52,7 +52,6 @@ export interface DatasetDirSelectorProps {
 
 withDefaults(defineProps<DatasetDirSelectorProps>(), {
 	dirLabel: "数据集目录",
-	dirPopoverContent: "train_data_dir",
 	dirPlaceholder: "请选择训练用的数据集目录",
 	taggerLabel: "打标模型",
 	taggerPlaceholder: "请选择打标模型",

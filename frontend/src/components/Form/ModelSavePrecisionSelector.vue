@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 11:57:50
- * @LastEditTime: 2024-12-06 14:19:54
+ * @LastEditTime: 2024-12-09 09:50:13
  * @LastEditors: mulingyuer
  * @Description: 模型保存精度选择器
  * @FilePath: \frontend\src\components\Form\ModelSavePrecisionSelector.vue
@@ -26,14 +26,13 @@ import type { FormItemProps } from "element-plus";
 export interface ModelSaveFormatSelectorProps {
 	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
-	popoverContent?: string;
+	popoverContent: string;
 	placeholder?: string;
 	options?: Array<{ label: string; value: string; disabled?: boolean }>;
 }
 
 withDefaults(defineProps<ModelSaveFormatSelectorProps>(), {
 	label: "模型保存精度",
-	popoverContent: "save_precision",
 	options: () => [
 		{
 			label: "fp16",

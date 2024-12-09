@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-06 16:39:50
+ * @LastEditTime: 2024-12-09 15:44:59
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -20,97 +20,16 @@
 					size="large"
 				>
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
-						<PopoverFormItem label="LoRA 名称" prop="output_name" popover-content="output_name">
-							<el-input v-model="ruleForm.output_name" placeholder="请输入LoRA名称" />
-						</PopoverFormItem>
-						<PopoverFormItem label="LoRA 触发词" prop="class_tokens" popover-content="class_tokens">
-							<el-input
-								v-model="ruleForm.class_tokens"
-								placeholder="请输入触发词，多个词用英文逗号分隔"
-								type="textarea"
-								:rows="4"
-							/>
-						</PopoverFormItem>
-						<PopoverFormItem
-							label="底模"
-							prop="pretrained_model_name_or_path"
-							popover-content="pretrained_model_name_or_path"
-						>
-							<FolderSelector
-								v-model="ruleForm.pretrained_model_name_or_path"
-								placeholder="请选择训练用的底模"
-							/>
-						</PopoverFormItem>
-						<PopoverFormItem
-							v-if="isExpert"
-							label="从某个 save_state 保存的中断状态继续训练"
-							prop="resume"
-							popover-content="resume"
-						>
-							<FolderSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
-						</PopoverFormItem>
-						<PopoverFormItem label="VAE" prop="vae" popover-content="vae">
-							<FolderSelector v-model="ruleForm.vae" placeholder="请选择VAE" />
-						</PopoverFormItem>
-						<PopoverFormItem label="LoRA 保存路径" prop="output_dir" popover-content="output_dir">
-							<FolderSelector v-model="ruleForm.output_dir" placeholder="请选择LoRA保存路径" />
-						</PopoverFormItem>
-						<template v-if="isExpert">
-							<ModelSaveFormatSelector v-model="ruleForm.save_model_as" prop="save_model_as" />
-							<ModelSavePrecisionSelector v-model="ruleForm.save_precision" prop="save_precision" />
-							<SaveEveryNEpochsNumber
-								v-model="ruleForm.save_every_n_epochs"
-								prop="save_every_n_epochs"
-							/>
-							<SaveStateSwitch v-model="ruleForm.save_state" prop="save_state" />
-						</template>
+						<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
 					</Collapse>
 					<Collapse v-model="openStep2" title="第2步：训练用的数据">
-						<DatasetDirSelector v-model:dir="ruleForm.train_data_dir" dir-prop="train_data_dir" />
-						<PopoverFormItem
-							label="每个图像重复训练次数"
-							prop="num_repeats"
-							popover-content="num_repeats"
-						>
-							<el-input-number v-model.number="ruleForm.num_repeats" :step="1" step-strictly />
-						</PopoverFormItem>
-						<el-row :gutter="20">
-							<el-col :span="8">
-								<PopoverFormItem
-									label="图片尺寸-宽度px"
-									prop="resolution_width"
-									popover-content="resolution"
-								>
-									<el-input-number v-model.number="ruleForm.resolution_width" :controls="false" />
-								</PopoverFormItem>
-							</el-col>
-							<el-col :span="8">
-								<PopoverFormItem
-									label="图片尺寸-高度px"
-									prop="resolution_height"
-									popover-content="resolution"
-								>
-									<el-input-number v-model.number="ruleForm.resolution_height" :controls="false" />
-								</PopoverFormItem>
-							</el-col>
-						</el-row>
-						<ARB
-							v-if="isExpert"
-							v-model:enable_bucket="ruleForm.enable_bucket"
-							v-model:bucket_reso_steps="ruleForm.bucket_reso_steps"
-							v-model:min_bucket_reso="ruleForm.min_bucket_reso"
-							v-model:max_bucket_reso="ruleForm.max_bucket_reso"
-							enable-bucket-prop="enable_bucket"
-							min-bucket-reso-prop="min_bucket_reso"
-							max-bucket-reso-prop="max_bucket_reso"
-							bucket-reso-steps-prop="bucket_reso_steps"
-						/>
+						<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
 					</Collapse>
 					<Collapse v-model="openStep3" title="第3步：模型参数调教">
-						<TrainingOptions v-model="ruleForm" />
-						<LRAndOptimizer v-model="ruleForm" />
-						<NetworkConfig v-model="ruleForm" />
-						<div style="height: 1200px"></div>
+						<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
+					</Collapse>
+					<Collapse v-if="isExpert" v-model="openStep4" title="其它：高级设置">
+						<AdvancedSettings v-model:form="ruleForm" :form-props="ruleFormProps" />
 					</Collapse>
 				</el-form>
 			</div>
@@ -123,12 +42,13 @@
 
 <script setup lang="ts">
 import type { FormInstance, FormRules } from "element-plus";
-import ARB from "./components/ARB.vue";
-import TrainingOptions from "./components/TrainingOptions.vue";
-import LRAndOptimizer from "./components/LRAndOptimizer.vue";
-import NetworkConfig from "./components/NetworkConfig.vue";
+import BasicInfo from "./components/BasicInfo/index.vue";
+import TrainingData from "./components/TrainingData/index.vue";
+import ModelParameters from "./components/ModelParameters/index.vue";
+import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import { useSettingsStore } from "@/stores";
-import type { RuleForm } from "./types";
+import type { RuleForm, RuleFormProps } from "./types";
+import { generateKeyMapFromInterface } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 
@@ -142,23 +62,28 @@ const ruleForm = ref<RuleForm>({
 	output_dir: "",
 	save_model_as: "safetensors",
 	save_precision: "fp16",
-	save_every_n_epochs: 2,
 	save_state: false,
+	// -----
 	train_data_dir: "",
 	num_repeats: 10,
+	max_train_epochs: 10,
+	train_batch_size: 1,
 	resolution_width: 512,
 	resolution_height: 512,
 	enable_bucket: true,
 	min_bucket_reso: 256,
 	max_bucket_reso: 1024,
 	bucket_reso_steps: 64,
-	max_train_epochs: 10,
-	train_batch_size: 1,
+	// -----
+	seed: 1337,
+	learning_rate: "1e-4",
+	save_every_n_epochs: 2,
+	network_dim: 32,
+	// -----
 	gradient_checkpointing: false,
 	gradient_accumulation_steps: undefined,
 	network_train_unet_only: false,
 	network_train_text_encoder_only: false,
-	learning_rate: "1e-4",
 	unet_lr: "1e-4",
 	text_encoder_lr: "1e-4",
 	lr_scheduler: "cosine_with_restarts",
@@ -166,7 +91,68 @@ const ruleForm = ref<RuleForm>({
 	lr_scheduler_num_cycles: 1,
 	optimizer_type: "AdamW8bit",
 	min_snr_gamma: undefined,
-	optimizer_args_custom: []
+	optimizer_args_custom: [],
+	// -----
+	network_module: "networks.lora",
+	network_weights: "",
+	network_alpha: 32,
+	network_dropout: 0,
+	scale_weight_norms: undefined,
+	network_args_custom: [],
+	enable_block_weights: false,
+	down_lr_weight: "1,1,1,1,1,1,1,1,1,1,1,1",
+	mid_lr_weight: "1",
+	up_lr_weight: "1,1,1,1,1,1,1,1,1,1,1,1",
+	block_lr_zero_threshold: 0,
+	enable_base_weight: false,
+	base_weights: [],
+	base_weights_multiplier: "",
+	// -----
+	enable_preview: false,
+	// -----,
+	log_with: "tensorboard",
+	log_prefix: "",
+	log_tracker_name: "",
+	logging_dir: "./logs",
+	// -----
+	caption_extension: ".txt",
+	shuffle_caption: true,
+	weighted_captions: false,
+	keep_tokens: 0,
+	keep_tokens_separator: "",
+	max_token_length: 255,
+	caption_dropout_rate: undefined,
+	caption_dropout_every_n_epochs: undefined,
+	caption_tag_dropout_rate: undefined,
+	// -----
+	noise_offset: undefined,
+	multires_noise_iterations: undefined,
+	multires_noise_discount: undefined,
+	// -----
+	color_aug: false,
+	flip_aug: false,
+	random_crop: false,
+	// -----
+	clip_skip: 2,
+	ui_custom_params: "",
+	// -----
+	mixed_precision: "fp16",
+	full_fp16: false,
+	full_bf16: false,
+	fp8_base: false,
+	no_half_vae: false,
+	xformers: true,
+	sdpa: false,
+	lowram: false,
+	cache_latents: true,
+	cache_latents_to_disk: true,
+	cache_text_encoder_outputs: false,
+	cache_text_encoder_outputs_to_disk: false,
+	persistent_data_loader_workers: true,
+	vae_batch_size: undefined,
+	// -----
+	ddp_timeout: undefined,
+	ddp_gradient_as_bucket_view: false
 });
 const rules = reactive<FormRules<RuleForm>>({
 	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
@@ -185,12 +171,14 @@ const rules = reactive<FormRules<RuleForm>>({
 	resolution_width: [{ required: true, message: "请输入图片尺寸-宽度", trigger: "blur" }],
 	resolution_height: [{ required: true, message: "请输入图片尺寸-高度", trigger: "blur" }]
 });
+const ruleFormProps = generateKeyMapFromInterface<RuleForm, RuleFormProps>(ruleForm.value);
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 
-const openStep1 = ref(false);
-const openStep2 = ref(false);
+const openStep1 = ref(true);
+const openStep2 = ref(true);
 const openStep3 = ref(true);
+const openStep4 = ref(true);
 </script>
 
 <style lang="scss" scoped>
@@ -198,6 +186,6 @@ const openStep3 = ref(true);
 	height: calc(100vh - $header-height - $padding * 2);
 }
 .lora-sdxl-content {
-	padding: 16px 36px 16px 16px;
+	padding: 16px;
 }
 </style>

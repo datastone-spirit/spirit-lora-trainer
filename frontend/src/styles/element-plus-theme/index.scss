@@ -29,3 +29,7 @@ $--colors: (
 );
 
 @use "./dark.scss";
+
+:root {
+	--el-two-split-scrollbar: rgba(144, 147, 153, 0.4);
+}

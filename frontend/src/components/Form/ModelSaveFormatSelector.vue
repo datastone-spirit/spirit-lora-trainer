@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 11:39:32
- * @LastEditTime: 2024-12-06 11:55:18
+ * @LastEditTime: 2024-12-09 09:49:51
  * @LastEditors: mulingyuer
  * @Description: 模型保存格式下拉框
  * @FilePath: \frontend\src\components\Form\ModelSaveFormatSelector.vue
@@ -26,14 +26,13 @@ import type { FormItemProps } from "element-plus";
 export interface ModelSaveFormatSelectorProps {
 	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
-	popoverContent?: string;
+	popoverContent: string;
 	placeholder?: string;
 	options?: Array<{ label: string; value: string; disabled?: boolean }>;
 }
 
 withDefaults(defineProps<ModelSaveFormatSelectorProps>(), {
 	label: "模型保存格式",
-	popoverContent: "save_model_as",
 	options: () => [
 		{
 			label: "safetensors",

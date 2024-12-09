@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 10:13:40
- * @LastEditTime: 2024-12-05 16:38:54
+ * @LastEditTime: 2024-12-09 17:00:37
  * @LastEditors: mulingyuer
  * @Description: 2分割组件
  * @FilePath: \frontend\src\components\Split\TwoSplit.vue
@@ -11,9 +11,7 @@
 	<div class="two-split" :class="[direction]">
 		<div ref="splitLeft" class="two-split-left">
 			<Card class="two-split-card">
-				<el-scrollbar height="100%">
-					<slot name="left"></slot>
-				</el-scrollbar>
+				<slot name="left"></slot>
 			</Card>
 		</div>
 		<div ref="splitRight" class="two-split-right">
@@ -138,11 +136,27 @@ watch([() => props.direction, () => props.sizes], () => {
 
 .two-split-card {
 	height: 100%;
-	:deep(.el-card__body) {
-		padding: 0;
-		height: 100%;
+}
+.two-split-card :deep(.el-card__body) {
+	padding: 0;
+	height: 100%;
+	overflow: auto;
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: var(--el-two-split-scrollbar);
 	}
 }
+
+/* 针对不支持::-webkit-scrollbar-*的浏览器的样式调整 */
+@supports not (selector(::-webkit-scrollbar)) {
+	.two-split-card :deep(.el-card__body) {
+		scrollbar-width: thin;
+		scrollbar-color: var(--el-two-split-scrollbar) transparent;
+	}
+}
+
 .two-split :deep(.gutter) {
 	background-color: #eee;
 	background-repeat: no-repeat;

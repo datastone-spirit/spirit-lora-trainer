@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 15:38:25
- * @LastEditTime: 2024-12-10 10:40:28
+ * @LastEditTime: 2024-12-10 11:40:59
  * @LastEditors: mulingyuer
  * @Description: 学习率与优化器设置
- * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\LRAndOptimizer.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LRAndOptimizer.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -21,6 +21,7 @@
 		</PopoverFormItem>
 		<LrSchedulerSelect
 			v-model="ruleForm.lr_scheduler"
+			label="学习率调度器设置"
 			:prop="formProps.lr_scheduler"
 			popover-content="lr_scheduler"
 		/>
@@ -45,6 +46,7 @@
 		</PopoverFormItem>
 		<OptimizerTypeSelect
 			v-model="ruleForm.optimizer_type"
+			label="优化器设置"
 			:prop="formProps.optimizer_type"
 			popover-content="optimizer_type"
 		/>

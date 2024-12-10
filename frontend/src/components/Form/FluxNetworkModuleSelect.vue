@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2024-12-10 10:48:53
- * @LastEditTime: 2024-12-10 10:56:14
+ * @Date: 2024-12-10 10:56:35
+ * @LastEditTime: 2024-12-10 11:41:34
  * @LastEditors: mulingyuer
  * @Description: 训练网络模块
- * @FilePath: \frontend\src\components\Form\SDXLNetworkModuleSelect.vue
+ * @FilePath: \frontend\src\components\Form\FluxNetworkModuleSelect.vue
  * 怎么可能会有bug！！！
 -->
 <template>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:19:14
- * @LastEditTime: 2024-12-10 09:03:56
+ * @LastEditTime: 2024-12-10 11:38:35
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\sdxl\components\TrainingData\index.vue
@@ -10,6 +10,7 @@
 <template>
 	<DatasetDirSelector
 		v-model:dir="ruleForm.train_data_dir"
+		dir-label="数据集目录"
 		:dir-prop="formProps.train_data_dir"
 		dir-popover-content="train_data_dir"
 	/>

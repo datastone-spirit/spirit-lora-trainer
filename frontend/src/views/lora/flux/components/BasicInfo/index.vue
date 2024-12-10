@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2024-12-10 09:32:05
+ * @LastEditTime: 2024-12-10 11:39:59
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -56,11 +56,13 @@
 	<template v-if="isExpert">
 		<ModelSaveFormatSelector
 			v-model="ruleForm.save_model_as"
+			label="模型保存格式"
 			:prop="formProps.save_model_as"
 			popoverContent="save_model_as"
 		/>
 		<ModelSavePrecisionSelector
 			v-model="ruleForm.save_precision"
+			label="模型保存精度"
 			:prop="formProps.save_precision"
 			popover-content="save_precision"
 		/>

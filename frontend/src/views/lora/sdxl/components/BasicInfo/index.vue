@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:18:16
- * @LastEditTime: 2024-12-10 09:32:17
+ * @LastEditTime: 2024-12-10 11:40:03
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\sdxl\components\BasicInfo\index.vue
@@ -50,11 +50,13 @@
 	<template v-if="isExpert">
 		<ModelSaveFormatSelector
 			v-model="ruleForm.save_model_as"
+			label="模型保存格式"
 			:prop="formProps.save_model_as"
 			popoverContent="save_model_as"
 		/>
 		<ModelSavePrecisionSelector
 			v-model="ruleForm.save_precision"
+			label="模型保存精度"
 			:prop="formProps.save_precision"
 			popover-content="save_precision"
 		/>

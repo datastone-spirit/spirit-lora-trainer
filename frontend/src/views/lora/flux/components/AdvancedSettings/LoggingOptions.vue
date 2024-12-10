@@ -1,0 +1,66 @@
+<!--
+ * @Author: mulingyuer
+ * @Date: 2024-12-09 11:30:00
+ * @LastEditTime: 2024-12-09 11:36:18
+ * @LastEditors: mulingyuer
+ * @Description: 日志设置
+ * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\LoggingOptions.vue
+ * 怎么可能会有bug！！！
+-->
+<template>
+	<FieldSetWrapper title="日志设置">
+		<PopoverFormItem label="日志模块" :prop="formProps.log_with" popover-content="log_with">
+			<el-select v-model="ruleForm.log_with" placeholder="请选择日志模块">
+				<el-option
+					v-for="item in logWithOptions"
+					:key="item.value"
+					:label="item.label"
+					:value="item.value"
+				/>
+			</el-select>
+		</PopoverFormItem>
+		<PopoverFormItem label="日志前缀" :prop="formProps.log_prefix" popover-content="log_prefix">
+			<el-input v-model="ruleForm.log_prefix" placeholder="请输入日志前缀" />
+		</PopoverFormItem>
+		<PopoverFormItem
+			label="日志追踪器名称"
+			:prop="formProps.log_tracker_name"
+			popover-content="log_tracker_name"
+		>
+			<el-input v-model="ruleForm.log_tracker_name" placeholder="请输入日志追踪器名称" />
+		</PopoverFormItem>
+		<PopoverFormItem
+			label="日志保存文件夹"
+			:prop="formProps.logging_dir"
+			popover-content="logging_dir"
+		>
+			<el-input v-model="ruleForm.logging_dir" placeholder="请输入日志保存文件夹" />
+		</PopoverFormItem>
+	</FieldSetWrapper>
+</template>
+
+<script setup lang="ts">
+import type { RuleForm, RuleFormProps } from "../../types";
+
+export interface LoggingOptionsProps {
+	/** 表单props */
+	formProps: RuleFormProps;
+}
+
+defineProps<LoggingOptionsProps>();
+
+const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
+
+const logWithOptions = readonly([
+	{
+		label: "tensorboard",
+		value: "tensorboard"
+	},
+	{
+		label: "wandb",
+		value: "wandb"
+	}
+]);
+</script>
+
+<style scoped></style>

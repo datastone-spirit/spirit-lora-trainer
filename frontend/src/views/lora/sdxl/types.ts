@@ -1,12 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-06 14:57:11
- * @LastEditTime: 2024-12-09 15:38:59
+ * @LastEditTime: 2024-12-09 17:07:04
  * @LastEditors: mulingyuer
  * @Description: sdxl类型定义
  * @FilePath: \frontend\src\views\lora\sdxl\types.ts
  * 怎么可能会有bug！！！
  */
+
+// model_train_type:sdxl-lora   这个参数固定
 
 /** 表单 */
 export interface RuleForm {
@@ -16,7 +18,7 @@ export interface RuleForm {
 	class_tokens: string;
 	/** 底模 */
 	pretrained_model_name_or_path: string;
-	/** 从某个 save_state 保存的中断状态继续训练，填写文件路径 */
+	/** 从某个 save_state 保存的中断状态继续训练，选择文件路径 */
 	resume: string;
 	/** vae */
 	vae: string;

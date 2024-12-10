@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 10:13:40
- * @LastEditTime: 2024-12-09 17:00:37
+ * @LastEditTime: 2024-12-10 08:46:44
  * @LastEditors: mulingyuer
  * @Description: 2分割组件
  * @FilePath: \frontend\src\components\Split\TwoSplit.vue
@@ -16,9 +16,7 @@
 		</div>
 		<div ref="splitRight" class="two-split-right">
 			<Card class="two-split-card">
-				<el-scrollbar height="100%">
-					<slot name="right"></slot>
-				</el-scrollbar>
+				<slot name="right"></slot>
 			</Card>
 		</div>
 	</div>

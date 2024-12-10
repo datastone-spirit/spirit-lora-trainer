@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2024-12-09 09:19:14
- * @LastEditTime: 2024-12-10 09:03:56
+ * @Date: 2024-12-09 17:28:31
+ * @LastEditTime: 2024-12-10 09:09:30
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
- * @FilePath: \frontend\src\views\lora\sdxl\components\TrainingData\index.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -107,6 +107,15 @@
 				popover-content="bucket_reso_steps"
 			>
 				<el-input-number v-model.number="ruleForm.bucket_reso_steps" />
+			</PopoverFormItem>
+		</el-col>
+		<el-col :span="24">
+			<PopoverFormItem
+				label="arb 桶不放大图片"
+				:prop="formProps.bucket_no_upscale"
+				popover-content="bucket_no_upscale"
+			>
+				<el-switch v-model="ruleForm.bucket_no_upscale" />
 			</PopoverFormItem>
 		</el-col>
 	</el-row>

@@ -1,15 +1,15 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 16:25:06
- * @LastEditTime: 2024-12-10 10:56:27
+ * @LastEditTime: 2024-12-10 10:59:24
  * @LastEditors: mulingyuer
  * @Description: 网络配置
- * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\NetworkOptions.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\NetworkOptions.vue
  * 怎么可能会有bug！！！
 -->
 <template>
 	<FieldSetWrapper title="网络设置">
-		<SDXLNetworkModuleSelect
+		<FluxNetworkModuleSelect
 			v-model="ruleForm.network_module"
 			label="训练网络模块"
 			:prop="formProps.network_module"
@@ -56,58 +56,12 @@
 			/>
 		</PopoverFormItem>
 		<PopoverFormItem
-			label="启用分层学习率训练（只支持网络模块 networks.lora）"
-			:prop="formProps.enable_block_weights"
-			popover-content="enable_block_weights"
-		>
-			<el-switch v-model="ruleForm.enable_block_weights" />
-		</PopoverFormItem>
-		<PopoverFormItem
 			label="启用基础权重（差异炼丹）"
 			:prop="formProps.enable_base_weight"
 			popover-content="enable_base_weight"
 		>
 			<el-switch v-model="ruleForm.enable_base_weight" />
 		</PopoverFormItem>
-		<template v-if="ruleForm.enable_block_weights">
-			<PopoverFormItem
-				label="U-Net 的 Encoder 层分层学习率权重，共 12 层"
-				:prop="formProps.down_lr_weight"
-				popover-content="down_lr_weight"
-			>
-				<el-input
-					v-model="ruleForm.down_lr_weight"
-					placeholder="请输入U-Net 的 Encoder 层分层学习率权重"
-				/>
-			</PopoverFormItem>
-			<PopoverFormItem
-				label="U-Net 的 Mid 层分层学习率权重，共 1 层"
-				:prop="formProps.mid_lr_weight"
-				popover-content="mid_lr_weight"
-			>
-				<el-input
-					v-model="ruleForm.mid_lr_weight"
-					placeholder="请输入U-Net 的 Mid 层分层学习率权重"
-				/>
-			</PopoverFormItem>
-			<PopoverFormItem
-				label="U-Net 的 Decoder 层分层学习率权重，共 12 层"
-				:prop="formProps.up_lr_weight"
-				popover-content="up_lr_weight"
-			>
-				<el-input
-					v-model="ruleForm.up_lr_weight"
-					placeholder="请输入U-Net 的 Decoder 层分层学习率权重"
-				/>
-			</PopoverFormItem>
-			<PopoverFormItem
-				label="分层学习率置 0 阈值"
-				:prop="formProps.block_lr_zero_threshold"
-				popover-content="block_lr_zero_threshold"
-			>
-				<el-input-number v-model.number="ruleForm.block_lr_zero_threshold" :step="0.01" />
-			</PopoverFormItem>
-		</template>
 		<template v-if="ruleForm.enable_base_weight">
 			<PopoverFormItem
 				label="合并入底模的 LoRA 路径，可以选择多个"

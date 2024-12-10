@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-09 15:44:59
+ * @LastEditTime: 2024-12-09 17:08:51
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<TwoSplit class="lora-sdxl-page" direction="horizontal" :sizes="[40, 60]">
+	<TwoSplit class="lora-sdxl-page" direction="horizontal" :sizes="[50, 50]">
 		<template #left>
 			<div class="lora-sdxl-content">
 				<el-form

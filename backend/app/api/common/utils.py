@@ -1,6 +1,8 @@
 from flask import jsonify
 import os
 from flasgger import swag_from
+from app.api.model.training_paramter import TrainingParameter
+from typing import List
 
 # 公共 response 方法
 def res(data=None, message="Ok", success=True, code=200):
@@ -58,3 +60,19 @@ def use_swagger_config(swagger_config=None):
         return swag_from(swagger_config)(func)
 
     return decorator
+
+
+def traningparameter_to_args(parameter :TrainingParameter) -> 'List[str]':
+    args = []
+    for key, value in parameter.__dict__.items():
+        if value is not None:
+            if isinstance(value, bool):
+                if value:
+                    args.append(f'--{key} true') 
+                else:
+                    args.append(f'--{key} false')
+            elif isinstance(value, str):
+                args.append(f'--{key} "{value}"')
+            else:
+                args.append(f'--{key} {value}')
+    return ' '.join(args)

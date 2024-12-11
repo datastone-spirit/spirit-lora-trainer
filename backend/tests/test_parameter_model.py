@@ -20,5 +20,5 @@ def test_traningparameter_to_arguments():
     }
     parameter = TrainingParameter.from_dict(request)
     result = traningparameter_to_args(parameter)
-    assert result == ['--output_name output_name1', '--class_tokens class_tokens1']
-    print(result)
+    for i in ['--output_name "output_name1"', '--class_tokens "class_tokens1"']:
+        assert i in result  

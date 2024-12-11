@@ -68,9 +68,7 @@ def traningparameter_to_args(parameter :TrainingParameter) -> 'List[str]':
         if value is not None:
             if isinstance(value, bool):
                 if value:
-                    args.append(f'--{key} true') 
-                else:
-                    args.append(f'--{key} false')
+                    args.append(f'--{key}') 
             elif isinstance(value, str):
                 args.append(f'--{key} "{value}"')
             else:

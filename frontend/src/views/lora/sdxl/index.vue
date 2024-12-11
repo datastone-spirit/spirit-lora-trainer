@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-09 17:08:51
+ * @LastEditTime: 2024-12-11 15:48:08
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -89,16 +89,16 @@ const ruleForm = ref<RuleForm>({
 	lr_scheduler: "cosine_with_restarts",
 	lr_warmup_steps: 0,
 	lr_scheduler_num_cycles: 1,
-	optimizer_type: "AdamW8bit",
+	optimizer_type: "adamw8bit",
 	min_snr_gamma: undefined,
-	optimizer_args_custom: [],
+	optimizer_args: "",
 	// -----
 	network_module: "networks.lora",
 	network_weights: "",
-	network_alpha: 32,
+	network_alpha: "1e-2",
 	network_dropout: 0,
 	scale_weight_norms: undefined,
-	network_args_custom: [],
+	network_args: "",
 	enable_block_weights: false,
 	down_lr_weight: "1,1,1,1,1,1,1,1,1,1,1,1",
 	mid_lr_weight: "1",
@@ -134,7 +134,6 @@ const ruleForm = ref<RuleForm>({
 	random_crop: false,
 	// -----
 	clip_skip: 2,
-	ui_custom_params: "",
 	// -----
 	mixed_precision: "fp16",
 	full_fp16: false,

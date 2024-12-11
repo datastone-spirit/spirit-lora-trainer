@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 10:56:35
- * @LastEditTime: 2024-12-10 11:41:34
+ * @LastEditTime: 2024-12-11 10:40:22
  * @LastEditors: mulingyuer
  * @Description: 训练网络模块
  * @FilePath: \frontend\src\components\Form\FluxNetworkModuleSelect.vue

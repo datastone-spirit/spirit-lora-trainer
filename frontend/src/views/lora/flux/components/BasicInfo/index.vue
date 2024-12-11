@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2024-12-10 11:39:59
+ * @LastEditTime: 2024-12-10 16:56:57
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -41,15 +41,17 @@
 	>
 		<FileSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
 	</PopoverFormItem>
-	<PopoverFormItem label="AE 模型文件" :prop="formProps.ae" popover-content="ae">
-		<FileSelector v-model="ruleForm.ae" placeholder="请选择AE 模型文件" />
-	</PopoverFormItem>
-	<PopoverFormItem label="clip_l 模型文件" :prop="formProps.clip_l" popover-content="clip_l">
-		<FileSelector v-model="ruleForm.clip_l" placeholder="请选择clip_l 模型文件" />
-	</PopoverFormItem>
-	<PopoverFormItem label="t5xxl 模型文件" :prop="formProps.t5xxl" popover-content="t5xxl">
-		<FileSelector v-model="ruleForm.t5xxl" placeholder="请选择t5xxl 模型文件" />
-	</PopoverFormItem>
+	<template v-if="isExpert">
+		<PopoverFormItem label="AE 模型文件" :prop="formProps.ae" popover-content="ae">
+			<FileSelector v-model="ruleForm.ae" placeholder="请选择AE 模型文件" />
+		</PopoverFormItem>
+		<PopoverFormItem label="CLIP-L 模型文件" :prop="formProps.clip_l" popover-content="clip_l">
+			<FileSelector v-model="ruleForm.clip_l" placeholder="请选择CLIP-L 模型文件" />
+		</PopoverFormItem>
+		<PopoverFormItem label="T5XXL 模型文件" :prop="formProps.t5xxl" popover-content="t5xxl">
+			<FileSelector v-model="ruleForm.t5xxl" placeholder="请选择T5XXL 模型文件" />
+		</PopoverFormItem>
+	</template>
 	<PopoverFormItem label="LoRA 保存路径" :prop="formProps.output_dir" popover-content="output_dir">
 		<FolderSelector v-model="ruleForm.output_dir" placeholder="请选择LoRA保存路径" />
 	</PopoverFormItem>

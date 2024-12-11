@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 09:10:38
- * @LastEditTime: 2024-12-10 09:30:27
+ * @LastEditTime: 2024-12-10 17:23:49
  * @LastEditors: mulingyuer
  * @Description: 模型参数
  * @FilePath: \frontend\src\views\lora\flux\components\ModelParameters\index.vue
@@ -95,6 +95,10 @@ const timestepSamplingOptions = readonly([
 	{
 		label: "shift",
 		value: "shift"
+	},
+	{
+		label: "flux_shift",
+		value: "flux_shift"
 	}
 ]);
 </script>

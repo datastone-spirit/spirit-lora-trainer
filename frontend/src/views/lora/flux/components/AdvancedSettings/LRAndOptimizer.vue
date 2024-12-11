@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 15:38:25
- * @LastEditTime: 2024-12-10 11:40:59
+ * @LastEditTime: 2024-12-11 10:21:35
  * @LastEditors: mulingyuer
  * @Description: 学习率与优化器设置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LRAndOptimizer.vue
@@ -58,15 +58,15 @@
 			<el-input-number v-model.number="ruleForm.min_snr_gamma" :step="1" step-strictly :min="1" />
 		</PopoverFormItem>
 		<PopoverFormItem
-			label="自定义 optimizer_args，回车分割"
-			:prop="formProps.optimizer_args_custom"
+			label="自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。&#10;示例：weight_decay=0.01 betas=.9,.999"
+			:prop="formProps.optimizer_args"
 			popover-content="optimizer_args"
 		>
-			<el-input-tag
-				v-model="ruleForm.optimizer_args_custom"
-				clearable
-				placeholder="请输入自定义 optimizer_args"
-				tag-type="primary"
+			<el-input
+				v-model="ruleForm.optimizer_args"
+				:autosize="{ minRows: 4 }"
+				type="textarea"
+				placeholder="请输入自定义优化器参数"
 			/>
 		</PopoverFormItem>
 	</FieldSetWrapper>

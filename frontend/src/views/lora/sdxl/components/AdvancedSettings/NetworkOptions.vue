@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 16:25:06
- * @LastEditTime: 2024-12-10 10:56:27
+ * @LastEditTime: 2024-12-11 11:25:59
  * @LastEditors: mulingyuer
  * @Description: 网络配置
  * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\NetworkOptions.vue
@@ -23,11 +23,11 @@
 			<FileSelector v-model="ruleForm.network_weights" placeholder="请选择已有的 LoRA 模型" />
 		</PopoverFormItem>
 		<PopoverFormItem
-			label="常用值：等于 network_dim 或 network_dim*1/2 或 1。使用较小的 alpha 需要提升学习率"
+			label="视为 OFT 的约束。我们建议使用 1e-2 到 1e-4"
 			:prop="formProps.network_alpha"
 			popover-content="network_alpha"
 		>
-			<el-input-number v-model.number="ruleForm.network_alpha" :step="1" step-strictly :min="1" />
+			<el-input v-model="ruleForm.network_alpha" placeholder="请输入OFT 的约束" />
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的）"
@@ -44,15 +44,15 @@
 			<el-input-number v-model.number="ruleForm.scale_weight_norms" :step="0.01" :min="0" />
 		</PopoverFormItem>
 		<PopoverFormItem
-			label="自定义 network_args，回车分割"
-			:prop="formProps.network_args_custom"
-			popover-content="network_args_custom"
+			label='自定义 network_args &#10;示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"'
+			:prop="formProps.network_args"
+			popover-content="network_args"
 		>
-			<el-input-tag
-				v-model="ruleForm.network_args_custom"
-				clearable
+			<el-input
+				v-model="ruleForm.network_args"
 				placeholder="请输入自定义 network_args"
-				tag-type="primary"
+				type="textarea"
+				:autosize="{ minRows: 4 }"
 			/>
 		</PopoverFormItem>
 		<PopoverFormItem

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 10:34:40
- * @LastEditTime: 2024-12-10 10:39:12
+ * @LastEditTime: 2024-12-11 15:47:40
  * @LastEditors: mulingyuer
  * @Description: 优化器设置
  * @FilePath: \frontend\src\components\Form\OptimizerTypeSelect.vue
@@ -40,71 +40,71 @@ const optimizerTypeOptions = readonly(
 	ref([
 		{
 			label: "AdamW",
-			value: "AdamW"
+			value: "adamw"
 		},
 		{
 			label: "AdamW8bit",
-			value: "AdamW8bit"
+			value: "adamw8bit"
 		},
 		{
 			label: "PagedAdamW8bit",
-			value: "PagedAdamW8bit"
+			value: "pagedadamw8bit"
 		},
 		{
 			label: "Lion",
-			value: "Lion"
+			value: "lion"
 		},
 		{
 			label: "Lion8bit",
-			value: "Lion8bit"
+			value: "lion8bit"
 		},
 		{
 			label: "PagedLion8bit",
-			value: "PagedLion8bit"
+			value: "pagedlion8bit"
 		},
 		{
 			label: "SGDNesterov",
-			value: "SGDNesterov"
+			value: "sgdnesterov"
 		},
 		{
 			label: "SGDNesterov8bit",
-			value: "SGDNesterov8bit"
+			value: "sgdnesterov8bit"
 		},
 		{
 			label: "DAdaptation",
-			value: "DAdaptation"
+			value: "dadaptation"
 		},
 		{
 			label: "DAdaptAdam",
-			value: "DAdaptAdam"
+			value: "dadaptadam"
 		},
 		{
 			label: "DAdaptAdaGrad",
-			value: "DAdaptAdaGrad"
+			value: "dadaptadagrad"
 		},
 		{
-			label: "DAdaptAdanlP",
-			value: "DAdaptAdanlP"
+			label: "DAdaptAdan",
+			value: "dadaptadan"
 		},
 		{
-			label: "DAdaptAdaMax",
-			value: "DAdaptAdaMax"
+			label: "DAdaptAdanIP",
+			value: "dadaptadanip"
 		},
 		{
 			label: "DAdaptLion",
-			value: "DAdaptLion"
+			value: "dadaptlion"
 		},
 		{
-			label: "DAdaptsGD",
-			value: "DAdaptsGD"
-		},
-		{
-			label: "AdaFactor",
-			value: "AdaFactor"
+			label: "DAdaptSGD",
+			value: "dadaptsgd"
 		},
 		{
 			label: "Prodigy",
-			value: "Prodigy"
+			value: "prodigy"
+		},
+		{
+			label: "AdaFactor",
+			value: "adafactor"
 		}
 	])
 );

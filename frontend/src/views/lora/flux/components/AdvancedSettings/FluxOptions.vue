@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 09:44:26
- * @LastEditTime: 2024-12-10 10:06:16
+ * @LastEditTime: 2024-12-10 17:32:23
  * @LastEditors: mulingyuer
  * @Description: flux相关配置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\FluxOptions.vue
@@ -35,7 +35,7 @@
 			:prop="formProps.discrete_flow_shift"
 			popover-content="discrete_flow_shift"
 		>
-			<el-input-number v-model.number="ruleForm.discrete_flow_shift" :step="0.001" />
+			<el-input-number v-model.number="ruleForm.discrete_flow_shift" :step="0.0001" />
 		</PopoverFormItem>
 		<PopoverFormItem label="损失函数类型" :prop="formProps.loss_type" popover-content="loss_type">
 			<el-select v-model="ruleForm.loss_type" placeholder="请选择损失函数类型">
@@ -86,8 +86,8 @@ const modelPredictionTypeOptions = readonly([
 
 const lossTypeOptions = readonly([
 	{
-		label: "l1",
-		value: "l1"
+		label: "smooth_l1",
+		value: "smooth_l1"
 	},
 	{
 		label: "l2",

@@ -59,6 +59,10 @@ const logWithOptions = readonly([
 	{
 		label: "wandb",
 		value: "wandb"
+	},
+	{
+		label: "all",
+		value: "all"
 	}
 ]);
 </script>

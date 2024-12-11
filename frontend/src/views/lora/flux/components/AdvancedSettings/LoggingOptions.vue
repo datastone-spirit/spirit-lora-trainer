@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 11:30:00
- * @LastEditTime: 2024-12-09 11:36:18
+ * @LastEditTime: 2024-12-11 11:48:42
  * @LastEditors: mulingyuer
  * @Description: 日志设置
- * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\LoggingOptions.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LoggingOptions.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -59,6 +59,10 @@ const logWithOptions = readonly([
 	{
 		label: "wandb",
 		value: "wandb"
+	},
+	{
+		label: "all",
+		value: "all"
 	}
 ]);
 </script>

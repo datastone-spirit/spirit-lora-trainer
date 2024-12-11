@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-10 11:20:35
+ * @LastEditTime: 2024-12-11 15:48:01
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -35,6 +35,8 @@
 			</div>
 		</template>
 		<template #right>
+			<button @click="onTest">转toml</button>
+			<TomlPreview :toml="toml" />
 			<div style="height: 100%">AI 数据集</div>
 		</template>
 	</TwoSplit>
@@ -49,6 +51,7 @@ import TrainingData from "./components/TrainingData/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import { useSettingsStore } from "@/stores";
+import { stringify } from "smol-toml";
 
 const settingsStore = useSettingsStore();
 
@@ -63,32 +66,32 @@ const ruleForm = ref<RuleForm>({
 	resume: "",
 	output_dir: "",
 	save_model_as: "",
-	save_precision: "",
+	save_precision: "bf16",
 	save_state: false,
 	// -----
 	train_data_dir: "",
-	num_repeats: 10,
-	max_train_epochs: 10,
+	num_repeats: 1,
+	max_train_epochs: 4,
 	train_batch_size: 1,
 	resolution_width: 768,
 	resolution_height: 768,
-	enable_bucket: true,
+	enable_bucket: false,
 	min_bucket_reso: 256,
-	max_bucket_reso: 2048,
-	bucket_reso_steps: 32,
-	bucket_no_upscale: true,
+	max_bucket_reso: 1024,
+	bucket_reso_steps: 64,
+	bucket_no_upscale: false,
 	// -----
-	seed: 1337,
+	seed: 42,
 	max_data_loader_n_workers: 2,
 	learning_rate: "1e-4",
-	save_every_n_epochs: 2,
+	save_every_n_epochs: 1,
 	guidance_scale: 1,
 	timestep_sampling: "sigmoid",
-	network_dim: 2,
+	network_dim: 4,
 	// -----
 	sigmoid_scale: 1,
 	model_prediction_type: "raw",
-	discrete_flow_shift: 1,
+	discrete_flow_shift: 3.1582,
 	loss_type: "l2",
 	t5xxl_max_token_length: undefined,
 	// -----
@@ -97,21 +100,21 @@ const ruleForm = ref<RuleForm>({
 	network_train_unet_only: true,
 	network_train_text_encoder_only: false,
 	// -----
-	unet_lr: "5e-4",
-	text_encoder_lr: "1e-5",
-	lr_scheduler: "cosine_with_restarts",
+	unet_lr: "1e-5",
+	text_encoder_lr: "1e-4",
+	lr_scheduler: "constant_with_warmup",
 	lr_warmup_steps: 0,
-	lr_scheduler_num_cycles: 1,
-	optimizer_type: "PagedAdamW8bit",
+	lr_scheduler_num_cycles: 0,
+	optimizer_type: "adafactor",
 	min_snr_gamma: undefined,
-	optimizer_args_custom: [],
+	optimizer_args: "",
 	// -----
 	network_module: "networks.lora_flux",
 	network_weights: "",
-	network_alpha: 16,
+	network_alpha: "1e-2",
 	network_dropout: 0,
 	scale_weight_norms: undefined,
-	network_args_custom: [],
+	network_args: "",
 	enable_base_weight: false,
 	base_weights: [],
 	base_weights_multiplier: "",
@@ -126,22 +129,21 @@ const ruleForm = ref<RuleForm>({
 	caption_extension: ".txt",
 	shuffle_caption: false,
 	weighted_captions: false,
-	keep_tokens: 0,
-	keep_tokens_separator: "",
+	keep_tokens: 1,
+	keep_tokens_separator: "|||",
 	caption_dropout_rate: undefined,
 	caption_dropout_every_n_epochs: undefined,
-	caption_tag_dropout_rate: undefined,
+	caption_tag_dropout_rate: 0,
 	// -----
 	color_aug: false,
-	flip_aug: false,
+	flip_aug: true,
 	random_crop: false,
 	// -----
 	clip_skip: 2,
-	ui_custom_params: "",
 	// -----
 	mixed_precision: "bf16",
 	full_fp16: false,
-	full_bf16: false,
+	full_bf16: true,
 	fp8_base: true,
 	fp8_base_unet: false,
 	no_half_vae: false,
@@ -182,6 +184,11 @@ const openStep1 = ref(true);
 const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
+
+const toml = ref("");
+function onTest() {
+	toml.value = stringify(ruleForm.value);
+}
 </script>
 
 <style lang="scss" scoped>

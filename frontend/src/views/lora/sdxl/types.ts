@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-06 14:57:11
- * @LastEditTime: 2024-12-09 17:07:04
+ * @LastEditTime: 2024-12-11 15:19:05
  * @LastEditors: mulingyuer
  * @Description: sdxl类型定义
  * @FilePath: \frontend\src\views\lora\sdxl\types.ts
@@ -84,21 +84,26 @@ export interface RuleForm {
 	optimizer_type: string;
 	/** 最小信噪比伽马值, 如果启用推荐为 5 */
 	min_snr_gamma: number | undefined;
-	/** 自定义 optimizer_args，一行一个 */
-	optimizer_args_custom: Array<string>;
+	/**
+	 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
+	 * 示例：weight_decay=0.01 betas=.9,.999
+	 */
+	optimizer_args: string;
 	// ---------
 	/** 训练网络模块 */
 	network_module: string;
 	/** 从已有的 LoRA 模型上继续训练 */
 	network_weights: string;
-	/** 常用值：等于 network_dim 或 network_dim*1/2 或 1。使用较小的 alpha 需要提升学习率 */
-	network_alpha: number;
+	/** 视为 OFT 的约束。我们建议使用 1e-2 到 1e-4 */
+	network_alpha: string;
 	/** dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的） */
 	network_dropout: number;
 	/** 最大范数正则化。如果使用，推荐为 1 */
 	scale_weight_norms: number | undefined;
-	/** 自定义 network_args，一行一个 */
-	network_args_custom: Array<string>;
+	/** 自定义 network_args
+	 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
+	 */
+	network_args: string;
 	/** 启用分层学习率训练（只支持网络模块 networks.lora） */
 	enable_block_weights: boolean;
 	/** 启用基础权重（差异炼丹） */
@@ -163,8 +168,6 @@ export interface RuleForm {
 	// ---------
 	/** CLIP 跳过层数 玄学 */
 	clip_skip: number;
-	/** 危险 自定义参数，请输入 TOML 格式，将会直接覆盖当前界面内任何参数。实时更新，推荐写完后再粘贴过来 */
-	ui_custom_params: string;
 	// ---------
 	/** 训练混合精度, RTX30系列以后也可以指定bf16 */
 	mixed_precision: string;

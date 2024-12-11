@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 08:41:44
- * @LastEditTime: 2024-12-06 09:48:09
+ * @LastEditTime: 2024-12-11 10:07:30
  * @LastEditors: mulingyuer
  * @Description: 表单项组件
  * @FilePath: \frontend\src\components\Form\PopoverFormItem.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<el-form-item :prop="prop">
+	<el-form-item class="popover-form-item" :prop="prop">
 		<template #label>
 			{{ label }}
 			<el-popover
@@ -56,6 +56,9 @@ withDefaults(defineProps<PopoverFormItemProps>(), {
 </script>
 
 <style lang="scss" scoped>
+.popover-form-item :deep(.el-form-item__label) {
+	white-space: break-spaces;
+}
 .popover-form-item-icon {
 	vertical-align: -0.185em;
 	cursor: pointer;

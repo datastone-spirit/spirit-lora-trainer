@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-10 11:20:23
+ * @LastEditTime: 2024-12-11 15:35:33
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -22,7 +22,7 @@ export interface RuleForm {
 	resume: string;
 	/** AE 模型文件路径 */
 	ae: string;
-	/** clip_l 模型文件路径 */
+	/** CLIP-L 模型文件路径 */
 	clip_l: string;
 	/** t5xxl 模型文件路径 */
 	t5xxl: string;
@@ -33,10 +33,10 @@ export interface RuleForm {
 	/** 模型保存精度 */
 	save_precision: string;
 	/** 保存训练状态 配合 resume 参数可以继续从某个状态训练 */
-	save_state: boolean;
+	save_state: boolean; // 官方只有save_state_on_train_end 配置
 	// ---------
 	/** 数据集目录 */
-	train_data_dir: string;
+	image_dir: string;
 	/** 每个图像重复训练次数 */
 	num_repeats: number;
 	/** 最大训练 epoch（轮数） */
@@ -44,9 +44,9 @@ export interface RuleForm {
 	/** 批量大小, 越高显存占用越高 */
 	train_batch_size: number;
 	/** 图片尺寸-宽度 */
-	resolution_width: number;
+	resolution_width: number; //resolution = [512, 512]
 	/** 图片尺寸-高度 */
-	resolution_height: number;
+	resolution_height: number; //resolution = [512, 512]
 	/** 启用 arb 桶以允许非固定宽高比的图片 */
 	enable_bucket: boolean;
 	/** arb 桶最小分辨率 */
@@ -81,7 +81,7 @@ export interface RuleForm {
 	discrete_flow_shift: number;
 	/** 损失函数类型 */
 	loss_type: string;
-	/** T5XXL 最大 token 长度（不填写使用自动） */
+	/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
 	t5xxl_max_token_length: number | undefined;
 	// ---------
 	/** 梯度检查点 */
@@ -107,25 +107,32 @@ export interface RuleForm {
 	optimizer_type: string;
 	/** 最小信噪比伽马值, 如果启用推荐为 5 */
 	min_snr_gamma: number | undefined;
-	/** 自定义 optimizer_args */
-	optimizer_args_custom: Array<string>;
+	/**
+	 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
+	 * 示例：weight_decay=0.01 betas=.9,.999
+	 */
+	optimizer_args: string;
 	// ---------
 	/** 训练网络模块 */
 	network_module: string;
 	/** 从已有的 LoRA 模型上继续训练，填写路径 */
 	network_weights: string;
-	/** 常用值：等于 network_dim 或 network_dim*1/2 或 1。使用较小的 alpha 需要提升学习率 */
-	network_alpha: number;
+	/** 视为 OFT 的约束。我们建议使用 1e-2 到 1e-4 */
+	network_alpha: string;
 	/** dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的） */
 	network_dropout: number;
 	/** 最大范数正则化。如果使用，推荐为 1 */
 	scale_weight_norms: number | undefined;
-	/** 自定义 network_args，一行一个 */
-	network_args_custom: Array<string>;
+	/** 自定义 network_args
+	 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
+	 */
+	network_args: string;
+	// NOTE: 给后端要去除该参数
 	/** 启用基础权重（差异炼丹） */
 	enable_base_weight: boolean;
 	/** 基础权重-合并入底模的 LoRA 路径，可以选择多个 */
 	base_weights: Array<string>;
+	// NOTE: 要转成数组[1,2,3,4]
 	/** 基础权重-合并入底模的 LoRA 权重，英文逗号分隔，与 base_weights 对应 */
 	base_weights_multiplier: string;
 	// ---------
@@ -167,8 +174,6 @@ export interface RuleForm {
 	// ---------
 	/** CLIP 跳过层数 玄学 */
 	clip_skip: number;
-	/** 危险 自定义参数，请输入 TOML 格式，将会直接覆盖当前界面内任何参数。实时更新，推荐写完后再粘贴过来 */
-	ui_custom_params: string;
 	// ---------
 	/** 训练混合精度, RTX30系列以后也可以指定bf16 */
 	mixed_precision: string;
@@ -199,9 +204,9 @@ export interface RuleForm {
 	/** vae 编码批量大小 */
 	vae_batch_size: number | undefined;
 	// ---------
-	/** 分布式训练超时时间 */
+	/** 分布式训练超时时间（分钟） */
 	ddp_timeout: number | undefined;
-	/** 启动梯度作为bucket视图进行同步 */
+	/** 为 DDP 启用 gradient_as_bucket_view  */
 	ddp_gradient_as_bucket_view: boolean;
 }
 

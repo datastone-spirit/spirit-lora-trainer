@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 08:55:24
- * @LastEditTime: 2024-12-09 16:39:30
+ * @LastEditTime: 2024-12-11 11:33:10
  * @LastEditors: mulingyuer
  * @Description: 文件选择器
  * @FilePath: \frontend\src\components\Form\FileSelector.vue
@@ -54,6 +54,11 @@ function load(node: Node, resolve: (data: Tree[]) => void) {
 				label: "leaf",
 				isLeaf: true,
 				value: "/leaf"
+			},
+			{
+				label: "leafs",
+				isLeaf: true,
+				value: "/leafs"
 			},
 			{
 				label: "zone",

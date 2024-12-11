@@ -55,6 +55,7 @@ declare module 'vue' {
     SaveEveryNEpochsNumber: typeof import('./../src/components/Form/SaveEveryNEpochsNumber.vue')['default']
     SaveStateSwitch: typeof import('./../src/components/Form/SaveStateSwitch.vue')['default']
     SDXLNetworkModuleSelect: typeof import('./../src/components/Form/SDXLNetworkModuleSelect.vue')['default']
+    TomlPreview: typeof import('./../src/components/Toml/TomlPreview.vue')['default']
     TwoSplit: typeof import('./../src/components/Split/TwoSplit.vue')['default']
   }
 }

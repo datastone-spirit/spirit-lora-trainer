@@ -75,4 +75,4 @@ def traningparameter_to_args(parameter :TrainingParameter) -> 'List[str]':
                 args.append(f'--{key} "{value}"')
             else:
                 args.append(f'--{key} {value}')
-    return ' '.join(args)
+    return args

@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from dataclasses import dataclass, field
 from typing import List
 from .base_model import Model
-from app.api.common.utils import deserialize_model
 
 @dataclass
 class TrainingParameter(Model):
@@ -88,13 +87,9 @@ class TrainingParameter(Model):
     persistent_data_loader_workers: bool = True
     ddp_gradient_as_bucket_view: bool = False
 
+
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingParameter':
-        """Returns the dict as a model
-
-        :param dikt: A dict.
-        :type: dict
-        :return: The User of this User.  # noqa: E501
-        :rtype: User
-        """
-        return deserialize_model(dikt, cls)    
+        parameter =  TrainingParameter()
+        parameter._from_dict(dikt)
+        return parameter

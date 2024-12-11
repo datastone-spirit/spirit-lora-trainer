@@ -1,3 +1,4 @@
 models/
 captions_output
 configs
+.coverage

@@ -1,10 +1,10 @@
 from flask import jsonify
 import os
 from flasgger import swag_from
+from dataclasses import asdict
 from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset, TrainingDataset
 from typing import List, Tuple
 from utils.util import getmodelpath
-import dacite
 import logging
 import tempfile
 import toml
@@ -197,7 +197,7 @@ def dataset2toml(dataset :TrainingDataset) -> str:
     # accroding to the value of feild to generate a toml format file 
     # in the temporary directory and return the path
     # Convert the TrainingDataset instance to a dictionary
-    data = dacite.asdict(dataset)
+    data = asdict(dataset)
 
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")

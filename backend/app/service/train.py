@@ -19,14 +19,12 @@ class TrainingService:
     def training(self,parameters :TrainingParameter):
         dataset_path = dataset2toml(parameters.dataset) 
 
-        config_path = config2args(parameters.config, dataset_path)
+        config_path = config2toml(parameters.config, dataset_path)
         print(f"file {config_path}, {dataset_path}")
 
-        # TODO: generate shell scripts and run
         command = self.run_train(config_path, script=f"{getprojectpath()}/sd-scripts/flux_train_network.py")
 
         # subprocess.Popen(self.command, env=self.environ)
-        # sh = self.gen_sh(parameters)
 
     def resolve_path(self, p):
         current_dir = os.path.dirname(os.path.abspath(__file__))

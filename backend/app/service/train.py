@@ -5,7 +5,7 @@ import gradio as gr
 import toml
 from gradio_logsview import LogsView, LogsViewRunner
 from ..api.model.training_paramter import TrainingParameter
-
+from ..api.common.utils import config2args
 MAX_IMAGES = 150
 training_parameters: TrainingParameter
 with open('models.yaml', 'r') as file:
@@ -50,69 +50,13 @@ class TrainingService:
         self,
         parameters: TrainingParameter
     ):
-        parameters = parameters.config
-        output_dir = self.resolve_path(f"outputs/{parameters.config.output_name}")
-        sample_prompts_path = self.resolve_path(f"outputs/{parameters.output_name}/sample_prompts.txt")
-
+        
+        parameters.validate()
+        arguments = config2args(parameters.config)
         line_break = "\\"
-
-        ############# Sample args ########################
-        sample = ""
-        if len(parameters.sample_prompts) > 0 and parameters.sample_every_n_steps > 0:
-            sample = f"""--sample_prompts={sample_prompts_path} --sample_every_n_steps="{parameters.sample_every_n_steps}" {line_break}"""
-
-            optimizer = f"--optimizer_type adamw8bit {line_break}"
-
-
-        #######################################################
-        model_config = models[parameters.base_model]
-        model_file = model_config["file"]
-        repo = model_config["repo"]
-        if parameters.base_model == "flux-dev" or parameters.base_model == "flux-schnell":
-            model_folder = "models/unet"
-        else:
-            model_folder = f"models/unet/{repo}"
-        model_path = os.path.join(model_folder, model_file)
-        pretrained_model_path = self.resolve_path(model_path)
-
-        clip_path = self.resolve_path("models/clip/clip_l.safetensors")
-        t5_path = self.resolve_path("models/clip/t5xxl_fp16.safetensors")
-        ae_path = self.resolve_path("models/vae/ae.sft")
-        sh = f"""accelerate launch {line_break}
-        --mixed_precision bf16 {line_break}
-        --num_cpu_threads_per_process 1 {line_break}
-        sd-scripts/flux_train_network.py {line_break}
-        --pretrained_model_name_or_path {pretrained_model_path} {line_break}
-        --clip_l {clip_path} {line_break}
-        --t5xxl {t5_path} {line_break}
-        --ae {ae_path} {line_break}
-        --cache_latents_to_disk {line_break}
-        --save_model_as safetensors {line_break}
-        --sdpa --persistent_data_loader_workers {line_break}
-        --max_data_loader_n_workers {parameters.workers} {line_break}
-        --seed {parameters.seed} {line_break}
-        --gradient_checkpointing {line_break}
-        --mixed_precision bf16 {line_break}
-        --save_precision bf16 {line_break}
-        --network_module networks.lora_flux {line_break}
-        --network_dim {parameters.network_dim} {line_break}
-        {optimizer}{sample}
-        --learning_rate {parameters.learning_rate} {line_break}
-        --cache_text_encoder_outputs {line_break}
-        --cache_text_encoder_outputs_to_disk {line_break}
-        --fp8_base {line_break}
-        --highvram {line_break}
-        --max_train_epochs {parameters.max_train_epochs} {line_break}
-        --save_every_n_epochs {parameters.save_every_n_epochs} {line_break}
-        --dataset_config {self.resolve_path(f"outputs/{parameters.output_name}/dataset.toml")} {line_break}
-        --output_dir {output_dir} {line_break}
-        --output_name {parameters.output_name} {line_break}
-        --timestep_sampling {parameters.timestep_sampling} {line_break}
-        --discrete_flow_shift 3.1582 {line_break}
-        --model_prediction_type raw {line_break}
-        --guidance_scale {parameters.guidance_scale} {line_break}
-        --loss_type l2 {line_break}"""
-
+        command = "accelerate launch"
+        args_parts = "\\\n".join(arguments)
+        sh = command + "\\\n" + args_parts
         return sh
     
     def start_training(

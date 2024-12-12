@@ -20,3 +20,4 @@ pytest-watch>=4.2.0
 coverage>=6.0.0
 python-slugify
 gradio
+toml

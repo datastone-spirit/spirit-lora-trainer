@@ -3,8 +3,21 @@ from dataclasses import dataclass, field
 from typing import List
 from .base_model import Model
 
+
+
 @dataclass
-class TrainingParameter(Model):
+class TrainingDataset(Model):
+    pass
+
+    @classmethod
+    def from_dict(cls, dikt) -> 'TrainingDataset':
+        parameter =  TrainingDataset()
+        parameter._from_dict(dikt)
+        return parameter
+    
+
+@dataclass
+class TrainingConfig(Model):
     adaptive_noise_scale: float = None
     ae: str  = None
     alpha_mask: int = False
@@ -199,7 +212,19 @@ class TrainingParameter(Model):
     zero_terminal_snr: int = False
 
     @classmethod
-    def from_dict(cls, dikt) -> 'TrainingParameter':
-        parameter =  TrainingParameter()
+    def from_dict(cls, dikt) -> 'TrainingConfig':
+        parameter =  TrainingConfig()
         parameter._from_dict(dikt)
         return parameter
+    
+@dataclass
+class TrainingParameter(Model):
+    config: TrainingConfig
+    dataset: TrainingDataset   
+
+    @classmethod
+    def from_dict(cls, dikt) -> 'TrainingParameter':
+        parameter = TrainingParameter()
+        parameter.config = TrainingConfig._from_dict(dikt.get('config'))
+        parameter.dataset = TrainingDataset._from_dict(dikt.get('dataset'))
+

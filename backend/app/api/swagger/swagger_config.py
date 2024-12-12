@@ -591,6 +591,41 @@ generate_sh_config = {
           "ddp_gradient_as_bucket_view": { "type": "boolean", "example": False }
         }
       }
+    },
+    {
+      "name": "dataset",
+      "in": "body",
+      "required": True,
+      "description": "包含 TOML 格式的训练配置的对象",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "general": {
+            "type": "object",
+            "properties": {
+              "shuffle_caption": { "type": "boolean", "example": False },
+              "caption_extension": { "type": "string", "example": ".txt" },
+              "keep_tokens": { "type": "integer", "example": 1 }
+            }
+          },
+          "datasets": {
+            "type": "object",
+            "properties": {
+              "resolution": { "type": "integer", "example": 512 },
+              "batch_size": { "type": "integer", "example": 1 },
+              "keep_tokens": { "type": "integer", "example": 1 },
+              "subsets": {
+                "type": "object",
+                "properties": {
+                  "image_dir": { "type": "string", "example": "/spirit/fluxgym/datasets/aaa" },
+                  "class_tokens": { "type": "string", "example": "aaa" },
+                  "num_repeats": { "type": "integer", "example": 10 }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "responses": {

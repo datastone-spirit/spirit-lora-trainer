@@ -2,6 +2,7 @@ import os
 import yaml
 from slugify import slugify
 import gradio as gr
+import toml
 from gradio_logsview import LogsView, LogsViewRunner
 from ..api.model.training_paramter import TrainingParameter
 
@@ -15,6 +16,33 @@ class TrainingService:
     def training(self,parameters :TrainingParameter):
         global training_parameters
         training_parameters = parameters
+        # ------------
+        dataset_path = self.resolve_path_without_quotes(f"/outputs/bbbbb/dataset.toml")
+        # with open(dataset_path, 'w', encoding="utf-8") as file:
+        #     file.write(train_config)
+        train_config = {
+            "datasets": {
+                "batch_size": 1,
+                "keep_tokens": 1,
+                "resolution": 512,
+                "subsets": {
+                    "class_tokens": "aaa",
+                    "image_dir": "/spirit/fluxgym/datasets/aaa",
+                    "num_repeats": 10
+                }
+            },
+            "general": {
+                "caption_extension": ".txt",
+                "keep_tokens": 1,
+                "shuffle_caption": True
+            }
+        }
+        with open(dataset_path, "w", encoding="utf-8") as f:
+            toml.dump(train_config, f)
+        gr.Info(f"Generated dataset.toml")
+
+
+        # ---------------------
         print(f'trainingparameters is {parameters.output_name} {parameters.class_tokens}')
         # TODO: generate shell scripts and run
         sh = self.gen_sh(parameters)
@@ -24,8 +52,24 @@ class TrainingService:
         norm_path = os.path.normpath(os.path.join(current_dir, p))
         return f"\"{norm_path}\""
     def resolve_path_without_quotes(self, p):
+        # 获取当前脚本所在的目录
         current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # 规范化路径
         norm_path = os.path.normpath(os.path.join(current_dir, p))
+
+        # 获取目录路径
+        dir_path = os.path.dirname(norm_path)
+
+        # 如果目录不存在，创建目录
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+
+        # 如果文件不存在，创建文件（写入空内容）
+        if not os.path.exists(norm_path):
+            with open(norm_path, 'w') as f:
+                f.write("")  # 可以根据需要写入初始内容
+
         return norm_path
 
     def gen_sh(
@@ -138,15 +182,12 @@ class TrainingService:
     
     def start_training(
         self,
-        base_model,
         lora_name,
         train_script,
         train_config,
         sample_prompts,
     ):
         # write custom script and toml
-        if not os.path.exists("models"):
-            os.makedirs("models", exist_ok=True)
         if not os.path.exists("outputs"):
             os.makedirs("outputs", exist_ok=True)
         output_name = slugify(lora_name)
@@ -165,8 +206,10 @@ class TrainingService:
 
 
         dataset_path = self.resolve_path_without_quotes(f"outputs/{output_name}/dataset.toml")
-        with open(dataset_path, 'w', encoding="utf-8") as file:
-            file.write(train_config)
+        # with open(dataset_path, 'w', encoding="utf-8") as file:
+        #     file.write(train_config)
+        with open(dataset_path, "w", encoding="utf-8") as f:
+            toml.dump(train_config, f)
         gr.Info(f"Generated dataset.toml")
 
         sample_prompts_path = self.resolve_path_without_quotes(f"outputs/{output_name}/sample_prompts.txt")

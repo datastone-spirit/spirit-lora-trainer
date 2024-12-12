@@ -11,4 +11,5 @@ class Model:
         if d is not None:
             for key, value in d.items():
                 setattr(self, key, value)
+        return self
 

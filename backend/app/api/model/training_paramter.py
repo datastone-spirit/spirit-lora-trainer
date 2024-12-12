@@ -1,27 +1,44 @@
 from dataclasses import dataclass
-from dataclasses import dataclass, field
 from typing import List
 from .base_model import Model
 
 
 @dataclass
-class Subsets:
+class Subsets(Model):
     class_tokens: str
     image_dir: str
     num_repeats: int
+    @classmethod
+    def from_dict(cls, dikt) -> 'Subsets':
+        parameter =  Subsets()._from_dict(dikt)
+        return parameter
 
 @dataclass
-class Datasets:
+class Datasets(Model):
     batch_size: int
     keep_tokens: int
     resolution: int
     subsets: Subsets
 
+    @classmethod
+    def from_dict(cls, dikt) -> 'Datasets':
+        # Fixme: Need a more elegant way to handle the list of subsets
+        parameter =  Datasets()
+        parameter.batch_size = dikt.get('batch_size')
+        parameter.keep_tokens = dikt.get('keep_tokens')
+        parameter.resolution = dikt.get('resolution')
+        parameter.subsets = Subsets.from_dict(dikt.get('subsets'))
+        return parameter
 @dataclass
-class General:
+class General(Model):
     caption_extension: str
     keep_tokens: int
     shuffle_caption: bool
+
+    @classmethod
+    def from_dict(cls, dikt) -> 'General':
+        parameter =  General()._from_dict(dikt)
+        return parameter
 
 @dataclass
 class TrainingDataset(Model):
@@ -50,7 +67,8 @@ class TrainingDataset(Model):
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingDataset':
         parameter =  TrainingDataset()
-        parameter._from_dict(dikt)
+        parameter.datasets = Datasets.from_dict(dikt.get('datasets'))
+        parameter.general = General.from_dict(dikt.get('general'))
         return parameter
     
 
@@ -251,9 +269,7 @@ class TrainingConfig(Model):
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingConfig':
-        parameter =  TrainingConfig()
-        parameter._from_dict(dikt)
-        return parameter
+        return TrainingConfig()._from_dict(dikt)
     
 @dataclass
 class TrainingParameter(Model):
@@ -263,6 +279,7 @@ class TrainingParameter(Model):
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingParameter':
         parameter = TrainingParameter()
-        parameter.config = TrainingConfig._from_dict(dikt.get('config'))
-        parameter.dataset = TrainingDataset._from_dict(dikt.get('dataset'))
+        parameter.config = TrainingConfig.from_dict(dikt.get('config'))
+        parameter.dataset = TrainingDataset.from_dict(dikt.get('dataset'))
+        return parameter
 

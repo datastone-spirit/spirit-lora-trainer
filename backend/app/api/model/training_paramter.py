@@ -8,6 +8,12 @@ class Subsets(Model):
     class_tokens: str
     image_dir: str
     num_repeats: int
+
+    def __init__(self):
+        self.class_tokens = None
+        self.image_dir = None
+        self.num_repeats = None
+
     @classmethod
     def from_dict(cls, dikt) -> 'Subsets':
         parameter =  Subsets()._from_dict(dikt)
@@ -19,6 +25,12 @@ class Datasets(Model):
     keep_tokens: int
     resolution: int
     subsets: Subsets
+
+    def __init__(self, batch_size=None, keep_tokens=None, resolution=None, subsets=None):
+        self.batch_size = batch_size
+        self.keep_tokens = keep_tokens
+        self.resolution = resolution
+        self.subsets = subsets
 
     @classmethod
     def from_dict(cls, dikt) -> 'Datasets':
@@ -34,6 +46,11 @@ class General(Model):
     caption_extension: str
     keep_tokens: int
     shuffle_caption: bool
+
+    def __init__(self):
+        self.caption_extension = None
+        self.keep_tokens = None
+        self.shuffle_caption = None
 
     @classmethod
     def from_dict(cls, dikt) -> 'General':
@@ -63,6 +80,10 @@ class TrainingDataset(Model):
     """
     datasets: Datasets
     general: General
+
+    def __init__(self, datasets=None, general=None):
+        self.datasets = datasets
+        self.general = general
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingDataset':
@@ -275,6 +296,10 @@ class TrainingConfig(Model):
 class TrainingParameter(Model):
     config: TrainingConfig
     dataset: TrainingDataset   
+
+    def __init__(self, config=None, dataset=None):
+        self.config = config
+        self.dataset = dataset
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingParameter':

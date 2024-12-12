@@ -1,7 +1,7 @@
 from flask import jsonify
 import os
 from flasgger import swag_from
-from app.api.model.training_paramter import TrainingParameter
+from app.api.model.training_paramter import TrainingConfig, TrainingParameter
 from typing import List, Tuple
 
 # 公共 response 方法
@@ -62,7 +62,7 @@ def use_swagger_config(swagger_config=None):
     return decorator
 
 
-def config2args(parameter :TrainingParameter) -> 'List[str]':
+def config2args(parameter :TrainingConfig) -> 'List[str]':
     args = []
     for key, value in parameter.__dict__.items():
         if value is not None:

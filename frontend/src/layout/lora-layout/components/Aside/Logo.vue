@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:29:28
- * @LastEditTime: 2024-12-06 16:50:12
+ * @LastEditTime: 2024-12-12 16:56:52
  * @LastEditors: mulingyuer
  * @Description: logo
- * @FilePath: \frontend\src\layout\admin-layout\components\Aside\Logo.vue
+ * @FilePath: \frontend\src\layout\lora-layout\components\Aside\Logo.vue
  * 怎么可能会有bug！！！
 -->
 <template>

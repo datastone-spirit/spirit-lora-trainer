@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-11 15:35:33
+ * @LastEditTime: 2024-12-11 17:51:53
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts

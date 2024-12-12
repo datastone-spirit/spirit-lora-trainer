@@ -1,5 +1,3 @@
-@use "../variables.scss" as *;
-
 $--colors: (
 	"primary": (
 		"base": #20bda0
@@ -22,14 +20,26 @@ $--colors: (
 );
 
 @forward "element-plus/theme-chalk/src/common/var.scss" with (
-	$colors: $--colors,
-	$card: (
-		"padding": $padding
-	)
+	$colors: $--colors
 );
 
 @use "./dark.scss";
 
-:root {
-	--el-two-split-scrollbar: rgba(144, 147, 153, 0.4);
+html {
+	--zl-page-bg: #f2f3f8;
+	--zl-aside-footer-box-shadow: rgba(0, 0, 0, 0.12);
+	--zl-footer-bar-bg: #fff;
+	--zl-complexity-setting-bg: #f0f0f0;
+	--zl-complexity-setting-color: #606266;
+	--zl-complexity-setting-color-active: #fff;
+	--zl-scrollbar: rgba(144, 147, 153, 0.4);
+	--zl-two-split-gutter-bg: #f2f3f8;
+	--zl-two-split-gutter-bg-hover: #fff;
+	--zl-collapse-bg: #fff;
+	--zl-field-set-wrapper-bg: #fff;
+	--zl-split-right-panel-bg: #fff;
+	--zl-preview-switch-bg: #f0f0f0;
+	--zl-preview-switch-color: #606266;
+	--zl-preview-switch-color-active: #fff;
+	--zl-toml-preview-bg: transparent;
 }

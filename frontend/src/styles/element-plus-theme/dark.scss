@@ -23,3 +23,22 @@ $--colors: (
 @forward "element-plus/theme-chalk/src/dark/var.scss" with (
 	$colors: $--colors
 );
+
+html.dark {
+	--zl-page-bg: #0a0a0a;
+	--zl-aside-footer-box-shadow: rgba(255, 255, 255, 0.12);
+	--zl-footer-bar-bg: #141414;
+	--zl-complexity-setting-bg: #000;
+	--zl-complexity-setting-color: #e5eaf3;
+	--zl-complexity-setting-color-active: #141414;
+	--zl-scrollbar: rgba(144, 147, 153, 0.4);
+	--zl-two-split-gutter-bg: #141414;
+	--zl-two-split-gutter-bg-hover: #1d1e1f;
+	--zl-collapse-bg: #141414;
+	--zl-field-set-wrapper-bg: #141414;
+	--zl-split-right-panel-bg: #141414;
+	--zl-preview-switch-bg: #000;
+	--zl-preview-switch-color: #e5eaf3;
+	--zl-preview-switch-color-active: #141414;
+	--zl-toml-preview-bg: transparent;
+}

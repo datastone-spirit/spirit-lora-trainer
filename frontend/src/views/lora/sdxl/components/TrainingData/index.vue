@@ -9,10 +9,10 @@
 -->
 <template>
 	<DatasetDirSelector
-		v-model:dir="ruleForm.train_data_dir"
+		v-model:dir="ruleForm.image_dir"
 		dir-label="数据集目录"
-		:dir-prop="formProps.train_data_dir"
-		dir-popover-content="train_data_dir"
+		:dir-prop="formProps.image_dir"
+		dir-popover-content="image_dir"
 	/>
 	<el-row :gutter="16">
 		<el-col :span="10">

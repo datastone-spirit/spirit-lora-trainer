@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-29 17:00:46
- * @LastEditTime: 2024-12-12 15:21:09
+ * @LastEditTime: 2024-12-12 15:20:52
  * @LastEditors: mulingyuer
  * @Description: main
- * @FilePath: \frontend\src\layout\admin-layout\components\Main\index.vue
+ * @FilePath: \frontend\src\layout\lora-layout\components\Main\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -52,7 +52,7 @@ const mainClass = computed(() => {
 	}
 }
 .admin-main-content {
-	padding: $zl-padding 0 $zl-padding $zl-padding;
+	padding: $zl-padding 0 calc($zl-padding + $zl-footer-bar-height) $zl-padding;
 	height: 100%;
 	overflow: hidden;
 }

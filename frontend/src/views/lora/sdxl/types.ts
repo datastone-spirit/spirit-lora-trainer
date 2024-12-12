@@ -32,7 +32,7 @@ export interface RuleForm {
 	save_state: boolean;
 	// ---------
 	/** 数据集目录 */
-	train_data_dir: string;
+	image_dir: string;
 	/** 每个图像重复训练次数 */
 	num_repeats: number;
 	/** 最大训练 epoch（轮数） */

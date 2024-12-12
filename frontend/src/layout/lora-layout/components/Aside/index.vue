@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:00:24
- * @LastEditTime: 2024-12-12 10:20:31
+ * @LastEditTime: 2024-12-12 08:45:53
  * @LastEditors: mulingyuer
  * @Description: 侧边栏
  * @FilePath: \frontend\src\layout\admin-layout\components\Aside\index.vue
@@ -43,7 +43,7 @@ function onCloseAppMask() {
 	position: fixed;
 	top: $zl-padding;
 	left: 0;
-	bottom: calc($zl-padding);
+	bottom: calc($zl-padding + $zl-footer-bar-height);
 	overflow: hidden;
 	background-color: var(--el-bg-color);
 	// box-shadow: 0 0 1px rgba(136, 136, 136);

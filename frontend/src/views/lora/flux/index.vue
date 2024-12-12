@@ -1,57 +1,66 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-11 15:48:01
+ * @LastEditTime: 2024-12-12 16:32:41
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<TwoSplit class="lora-flux-page" direction="horizontal" :sizes="[50, 50]">
-		<template #left>
-			<div class="lora-flux-content">
-				<el-form
-					ref="ruleFormRef"
-					:model="ruleForm"
-					:rules="rules"
-					label-width="auto"
-					label-position="top"
-					size="large"
-				>
-					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
-						<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
-					</Collapse>
-					<Collapse v-model="openStep2" title="第2步：训练用的数据">
-						<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
-					</Collapse>
-					<Collapse v-model="openStep3" title="第3步：模型参数调教">
-						<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
-					</Collapse>
-					<Collapse v-if="isExpert" v-model="openStep4" title="其它：高级设置">
-						<AdvancedSettings v-model:form="ruleForm" :form-props="ruleFormProps" />
-					</Collapse>
-				</el-form>
+	<div class="lora-flux-page">
+		<TwoSplit direction="horizontal" :sizes="[50, 50]">
+			<template #left>
+				<div class="lora-flux-content">
+					<el-form
+						ref="ruleFormRef"
+						:model="ruleForm"
+						:rules="rules"
+						label-width="auto"
+						label-position="top"
+						size="large"
+					>
+						<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
+							<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
+						</Collapse>
+						<Collapse v-model="openStep2" title="第2步：训练用的数据">
+							<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
+						</Collapse>
+						<Collapse v-model="openStep3" title="第3步：模型参数调教">
+							<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
+						</Collapse>
+						<SimpleCollapse v-if="isExpert" v-model="openStep4" title="其它：高级设置">
+							<AdvancedSettings v-model:form="ruleForm" :form-props="ruleFormProps" />
+						</SimpleCollapse>
+					</el-form>
+				</div>
+			</template>
+			<template #right>
+				<SplitRightPanel :toml="toml" />
+			</template>
+		</TwoSplit>
+		<ConfigBtns />
+		<Teleport to="#footer-bar-center" defer>
+			<div class="flux-footer-bar">
+				<el-button type="primary" size="large" :loading="submitLoading" @click="onSubmit">
+					开始训练
+				</el-button>
 			</div>
-		</template>
-		<template #right>
-			<button @click="onTest">转toml</button>
-			<TomlPreview :toml="toml" />
-			<div style="height: 100%">AI 数据集</div>
-		</template>
-	</TwoSplit>
+		</Teleport>
+	</div>
 </template>
 
 <script setup lang="ts">
 import type { FormInstance, FormRules } from "element-plus";
 import type { RuleForm, RuleFormProps } from "./types";
-import { generateKeyMapFromInterface } from "@/utils/tools";
+import { generateKeyMapFromInterface, removeUndefinedKeys } from "@/utils/tools";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
+import ConfigBtns from "./components/Footer/ConfigBtns.vue";
 import { useSettingsStore } from "@/stores";
-import { stringify } from "smol-toml";
+import { generateTomlString } from "@/utils/toml";
 
 const settingsStore = useSettingsStore();
 
@@ -69,7 +78,7 @@ const ruleForm = ref<RuleForm>({
 	save_precision: "bf16",
 	save_state: false,
 	// -----
-	train_data_dir: "",
+	image_dir: "",
 	num_repeats: 1,
 	max_train_epochs: 4,
 	train_batch_size: 1,
@@ -171,7 +180,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	// save_every_n_epochs: [
 	// 	{ required: true, message: "请输入每 N epoch（轮）自动保存一次模型", trigger: "blur" }
 	// ],
-	// train_data_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }],
+	// image_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }],
 	// num_repeats: [{ required: true, message: "请输入每个图像重复训练次数", trigger: "blur" }],
 	// resolution_width: [{ required: true, message: "请输入图片尺寸-宽度", trigger: "blur" }],
 	// resolution_height: [{ required: true, message: "请输入图片尺寸-高度", trigger: "blur" }]
@@ -185,17 +194,42 @@ const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
 
-const toml = ref("");
-function onTest() {
-	toml.value = stringify(ruleForm.value);
+/** 提交表单 */
+const submitLoading = ref(false);
+function onSubmit() {
+	if (!ruleFormRef.value) return;
+	ruleFormRef.value.validate((valid) => {
+		if (!valid) return;
+
+		// 开始训练
+		submitLoading.value = true;
+		setTimeout(() => {
+			submitLoading.value = false;
+		}, 1000);
+	});
 }
+
+/** toml */
+const toml = ref("");
+const generateToml = useDebounceFn(() => {
+	const tomlData = removeUndefinedKeys(ruleForm.value);
+	toml.value = generateTomlString(tomlData);
+}, 300);
+watch(ruleForm, generateToml, { deep: true, immediate: true });
 </script>
 
 <style lang="scss" scoped>
 .lora-flux-page {
-	height: calc(100vh - $header-height - $padding * 2);
+	height: calc(100vh - $zl-padding * 2 - $zl-footer-bar-height);
 }
-.lora-flux-content {
-	padding: 16px;
+.flux-footer-bar {
+	height: 100%;
+	padding: 0 $zl-padding;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
 }
+// .lora-flux-content {
+// 	padding: 16px;
+// }
 </style>

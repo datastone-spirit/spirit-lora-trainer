@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2024-12-04 10:48:25
+ * @LastEditTime: 2024-12-12 16:34:25
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
@@ -11,7 +11,7 @@ import type { RouteRecordRaw } from "vue-router";
 
 export default {
 	path: "/lora",
-	component: () => import("@/layout/admin-layout/index.vue"),
+	component: () => import("@/layout/lora-layout/index.vue"),
 	meta: {
 		auth: "public",
 		title: "LoRA 训练",
@@ -19,14 +19,14 @@ export default {
 		sort: 2
 	},
 	children: [
-		{
-			path: "/lora/sdxl",
-			name: "LoRA-SDXL",
-			component: () => import("@/views/lora/sdxl/index.vue"),
-			meta: {
-				title: "SDXL"
-			}
-		},
+		// {
+		// 	path: "/lora/sdxl",
+		// 	name: "LoRA-SDXL",
+		// 	component: () => import("@/views/lora/sdxl/index.vue"),
+		// 	meta: {
+		// 		title: "SDXL"
+		// 	}
+		// },
 		{
 			path: "/lora/flux",
 			name: "LoRA-Flux",

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 10:13:40
- * @LastEditTime: 2024-12-10 08:46:44
+ * @LastEditTime: 2024-12-12 16:02:44
  * @LastEditors: mulingyuer
  * @Description: 2分割组件
  * @FilePath: \frontend\src\components\Split\TwoSplit.vue
@@ -10,14 +10,14 @@
 <template>
 	<div class="two-split" :class="[direction]">
 		<div ref="splitLeft" class="two-split-left">
-			<Card class="two-split-card">
+			<div class="two-split-card">
 				<slot name="left"></slot>
-			</Card>
+			</div>
 		</div>
 		<div ref="splitRight" class="two-split-right">
-			<Card class="two-split-card">
+			<div class="two-split-card">
 				<slot name="right"></slot>
-			</Card>
+			</div>
 		</div>
 	</div>
 </template>
@@ -49,7 +49,9 @@ export interface TwoSplitProps {
 }
 
 const props = withDefaults(defineProps<TwoSplitProps>(), {
-	direction: "horizontal"
+	direction: "horizontal",
+	gutterSize: 12,
+	minSize: () => [550, 450]
 });
 
 const splitLeft = ref<HTMLDivElement>();
@@ -103,68 +105,44 @@ watch([() => props.direction, () => props.sizes], () => {
 .two-split {
 	display: flex;
 	height: 100%;
-	min-height: 1px;
 }
 .two-split.horizontal {
 	.two-split-left,
 	.two-split-right {
 		height: 100%;
 	}
-	.two-split-left .two-split-card {
-		border-top-right-radius: 0;
-		border-bottom-right-radius: 0;
-	}
-	.two-split-right .two-split-card {
-		border-top-left-radius: 0;
-		border-bottom-left-radius: 0;
-	}
 }
-// .two-split.vertical {
-// 	flex-direction: column;
-// 	padding-right: 12px;
-// 	flex-direction: column-reverse;
-// 	.two-split-left,
-// 	.two-split-right {
-// 		width: 100%;
-// 		height: auto;
-// 	}
-// 	.two-split-left .two-split-card {
-// 	}
-// }
-
+.two-split-right {
+	margin-left: 6px;
+}
 .two-split-card {
 	height: 100%;
-}
-.two-split-card :deep(.el-card__body) {
-	padding: 0;
-	height: 100%;
 	overflow: auto;
+	padding-right: 6px;
 	&::-webkit-scrollbar {
-		width: 8px;
+		width: $zl-scrollbar-width;
 	}
 	&::-webkit-scrollbar-thumb {
-		background: var(--el-two-split-scrollbar);
+		background: var(--zl-scrollbar);
 	}
 }
 
 /* 针对不支持::-webkit-scrollbar-*的浏览器的样式调整 */
 @supports not (selector(::-webkit-scrollbar)) {
-	.two-split-card :deep(.el-card__body) {
+	.two-split-card {
 		scrollbar-width: thin;
-		scrollbar-color: var(--el-two-split-scrollbar) transparent;
+		scrollbar-color: var(--zl-scrollbar) transparent;
 	}
 }
 
 .two-split :deep(.gutter) {
-	background-color: #eee;
+	background-color: var(--zl-two-split-gutter-bg);
 	background-repeat: no-repeat;
 	background-position: 50%;
-	border-color: var(--el-border-color-light);
-	border-style: solid;
-	border-width: 1px 0 1px 0;
 	transition: background-color 0.2s;
+	border-radius: $zl-border-radius;
 	&:hover {
-		background-color: #eef5f9;
+		background-color: var(--zl-two-split-gutter-bg-hover);
 	}
 }
 .two-split :deep(.gutter.gutter-horizontal) {
@@ -174,15 +152,5 @@ watch([() => props.direction, () => props.sizes], () => {
 .two-split :deep(.gutter.gutter-vertical) {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=");
 	cursor: col-resize;
-}
-</style>
-<style lang="scss">
-html.dark {
-	.two-split .gutter {
-		background-color: var(--el-bg-color);
-		&:hover {
-			background-color: var(--el-bg-color-overlay);
-		}
-	}
 }
 </style>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_2" data-name=" 图层 2" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 62.8 71.9">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #b3b3b3;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #5cbca5;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="_图层_1-2" data-name=" 图层 1-2">
+    <g>
+      <g>
+        <path class="cls-2" d="M62.8,26.7l-21.2-12.2v5.1l7.3,4.2c.6.3,1,1,1.1,1.7,0,.7-.3,1.4-.9,1.8h0s0,0,0,0l-5.4,3.1,19.1,11.1v-14.8h0Z"/>
+        <polygon class="cls-2" points="22.9 18.5 29.3 14.8 29.3 7.4 16.5 0 16.5 14.8 22.9 18.5"/>
+      </g>
+      <g>
+        <polygon class="cls-3" points="0 62 12.8 54.6 12.8 47.2 6.4 43.5 0 47.2 0 62"/>
+        <path class="cls-3" d="M4.4,30.4v-8.6c0-.7.4-1.4,1-1.7.6-.4,1.4-.4,2,0h0s5.4,3.1,5.4,3.1V1.1L0,8.5v24.4l4.4-2.5Z"/>
+      </g>
+      <g>
+        <path class="cls-1" d="M2.2,64.6l12.8,7.4,21.2-12.2-4.4-2.5-7.4,4.2c-.6.4-1.4.4-2,0-.6-.3-1-1-1-1.7v-6.2l-19.1,11Z"/>
+        <polygon class="cls-1" points="42 41.5 42 48.9 48.5 52.6 61.2 45.2 48.4 37.8 42 41.5"/>
+      </g>
+    </g>
+  </g>
+</svg>

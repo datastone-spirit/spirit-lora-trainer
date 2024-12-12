@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-11 15:48:08
+ * @LastEditTime: 2024-12-12 10:23:43
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -64,7 +64,7 @@ const ruleForm = ref<RuleForm>({
 	save_precision: "fp16",
 	save_state: false,
 	// -----
-	train_data_dir: "",
+	image_dir: "",
 	num_repeats: 10,
 	max_train_epochs: 10,
 	train_batch_size: 1,
@@ -165,7 +165,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	save_every_n_epochs: [
 		{ required: true, message: "请输入每 N epoch（轮）自动保存一次模型", trigger: "blur" }
 	],
-	train_data_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }],
+	image_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }],
 	num_repeats: [{ required: true, message: "请输入每个图像重复训练次数", trigger: "blur" }],
 	resolution_width: [{ required: true, message: "请输入图片尺寸-宽度", trigger: "blur" }],
 	resolution_height: [{ required: true, message: "请输入图片尺寸-高度", trigger: "blur" }]
@@ -182,7 +182,7 @@ const openStep4 = ref(true);
 
 <style lang="scss" scoped>
 .lora-sdxl-page {
-	height: calc(100vh - $header-height - $padding * 2);
+	height: calc(100vh - $zl-padding * 2 - $zl-footer-bar-height);
 }
 .lora-sdxl-content {
 	padding: 16px;

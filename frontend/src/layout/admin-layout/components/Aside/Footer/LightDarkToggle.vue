@@ -1,26 +1,36 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:28:33
- * @LastEditTime: 2024-12-10 14:23:19
+ * @LastEditTime: 2024-12-11 17:38:14
  * @LastEditors: mulingyuer
  * @Description: 暗色亮色切换按钮
- * @FilePath: \frontend\src\layout\admin-layout\components\Header\LightDarkToggle.vue
+ * @FilePath: \frontend\src\layout\admin-layout\components\Aside\Footer\LightDarkToggle.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="light-dark-toggle" @click="onToggle">
-		<Icon v-if="isDark" name="ri-contrast-2-line" />
-		<Icon v-else name="ri-sun-line" />
-	</div>
+	<el-button
+		class="light-dark-toggle"
+		:type="btnType"
+		:icon="isDark ? DarkIcon : LightIcon"
+		circle
+		text
+		size="large"
+		@click="onToggle"
+	/>
 </template>
 
 <script setup lang="ts">
+import { useIcon } from "@/hooks/useIcon";
+
+const DarkIcon = useIcon({ name: "ri-contrast-2-line", size: 20 });
+const LightIcon = useIcon({ name: "ri-sun-line", size: 20 });
 const isDark = useDark({
 	storageKey: "__spirit-lora-trainer__color-scheme",
 	valueDark: "dark",
 	valueLight: "light"
 });
 const toggleDark = useToggle(isDark);
+const btnType = computed(() => (isDark.value ? "" : "primary"));
 
 function onToggle(event: MouseEvent) {
 	if (!("startViewTransition" in document)) {
@@ -44,7 +54,7 @@ function onToggle(event: MouseEvent) {
 				clipPath: !isDark.value ? [...clipPath].reverse() : clipPath
 			},
 			{
-				duration: 500,
+				duration: 350,
 				easing: "ease-in-out",
 				pseudoElement: !isDark.value ? "::view-transition-old(root)" : "::view-transition-new(root)"
 			}
@@ -53,19 +63,6 @@ function onToggle(event: MouseEvent) {
 }
 </script>
 
-<style lang="scss" scoped>
-.light-dark-toggle {
-	width: 40px;
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	&:hover {
-		background-color: var(--el-fill-color-light);
-	}
-}
-</style>
 <style lang="scss">
 ::view-transition-old(root),
 ::view-transition-new(root) {

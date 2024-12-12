@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2024-12-09 09:43:44
+ * @LastEditTime: 2024-12-12 16:23:11
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -21,4 +21,9 @@ export function generateKeyMapFromInterface<
 		acc[typedKey] = key;
 		return acc;
 	}, {} as R);
+}
+
+/** 剔除键值对对象中值为 undefined 的键 */
+export function removeUndefinedKeys<T extends Record<string, any>>(obj: T): T {
+	return JSON.parse(JSON.stringify(obj));
 }

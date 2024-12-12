@@ -1,18 +1,18 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2024-12-05 15:29:23
- * @LastEditTime: 2024-12-12 10:14:44
+ * @Date: 2024-12-12 09:56:30
+ * @LastEditTime: 2024-12-12 10:02:24
  * @LastEditors: mulingyuer
- * @Description: 折叠面板
- * @FilePath: \frontend\src\components\Collapse\Collapse.vue
+ * @Description: 简化的折叠面板
+ * @FilePath: \frontend\src\components\Collapse\SimpleCollapse.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="collapse">
-		<div class="collapse-header">
-			<h2 class="collapse-title">{{ title }}</h2>
+	<div class="simple-collapse">
+		<div class="simple-collapse-header">
+			<h2 class="simple-collapse-title">{{ title }}</h2>
 			<el-button
-				class="collapse-arrow"
+				class="simple-collapse-arrow"
 				:class="{ closed: !open }"
 				:icon="CollapseIcon"
 				circle
@@ -21,13 +21,8 @@
 				@click="onToggleCollapse"
 			/>
 		</div>
-		<div v-show="open" class="collapse-divider-wrapper">
-			<el-divider class="collapse-divider" />
-		</div>
-		<div v-show="open" class="collapse-body">
-			<slot></slot>
-		</div>
 	</div>
+	<slot v-if="open"></slot>
 </template>
 
 <script setup lang="ts">
@@ -51,36 +46,27 @@ function onToggleCollapse() {
 </script>
 
 <style lang="scss" scoped>
-.collapse {
-	margin-bottom: $zl-collapse-margin;
+.simple-collapse {
+	margin-bottom: 10px;
 	background-color: var(--zl-collapse-bg);
 	border-radius: $zl-border-radius;
 	overflow: hidden;
 }
-.collapse-header {
+.simple-collapse-header {
 	display: flex;
 	align-items: center;
 	padding: $zl-padding;
 }
-.collapse-title {
+.simple-collapse-title {
 	font-size: 20px;
 	font-weight: bold;
 	color: var(--el-text-color-primary);
 }
-.collapse-arrow {
+.simple-collapse-arrow {
 	flex-shrink: 0;
 	margin-left: auto;
 }
-.collapse-arrow.closed {
+.simple-collapse-arrow.closed {
 	transform: rotate(-180deg);
-}
-.collapse-divider-wrapper {
-	margin: 0 $zl-padding;
-}
-.collapse-divider {
-	margin: 0;
-}
-.collapse-body {
-	padding: calc($zl-padding + $zl-padding / 2) $zl-padding;
 }
 </style>

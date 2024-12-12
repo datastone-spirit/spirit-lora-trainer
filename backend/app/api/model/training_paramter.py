@@ -4,10 +4,48 @@ from typing import List
 from .base_model import Model
 
 
+@dataclass
+class Subsets:
+    class_tokens: str
+    image_dir: str
+    num_repeats: int
+
+@dataclass
+class Datasets:
+    batch_size: int
+    keep_tokens: int
+    resolution: int
+    subsets: Subsets
+
+@dataclass
+class General:
+    caption_extension: str
+    keep_tokens: int
+    shuffle_caption: bool
 
 @dataclass
 class TrainingDataset(Model):
-    pass
+    """
+    {
+    "datasets": {
+        "batch_size": 1,
+        "keep_tokens": 1,
+        "resolution": 512,
+        "subsets": {
+        "class_tokens": "aaa",
+        "image_dir": "/spirit/fluxgym/datasets/aaa",
+        "num_repeats": 10
+        }
+    },
+    "general": {
+        "caption_extension": ".txt",
+        "keep_tokens": 1,
+        "shuffle_caption": false
+    }
+    }
+    """
+    datasets: Datasets
+    general: General
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingDataset':

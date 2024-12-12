@@ -1,68 +1,42 @@
 from dataclasses import dataclass, asdict
 import toml
 import tempfile
-from typing import List
+from typing import List, Optional
 from .base_model import Model
-
-
+import dacite
 
 @dataclass
-class Subset(Model):
+class Subset:
     class_tokens: str
     image_dir: str
     num_repeats: int
 
-    def __init__(self):
-        self.class_tokens = None
-        self.image_dir = None
-        self.num_repeats = None
-
     @classmethod
     def from_dict(cls, dikt) -> 'Subset':
-        parameter =  Subset()._from_dict(dikt)
-        return parameter
+        return dacite.from_dict(data_class=Subset, data=dikt)
 
 @dataclass
-class Datasets(Model):
+class Datasets:
     batch_size: int
     keep_tokens: int
     resolution: int
-    subsets: List[Subset]
-
-    def __init__(self, batch_size=None, keep_tokens=None, resolution=None, subsets=[]):
-        self.batch_size = batch_size
-        self.keep_tokens = keep_tokens
-        self.resolution = resolution
-        self.subsets = subsets
+    subsets: Optional[List[Subset]] 
 
     @classmethod
     def from_dict(cls, dikt) -> 'Datasets':
-        # Fixme: Need a more elegant way to handle the list of subsets
-        parameter =  Datasets()
-        parameter.batch_size = dikt.get('batch_size')
-        parameter.keep_tokens = dikt.get('keep_tokens')
-        parameter.resolution = dikt.get('resolution')
-        for subset in dikt.get('subsets'):
-            parameter.subsets.append(Subset.from_dict(subset))
-        return parameter
+        return dacite.from_dict(data_class=Datasets, data=dikt)
 @dataclass
-class General(Model):
+class General:
     caption_extension: str
     keep_tokens: int
     shuffle_caption: bool
 
-    def __init__(self):
-        self.caption_extension = None
-        self.keep_tokens = None
-        self.shuffle_caption = None
-
     @classmethod
     def from_dict(cls, dikt) -> 'General':
-        parameter =  General()._from_dict(dikt)
-        return parameter
+        return dacite.from_dict(data_class=General, data=dikt)
 
 @dataclass
-class TrainingDataset(Model):
+class TrainingDataset:
     """
     {
     "datasets": [{
@@ -82,20 +56,13 @@ class TrainingDataset(Model):
     }
     }
     """
-    datasets: List[Datasets]
-    general: General
-
-    def __init__(self, datasets=[], general=None):
-        self.datasets = datasets
-        self.general = general
+    datasets: Optional[List[Datasets]] 
+    general: General = None
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingDataset':
-        parameter =  TrainingDataset()
-        parameter.general = General.from_dict(dikt.get('general'))
-        for dataset in dikt.get('datasets'):
-            parameter.datasets.append(Datasets.from_dict(dataset))
-        return parameter
+        return dacite.from_dict(data_class=TrainingDataset, data=dikt)
+
  
     def to_file(self) -> str:
         # accroding to the value of feild to generate a toml format file 
@@ -108,13 +75,14 @@ class TrainingDataset(Model):
         temp_file_path = temp_file.name
 
         # Write the dictionary to the temporary file in TOML format
-        with open(temp_file_path, 'w', encoding='utf-8') as f:
+        with open(temp_file_path, 'w+', encoding='utf-8') as f:
+            f.truncate(0)
             toml.dump(data, f)
         return temp_file_path
 
 
 @dataclass
-class TrainingConfig(Model):
+class TrainingConfig:
     adaptive_noise_scale: float = None
     ae: str  = None
     alpha_mask: int = False
@@ -310,23 +278,13 @@ class TrainingConfig(Model):
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingConfig':
-        parameter = TrainingConfig()
-        parameter._from_dict(dikt)
-        return parameter
+       return dacite.from_dict(data_class=TrainingConfig, data=dikt) 
     
 @dataclass
-class TrainingParameter(Model):
-    config: TrainingConfig
-    dataset: TrainingDataset   
-
-    def __init__(self, config=None, dataset=None):
-        self.config = config
-        self.dataset = dataset
+class TrainingParameter:
+    config: Optional[TrainingConfig]  
+    dataset: Optional[TrainingDataset]
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingParameter':
-        parameter = TrainingParameter()
-        parameter.config = TrainingConfig._from_dict(dikt.get('config'))
-        parameter.dataset = TrainingDataset._from_dict(dikt.get('dataset'))
-        return parameter
-        
+       return dacite.from_dict(data_class=TrainingParameter, data=dikt) 

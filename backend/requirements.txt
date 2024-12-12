@@ -1,4 +1,5 @@
 transformers
+dacite
 gradio_logsview@https://hf-mirror.com/spaces/cocktailpeanut/gradio_logsview/resolve/main/gradio_logsview-0.0.17-py3-none-any.whl
 accelerate
 tensorboard

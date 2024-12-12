@@ -1,26 +1,24 @@
 from app.api.model.training_paramter import TrainingConfig, TrainingDataset, TrainingParameter
 from app.api.common.utils import traningparameter_to_args
-
-
     
 def test_trainingconfig_model():
     request = {
         'output_name': 'output_name1',
-        'class_tokens': 'class_tokens1',
+        'bucket_reso_steps': 128,
     }
     parameter = TrainingConfig.from_dict(request)
     assert parameter.output_name == 'output_name1'
-    assert parameter.class_tokens == 'class_tokens1'
+    assert parameter.bucket_reso_steps == 128
 
 
 def test_traningconfig_to_arguments():
     request = {
         'output_name': 'output_name1',
-        'class_tokens': 'class_tokens1',
+        'bucket_reso_steps': 128,
     }
     parameter = TrainingConfig.from_dict(request)
     result = traningparameter_to_args(parameter)
-    for i in ['--output_name "output_name1"', '--class_tokens "class_tokens1"']:
+    for i in ['--output_name "output_name1"', '--bucket_reso_steps 128']:
         assert i in result  
 
 def test_trainingdataset_model():
@@ -56,11 +54,11 @@ def test_trainingdataset_model():
 
 
 def test_trainingparamter_model():
-    paramter = {
+    request = {
         'config': 
 {
         'output_name': 'output_name1',
-        'class_tokens': 'class_tokens1',
+        'bucket_reso_steps': 128,
     } 
         ,
         'dataset': {
@@ -82,9 +80,9 @@ def test_trainingparamter_model():
         }
     }
 
-    training_paramter = TrainingParameter.from_dict(paramter)
+    training_paramter = TrainingParameter.from_dict(request)
     assert training_paramter.config.output_name == 'output_name1'
-    assert training_paramter.config.class_tokens == 'class_tokens1'
+    assert training_paramter.config.bucket_reso_steps == 128
     assert len(training_paramter.dataset.datasets) == 1
     assert training_paramter.dataset.datasets[0].batch_size == 1
     assert training_paramter.dataset.datasets[0].keep_tokens == 1

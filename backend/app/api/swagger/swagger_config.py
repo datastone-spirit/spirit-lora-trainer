@@ -593,33 +593,64 @@ generate_sh_config = {
       }
     },
     {
-      "name": "dataset",
-      "in": "body",
-      "required": True,
-      "description": "包含 TOML 格式的训练配置的对象",
-      "schema": {
+  "name": "dataset",
+  "in": "body",
+  "required": True,
+  "description": "包含训练配置的对象",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "general": {
         "type": "object",
         "properties": {
-          "general": {
-            "type": "object",
-            "properties": {
-              "shuffle_caption": { "type": "boolean", "example": False },
-              "caption_extension": { "type": "string", "example": ".txt" },
-              "keep_tokens": { "type": "integer", "example": 1 }
-            }
+          "shuffle_caption": {
+            "type": "boolean",
+            "example": False
           },
-          "datasets": {
-            "type": "object",
-            "properties": {
-              "resolution": { "type": "integer", "example": 512 },
-              "batch_size": { "type": "integer", "example": 1 },
-              "keep_tokens": { "type": "integer", "example": 1 },
-              "subsets": {
+          "caption_extension": {
+            "type": "string",
+            "example": ".txt"
+          },
+          "keep_tokens": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "datasets": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "resolution": {
+              "type": "integer",
+              "example": 512
+            },
+            "batch_size": {
+              "type": "integer",
+              "example": 1
+            },
+            "keep_tokens": {
+              "type": "integer",
+              "example": 1
+            },
+            "subsets": {
+              "type": "array",
+              "items": {
                 "type": "object",
                 "properties": {
-                  "image_dir": { "type": "string", "example": "/spirit/fluxgym/datasets/aaa" },
-                  "class_tokens": { "type": "string", "example": "aaa" },
-                  "num_repeats": { "type": "integer", "example": 10 }
+                  "class_tokens": {
+                    "type": "string",
+                    "example": "abc"
+                  },
+                  "image_dir": {
+                    "type": "string",
+                    "example": "/upload/image"
+                  },
+                  "num_repeats": {
+                    "type": "integer",
+                    "example": 10
+                  }
                 }
               }
             }
@@ -627,6 +658,8 @@ generate_sh_config = {
         }
       }
     }
+  }
+}
   ],
   "responses": {
     "200": {
@@ -638,7 +671,7 @@ generate_sh_config = {
           "data": { 
             "type": "string",
             "description": "TOML 格式的配置文件内容",
-            "example": "[settings]\noutput_name = \"\"\nclass_tokens = \"\"\npretrained_model_name_or_path = \"\"\nae = \"\"\nclip_l = \"\"\nt5xxl = \"\"\nresume = \"\"\noutput_dir = \"\"\nsave_model_as = \"\"\nsave_precision = \"\"\nsave_state = False\ntrain_data_dir = \"\"\nnum_repeats = 10\nmax_train_epochs = 10\ntrain_batch_size = 1\nresolution_width = 768\nresolution_height = 768\nenable_bucket = True\nmin_bucket_reso = 256\nmax_bucket_reso = 2048\nbucket_reso_steps = 32\nbucket_no_upscale = True\nseed = 1337\nmax_data_loader_n_workers = 2\nlearning_rate = \"1e-4\"\nsave_every_n_epochs = 2\nguidance_scale = 1\ntimestep_sampling = \"sigmoid\"\nnetwork_dim = 2\nsigmoid_scale = 1\nmodel_prediction_type = \"raw\"\ndiscrete_flow_shift = 3\nloss_type = \"l2\"\ngradient_checkpointing = True\ngradient_accumulation_steps = 1\nnetwork_train_unet_only = True\nnetwork_train_text_encoder_only = False\nunet_lr = \"5e-4\"\ntext_encoder_lr = \"1e-5\"\nlr_scheduler = \"cosine_with_restarts\"\nlr_warmup_steps = 1\nlr_scheduler_num_cycles = 1\noptimizer_type = \"PagedAdamW8bit\"\noptimizer_args_custom = []\nnetwork_module = \"networks.lora_flux\"\nnetwork_weights = \"\"\nnetwork_alpha = 16\nnetwork_dropout = 0\nnetwork_args_custom = []\nenable_base_weight = False\nbase_weights = []\nbase_weights_multiplier = \"\"\nenable_preview = False\nlog_with = \"tensorboard\"\nlog_prefix = \"\"\nlog_tracker_name = \"\"\nlogging_dir = \"./logs\"\ncaption_extension = \".txt\"\nshuffle_caption = False\nweighted_captions = False\nkeep_tokens = 0\nkeep_tokens_separator = \"\"\ncolor_aug = False\nflip_aug = False\nrandom_crop = False\nclip_skip = 2\nui_custom_params = \"\"\nmixed_precision = \"bf16\"\nfull_fp16 = False\nfull_bf16 = False\nfp8_base = True\nfp8_base_unet = False\nno_half_vae = False\nsdpa = True\nlowram = False\ncache_latents = True\ncache_latents_to_disk = True\ncache_text_encoder_outputs = True\ncache_text_encoder_outputs_to_disk = True\npersistent_data_loader_workers = True\nddp_gradient_as_bucket_view = False"
+            "example": ""
           }
         }
       }

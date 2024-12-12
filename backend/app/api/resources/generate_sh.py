@@ -22,7 +22,7 @@ class GenerateSH(Resource):
         # 解析请求中的 JSON 数据
         data = request.get_json()
 
-        parameter = TrainingParameter.from_dict(data.get('config'))
+        parameter = TrainingParameter.from_dict(data)
 
         TrainingService().training(parameter)
 

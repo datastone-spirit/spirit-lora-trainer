@@ -308,7 +308,9 @@ class TrainingConfig(Model):
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingConfig':
-        return TrainingConfig()._from_dict(dikt)
+        parameter = TrainingConfig()
+        parameter._from_dict(dikt)
+        return parameter
     
 @dataclass
 class TrainingParameter(Model):
@@ -322,7 +324,7 @@ class TrainingParameter(Model):
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingParameter':
         parameter = TrainingParameter()
-        parameter.config = TrainingConfig.from_dict(dikt.get('config'))
-        parameter.dataset = TrainingDataset.from_dict(dikt.get('dataset'))
+        parameter.config = TrainingConfig._from_dict(dikt.get('config'))
+        parameter.dataset = TrainingDataset._from_dict(dikt.get('dataset'))
         return parameter
         

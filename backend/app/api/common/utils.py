@@ -2,7 +2,7 @@ from flask import jsonify
 import os
 from flasgger import swag_from
 from app.api.model.training_paramter import TrainingParameter
-from typing import List
+from typing import List, Tuple
 
 # 公共 response 方法
 def res(data=None, message="Ok", success=True, code=200):
@@ -74,3 +74,25 @@ def config2args(parameter :TrainingParameter) -> 'List[str]':
             else:
                 args.append(f'--{key} {value}')
     return args
+
+def validate_dataset(dataset) -> 'Tuple[bool, str]':
+    if dataset.datasets is None:
+        return False, "datasets is required"
+    if dataset.general is None:
+        return False, "general is required"
+    return True, "Ok"
+
+def validate_config(config) -> 'Tuple[bool, str]':
+    if config.output_name is None:
+        return False, "output_name is required"
+    if config.bucket_reso_steps is None:
+        return False, "bucket_reso_steps is required"
+    return True, "Ok"
+
+def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
+    validated, reason = validate_config(parameter.config)
+    if not validated:
+        return validated, reason
+    
+    validated, reason = validate_dataset(parameter.dataset)
+    return validated, reason

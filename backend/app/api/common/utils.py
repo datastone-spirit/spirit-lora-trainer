@@ -77,6 +77,21 @@ def config2args(parameter :TrainingConfig) -> 'List[str]':
                 args.append(f'--{key} {value}')
     return args
 
+def config2args2(parameter :TrainingConfig) -> 'List[str]':
+    args = []
+    for key, value in parameter.__dict__.items():
+        if value is not None:
+            if isinstance(value, bool):
+                if value:
+                    args.append(f'--{key}') 
+            elif isinstance(value, str):
+                args.append(f'--{key}')
+                args.append(f'"{value}"')
+            else:
+                args.append(f'--{key}')
+                args.append(f'{value}')
+    return args
+
 def validate_subsets(subsets: List[Subset]) -> 'Tuple[bool, str]':
     for idx in range(len(subsets)):
         if subsets[idx].class_tokens is None:

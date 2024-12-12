@@ -62,7 +62,7 @@ def use_swagger_config(swagger_config=None):
     return decorator
 
 
-def traningparameter_to_args(parameter :TrainingParameter) -> 'List[str]':
+def config2args(parameter :TrainingParameter) -> 'List[str]':
     args = []
     for key, value in parameter.__dict__.items():
         if value is not None:

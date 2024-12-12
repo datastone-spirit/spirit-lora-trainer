@@ -1,5 +1,5 @@
 from app.api.model.training_paramter import TrainingConfig, TrainingDataset, TrainingParameter
-from app.api.common.utils import traningparameter_to_args
+from app.api.common.utils import config2args
     
 def test_trainingconfig_model():
     request = {
@@ -17,7 +17,7 @@ def test_traningconfig_to_arguments():
         'bucket_reso_steps': 128,
     }
     parameter = TrainingConfig.from_dict(request)
-    result = traningparameter_to_args(parameter)
+    result = config2args(parameter)
     for i in ['--output_name "output_name1"', '--bucket_reso_steps 128']:
         assert i in result  
 

@@ -5,7 +5,7 @@ import gradio as gr
 import toml
 from gradio_logsview import LogsView, LogsViewRunner
 from ..api.model.training_paramter import TrainingParameter
-from ..api.common.utils import config2args
+from ..api.common.utils import config2args, validate_parameter
 MAX_IMAGES = 150
 training_parameters: TrainingParameter
 with open('models.yaml', 'r') as file:
@@ -51,12 +51,15 @@ class TrainingService:
         parameters: TrainingParameter
     ):
         
-        parameters.validate()
+        validated, reason = validate_parameter(parameters)
+        if not validated:
+            raise Exception(f"parameter validate faild {reason}")
+        
         arguments = config2args(parameters.config)
-        line_break = "\\"
-        command = "accelerate launch"
+        command = "accelerate launch "
         args_parts = "\\\n".join(arguments)
         sh = command + "\\\n" + args_parts
+        print(f"sh ------------- {sh}")
         return sh
     
     def start_training(

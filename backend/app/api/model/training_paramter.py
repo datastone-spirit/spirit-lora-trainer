@@ -16,15 +16,15 @@ class Subset:
         return dacite.from_dict(data_class=Subset, data=dikt)
 
 @dataclass
-class Datasets:
+class Dataset:
     batch_size: int
     keep_tokens: int
     resolution: int
     subsets: Optional[List[Subset]] 
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Datasets':
-        return dacite.from_dict(data_class=Datasets, data=dikt)
+    def from_dict(cls, dikt) -> 'Dataset':
+        return dacite.from_dict(data_class=Dataset, data=dikt)
 @dataclass
 class General:
     caption_extension: str
@@ -56,7 +56,7 @@ class TrainingDataset:
     }
     }
     """
-    datasets: Optional[List[Datasets]] 
+    datasets: Optional[List[Dataset]] 
     general: General = None
 
     @classmethod

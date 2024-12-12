@@ -182,8 +182,6 @@ def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
 
 
 def config2toml(config: TrainingConfig, dataset_path: str) -> str:
-    
-
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
     temp_file_path = temp_file.name

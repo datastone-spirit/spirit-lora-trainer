@@ -1,5 +1,5 @@
 from app.api.model.training_paramter import TrainingConfig, TrainingDataset, TrainingParameter
-from app.api.common.utils import config2args
+from app.api.common.utils import config2args, dataset2toml
     
 def test_trainingconfig_model():
     request = {
@@ -128,7 +128,7 @@ keep_tokens = 1
 shuffle_caption = false
 """
     parameter = TrainingDataset.from_dict(request)
-    path = parameter.to_file()
+    path = dataset2toml(parameter)
     contents = open(path, 'r').read() 
     assert contents == result
 

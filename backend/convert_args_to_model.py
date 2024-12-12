@@ -63,17 +63,17 @@ def loop_advanced_component(advanced_component: List) -> str:
         else:
             if isinstance(item['default'], str):
                 yield f'{key}: str = "{item["default"]}"'
+            elif isinstance(item['default'], bool): 
+                yield f'{key}: bool = {item["default"]}'
             elif isinstance(item['default'], int):
                 yield f'{key}: int = {item["default"]}'
             elif isinstance(item['default'], float):
                 yield f'{key}: float = {item["default"]}'
-            elif isinstance(item['default'], bool): 
-                yield f'{key}: bool = {item["default"]}'
             else:
                 yield f'{key}: {action_type} = {item["default"]}' 
 
 def to_classe(advanced_component: List) -> str:
-    return '@dataclass\nclass TrainingParameter\n    ' + '\n    '.join(loop_advanced_component(advanced_component))
+    return '@dataclass\nclass TrainingConfig:\n    ' + '\n    '.join(loop_advanced_component(advanced_component))
 
 if __name__ == '__main__':
     print(to_classe(init_advanced()))

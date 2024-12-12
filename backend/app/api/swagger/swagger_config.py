@@ -534,32 +534,29 @@ generate_sh_config = {
           "network_train_unet_only": { "type": "boolean", "example": True },
           "network_train_text_encoder_only": { "type": "boolean", "example": False },
           "unet_lr": { "type": "string", "example": "5e-4" },
-          "text_encoder_lr": { "type": "string", "example": "1e-5" },
+          "text_encoder_lr": { "type": "number", "example": "0.00001" },
           "lr_scheduler": { "type": "string", "example": "cosine_with_restarts" },
           "lr_warmup_steps": { "type": "integer", "example": 1 },
           "lr_scheduler_num_cycles": { "type": "integer", "example": 1 },
           "optimizer_type": { "type": "string", "example": "PagedAdamW8bit" },
           "optimizer_args_custom": {
-            "type": "array",
-            "items": { "type": "string" },
-            "example": []
+            "type": "string",
+            "example": ""
           },
           "network_module": { "type": "string", "example": "networks.lora_flux" },
           "network_weights": { "type": "string", "example": "" },
           "network_alpha": { "type": "integer", "example": 16 },
           "network_dropout": { "type": "integer", "example": 0 },
           "network_args_custom": {
-            "type": "array",
-            "items": { "type": "string" },
-            "example": []
+            "type": "string",
+            "example": ""
           },
           "enable_base_weight": { "type": "boolean", "example": False },
           "base_weights": {
-            "type": "array",
-            "items": { "type": "string" },
-            "example": []
+            "type": "string",
+            "example": ""
           },
-          "base_weights_multiplier": { "type": "string", "example": "" },
+          "base_weights_multiplier": { "type": "number", "example": "" },
           "enable_preview": { "type": "boolean", "example": False },
           "log_with": { "type": "string", "example": "tensorboard" },
           "log_prefix": { "type": "string", "example": "" },

@@ -1,10 +1,13 @@
 from flask import jsonify
 import os
 from flasgger import swag_from
-from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset
+from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset, TrainingDataset
 from typing import List, Tuple
 from utils.util import getmodelpath
+import dacite
 import logging
+import tempfile
+import toml
     
 # 公共 response 方法
 def res(data=None, message="Ok", success=True, code=200):
@@ -176,3 +179,31 @@ def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
     
     validated, reason = validate_dataset(parameter.dataset)
     return validated, reason
+
+
+def config2toml(config: TrainingConfig, dataset_path: str) -> str:
+    
+
+    # Create a temporary file
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
+    temp_file_path = temp_file.name
+
+    # Write the dictionary to the temporary file in TOML format
+    with open(temp_file_path, 'w+', encoding='utf-8') as f:
+        toml.dump(config, f)
+    return temp_file_path
+
+def dataset2toml(dataset :TrainingDataset) -> str:
+    # accroding to the value of feild to generate a toml format file 
+    # in the temporary directory and return the path
+    # Convert the TrainingDataset instance to a dictionary
+    data = dacite.asdict(dataset)
+
+    # Create a temporary file
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
+    temp_file_path = temp_file.name
+
+    # Write the dictionary to the temporary file in TOML format
+    with open(temp_file_path, 'w+', encoding='utf-8') as f:
+        toml.dump(data, f)
+    return temp_file_path

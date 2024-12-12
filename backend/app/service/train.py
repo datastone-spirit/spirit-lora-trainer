@@ -2,24 +2,31 @@ import os
 import yaml
 from slugify import slugify
 import gradio as gr
+from typing import Optional
+import sys
 import toml
 from gradio_logsview import LogsView, LogsViewRunner
 from ..api.model.training_paramter import TrainingParameter
-from ..api.common.utils import config2args, validate_parameter
+from ..api.common.utils import config2args, validate_parameter,config2args2, dataset2toml, config2toml
+from utils.util import getprojectpath
 MAX_IMAGES = 150
-training_parameters: TrainingParameter
+
 with open('models.yaml', 'r') as file:
     models = yaml.safe_load(file)
 
 class TrainingService:
 
     def training(self,parameters :TrainingParameter):
-        global training_parameters
-        temp_file_path = parameters.dataset.to_file()
-        print(f"file {temp_file_path}")
+        dataset_path = dataset2toml(parameters.dataset) 
+
+        config_path = config2args(parameters.config, dataset_path)
+        print(f"file {config_path}, {dataset_path}")
 
         # TODO: generate shell scripts and run
-        sh = self.gen_sh(parameters)
+        command = self.run_train(config_path, script=f"{getprojectpath()}/sd-scripts/flux_train_network.py")
+
+        # subprocess.Popen(self.command, env=self.environ)
+        # sh = self.gen_sh(parameters)
 
     def resolve_path(self, p):
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -55,62 +62,59 @@ class TrainingService:
         if not validated:
             raise Exception(f"parameter validate faild {reason}")
         
-        arguments = config2args(parameters.config)
+        arguments = config2args2(parameters.config)
         command = "accelerate launch "
         args_parts = "\\\n".join(arguments)
         sh = command + "\\\n" + args_parts
         print(f"sh ------------- {sh}")
         return sh
     
-    def start_training(
-        self,
-        lora_name,
-        train_script,
-        train_config,
-        sample_prompts,
-    ):
-        # write custom script and toml
-        if not os.path.exists("outputs"):
-            os.makedirs("outputs", exist_ok=True)
-        output_name = slugify(lora_name)
-        output_dir = self.resolve_path_without_quotes(f"outputs/{output_name}")
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir, exist_ok=True)
+    def run_train(toml_path: str,
+              script: str = "",
+              gpu_ids: Optional[list] = None,
+              cpu_threads: Optional[int] = 2):
+        args = [
+            sys.executable, "-m", "accelerate.commands.launch",
+            "--num_cpu_threads_per_process", str(cpu_threads),
+            "--quiet",
+            script,
+            "--config_file", toml_path,
+        ]
+        print(f"args ------------------- {args}")
+
+        subprocess.Popen(self.command, env=self.environ)
 
 
-        file_type = "sh"
+        # customize_env = os.environ.copy()
+        # customize_env["ACCELERATE_DISABLE_RICH"] = "1"
+        # customize_env["PYTHONUNBUFFERED"] = "1"
+        # customize_env["PYTHONWARNINGS"] = "ignore::FutureWarning,ignore::UserWarning"
 
-        sh_filename = f"train.{file_type}"
-        sh_filepath = self.resolve_path_without_quotes(f"outputs/{output_name}/{sh_filename}")
-        with open(sh_filepath, 'w', encoding="utf-8") as file:
-            file.write(train_script)
-        gr.Info(f"Generated train script at {sh_filename}")
+        # if gpu_ids:
+        #     customize_env["CUDA_VISIBLE_DEVICES"] = ",".join(gpu_ids)
+        #     print(f"使用 GPU: {gpu_ids}")
 
+        #     if len(gpu_ids) > 1:
+        #         args[3:3] = ["--multi_gpu", "--num_processes", str(len(gpu_ids))]
+        #         if sys.platform == "win32":
+        #             customize_env["USE_LIBUV"] = "0"
+        #             args[3:3] = ["--rdzv_backend", "c10d"]
 
-        dataset_path = self.resolve_path_without_quotes(f"outputs/{output_name}/dataset.toml")
-        # with open(dataset_path, 'w', encoding="utf-8") as file:
-        #     file.write(train_config)
-        with open(dataset_path, "w", encoding="utf-8") as f:
-            toml.dump(train_config, f)
-        gr.Info(f"Generated dataset.toml")
+        # if not (task := tm.create_task(args, customize_env)):
+        #     return APIResponse(status="error", message="Failed to create task / 无法创建训练任务")
 
-        sample_prompts_path = self.resolve_path_without_quotes(f"outputs/{output_name}/sample_prompts.txt")
-        with open(sample_prompts_path, 'w', encoding='utf-8') as file:
-            file.write(sample_prompts)
-        gr.Info(f"Generated sample_prompts.txt")
+        # def _run():
+        #     try:
+        #         task.execute()
+        #         result = task.communicate()
+        #         if result.returncode != 0:
+        #             log.error(f"Training failed / 训练失败")
+        #         else:
+        #             log.info(f"Training finished / 训练完成")
+        #     except Exception as e:
+        #         log.error(f"An error occurred when training / 训练出现致命错误: {e}")
 
-        # Train
-        
-        command = f"bash \"{sh_filepath}\""
+        # coro = asyncio.to_thread(_run)
+        # asyncio.create_task(coro)
 
-        # Use Popen to run the command and capture output in real-time
-        env = os.environ.copy()
-        env['PYTHONIOENCODING'] = 'utf-8'
-        env['LOG_LEVEL'] = 'DEBUG'
-        runner = LogsViewRunner()
-        cwd = os.path.dirname(os.path.abspath(__file__))
-        gr.Info(f"Started training")
-        yield from runner.run_command([command], cwd=cwd)
-        yield runner.log(f"Runner: {runner}")
-
-        gr.Info(f"Training Complete. Check the outputs folder for the LoRA files.", duration=None)
+        # return APIResponse(status="success", message=f"Training started / 训练开始 ID: {task.task_id}")

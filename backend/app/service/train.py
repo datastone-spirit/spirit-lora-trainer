@@ -15,35 +15,9 @@ class TrainingService:
 
     def training(self,parameters :TrainingParameter):
         global training_parameters
-        training_parameters = parameters
-        # ------------
-        dataset_path = self.resolve_path_without_quotes(f"/outputs/bbbbb/dataset.toml")
-        # with open(dataset_path, 'w', encoding="utf-8") as file:
-        #     file.write(train_config)
-        train_config = {
-            "datasets": {
-                "batch_size": 1,
-                "keep_tokens": 1,
-                "resolution": 512,
-                "subsets": {
-                    "class_tokens": "aaa",
-                    "image_dir": "/spirit/fluxgym/datasets/aaa",
-                    "num_repeats": 10
-                }
-            },
-            "general": {
-                "caption_extension": ".txt",
-                "keep_tokens": 1,
-                "shuffle_caption": True
-            }
-        }
-        with open(dataset_path, "w", encoding="utf-8") as f:
-            toml.dump(train_config, f)
-        gr.Info(f"Generated dataset.toml")
+        temp_file_path = parameters.dataset.to_file()
+        print(f"file {temp_file_path}")
 
-
-        # ---------------------
-        print(f'trainingparameters is {parameters.output_name} {parameters.class_tokens}')
         # TODO: generate shell scripts and run
         sh = self.gen_sh(parameters)
 
@@ -76,8 +50,8 @@ class TrainingService:
         self,
         parameters: TrainingParameter
     ):
-
-        output_dir = self.resolve_path(f"outputs/{parameters.output_name}")
+        parameters = parameters.config
+        output_dir = self.resolve_path(f"outputs/{parameters.config.output_name}")
         sample_prompts_path = self.resolve_path(f"outputs/{parameters.output_name}/sample_prompts.txt")
 
         line_break = "\\"
@@ -87,22 +61,6 @@ class TrainingService:
         if len(parameters.sample_prompts) > 0 and parameters.sample_every_n_steps > 0:
             sample = f"""--sample_prompts={sample_prompts_path} --sample_every_n_steps="{parameters.sample_every_n_steps}" {line_break}"""
 
-        if parameters.vram == "16G":
-            # 16G VRAM
-            optimizer = f"""--optimizer_type adafactor {line_break}
-            --optimizer_args "relative_step=False" "scale_parameter=False" "warmup_init=False" {line_break}
-            --lr_scheduler constant_with_warmup {line_break}
-            --max_grad_norm 0.0 {line_break}"""
-        elif parameters.vram == "12G":
-        # 12G VRAM
-            optimizer = f"""--optimizer_type adafactor {line_break}
-            --optimizer_args "relative_step=False" "scale_parameter=False" "warmup_init=False" {line_break}
-            --split_mode {line_break}
-            --network_args "train_blocks=single" {line_break}
-            --lr_scheduler constant_with_warmup {line_break}
-            --max_grad_norm 0.0 {line_break}"""
-        else:
-            # 20G+ VRAM
             optimizer = f"--optimizer_type adamw8bit {line_break}"
 
 
@@ -156,29 +114,6 @@ class TrainingService:
         --loss_type l2 {line_break}"""
 
         return sh
-    
-    def gen_toml(
-        self,
-        dataset_folder,
-        resolution,
-        class_tokens,
-        num_repeats
-    ):
-        toml = f"""[general]
-        shuffle_caption = false
-        caption_extension = '.txt'
-        keep_tokens = 1
-
-        [[datasets]]
-        resolution = {resolution}
-        batch_size = 1
-        keep_tokens = 1
-
-        [[datasets.subsets]]
-        image_dir = '{self.resolve_path_without_quotes(dataset_folder)}'
-        class_tokens = '{class_tokens}'
-        num_repeats = {num_repeats}"""
-        return toml
     
     def start_training(
         self,

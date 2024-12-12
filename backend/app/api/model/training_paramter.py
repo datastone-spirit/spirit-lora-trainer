@@ -1,6 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+import toml
+import tempfile
 from typing import List
 from .base_model import Model
+
 
 
 @dataclass
@@ -91,7 +94,22 @@ class TrainingDataset(Model):
         parameter.datasets = Datasets.from_dict(dikt.get('datasets'))
         parameter.general = General.from_dict(dikt.get('general'))
         return parameter
-    
+ 
+    def to_file(self) -> str:
+        # accroding to the value of feild to generate a toml format file 
+        # in the temporary directory and return the path
+        # Convert the TrainingDataset instance to a dictionary
+        data = asdict(self)
+
+        # Create a temporary file
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
+        temp_file_path = temp_file.name
+
+        # Write the dictionary to the temporary file in TOML format
+        with open(temp_file_path, 'w', encoding='utf-8') as f:
+            toml.dump(data, f)
+        return temp_file_path
+
 
 @dataclass
 class TrainingConfig(Model):
@@ -307,4 +325,4 @@ class TrainingParameter(Model):
         parameter.config = TrainingConfig.from_dict(dikt.get('config'))
         parameter.dataset = TrainingDataset.from_dict(dikt.get('dataset'))
         return parameter
-
+        

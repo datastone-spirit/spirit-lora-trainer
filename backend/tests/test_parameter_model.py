@@ -93,3 +93,44 @@ def test_trainingparamter_model():
     assert training_paramter.dataset.datasets.subsets.num_repeats == 10
     assert training_paramter.dataset.general.caption_extension == '.txt'
     assert training_paramter.dataset.general.keep_tokens == 1
+
+def test_dataset_tofile():
+    request = {
+        'datasets': {
+            'batch_size': 1,
+            'keep_tokens': 1,
+            'resolution': 512,
+            'subsets': {
+                'class_tokens': 'aaa',
+                'image_dir': '/spirit/fluxgym/datasets/aaa',
+                'num_repeats': 10
+            }
+        },
+        'general': {
+            'caption_extension': '.txt',
+            'keep_tokens': 1,
+            'shuffle_caption': False
+        }
+    }
+    result="""[datasets]
+batch_size = 1
+keep_tokens = 1
+resolution = 512
+
+[general]
+caption_extension = ".txt"
+keep_tokens = 1
+shuffle_caption = false
+
+[datasets.subsets]
+class_tokens = "aaa"
+image_dir = "/spirit/fluxgym/datasets/aaa"
+num_repeats = 10
+"""
+    parameter = TrainingDataset.from_dict(request)
+    path = parameter.to_file()
+    contents = open(path, 'r').read() 
+    assert contents == result
+
+
+    

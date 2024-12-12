@@ -7,7 +7,7 @@ from .base_model import Model
 
 
 @dataclass
-class Subsets(Model):
+class Subset(Model):
     class_tokens: str
     image_dir: str
     num_repeats: int
@@ -18,8 +18,8 @@ class Subsets(Model):
         self.num_repeats = None
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Subsets':
-        parameter =  Subsets()._from_dict(dikt)
+    def from_dict(cls, dikt) -> 'Subset':
+        parameter =  Subset()._from_dict(dikt)
         return parameter
 
 @dataclass
@@ -27,9 +27,9 @@ class Datasets(Model):
     batch_size: int
     keep_tokens: int
     resolution: int
-    subsets: Subsets
+    subsets: List[Subset]
 
-    def __init__(self, batch_size=None, keep_tokens=None, resolution=None, subsets=None):
+    def __init__(self, batch_size=None, keep_tokens=None, resolution=None, subsets=[]):
         self.batch_size = batch_size
         self.keep_tokens = keep_tokens
         self.resolution = resolution
@@ -42,7 +42,8 @@ class Datasets(Model):
         parameter.batch_size = dikt.get('batch_size')
         parameter.keep_tokens = dikt.get('keep_tokens')
         parameter.resolution = dikt.get('resolution')
-        parameter.subsets = Subsets.from_dict(dikt.get('subsets'))
+        for subset in dikt.get('subsets'):
+            parameter.subsets.append(Subset.from_dict(subset))
         return parameter
 @dataclass
 class General(Model):
@@ -64,16 +65,16 @@ class General(Model):
 class TrainingDataset(Model):
     """
     {
-    "datasets": {
+    "datasets": [{
         "batch_size": 1,
         "keep_tokens": 1,
         "resolution": 512,
-        "subsets": {
+        "subsets": [{
         "class_tokens": "aaa",
         "image_dir": "/spirit/fluxgym/datasets/aaa",
         "num_repeats": 10
-        }
-    },
+        }]
+    }],
     "general": {
         "caption_extension": ".txt",
         "keep_tokens": 1,
@@ -81,18 +82,19 @@ class TrainingDataset(Model):
     }
     }
     """
-    datasets: Datasets
+    datasets: List[Datasets]
     general: General
 
-    def __init__(self, datasets=None, general=None):
+    def __init__(self, datasets=[], general=None):
         self.datasets = datasets
         self.general = general
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingDataset':
         parameter =  TrainingDataset()
-        parameter.datasets = Datasets.from_dict(dikt.get('datasets'))
         parameter.general = General.from_dict(dikt.get('general'))
+        for dataset in dikt.get('datasets'):
+            parameter.datasets.append(Datasets.from_dict(dataset))
         return parameter
  
     def to_file(self) -> str:

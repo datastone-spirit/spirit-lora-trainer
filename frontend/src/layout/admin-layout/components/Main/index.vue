@@ -1,15 +1,15 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-29 17:00:46
- * @LastEditTime: 2024-12-12 15:21:09
+ * @LastEditTime: 2024-12-13 09:43:17
  * @LastEditors: mulingyuer
  * @Description: main
- * @FilePath: \frontend\src\layout\admin-layout\components\Main\index.vue
+ * @FilePath: \spirit-lora-trainer\frontend\src\layout\admin-layout\components\Main\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<el-main class="admin-main" :class="[mainClass]">
-		<div class="admin-main-content">
+	<el-main class="admin-main" :class="[mainClass, footerBarClass]">
+		<div class="admin-main-content" :class="[footerBarClass]">
 			<router-view>
 				<template #default="{ Component, route }">
 					<el-backtop title="回到顶部" />
@@ -36,6 +36,10 @@ const mainClass = computed(() => {
 		return appStore.isCollapse ? "is-collapse" : "";
 	}
 });
+
+const footerBarClass = computed(() => {
+	return appStore.showFooter ? "show-footer-bar" : "hide-footer-bar";
+});
 </script>
 
 <style lang="scss" scoped>
@@ -55,5 +59,8 @@ const mainClass = computed(() => {
 	padding: $zl-padding 0 $zl-padding $zl-padding;
 	height: 100%;
 	overflow: hidden;
+	&.show-footer-bar {
+		padding-bottom: calc($zl-padding + $zl-footer-bar-height);
+	}
 }
 </style>

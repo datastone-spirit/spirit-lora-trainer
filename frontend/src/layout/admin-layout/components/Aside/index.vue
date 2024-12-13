@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:00:24
- * @LastEditTime: 2024-12-12 10:20:31
+ * @LastEditTime: 2024-12-13 09:41:23
  * @LastEditors: mulingyuer
  * @Description: 侧边栏
- * @FilePath: \frontend\src\layout\admin-layout\components\Aside\index.vue
+ * @FilePath: \spirit-lora-trainer\frontend\src\layout\admin-layout\components\Aside\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<el-aside :class="['admin-layout-aside', asideClass]">
+	<el-aside :class="['admin-layout-aside', asideClass, footerBarClass]">
 		<Logo />
 		<Menu />
 		<Footer />
@@ -36,6 +36,10 @@ const showAppMask = computed(() => appStore.isMobile && !appStore.isCollapse);
 function onCloseAppMask() {
 	appStore.setIsCollapse(true);
 }
+
+const footerBarClass = computed(() => {
+	return appStore.showFooter ? "show-footer-bar" : "hide-footer-bar";
+});
 </script>
 
 <style lang="scss" scoped>
@@ -43,11 +47,12 @@ function onCloseAppMask() {
 	position: fixed;
 	top: $zl-padding;
 	left: 0;
-	bottom: calc($zl-padding);
+	bottom: $zl-padding;
 	overflow: hidden;
 	background-color: var(--el-bg-color);
-	// box-shadow: 0 0 1px rgba(136, 136, 136);
-	transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	transition:
+		width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	display: flex;
 	flex-direction: column;
 	z-index: 5;
@@ -62,6 +67,9 @@ function onCloseAppMask() {
 	}
 	&.is-mobile-collapse {
 		width: $zl-aside-mobile-width;
+	}
+	&.show-footer-bar {
+		bottom: calc($zl-padding + $zl-footer-bar-height);
 	}
 }
 .el-aside-mask {

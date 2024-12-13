@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-11 16:13:18
- * @LastEditTime: 2024-12-12 09:28:19
+ * @LastEditTime: 2024-12-13 09:46:02
  * @LastEditors: mulingyuer
  * @Description: 底部
- * @FilePath: \frontend\src\layout\admin-layout\components\Aside\Footer\index.vue
+ * @FilePath: \spirit-lora-trainer\frontend\src\layout\admin-layout\components\Aside\Footer\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -33,7 +33,7 @@ import MenuCollapse from "./MenuCollapse.vue";
 .aside-footer-content {
 	display: flex;
 	flex-wrap: wrap;
-	padding: 12px 0;
+	padding: 6px 0;
 }
 .aside-footer-content-left,
 .aside-footer-content-right {

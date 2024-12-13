@@ -1,26 +1,31 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2024-12-12 14:24:03
+ * @LastEditTime: 2024-12-13 09:44:53
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
- * @FilePath: \frontend\src\layout\lora-layout\components\FooterBar\index.vue
+ * @FilePath: \spirit-lora-trainer\frontend\src\layout\admin-layout\components\FooterBar\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<footer class="footer-bar">
-		<div class="footer-bar-left">
-			<ComplexitySetting />
-		</div>
-		<div class="footer-bar-content">
-			<div id="footer-bar-left" class="footer-bar-content-left"></div>
-			<div id="footer-bar-center" class="footer-bar-content-center"></div>
-		</div>
-	</footer>
+	<Transition name="fade">
+		<footer v-show="appStore.showFooter" class="footer-bar">
+			<div class="footer-bar-left">
+				<ComplexitySetting />
+			</div>
+			<div class="footer-bar-content">
+				<div id="footer-bar-left" class="footer-bar-content-left"></div>
+				<div id="footer-bar-center" class="footer-bar-content-center"></div>
+			</div>
+		</footer>
+	</Transition>
 </template>
 
 <script setup lang="ts">
 import ComplexitySetting from "./ComplexitySetting.vue";
+import { useAppStore } from "@/stores";
+
+const appStore = useAppStore();
 </script>
 
 <style lang="scss" scoped>

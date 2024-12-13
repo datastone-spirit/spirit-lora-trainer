@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 11:22:25
- * @LastEditTime: 2024-12-12 16:46:17
+ * @LastEditTime: 2024-12-13 09:03:17
  * @LastEditors: mulingyuer
  * @Description: 应用配置
- * @FilePath: \frontend\src\stores\modules\app\index.ts
+ * @FilePath: \spirit-lora-trainer\frontend\src\stores\modules\app\index.ts
  * 怎么可能会有bug！！！
  */
 import { defineStore } from "pinia";
@@ -79,12 +79,18 @@ export const useAppStore = defineStore(
 			routeAnimate.value = animate;
 		}
 
-		/** 是否暗色模式 */
+		/** 是否暗色模式，useDark自己有持久化 */
 		const isDark = useDark({
 			storageKey: "__spirit-lora-trainer__color-scheme",
 			valueDark: "dark",
 			valueLight: "light"
 		});
+
+		/** 是否显示footer-bar */
+		const showFooter = ref(false);
+		function setShowFooter(show: boolean) {
+			showFooter.value = show;
+		}
 
 		return {
 			language,
@@ -107,7 +113,9 @@ export const useAppStore = defineStore(
 			setReloadFlag,
 			routeAnimate,
 			setRouteAnimate,
-			isDark
+			isDark,
+			showFooter,
+			setShowFooter
 		};
 	},
 	{

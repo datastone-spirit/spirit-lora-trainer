@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import type { ImageProps } from "element-plus";
-import type { FileItem } from "../types";
+import type { FileItem } from "./types";
 import TextIcon from "@/assets/images/ai-dataset/text_icon.svg";
 
 export interface TextFileProps {

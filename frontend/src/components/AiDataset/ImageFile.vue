@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FileItem } from "../types";
+import type { FileItem } from "./types";
 import type { ImageProps } from "element-plus";
 import DefaultImageIcon from "@/assets/images/ai-dataset/image_icon.svg";
 

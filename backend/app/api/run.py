@@ -7,6 +7,7 @@ from .resources.tagging import Tagging,ManualTagging
 from .resources.generate_sh import GenerateSH
 from .resources.start import StartTraining
 from .resources.configuration import SaveConfig,GetConfig
+from .resources.gpu_log import GpuLog
 from flasgger import Swagger
 
 app = Flask(__name__)
@@ -24,6 +25,7 @@ api.add_resource(ManualTagging, "/training/tag_manual")  # 手动打标接口
 api.add_resource(StartTraining, "/training/start")  # 启动训练
 api.add_resource(SaveConfig, "/training/save_config") # 保存配置
 api.add_resource(GetConfig, "/training/get_config") # 读取配置
+api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
 
 
 if __name__ == "__main__":

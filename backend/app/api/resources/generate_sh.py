@@ -26,13 +26,7 @@ class GenerateSH(Resource):
 
         TrainingService().training(parameter)
 
-        # 合并默认参数和请求参数
-        final_params = {**default_params, **data}
-
-        # 构建 shell 命令
-        command = f"sh {final_params['path']}/{final_params['script_name']}"
-
-        return jsonify({"command": command})
+        return jsonify({"taskid": "taskid"})
     
 
 

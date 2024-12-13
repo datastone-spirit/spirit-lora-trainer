@@ -169,6 +169,14 @@ def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
         config.pretrained_model_name_or_path = getmodelpath() + "/unet/flux1-dev.safetensors"
     elif not os.path.exists(config.pretrained_model_name_or_path):
         return False, "pretrained_model_name_or_path is not exists"
+    
+    if config.resolution is None or config.resolution == "":
+        logging.warning("resolution is requirements, set default to 1024,1024")
+        config.resolution = "1024,1024"
+
+    if config.network_weights == '':
+        logging.warning('network_wights should be set to None when empty')
+        config.network_weights = None
 
     return True, "Ok"
 
@@ -182,13 +190,17 @@ def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
 
 
 def config2toml(config: TrainingConfig, dataset_path: str) -> str:
+    
+    config.dataset_config = dataset_path
+    configdikt = asdict(config)
+    logging.warning(f"configdikt is {configdikt}")
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
     temp_file_path = temp_file.name
 
     # Write the dictionary to the temporary file in TOML format
     with open(temp_file_path, 'w+', encoding='utf-8') as f:
-        toml.dump(config, f)
+        toml.dump(configdikt, f)
     return temp_file_path
 
 def dataset2toml(dataset :TrainingDataset) -> str:

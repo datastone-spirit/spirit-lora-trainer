@@ -675,3 +675,64 @@ generate_sh_config = {
     }
   }
 }
+
+gpu_log_config = {
+  "tags": ["Training"],
+  "description": "获取 GPU 的功耗、显存和名称等信息，每块 GPU 以 gpu_index 为键值。",
+  "responses": {
+    "200": {
+      "description": "成功获取 GPU 信息",
+      "schema": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "gpu_name": {
+              "type": "string",
+              "example": "NVIDIA GeForce RTX 4090",
+              "description": "GPU 的名称"
+            },
+            "power_draw_watts": {
+              "type": "number",
+              "format": "float",
+              "example": 35.56,
+              "description": "GPU 当前功耗（瓦特）"
+            },
+            "memory_total_mb": {
+              "type": "number",
+              "format": "float",
+              "example": 8192,
+              "description": "GPU 总显存大小（MB）"
+            },
+            "memory_used_mb": {
+              "type": "number",
+              "format": "float",
+              "example": 2048,
+              "description": "GPU 已使用的显存大小（MB）"
+            },
+            "memory_free_mb": {
+              "type": "number",
+              "format": "float",
+              "example": 6144,
+              "description": "GPU 剩余的显存大小（MB）"
+            }
+          }
+        }
+      }
+    },
+    "500": {
+      "description": "无法获取 GPU 信息，可能是 nvidia-smi 未安装或系统错误",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "nvidia-smi not found",
+            "description": "错误信息"
+          }
+        }
+      }
+    }
+  }
+}
+

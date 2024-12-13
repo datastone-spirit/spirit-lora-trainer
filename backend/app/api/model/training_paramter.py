@@ -99,7 +99,7 @@ class TrainingConfig:
     controlnet_model_name_or_path: str  = None
     cpu_offload_checkpointing: bool = False
     dataset_class: str  = None
-    dataset_config = None
+    dataset_config: str = None
     dataset_repeats: int = 1
     ddp_gradient_as_bucket_view: bool = False
     ddp_static_graph: bool = False

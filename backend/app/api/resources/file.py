@@ -1,6 +1,5 @@
 import os
 from flask_restful import Resource, reqparse
-from flasgger import swag_from
 from ..schema.common_valid import file_args_valid
 from ..common.utils import res, get_directory_structure, use_swagger_config
 from ..swagger.swagger_config import file_config

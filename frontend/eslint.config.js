@@ -1,3 +1,11 @@
+/*
+ * @Author: mulingyuer 1321968423@qq.com
+ * @Date: 2024-12-04 09:25:15
+ * @LastEditors: mulingyuer 1321968423@qq.com
+ * @LastEditTime: 2024-12-13 10:05:02
+ * @FilePath: \frontend\eslint.config.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import pluginVue from "eslint-plugin-vue";
 import vueTsEslintConfig from "@vue/eslint-config-typescript";
 import oxlint from "eslint-plugin-oxlint";
@@ -46,7 +54,8 @@ export default [
 					argsIgnorePattern: "^_",
 					varsIgnorePattern: "^_"
 				}
-			]
+			],
+			"@typescript-eslint/no-unused-expressions": "off"
 		}
 	}
 ];

@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 17:54:10
- * @LastEditTime: 2024-12-13 09:17:34
+ * @LastEditTime: 2024-12-13 10:07:49
  * @LastEditors: mulingyuer
  * @Description: 路由辅助函数
- * @FilePath: \spirit-lora-trainer\frontend\src\router\helpers\index.ts
+ * @FilePath: \frontend\src\router\helpers\index.ts
  * 怎么可能会有bug！！！
  */
 import type { Router, RouteRecordRaw } from "vue-router";
@@ -64,11 +64,7 @@ export function initRoutes(
 ) {
 	// 添加静态路由
 	routes.forEach((route) => {
-		if (route.children?.length) {
-			router.addRoute(route);
-		} else {
-			router.addRoute("Root", route);
-		}
+		route.children?.length ? router.addRoute(route) : router.addRoute("Root", route);
 	});
 
 	// 初始化菜单

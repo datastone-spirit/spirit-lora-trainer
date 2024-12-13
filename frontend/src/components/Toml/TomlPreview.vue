@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 14:46:06
- * @LastEditTime: 2024-12-12 16:51:42
+ * @LastEditTime: 2024-12-13 10:33:11
  * @LastEditors: mulingyuer
  * @Description: toml预览组件
  * @FilePath: \frontend\src\components\Toml\TomlPreview.vue
@@ -57,16 +57,36 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.toml-preview {
+	height: 100%;
+	background-color: var(--zl-toml-preview-bg);
+	border-radius: $zl-border-radius;
+	padding: $zl-padding 0 $zl-padding $zl-padding;
+}
 .toml-preview-content {
-	:deep(.shiki) {
-		font-size: 14px;
-		line-height: 1.5;
-		min-height: 4em;
-		white-space: pre;
-		border-width: 1px;
-		border-color: #9ca3af4d;
-		border-radius: 0.25rem;
-		background-color: var(--zl-toml-preview-bg) !important;
+	height: 100%;
+	overflow: auto;
+	&::-webkit-scrollbar {
+		width: $zl-scrollbar-width;
 	}
+	&::-webkit-scrollbar-thumb {
+		background: var(--zl-scrollbar);
+	}
+}
+@supports not (selector(::-webkit-scrollbar)) {
+	.toml-preview-content {
+		scrollbar-width: thin;
+		scrollbar-color: var(--zl-scrollbar) transparent;
+	}
+}
+.toml-preview-content :deep(.shiki) {
+	font-size: 14px;
+	line-height: 1.5;
+	min-height: 4em;
+	white-space: pre;
+	border-width: 1px;
+	border-color: #9ca3af4d;
+	border-radius: 0.25rem;
+	background-color: var(--zl-toml-preview-code-bg) !important;
 }
 </style>

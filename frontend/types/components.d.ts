@@ -40,7 +40,6 @@ declare module 'vue' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTreeSelect: typeof import('element-plus/es')['ElTreeSelect']
     FieldSetWrapper: typeof import('./../src/components/FieldSetWrapper/FieldSetWrapper.vue')['default']
-    FileList: typeof import('./../src/components/AiDataset/FileList/index.vue')['default']
     FileSelector: typeof import('./../src/components/Form/FileSelector.vue')['default']
     FluxNetworkModuleSelect: typeof import('./../src/components/Form/FluxNetworkModuleSelect.vue')['default']
     FolderSelector: typeof import('./../src/components/Form/FolderSelector.vue')['default']
@@ -64,5 +63,8 @@ declare module 'vue' {
     TextFile: typeof import('./../src/components/AiDataset/TextFile.vue')['default']
     TomlPreview: typeof import('./../src/components/Toml/TomlPreview.vue')['default']
     TwoSplit: typeof import('./../src/components/Split/TwoSplit.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

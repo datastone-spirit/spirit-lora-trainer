@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 17:37:52
- * @LastEditTime: 2024-12-13 18:18:01
+ * @LastEditTime: 2024-12-15 03:21:31
  * @LastEditors: mulingyuer
  * @Description: 右键菜单
  * @FilePath: \frontend\src\components\AiDataset\ContextMenu.vue
@@ -32,7 +32,7 @@ export interface ContextMenuProps {
 
 const props = defineProps<ContextMenuProps>();
 const emits = defineEmits<{
-	menuClick: [item: ContextMenuItem, data: FileItem];
+	menuClick: [menu: ContextMenuItem, data: FileItem];
 }>();
 
 const show = defineModel("show", { type: Boolean, required: true });
@@ -44,12 +44,37 @@ function onMenuClick(item: ContextMenuItem) {
 	}
 	emits("menuClick", item, props.data);
 }
+
+// 点击其他地方隐藏菜单
+useEventListener(document, "click", () => {
+	if (!show.value) return;
+	show.value = false;
+});
 </script>
 
 <style lang="scss" scoped>
 .context-menu {
 	position: fixed;
-	background-color: var(--el-bg-color);
 	z-index: 10;
+	list-style: none;
+	width: 100px;
+	box-shadow: 0px 0px 12px 0px var(--zl-context-menu-box-shadow);
+	border-radius: 4px;
+}
+.context-menu-item {
+	background-color: var(--zl-context-menu-item-bg);
+	line-height: 40px;
+	padding: 0 $zl-padding;
+	font-size: 12px;
+	color: var(--el-text-color-primary);
+	transition: background-color 0.3s;
+	cursor: pointer;
+	@include no-select();
+	&:hover {
+		background-color: var(--el-menu-hover-bg-color);
+	}
+	&:active {
+		color: var(--el-color-primary);
+	}
 }
 </style>

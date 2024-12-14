@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:08:09
- * @LastEditTime: 2024-12-12 15:55:43
+ * @LastEditTime: 2024-12-15 03:54:17
  * @LastEditors: mulingyuer
  * @Description: 难易度设置
- * @FilePath: \frontend\src\layout\lora-layout\components\FooterBar\ComplexitySetting.vue
+ * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\ComplexitySetting.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -67,6 +67,7 @@ function onToggleComplexity(item: SettingItem) {
 <style lang="scss" scoped>
 .complexity-setting {
 	--zl-complexity-setting-item-width: 65px;
+	@include no-select();
 }
 .complexity-setting-content {
 	background-color: var(--zl-complexity-setting-bg);

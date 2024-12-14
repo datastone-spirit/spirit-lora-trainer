@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 11:24:17
- * @LastEditTime: 2024-12-13 11:55:17
+ * @LastEditTime: 2024-12-15 03:51:16
  * @LastEditors: mulingyuer
  * @Description: 标签编辑器
  * @FilePath: \frontend\src\components\AiDataset\TagEdit.vue
@@ -10,11 +10,13 @@
 <template>
 	<div class="tag-edit" :class="{ focus: isFocus }">
 		<el-input
+			ref="tagEditInputRef"
 			class="tag-edit-input"
 			v-model="value"
 			type="textarea"
 			placeholder="请输入标签，多个标签用英文逗号分隔"
 			resize="none"
+			:disabled="loading"
 			@focus="onFocus"
 			@blur="onBlur"
 		/>
@@ -23,15 +25,28 @@
 				<span class="tag-edit-tips"> <kbd>Ctrl</kbd> + <kbd>S</kbd> 可以快捷保存</span>
 			</div>
 			<div class="tag-edit-footer-right">
-				<el-button type="primary">保存</el-button>
+				<el-button type="primary" :loading="loading" @click="emits('save')">保存</el-button>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import type { InputInstance } from "element-plus";
+
+export interface TagEditProps {
+	loading?: boolean;
+}
+
+withDefaults(defineProps<TagEditProps>(), {
+	loading: false
+});
+const emits = defineEmits<{
+	save: [];
+}>();
 const value = defineModel({ type: String, required: true });
 
+const tagEditInputRef = ref<InputInstance>();
 const isFocus = ref(false);
 function onFocus() {
 	isFocus.value = true;
@@ -39,6 +54,26 @@ function onFocus() {
 function onBlur() {
 	isFocus.value = false;
 }
+
+// 监听ctrl+s快捷键
+useEventListener(window, "keydown", (event) => {
+	if (event.ctrlKey && event.key === "s") {
+		event.preventDefault(); // 阻止默认的保存行为
+		emits("save");
+	}
+});
+
+// 对外暴露的方法
+defineExpose({
+	/** 获取焦点 */
+	focus: () => {
+		if (tagEditInputRef.value) tagEditInputRef.value.focus();
+	},
+	/** 失去焦点 */
+	blur: () => {
+		if (tagEditInputRef.value) tagEditInputRef.value.blur();
+	}
+});
 </script>
 
 <style lang="scss" scoped>

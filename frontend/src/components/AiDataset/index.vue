@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-13 18:00:58
+ * @LastEditTime: 2024-12-15 03:56:24
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="ai-dataset">
-		<div class="ai-dataset-content">
+		<div class="ai-dataset-content" v-loading="loading">
 			<div class="ai-dataset-content-body">
 				<div class="file-list">
 					<component
@@ -17,6 +17,7 @@
 						:key="item.id"
 						:is="componentMap[item.type]"
 						:data="item"
+						@contextmenu.prevent="onContextMenu($event, item)"
 					/>
 				</div>
 			</div>
@@ -30,13 +31,14 @@
 			</div>
 		</div>
 		<div class="ai-dataset-footer">
-			<TagEdit v-model="tagText" />
+			<TagEdit ref="tagEditRef" v-model="tagText" :loading="editTagTextLoading" @save="onSave" />
 		</div>
 		<ContextMenu
 			v-model:show="showContextMenu"
 			:data="fileData"
 			:top="contextMenuTop"
 			:left="contextMenuLeft"
+			@menu-click="onMenuClick"
 		/>
 	</div>
 </template>
@@ -49,6 +51,7 @@ import ImageFile from "./ImageFile.vue";
 import TextFile from "./TextFile.vue";
 import { FileType } from "./types";
 import type { FileList, FileItem } from "./types";
+import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
 
 /** 组件map */
 const componentMap = {
@@ -56,6 +59,7 @@ const componentMap = {
 	[FileType.TEXT]: TextFile
 };
 
+const tagEditRef = ref<InstanceType<typeof TagEdit>>();
 const list: FileList = [
 	{
 		id: useId(),
@@ -130,6 +134,7 @@ const list: FileList = [
 		value: "asdas,21312,dsada,f1,3ee,sadas"
 	}
 ];
+const loading = ref(false);
 
 const pageData = ref({
 	currentPage: 1,
@@ -147,9 +152,48 @@ const showContextMenu = ref(true);
 const contextMenuTop = ref(0);
 const contextMenuLeft = ref(0);
 const fileData = ref<FileItem>();
+function onContextMenu(event: MouseEvent, data: FileItem) {
+	// 更新当前右键菜单数据
+	fileData.value = data;
+	// 更新右键菜单列表
+	updateMenuList(data);
+	// 计算菜单位置
+	contextMenuTop.value = event.clientY;
+	contextMenuLeft.value = event.clientX;
+	// 显示右键菜单
+	showContextMenu.value = true;
+}
+function onMenuClick(menu: ContextMenuItem, data: FileItem) {
+	switch (menu.key) {
+		case ContextMenuKeyEnum.TAG: // 打标
+			ElMessage.info("打标");
+			break;
+		case ContextMenuKeyEnum.EDIT: // 编辑
+			tagText.value = data.value;
+			tagEditRef.value?.focus();
+			break;
+		case ContextMenuKeyEnum.DELETE: // 删除
+			ElMessage.info("删除");
+			break;
+	}
+}
 
 // 打标
 const tagText = ref("");
+const editTagTextLoading = ref(false);
+function onSave() {
+	if (tagText.value.trim() === "") {
+		ElMessage.warning("打标内容不能为空");
+		return;
+	}
+	editTagTextLoading.value = true;
+	loading.value = true;
+	setTimeout(() => {
+		editTagTextLoading.value = false;
+		loading.value = false;
+		ElMessage.success("保存成功");
+	}, 1000);
+}
 </script>
 
 <style lang="scss" scoped>

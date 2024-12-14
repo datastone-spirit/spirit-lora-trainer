@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 15:40:38
- * @LastEditTime: 2024-12-12 15:54:15
+ * @LastEditTime: 2024-12-15 03:53:42
  * @LastEditors: mulingyuer
  * @Description: 预览切换
  * @FilePath: \frontend\src\components\SplitRightPanel\PreviewSwitch.vue
@@ -60,6 +60,7 @@ function onToggleComplexity(item: SettingItem) {
 <style lang="scss" scoped>
 .preview-switch {
 	--zl-preview-switch-item-width: 80px;
+	@include no-select();
 }
 .preview-switch-content {
 	background-color: var(--zl-preview-switch-bg);

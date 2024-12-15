@@ -4,3 +4,4 @@ configs
 .coverage
 outputs
 sd-scripts/
+.vscode/

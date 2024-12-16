@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-16 10:45:48
+ * @LastEditTime: 2024-12-16 17:38:05
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -41,11 +41,19 @@
 		</TwoSplit>
 		<ConfigBtns />
 		<Teleport to="#footer-bar-center" defer>
-			<div class="flux-footer-bar">
-				<el-button type="primary" size="large" :loading="submitLoading" @click="onSubmit">
+			<el-space class="flux-footer-bar" :size="40">
+				<SystemMonitor v-if="showSystemMonitor" :data="systemMonitorData" />
+				<LoRATrainingMonitor v-if="showLoRATrainingMonitor" :data="loRATrainingMonitorData" />
+				<el-button
+					v-if="!showSystemMonitor"
+					type="primary"
+					size="large"
+					:loading="submitLoading"
+					@click="onSubmit"
+				>
 					开始训练
 				</el-button>
-			</div>
+			</el-space>
 		</Teleport>
 	</div>
 </template>
@@ -61,6 +69,8 @@ import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import ConfigBtns from "./components/Footer/ConfigBtns.vue";
 import { useSettingsStore } from "@/stores";
 import { generateTomlString } from "@/utils/toml";
+import type { SystemMonitorProps } from "@/components/SystemMonitor/index.vue";
+import type { LoRATrainingMonitorProps } from "@/components/LoRATrainingMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
 
@@ -79,6 +89,7 @@ const ruleForm = ref<RuleForm>({
 	save_state: false,
 	// -----
 	image_dir: "",
+	tagger_model: "florence",
 	num_repeats: 1,
 	max_train_epochs: 4,
 	train_batch_size: 1,
@@ -189,25 +200,11 @@ const ruleFormProps = generateKeyMapFromInterface<RuleForm, RuleFormProps>(ruleF
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 
+// 折叠
 const openStep1 = ref(true);
 const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
-
-/** 提交表单 */
-const submitLoading = ref(false);
-function onSubmit() {
-	if (!ruleFormRef.value) return;
-	ruleFormRef.value.validate((valid) => {
-		if (!valid) return;
-
-		// 开始训练
-		submitLoading.value = true;
-		setTimeout(() => {
-			submitLoading.value = false;
-		}, 1000);
-	});
-}
 
 /** toml */
 const toml = ref("");
@@ -216,6 +213,77 @@ const generateToml = useDebounceFn(() => {
 	toml.value = generateTomlString(tomlData);
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
+
+// 系统监控
+const showSystemMonitor = ref(false);
+const systemMonitorData = ref<SystemMonitorProps["data"]>({
+	gpuUsage: 0, // gpu占用百分比
+	gpuPower: 0, // gpu功率百分比
+	gpuMemory: 0 // gpu显存百分比
+});
+const showLoRATrainingMonitor = ref(false);
+const loRATrainingMonitorData = ref<LoRATrainingMonitorProps["data"]>({
+	currentRound: 0,
+	totalRound: 0,
+	usedTime: "00:00:00",
+	remainingTime: "00:00:00",
+	stepTime: "00:00:00",
+	averageLoss: "0.000"
+});
+/** 随机显示系统数据 */
+let timer: number | null = null;
+function randomSystemMonitorData() {
+	const keys = Object.keys(systemMonitorData.value) as (keyof typeof systemMonitorData.value)[];
+	for (const key of keys) {
+		systemMonitorData.value[key] = Math.floor(Math.random() * (100 - 1) + 1);
+	}
+	Object.assign(loRATrainingMonitorData.value, {
+		currentRound: Math.floor(Math.random() * (100 - 1) + 1),
+		totalRound: Math.floor(Math.random() * (100 - 1) + 1),
+		usedTime: new Date(Math.floor(Math.random() * (3600000 * 24)) + 1).toISOString().substr(11, 8),
+		remainingTime: new Date(Math.floor(Math.random() * (3600000 * 24)) + 1)
+			.toISOString()
+			.substr(11, 8),
+		stepTime: new Date(Math.floor(Math.random() * 60000) + 1).toISOString().substr(11, 8),
+		averageLoss: (Math.random() * (10 - 0.001) + 0.001).toFixed(3)
+	});
+}
+function startRandomSystemMonitorData() {
+	stopRandomSystemMonitorData();
+	timer = setInterval(() => {
+		randomSystemMonitorData();
+	}, 1000);
+}
+function stopRandomSystemMonitorData() {
+	if (timer) {
+		clearInterval(timer);
+		timer = null;
+	}
+}
+
+/** 提交表单 */
+const submitLoading = ref(false);
+function onSubmit() {
+	if (!ruleFormRef.value) return;
+	ruleFormRef.value.validate((valid) => {
+		if (!valid) {
+			ElMessage.warning("请填写必填项");
+			return;
+		}
+
+		// 开始训练
+		submitLoading.value = true;
+		showSystemMonitor.value = true;
+		showLoRATrainingMonitor.value = true;
+		startRandomSystemMonitorData();
+		setTimeout(() => {
+			submitLoading.value = false;
+			showSystemMonitor.value = false;
+			showLoRATrainingMonitor.value = false;
+			stopRandomSystemMonitorData();
+		}, 5000);
+	});
+}
 </script>
 
 <style lang="scss" scoped>
@@ -223,13 +291,8 @@ watch(ruleForm, generateToml, { deep: true, immediate: true });
 	height: calc(100vh - $zl-padding * 2 - $zl-footer-bar-height);
 }
 .flux-footer-bar {
+	width: 100%;
 	height: 100%;
-	padding: 0 $zl-padding;
-	display: flex;
-	align-items: center;
 	justify-content: flex-end;
 }
-// .lora-flux-content {
-// 	padding: 16px;
-// }
 </style>

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-11 17:51:53
+ * @LastEditTime: 2024-12-16 11:22:17
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -37,6 +37,8 @@ export interface RuleForm {
 	// ---------
 	/** 数据集目录 */
 	image_dir: string;
+	/** 打标模型 */
+	tagger_model: string;
 	/** 每个图像重复训练次数 */
 	num_repeats: number;
 	/** 最大训练 epoch（轮数） */

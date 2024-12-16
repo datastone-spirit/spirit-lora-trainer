@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-16 10:50:17
+ * @LastEditTime: 2024-12-16 16:31:30
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -11,16 +11,19 @@
 	<div class="ai-dataset">
 		<div class="ai-dataset-content" v-loading="loading">
 			<div class="ai-dataset-content-body">
-				<div class="file-list">
-					<component
-						v-for="(item, index) in list"
-						:key="item.id"
-						:is="componentMap[item.type]"
-						:data="item"
-						:selected="activeItemIndex !== null && activeItemIndex === index"
-						@contextmenu.prevent="onContextMenu($event, item)"
-						@dblclick="onDoubleClick(item, index)"
-					/>
+				<div class="ai-dataset-content-scroll">
+					<el-empty v-if="list.length === 0" class="ai-dataset-content-empty" :image-size="100" />
+					<div class="file-list" v-else>
+						<component
+							v-for="(item, index) in list"
+							:key="item.id"
+							:is="componentMap[item.type]"
+							:data="item"
+							:selected="activeItemIndex !== null && activeItemIndex === index"
+							@contextmenu.prevent="onContextMenu($event, item)"
+							@dblclick="onDoubleClick(item, index)"
+						/>
+					</div>
 				</div>
 			</div>
 			<!-- <div class="ai-dataset-content-footer">
@@ -277,7 +280,11 @@ defineExpose({
 	flex-grow: 1;
 	min-height: 0;
 	height: 1px;
-	padding: $zl-padding;
+	padding: $zl-padding 0 $zl-padding $zl-padding;
+}
+.ai-dataset-content-scroll {
+	height: 100%;
+	overflow: auto;
 }
 .file-list {
 	height: 100%;
@@ -287,21 +294,8 @@ defineExpose({
 	grid-auto-rows: $zl-ai-dataset-file-height;
 	justify-content: center;
 	align-items: start;
-	overflow: auto;
-	&::-webkit-scrollbar {
-		width: $zl-scrollbar-width;
-	}
-	&::-webkit-scrollbar-thumb {
-		background: var(--zl-scrollbar);
-	}
 }
-/* 针对不支持::-webkit-scrollbar-*的浏览器的样式调整 */
-@supports not (selector(::-webkit-scrollbar)) {
-	.file-list {
-		scrollbar-width: thin;
-		scrollbar-color: var(--zl-scrollbar) transparent;
-	}
-}
+
 // .ai-dataset-content-footer {
 // 	padding: 0 $zl-padding $zl-padding;
 // }

@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 10:13:40
- * @LastEditTime: 2024-12-13 10:48:46
+ * @LastEditTime: 2024-12-16 16:32:31
  * @LastEditors: mulingyuer
  * @Description: 2分割组件
- * @FilePath: \frontend\src\components\Split\TwoSplit.vue
+ * @FilePath: \frontend\src\components\Split\TwoSplit\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -119,22 +119,7 @@ watch([() => props.direction, () => props.sizes], () => {
 	height: 100%;
 	overflow: auto;
 	padding-right: 6px;
-	&::-webkit-scrollbar {
-		width: $zl-scrollbar-width;
-	}
-	&::-webkit-scrollbar-thumb {
-		background: var(--zl-scrollbar);
-	}
 }
-
-/* 针对不支持::-webkit-scrollbar-*的浏览器的样式调整 */
-@supports not (selector(::-webkit-scrollbar)) {
-	.two-split-card {
-		scrollbar-width: thin;
-		scrollbar-color: var(--zl-scrollbar) transparent;
-	}
-}
-
 .two-split :deep(.gutter) {
 	background-color: var(--zl-two-split-gutter-bg);
 	background-repeat: no-repeat;

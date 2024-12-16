@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 14:46:06
- * @LastEditTime: 2024-12-13 10:33:11
+ * @LastEditTime: 2024-12-16 16:32:42
  * @LastEditors: mulingyuer
  * @Description: toml预览组件
  * @FilePath: \frontend\src\components\Toml\TomlPreview.vue
@@ -66,18 +66,6 @@ watch(
 .toml-preview-content {
 	height: 100%;
 	overflow: auto;
-	&::-webkit-scrollbar {
-		width: $zl-scrollbar-width;
-	}
-	&::-webkit-scrollbar-thumb {
-		background: var(--zl-scrollbar);
-	}
-}
-@supports not (selector(::-webkit-scrollbar)) {
-	.toml-preview-content {
-		scrollbar-width: thin;
-		scrollbar-color: var(--zl-scrollbar) transparent;
-	}
 }
 .toml-preview-content :deep(.shiki) {
 	font-size: 14px;

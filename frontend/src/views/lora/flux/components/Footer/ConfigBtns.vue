@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 14:25:37
- * @LastEditTime: 2024-12-12 14:31:52
+ * @LastEditTime: 2024-12-16 11:41:02
  * @LastEditors: mulingyuer
  * @Description: 底部配置栏
  * @FilePath: \frontend\src\views\lora\flux\components\Footer\ConfigBtns.vue
@@ -13,6 +13,11 @@
 			<el-space class="lora-flux-config-wrapper" :size="12">
 				<el-button text> 配置导入 </el-button>
 				<el-button text> 配置导出 </el-button>
+				<el-popover placement="bottom" trigger="click" width="200" content="请前往智灵后台查看日志">
+					<template #reference>
+						<el-button text> 日志 </el-button>
+					</template>
+				</el-popover>
 			</el-space>
 		</div>
 	</Teleport>

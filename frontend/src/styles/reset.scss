@@ -83,3 +83,20 @@ pre {
 	font-variation-settings: normal;
 	font-size: 1em;
 }
+
+// 滚动条定制
+* {
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: var(--zl-scrollbar);
+	}
+}
+// 针对不支持::-webkit-scrollbar-*的浏览器的样式调整
+@supports not (selector(::-webkit-scrollbar)) {
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--zl-scrollbar) transparent;
+	}
+}

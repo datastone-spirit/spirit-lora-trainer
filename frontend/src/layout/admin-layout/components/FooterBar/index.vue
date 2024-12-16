@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2024-12-13 09:44:53
+ * @LastEditTime: 2024-12-16 11:25:01
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
- * @FilePath: \spirit-lora-trainer\frontend\src\layout\admin-layout\components\FooterBar\index.vue
+ * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<Transition name="fade">
+	<Transition name="el-zoom-in-bottom">
 		<footer v-show="appStore.showFooter" class="footer-bar">
 			<div class="footer-bar-left">
 				<ComplexitySetting />

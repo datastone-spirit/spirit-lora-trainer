@@ -27,6 +27,7 @@ class GenerateSH(Resource):
         TrainingService().training(parameter)
 
         return res(data='taskid')
+
     
 
 

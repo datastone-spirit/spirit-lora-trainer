@@ -26,7 +26,7 @@ class TrainingService:
         config_path = config2toml(parameters.config, dataset_path)
         #self.generate_dir(parameters)
 
-        self.run_train(config_path, script=f"{getprojectpath()}/sd-scripts/flux_train_network.py", training_paramters=parameters)
+        return self.run_train(config_path, script=f"{getprojectpath()}/sd-scripts/flux_train_network.py", training_paramters=parameters)
         
     # 生成训练目录
     def generate_dir(self, parameters: TrainingParameter):
@@ -84,7 +84,7 @@ class TrainingService:
         customize_env["NCCL_P2P_DISABLE"]="1"
         customize_env["NCCL_IB_DISABLE"]="1"
 
-        return Task.wrap_training(subprocess.Popen(args, env=customize_env), training_paramters)
+        return Task.wrap_training(subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=customize_env), training_paramters)
 
     def get_gpu_info(self):
         try:

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-16 11:47:59
+ * @LastEditTime: 2024-12-16 17:55:45
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -33,6 +33,12 @@
 					</el-button>
 				</el-form-item>
 			</el-form>
+			<TagMonitor v-if="showTagMonitor" :data="tagMonitorData" />
+			<SystemMonitor
+				v-if="showSystemMonitor"
+				class="ai-dataset-page-left-system-monitor"
+				:data="systemMonitorData"
+			/>
 		</div>
 		<div class="ai-dataset-page-right">
 			<div class="ai-dataset-header">
@@ -51,6 +57,8 @@
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
 import type { FormInstance, FormRules } from "element-plus";
+import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
+import type { TagMonitorProps } from "@/components/Monitor/TagMonitor/index.vue";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -70,6 +78,20 @@ const rules = reactive<FormRules<RuleForm>>({
 	tagger_model: [{ required: true, message: "请选择打标模型", trigger: "change" }]
 });
 const loading = ref(false);
+
+// 系统监控
+const showSystemMonitor = ref(false);
+const systemMonitorData = ref<SystemMonitorProps["data"]>({
+	gpuUsage: 0, // gpu占用百分比
+	gpuPower: 0, // gpu功率百分比
+	gpuMemory: 0 // gpu显存百分比
+});
+// 打标监控
+const showTagMonitor = ref(false);
+const tagMonitorData = ref<TagMonitorProps["data"]>({
+	currentRound: 0,
+	totalRound: 0
+});
 
 // 打标
 function onSubmit() {
@@ -104,6 +126,10 @@ async function onRefresh() {
 }
 .ai-dataset-page-left-btn {
 	width: 100%;
+}
+.ai-dataset-page-left-system-monitor {
+	justify-content: center;
+	margin-top: 24px;
 }
 .ai-dataset-page-right {
 	flex-grow: 1;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-16 17:38:05
+ * @LastEditTime: 2024-12-16 17:56:36
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -69,8 +69,8 @@ import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import ConfigBtns from "./components/Footer/ConfigBtns.vue";
 import { useSettingsStore } from "@/stores";
 import { generateTomlString } from "@/utils/toml";
-import type { SystemMonitorProps } from "@/components/SystemMonitor/index.vue";
-import type { LoRATrainingMonitorProps } from "@/components/LoRATrainingMonitor/index.vue";
+import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
+import type { LoRATrainingMonitorProps } from "@/components/Monitor/LoRATrainingMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
 
@@ -221,6 +221,7 @@ const systemMonitorData = ref<SystemMonitorProps["data"]>({
 	gpuPower: 0, // gpu功率百分比
 	gpuMemory: 0 // gpu显存百分比
 });
+// LoRA训练监控
 const showLoRATrainingMonitor = ref(false);
 const loRATrainingMonitorData = ref<LoRATrainingMonitorProps["data"]>({
 	currentRound: 0,

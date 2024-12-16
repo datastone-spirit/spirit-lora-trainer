@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2024-12-16 17:32:49
+ * @LastEditTime: 2024-12-16 17:54:44
  * @LastEditors: mulingyuer
  * @Description: lora训练监控
  * @FilePath: \frontend\src\components\LoRATrainingMonitor\index.vue
@@ -90,7 +90,7 @@ const percentage = computed(() => {
 }
 .lo-ra-training-monitor-round {
 	flex-shrink: 0;
-	margin-left: 4px;
+	margin-left: 8px;
 	font-size: 12px;
 	color: var(--el-text-color-primary);
 }

@@ -19,14 +19,6 @@ file_config = {
             "default": "/",
             "description": "请求的子目录路径",
         },
-        {
-            "name": "level",
-            "in": "query",
-            "type": "integer",
-            "required": False,
-            "description": "目录层级，默认值为 0",
-            "example": 0,
-        },
     ],
     "responses": {
         "200": {

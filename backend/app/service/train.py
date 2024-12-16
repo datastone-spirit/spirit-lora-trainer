@@ -8,7 +8,7 @@ from typing import Optional
 import sys
 from ..api.model.training_paramter import TrainingParameter
 from ..api.common.utils import config2args, validate_parameter,config2args2, dataset2toml, config2toml
-from utils.util import getprojectpath
+from utils.util import getprojectpath, resolveProjectPath
 import logging
 import subprocess
 from task.manager import task_decorator
@@ -36,10 +36,10 @@ class TrainingService:
         if not train_dir.startswith('/'):
            train_dir = f"{getprojectpath()}/{train_dir}/{parameters.config.dataset_repeats}_{parameters.config.output_name}" 
             
-        folder_name = f"{getprojectpath()}/{parameters.dataset.datasets[0].subsets[0].image_dir}/{parameters.config.dataset_repeats}_{parameters.config.output_name}"
+        folder_name = f"{resolveProjectPath(parameters.dataset.datasets[0].subsets[0].image_dir)}/{parameters.config.dataset_repeats}_{parameters.config.output_name}"
         folder_path = os.path.abspath(folder_name)
         # 删除当前目录中所有数字开头的文件夹
-        current_dir = f"{getprojectpath()}/{parameters.dataset.datasets[0].subsets[0].image_dir}"
+        current_dir = f"{resolveProjectPath(parameters.dataset.datasets[0].subsets[0].image_dir)}"
         for item in os.listdir(current_dir):
             item_path = os.path.join(current_dir, item)
             if os.path.isdir(item_path) and item[0].isdigit():
@@ -49,7 +49,7 @@ class TrainingService:
         os.makedirs(folder_path, exist_ok=True)
         image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff'}
         # 拷贝 captions_output 目录下的所有 .txt 文件
-        captions_dir = f"{getprojectpath()}/captions_output"
+        captions_dir = f"{resolveProjectPath(parameters.dataset.datasets[0].subsets[0].image_dir)}"
         if os.path.exists(captions_dir) and os.path.isdir(captions_dir):
             for filename in os.listdir(captions_dir):
                 if filename.endswith('.txt'):

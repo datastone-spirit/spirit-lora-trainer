@@ -11,7 +11,6 @@ class GpuLog(Resource):
     def get(self):
         """
         获取 GPU 数据信息。
-        ---
         """
 
         try:

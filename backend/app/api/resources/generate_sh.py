@@ -26,7 +26,7 @@ class GenerateSH(Resource):
 
         TrainingService().training(parameter)
 
-        return jsonify({"taskid": "taskid"})
+        return res(data='taskid')
     
 
 

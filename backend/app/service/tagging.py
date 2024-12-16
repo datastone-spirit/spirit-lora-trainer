@@ -7,24 +7,37 @@ from ..api.common.utils import res
 
 class TaggingService:
     def manual_captioning(self, image_path: str, caption_text: str) -> dict:
-        base_name = os.path.splitext(os.path.basename(image_path))[0]
-        
-        # 输出目录
-        output_dir = "captions_output"
-        os.makedirs(output_dir, exist_ok=True)  # 确保输出目录存在
+        try:
+            # 提取路径中的文件名和基础名称
+            base_name = os.path.splitext(os.path.basename(image_path))[0]
+            directory_path = os.path.dirname(image_path)  # 获取文件所在的目录
 
-        # 保存反推词到文件，文件名与图片名一致
-        txt_file_path = os.path.join(output_dir, f"{base_name}_caption.txt")
-        
-        with open(txt_file_path, "w", encoding="utf-8") as txt_file:
-            txt_file.write(caption_text)
+            # 确保输出目录存在
+            os.makedirs(directory_path, exist_ok=True)
 
-        # 返回结果
-        return res(success=True,data={
-            "image_path": image_path,
-            "caption": caption_text,
-            "txt_path": txt_file_path
-        })
+            # 保存反推词到文件，文件名与图片名一致
+            txt_file_path = os.path.join(directory_path, f"{base_name}_caption.txt")
+
+            with open(txt_file_path, "w", encoding="utf-8") as txt_file:
+                txt_file.write(caption_text)
+
+            # 返回结果
+            return {
+                "success": True,
+                "data": {
+                    "image_path": image_path,
+                    "caption": caption_text,
+                    "txt_path": txt_file_path
+                }
+            }
+        except Exception as e:
+            # 异常处理可以记录日志等
+            return {
+                "success": False,
+                "data": str(e)
+            }
+
+        
     
     def load_images_from_directory(self,directory: str, extensions=None):
         """
@@ -48,7 +61,7 @@ class TaggingService:
 
         return image_paths
     
-    def run_captioning(self, image_paths: List[str]) -> List[dict]:
+    def run_captioning(self, image_paths: List[str], output_dir: str) -> List[dict]:
 
         print("Starting run_captioning...")
 
@@ -69,7 +82,6 @@ class TaggingService:
         )
 
         results = []
-        output_dir = "captions_output"
         os.makedirs(output_dir, exist_ok=True)  # 确保输出目录存在
 
         for image_path in image_paths:

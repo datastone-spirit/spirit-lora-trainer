@@ -26,12 +26,13 @@ class Tagging(Resource):
             model_name = args["model_name"]
             image_path = args["image_path"]
             images = TaggingService().load_images_from_directory(image_path)
-            resule = TaggingService().run_captioning(images)
-
+            resule = TaggingService().run_captioning(images,image_path)
             return res(success=True, data=resule)
+        except Exception as e:
+            # 异常处理可以记录日志等
+            return res(success=False, data=str(e))
         finally:
              is_processing = False
-             return res(success=False, data={})
 
 
     

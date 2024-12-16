@@ -1,5 +1,6 @@
 import pathlib
 import logging
+import os
 
 
 def getmodelpath() -> str:
@@ -50,3 +51,11 @@ def setup_logging(args=None, log_level=None, reset=False):
         logger = logging.getLogger(__name__)
         logger.info(msg_init)
 
+def resolveProjectPath(input_path: str) -> str:
+     # 判断是否为绝对路径
+     if os.path.isabs(input_path):
+          return input_path
+
+     # 拼接项目路径与相对路径
+     project_path = getprojectpath()
+     return os.path.abspath(os.path.join(project_path, input_path))

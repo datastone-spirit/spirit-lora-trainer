@@ -12,6 +12,9 @@
 	padding: 4px;
 	cursor: pointer;
 	@include no-select();
+	&.selected {
+		background-color: var(--zl-page-bg);
+	}
 	&:hover {
 		background-color: var(--zl-page-bg);
 	}

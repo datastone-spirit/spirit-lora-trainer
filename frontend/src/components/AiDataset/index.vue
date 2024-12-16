@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-15 03:56:24
+ * @LastEditTime: 2024-12-16 10:50:17
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -13,22 +13,24 @@
 			<div class="ai-dataset-content-body">
 				<div class="file-list">
 					<component
-						v-for="item in list"
+						v-for="(item, index) in list"
 						:key="item.id"
 						:is="componentMap[item.type]"
 						:data="item"
+						:selected="activeItemIndex !== null && activeItemIndex === index"
 						@contextmenu.prevent="onContextMenu($event, item)"
+						@dblclick="onDoubleClick(item, index)"
 					/>
 				</div>
 			</div>
-			<div class="ai-dataset-content-footer">
+			<!-- <div class="ai-dataset-content-footer">
 				<DatasetPagination
 					v-model:current-page="pageData.currentPage"
 					v-model:page-size="pageData.pageSize"
 					:total="pageData.total"
 					@change="onChange"
 				/>
-			</div>
+			</div> -->
 		</div>
 		<div class="ai-dataset-footer">
 			<TagEdit ref="tagEditRef" v-model="tagText" :loading="editTagTextLoading" @save="onSave" />
@@ -44,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import DatasetPagination from "./DatasetPagination.vue";
+// import DatasetPagination from "./DatasetPagination.vue";
 import TagEdit from "./TagEdit.vue";
 import ContextMenu from "./ContextMenu.vue";
 import ImageFile from "./ImageFile.vue";
@@ -52,6 +54,7 @@ import TextFile from "./TextFile.vue";
 import { FileType } from "./types";
 import type { FileList, FileItem } from "./types";
 import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
+import { useImageViewer } from "@/hooks/useImageViewer";
 
 /** 组件map */
 const componentMap = {
@@ -59,8 +62,10 @@ const componentMap = {
 	[FileType.TEXT]: TextFile
 };
 
+const { previewImages } = useImageViewer();
+
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
-const list: FileList = [
+const list = ref<FileList>([
 	{
 		id: useId(),
 		name: "图片1.jpg",
@@ -133,22 +138,60 @@ const list: FileList = [
 		type: FileType.TEXT,
 		value: "asdas,21312,dsada,f1,3ee,sadas"
 	}
-];
+]);
 const loading = ref(false);
+const activeItemIndex = ref<number | null>(null);
 
-const pageData = ref({
-	currentPage: 1,
-	pageSize: 10,
-	total: 1000
-});
+// 请求数据
+async function getList() {
+	try {
+		loading.value = true;
+		onQuitEdit();
 
-function onChange(page: number, pageSize: number) {
-	pageData.value.currentPage = page;
-	pageData.value.pageSize = pageSize;
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		loading.value = false;
+	} catch (error) {
+		loading.value = false;
+		console.error("获取数据失败", error);
+	}
+}
+
+// 分页
+// const pageData = ref({
+// 	currentPage: 1,
+// 	pageSize: 10,
+// 	total: 1000
+// });
+// function onChange(page: number, pageSize: number) {
+// 	pageData.value.currentPage = page;
+// 	pageData.value.pageSize = pageSize;
+// }
+
+// 预览图片
+function onPreview(data: FileItem) {
+	const imgList = list.value.filter((item) => item.type === FileType.IMAGE);
+	let initialIndex = imgList.findIndex((item) => item === data);
+	if (initialIndex === -1) initialIndex = 0;
+	return previewImages({ urlList: imgList.map((item) => item.value), initialIndex });
+}
+
+// 双击
+function onDoubleClick(data: FileItem, index: number) {
+	activeItemIndex.value = index;
+	switch (data.type) {
+		case FileType.IMAGE:
+			onQuitEdit();
+			onPreview(data);
+			break;
+		case FileType.TEXT:
+			onEdit(data);
+			break;
+	}
 }
 
 // 右键菜单
-const showContextMenu = ref(true);
+const showContextMenu = ref(false);
 const contextMenuTop = ref(0);
 const contextMenuLeft = ref(0);
 const fileData = ref<FileItem>();
@@ -169,8 +212,7 @@ function onMenuClick(menu: ContextMenuItem, data: FileItem) {
 			ElMessage.info("打标");
 			break;
 		case ContextMenuKeyEnum.EDIT: // 编辑
-			tagText.value = data.value;
-			tagEditRef.value?.focus();
+			onEdit(data);
 			break;
 		case ContextMenuKeyEnum.DELETE: // 删除
 			ElMessage.info("删除");
@@ -181,7 +223,18 @@ function onMenuClick(menu: ContextMenuItem, data: FileItem) {
 // 打标
 const tagText = ref("");
 const editTagTextLoading = ref(false);
+function onEdit(data: FileItem) {
+	tagText.value = data.value;
+	tagEditRef.value?.focus();
+	const findIndex = list.value.findIndex((item) => item === data);
+	activeItemIndex.value = findIndex !== -1 ? findIndex : null;
+}
+function onQuitEdit() {
+	tagText.value = "";
+	tagEditRef.value?.blur();
+}
 function onSave() {
+	if (loading.value) return;
 	if (tagText.value.trim() === "") {
 		ElMessage.warning("打标内容不能为空");
 		return;
@@ -194,6 +247,12 @@ function onSave() {
 		ElMessage.success("保存成功");
 	}, 1000);
 }
+
+// 对外暴露方法
+defineExpose({
+	/** 获取数据 */
+	getList
+});
 </script>
 
 <style lang="scss" scoped>
@@ -243,9 +302,9 @@ function onSave() {
 		scrollbar-color: var(--zl-scrollbar) transparent;
 	}
 }
-.ai-dataset-content-footer {
-	padding: 0 $zl-padding $zl-padding;
-}
+// .ai-dataset-content-footer {
+// 	padding: 0 $zl-padding $zl-padding;
+// }
 .ai-dataset-footer {
 	flex-grow: 1;
 	margin-top: $zl-padding;

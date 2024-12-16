@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 15:15:16
- * @LastEditTime: 2024-12-13 17:21:55
+ * @LastEditTime: 2024-12-16 10:35:46
  * @LastEditors: mulingyuer
  * @Description: 图片文件
- * @FilePath: \frontend\src\components\AiDataset\FileList\ImageFile.vue
+ * @FilePath: \frontend\src\components\AiDataset\ImageFile.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -22,11 +22,11 @@
 </template>
 
 <script setup lang="ts">
-import type { FileItem } from "./types";
+import type { BaseFileItemProps, FileItem } from "./types";
 import type { ImageProps } from "element-plus";
 import DefaultImageIcon from "@/assets/images/ai-dataset/image_icon.svg";
 
-export interface ImageFileProps {
+export interface ImageFileProps extends BaseFileItemProps {
 	data: FileItem;
 	fit?: ImageProps["fit"];
 }

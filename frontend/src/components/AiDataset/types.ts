@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-13 15:25:58
- * @LastEditTime: 2024-12-13 15:29:33
+ * @LastEditTime: 2024-12-16 10:30:01
  * @LastEditors: mulingyuer
  * @Description: AI数据集类型
  * @FilePath: \frontend\src\components\AiDataset\types.ts
@@ -33,3 +33,9 @@ export interface TextFileItem extends BaseFileItem {
 export type FileItem = ImageFileItem | TextFileItem;
 
 export type FileList = Array<FileItem>;
+
+/** 文件组件基础props */
+export interface BaseFileItemProps {
+	/** 是否选中 */
+	selected: boolean;
+}

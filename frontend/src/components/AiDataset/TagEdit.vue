@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 11:24:17
- * @LastEditTime: 2024-12-15 03:51:16
+ * @LastEditTime: 2024-12-16 09:10:06
  * @LastEditors: mulingyuer
  * @Description: 标签编辑器
  * @FilePath: \frontend\src\components\AiDataset\TagEdit.vue
@@ -57,7 +57,8 @@ function onBlur() {
 
 // 监听ctrl+s快捷键
 useEventListener(window, "keydown", (event) => {
-	if (event.ctrlKey && event.key === "s") {
+	const isSaveEvent = event.ctrlKey && event.key === "s";
+	if (isSaveEvent && isFocus.value) {
 		event.preventDefault(); // 阻止默认的保存行为
 		emits("save");
 	}

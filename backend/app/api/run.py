@@ -1,6 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
+import argparse
+import logging
+import sys
 from .resources.file import File
 from .resources.upload import Upload, UploadProgress
 from .resources.tagging import Tagging,ManualTagging
@@ -10,11 +13,13 @@ from .resources.configuration import SaveConfig,GetConfig
 from .resources.gpu_log import GpuLog
 from flasgger import Swagger
 
+
+logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
+
 app = Flask(__name__)
 Swagger(app)
 CORS(app, resources=r"/*")
 api = Api(app, prefix="/api")
-
 
 api.add_resource(File, "/file")  # 获取目录结构
 api.add_resource(Upload, "/upload")  # 上传文件的接口
@@ -27,6 +32,18 @@ api.add_resource(SaveConfig, "/training/save_config") # 保存配置
 api.add_resource(GetConfig, "/training/get_config") # 读取配置
 api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
 
+# add port argument
+parser = argparse.ArgumentParser()
+parser.add_argument("--port", type=int, default=5002)
+parser.add_argument("--host", type=str, default="0.0.0.0")
+args = parser.parse_args()
+
+from utils.util import setup_logging
+setup_logging()
+import logging
+logger = logging.getLogger(__name__)
+
+logging.info(f"args.port is {args.port}, args.host is {args.host}")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5002)
+    app.run(host=args.host, port=args.port)

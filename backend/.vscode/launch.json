@@ -5,10 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python 调试程序: 模块",
+            "name": "Python lora-trainer",
             "type": "debugpy",
             "request": "launch",
-            "module": "app.api.run"
+            "env": {
+                "FLASK_APP": "app",
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "1",
+                "CUDA_VISIBLE_DEVICES": "2"
+            },
+            "module": "app.api.run",
+            "args": [
+                "--port",
+                "5050"
+            ],
+
         }
     ]
 }

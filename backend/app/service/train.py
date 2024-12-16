@@ -11,6 +11,8 @@ from ..api.common.utils import config2args, validate_parameter,config2args2, dat
 from utils.util import getprojectpath
 import logging
 import subprocess
+from task.manager import task_decorator
+from task.task import Task
 
 class TrainingService:
 
@@ -22,13 +24,18 @@ class TrainingService:
         
         dataset_path = dataset2toml(parameters.dataset)
         config_path = config2toml(parameters.config, dataset_path)
-        self.generate_dir(parameters)
+        #self.generate_dir(parameters)
 
-        self.run_train(config_path, script=f"{getprojectpath()}/sd-scripts/flux_train_network.py")
+        self.run_train(config_path, script=f"{getprojectpath()}/sd-scripts/flux_train_network.py", training_paramters=parameters)
         
     # 生成训练目录
     def generate_dir(self, parameters: TrainingParameter):
         # 创建目标文件夹名
+        train_dir = parameters.dataset.datasets[0].subsets[0].image_dir
+        
+        if not train_dir.startswith('/'):
+           train_dir = f"{getprojectpath()}/{train_dir}/{parameters.config.dataset_repeats}_{parameters.config.output_name}" 
+            
         folder_name = f"{getprojectpath()}/{parameters.dataset.datasets[0].subsets[0].image_dir}/{parameters.config.dataset_repeats}_{parameters.config.output_name}"
         folder_path = os.path.abspath(folder_name)
         # 删除当前目录中所有数字开头的文件夹
@@ -54,10 +61,11 @@ class TrainingService:
             if file_ext in image_extensions:
                 src_path = os.path.join(current_dir, filename)
                 shutil.copy(src_path, folder_path)
-    
+    @task_decorator 
     def run_train(self,
-                  toml_path: str,
+              toml_path: str,
               script: str = "",
+              training_paramters: TrainingParameter = None,
               gpu_ids: Optional[list] = None,
               cpu_threads: Optional[int] = 2):
         args = [
@@ -67,18 +75,16 @@ class TrainingService:
             script,
             "--config_file", toml_path,
         ]
-        print(f"args ------------------- {args}")
-
 
         customize_env = os.environ.copy()
         customize_env["ACCELERATE_DISABLE_RICH"] = "1"
         customize_env["PYTHONUNBUFFERED"] = "1"
         customize_env["PYTHONWARNINGS"] = "ignore::FutureWarning,ignore::UserWarning"
-        customize_env["CUDA_VISIBLE_DEVICES"] = "0"
+        #customize_env["CUDA_VISIBLE_DEVICES"] = "0"
         customize_env["NCCL_P2P_DISABLE"]="1"
         customize_env["NCCL_IB_DISABLE"]="1"
 
-        subprocess.Popen(args, env=customize_env)
+        return Task.wrap_training(subprocess.Popen(args, env=customize_env), training_paramters)
 
     def get_gpu_info(self):
         try:

@@ -25,6 +25,7 @@ class Dataset:
     @classmethod
     def from_dict(cls, dikt) -> 'Dataset':
         return dacite.from_dict(data_class=Dataset, data=dikt)
+
 @dataclass
 class General:
     caption_extension: str

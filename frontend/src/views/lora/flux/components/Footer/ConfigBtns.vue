@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 14:25:37
- * @LastEditTime: 2024-12-17 10:14:22
+ * @LastEditTime: 2024-12-17 17:39:26
  * @LastEditors: mulingyuer
  * @Description: 底部配置栏
  * @FilePath: \frontend\src\views\lora\flux\components\Footer\ConfigBtns.vue
@@ -53,7 +53,7 @@ const props = withDefaults(defineProps<ConfigProps>(), {
 });
 const emits = defineEmits<{
 	/** 配置导入 */
-	loadConfig: [config: Record<string, any>];
+	loadConfig: [config: any];
 }>();
 
 // 配置导入

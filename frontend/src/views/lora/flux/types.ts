@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-16 11:22:17
+ * @LastEditTime: 2024-12-17 17:29:27
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -33,7 +33,7 @@ export interface RuleForm {
 	/** 模型保存精度 */
 	save_precision: string;
 	/** 保存训练状态 配合 resume 参数可以继续从某个状态训练 */
-	save_state: boolean; // 官方只有save_state_on_train_end 配置
+	save_state: boolean;
 	// ---------
 	/** 数据集目录 */
 	image_dir: string;
@@ -96,9 +96,9 @@ export interface RuleForm {
 	network_train_text_encoder_only: boolean;
 	// ---------
 	/** U-Net 学习率 */
-	unet_lr: string;
+	unet_lr: string | undefined;
 	/** 文本编码器学习率 */
-	text_encoder_lr: string;
+	text_encoder_lr: string | undefined;
 	/** 学习率调度器设置 */
 	lr_scheduler: string;
 	/** 学习率预热步数 */
@@ -120,7 +120,7 @@ export interface RuleForm {
 	/** 从已有的 LoRA 模型上继续训练，填写路径 */
 	network_weights: string;
 	/** 视为 OFT 的约束。我们建议使用 1e-2 到 1e-4 */
-	network_alpha: string;
+	network_alpha: string | undefined;
 	/** dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的） */
 	network_dropout: number;
 	/** 最大范数正则化。如果使用，推荐为 1 */

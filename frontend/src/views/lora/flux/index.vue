@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-17 10:03:03
+ * @LastEditTime: 2024-12-17 18:20:16
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import type { FormInstance, FormRules } from "element-plus";
 import type { RuleForm, RuleFormProps } from "./types";
-import { generateKeyMapFromInterface, removeUndefinedKeys } from "@/utils/tools";
+import { generateKeyMapFromInterface } from "@/utils/tools";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
@@ -71,6 +71,8 @@ import { useSettingsStore } from "@/stores";
 import { tomlStringify } from "@/utils/toml";
 import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
 import type { LoRATrainingMonitorProps } from "@/components/Monitor/LoRATrainingMonitor/index.vue";
+import type { TrainLoraData } from "@/api/lora/types";
+import { formatFormData, mergeDataToForm } from "./flux.helper";
 
 const settingsStore = useSettingsStore();
 
@@ -84,7 +86,7 @@ const ruleForm = ref<RuleForm>({
 	t5xxl: "",
 	resume: "",
 	output_dir: "",
-	save_model_as: "",
+	save_model_as: "safetensors",
 	save_precision: "bf16",
 	save_state: false,
 	// -----
@@ -182,19 +184,8 @@ const ruleForm = ref<RuleForm>({
 const rules = reactive<FormRules<RuleForm>>({
 	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
-	pretrained_model_name_or_path: [
-		{ required: true, message: "请选择训练用的底模", trigger: "change" }
-	],
 	output_dir: [{ required: true, message: "请选择LoRA保存路径", trigger: "blur" }],
-	save_model_as: [{ required: true, message: "请选择模型保存格式", trigger: "change" }],
-	save_precision: [{ required: true, message: "请选择模型保存精度", trigger: "change" }]
-	// save_every_n_epochs: [
-	// 	{ required: true, message: "请输入每 N epoch（轮）自动保存一次模型", trigger: "blur" }
-	// ],
-	// image_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }],
-	// num_repeats: [{ required: true, message: "请输入每个图像重复训练次数", trigger: "blur" }],
-	// resolution_width: [{ required: true, message: "请输入图片尺寸-宽度", trigger: "blur" }],
-	// resolution_height: [{ required: true, message: "请输入图片尺寸-高度", trigger: "blur" }]
+	image_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }]
 });
 const ruleFormProps = generateKeyMapFromInterface<RuleForm, RuleFormProps>(ruleForm.value);
 /** 是否专家模式 */
@@ -209,8 +200,7 @@ const openStep4 = ref(true);
 /** toml */
 const toml = ref("");
 const generateToml = useDebounceFn(() => {
-	const tomlData = removeUndefinedKeys(ruleForm.value);
-	toml.value = tomlStringify(tomlData);
+	toml.value = tomlStringify(formatFormData(ruleForm.value));
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
@@ -262,13 +252,19 @@ function stopRandomSystemMonitorData() {
 	}
 }
 
-// 导入配置
-function onLoadConfig(config: any) {
-	console.log("🚀 ~ onLoadConfig ~ config:", config);
+/** 导入配置 */
+function onLoadConfig(toml: TrainLoraData) {
+	try {
+		mergeDataToForm(toml, ruleForm.value);
+		ElMessage.success("配置导入成功");
+	} catch (error) {
+		ElMessage.error((error as Error)?.message ?? "配置导入失败");
+		console.error(error);
+	}
 }
-// 导出配置
+/** 导出配置 */
 function onExportConfig() {
-	return ruleForm.value;
+	return formatFormData(ruleForm.value);
 }
 
 /** 提交表单 */
@@ -280,6 +276,9 @@ function onSubmit() {
 			ElMessage.warning("请填写必填项");
 			return;
 		}
+
+		const data: TrainLoraData = formatFormData(ruleForm.value);
+		console.log("🚀 ~ ruleFormRef.value.validate ~ data:", data);
 
 		// 开始训练
 		submitLoading.value = true;

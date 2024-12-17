@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2024-12-10 16:56:57
+ * @LastEditTime: 2024-12-17 16:45:03
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -24,6 +24,7 @@
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
+		v-if="isExpert"
 		label="底模"
 		:prop="formProps.pretrained_model_name_or_path"
 		popover-content="pretrained_model_name_or_path"

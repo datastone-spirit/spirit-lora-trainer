@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-17 15:36:12
+ * @LastEditTime: 2024-12-17 17:39:02
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -9,8 +9,10 @@
  */
 
 /** 训练lora参数 */
-export interface TrainLoraData {
+export interface TrainLoraData extends Record<string, any> {
 	config: {
+		/** 底模 */
+		pretrained_model_name_or_path: string;
 		/** 启用基础权重（差异炼丹） */
 		enable_base_weight: boolean;
 		// base_weights: string;
@@ -31,9 +33,6 @@ export interface TrainLoraData {
 		cache_text_encoder_outputs_to_disk: boolean;
 		/** Tag 文件扩展名 */
 		caption_extension: string;
-		// dataset里面有，这里还要吗？
-		// /** 触发词 */
-		// class_tokens: string;
 		/** 颜色改变 */
 		color_aug: boolean;
 		/** 为 DDP 启用 gradient_as_bucket_view  */
@@ -58,9 +57,6 @@ export interface TrainLoraData {
 		gradient_checkpointing: boolean;
 		/** flux CFG 引导缩放 */
 		guidance_scale: number;
-		// dataset里面有，这里还要吗？
-		/** 在随机打乱 tokens 时，保留前 N 个不变 */
-		// keep_tokens: number;
 		/** 保留 tokens 时使用的分隔符 */
 		keep_tokens_separator: string;
 		/** 总学习率, 在分开设置 U-Net 与文本编码器学习率后这个值失效。格式化成数字 */
@@ -96,9 +92,11 @@ export interface TrainLoraData {
 		/** 模型预测类型 */
 		model_prediction_type: string;
 		/** 视为 OFT 的约束。我们建议使用 1e-2 到 1e-4 */
-		network_alpha: string;
-		// 不是改成 network_args，然后值是string了吗？
-		// "network_args_custom": [],
+		network_alpha: number | undefined;
+		/** 自定义 network_args
+		 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
+		 */
+		network_args: string;
 		/** 网络维度，常用 4~128，不是越大越好, 低dim可以降低显存占用 */
 		network_dim: number;
 		/** dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的） */
@@ -116,9 +114,12 @@ export interface TrainLoraData {
 		/** 每个图像重复训练次数 */
 		num_repeats: number;
 		// 秋叶没有啊，
-		// dataset_repeats: number;
-		// 不是改成 optimizer_args 吗？
-		// optimizer_args_custom:string;
+		dataset_repeats?: number;
+		/**
+		 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
+		 * 示例：weight_decay=0.01 betas=.9,.999
+		 */
+		optimizer_args: string;
 		/** 优化器设置 */
 		optimizer_type: string;
 		/** lora保存路径 */
@@ -129,9 +130,6 @@ export interface TrainLoraData {
 		persistent_data_loader_workers: boolean;
 		/** 随机剪裁 */
 		random_crop: boolean;
-		// 不是改成 resolution 吗？
-		// resolution_height:number;
-		// resolution_width:number;
 		/** 从某个 save_state 保存的中断状态继续训练，选择文件路径 */
 		resume: string;
 		/** 每 N epoch（轮）自动保存一次模型 */
@@ -140,8 +138,8 @@ export interface TrainLoraData {
 		save_model_as: string;
 		/** 模型保存精度 */
 		save_precision: string;
-		// 官方只有save_state_on_train_end 配置
-		// save_state:boolean;
+		/** 保存训练状态 配合 resume 参数可以继续从某个状态训练 */
+		save_state: boolean;
 		/** 启用 sdpa */
 		sdpa: boolean;
 		/** 随机种子 */
@@ -151,19 +149,41 @@ export interface TrainLoraData {
 		/** sigmoid 缩放 */
 		sigmoid_scale: number;
 		/** 文本编码器学习率，转成数字 */
-		text_encoder_lr: number;
+		text_encoder_lr: number | undefined;
 		/** flux 时间步采样 */
 		timestep_sampling: string;
 		/** 批量大小, 越高显存占用越高 */
 		train_batch_size: number;
-		// 这个和 dataset里的image_dir重复了吧
-		// train_data_dir:string;
-		// 搜不到这个参数
-		// ui_custom_params:string;
 		/** U-Net 学习率，转成数字 */
-		unet_lr: number;
+		unet_lr: number | undefined;
 		/** 使用带权重的 token，不推荐与 shuffle_caption 一同开启 */
 		weighted_captions: boolean;
+		/** AE 模型文件路径 */
+		ae: string;
+		/** CLIP-L 模型文件路径 */
+		clip_l: string;
+		/** t5xxl 模型文件路径 */
+		t5xxl: string;
+		/** 打标模型 */
+		tagger_model: string;
+		/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
+		t5xxl_max_token_length: number | undefined;
+		/** 最小信噪比伽马值, 如果启用推荐为 5 */
+		min_snr_gamma: number | undefined;
+		/** 最大范数正则化。如果使用，推荐为 1 */
+		scale_weight_norms: number | undefined;
+		/** 丢弃全部标签的概率，对一个图片概率不使用 caption 或 class token */
+		caption_dropout_rate: number | undefined;
+		/** 每 N 个 epoch 丢弃全部标签 */
+		caption_dropout_every_n_epochs: number | undefined;
+		/** 按逗号分隔的标签来随机丢弃 tag 的概率 */
+		caption_tag_dropout_rate: number | undefined;
+		/** CLIP 跳过层数 玄学 */
+		clip_skip: number;
+		/** vae 编码批量大小 */
+		vae_batch_size: number | undefined;
+		/** 分布式训练超时时间（分钟） */
+		ddp_timeout: number | undefined;
 	};
 	dataset: {
 		datasets: [
@@ -194,21 +214,3 @@ export interface TrainLoraData {
 		};
 	};
 }
-
-/**
- * 缺少 "pretrained_model_name_or_path"
- * ae
- * clip_l
- * t5xxl
- * tagger_model
- * t5xxl_max_token_length
- * min_snr_gamma
- * scale_weight_norms
- * caption_dropout_rate
- * caption_dropout_every_n_epochs
- * caption_tag_dropout_rate
- * clip_skip
- * vae_batch_size
- * ddp_timeout
- *
- */

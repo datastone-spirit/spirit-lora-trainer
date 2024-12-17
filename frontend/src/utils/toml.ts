@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:17:12
- * @LastEditTime: 2024-12-17 10:16:39
+ * @LastEditTime: 2024-12-17 17:44:00
  * @LastEditors: mulingyuer
  * @Description: toml相关工具
  * @FilePath: \frontend\src\utils\toml.ts
@@ -12,6 +12,7 @@ import { formatDate } from "@/utils/dayjs";
 
 /** 生成toml字符串 */
 export function tomlStringify(obj: any): string {
+	// 用easyDeepClone进行深度克隆，JSON会对对象的key进行排序
 	return stringify(obj);
 }
 

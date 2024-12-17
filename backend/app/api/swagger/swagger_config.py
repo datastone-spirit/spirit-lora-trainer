@@ -336,149 +336,10 @@ tag_manual_config = {
     },
 }
 
-save_config_config = {
-    "tags": ["Training"],
-    "description": "保存配置内容",
-    "parameters": [
-        {
-            "name": "config_name",
-            "in": "query",
-            "type": "string",
-            "required": True,
-            "description": "配置名称，用于标识保存的配置",
-        },
-        {
-            "name": "config_content",
-            "in": "query",
-            "type": "string",
-            "required": True,
-            "description": "配置内容，以 JSON 格式表示配置的详细内容",
-        },
-    ],
-    "responses": {
-        "200": {
-            "description": "配置保存结果",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "success": {"type": "boolean", "example": True},
-                    "msg": {"type": "string", "example": "配置保存成功"},
-                },
-            },
-        },
-        "400": {
-            "description": "配置保存失败",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "success": {"type": "boolean", "example": False},
-                    "msg": {"type": "string", "example": "配置内容格式无效，请提供有效的 JSON 内容"},
-                },
-            },
-        },
-    },
-}
-
-get_config_config = {
-    "tags": ["Training"],
-    "description": "获取保存的配置内容",
-    "parameters": [
-        {
-            "name": "config_name",
-            "in": "query",
-            "type": "string",
-            "required": True,
-            "description": "配置名称，用于读取相应的配置",
-        },
-    ],
-    "responses": {
-        "200": {
-            "description": "返回配置内容",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "success": {"type": "boolean", "example": True},
-                    "data": {
-                        "type": "object",
-                        "description": "配置内容",
-                        "example": {"model_name": "florence2", "image_size": [224, 224]},
-                    },
-                },
-            },
-        },
-        "400": {
-            "description": "配置文件不存在",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "success": {"type": "boolean", "example": False},
-                    "msg": {"type": "string", "example": "配置文件不存在"},
-                },
-            },
-        },
-    },
-}
-
-# 启动训练
-start_training_config = {
-    "tags": ["Training"],
-    "description": "启动训练任务",
-    "parameters": [
-        {
-            "name": "config_name",
-            "in": "body",
-            "type": "string",
-            "required": True,
-            "description": "配置名称，指定要使用的训练配置文件",
-        }
-    ],
-    "responses": {
-        "200": {
-            "description": "返回训练任务启动结果",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "success": {"type": "boolean", "example": True},
-                    "msg": {
-                        "type": "string",
-                        "example": "训练任务已启动",
-                    },
-                },
-            },
-        },
-        "400": {
-            "description": "请求无效，配置文件不存在或读取失败",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "success": {"type": "boolean", "example": False},
-                    "msg": {
-                        "type": "string",
-                        "example": "配置文件不存在",
-                    },
-                },
-            },
-        },
-        "500": {
-            "description": "服务器错误，训练启动失败",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "success": {"type": "boolean", "example": False},
-                    "msg": {
-                        "type": "string",
-                        "example": "训练启动失败",
-                    },
-                },
-            },
-        },
-    },
-}
-
-# 生成命令参数
-generate_sh_config = {
+# 启动训练任务
+start_training = {
   "tags": ["Training"],
-  "description": "获取保存的配置内容",
+   "description": "启动训练任务",
   "parameters": [
     {
       "name": "config",
@@ -650,22 +511,51 @@ generate_sh_config = {
   }
 }
   ],
-  "responses": {
-    "200": {
-      "description": "返回配置内容",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "success": { "type": "boolean", "example": True },
-          "data": { 
-            "type": "string",
-            "description": "TOML 格式的配置文件内容",
-            "example": ""
-          }
-        }
-      }
+    "responses": {
+        "200": {
+            "description": "返回训练任务启动结果",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": True},
+                    "task_id": {
+                        "type": "string",
+                        "example": "id of the task",
+                    },
+                    "msg": {
+                        "type": "string",
+                        "example": "训练任务已启动",
+                    }
+                },
+            },
+        },
+        "400": {
+            "description": "请求无效，配置文件不存在或读取失败",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "msg": {
+                        "type": "string",
+                        "example": "配置文件不存在",
+                    },
+                },
+            },
+        },
+        "500": {
+            "description": "服务器错误，训练启动失败",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "msg": {
+                        "type": "string",
+                        "example": "训练启动失败",
+                    },
+                },
+            },
+        },
     }
-  }
 }
 
 gpu_log_config = {

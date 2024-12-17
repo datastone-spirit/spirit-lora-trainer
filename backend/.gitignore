@@ -5,3 +5,4 @@ configs
 outputs
 sd-scripts/
 .vscode/
+venv/

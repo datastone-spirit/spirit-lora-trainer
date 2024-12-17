@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-16 17:56:36
+ * @LastEditTime: 2024-12-17 10:03:03
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -39,7 +39,7 @@
 				<SplitRightPanel :toml="toml" />
 			</template>
 		</TwoSplit>
-		<ConfigBtns />
+		<ConfigBtns @load-config="onLoadConfig" :export-config="onExportConfig" />
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="flux-footer-bar" :size="40">
 				<SystemMonitor v-if="showSystemMonitor" :data="systemMonitorData" />
@@ -68,7 +68,7 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import ConfigBtns from "./components/Footer/ConfigBtns.vue";
 import { useSettingsStore } from "@/stores";
-import { generateTomlString } from "@/utils/toml";
+import { tomlStringify } from "@/utils/toml";
 import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
 import type { LoRATrainingMonitorProps } from "@/components/Monitor/LoRATrainingMonitor/index.vue";
 
@@ -210,7 +210,7 @@ const openStep4 = ref(true);
 const toml = ref("");
 const generateToml = useDebounceFn(() => {
 	const tomlData = removeUndefinedKeys(ruleForm.value);
-	toml.value = generateTomlString(tomlData);
+	toml.value = tomlStringify(tomlData);
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
@@ -260,6 +260,15 @@ function stopRandomSystemMonitorData() {
 		clearInterval(timer);
 		timer = null;
 	}
+}
+
+// 导入配置
+function onLoadConfig(config: any) {
+	console.log("🚀 ~ onLoadConfig ~ config:", config);
+}
+// 导出配置
+function onExportConfig() {
+	return ruleForm.value;
 }
 
 /** 提交表单 */

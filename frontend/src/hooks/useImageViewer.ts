@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-16 09:50:57
- * @LastEditTime: 2024-12-16 10:11:57
+ * @LastEditTime: 2024-12-17 09:09:05
  * @LastEditors: mulingyuer
  * @Description: 图片预览
  * @FilePath: \frontend\src\hooks\useImageViewer.ts
@@ -23,6 +23,7 @@ export function useImageViewer() {
 			onClose() {
 				render(null, container);
 				vmDom && document.body.removeChild(vmDom);
+				container.remove();
 			}
 		});
 
@@ -30,9 +31,6 @@ export function useImageViewer() {
 		render(vm, container);
 		vmDom = container.firstElementChild!;
 		document.body.appendChild(vmDom);
-
-		// 销毁容器
-		container.remove();
 	}
 
 	return {

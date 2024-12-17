@@ -41,6 +41,7 @@ declare module 'vue' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElText: typeof import('element-plus/es')['ElText']
     ElTreeSelect: typeof import('element-plus/es')['ElTreeSelect']
+    ElUpload: typeof import('element-plus/es')['ElUpload']
     FieldSetWrapper: typeof import('./../src/components/FieldSetWrapper/FieldSetWrapper.vue')['default']
     FileSelector: typeof import('./../src/components/Form/FileSelector.vue')['default']
     FluxNetworkModuleSelect: typeof import('./../src/components/Form/FluxNetworkModuleSelect.vue')['default']

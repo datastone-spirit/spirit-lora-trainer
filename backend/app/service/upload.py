@@ -1,4 +1,5 @@
 import os
+import time
 from typing import List, Union
 import torch
 from transformers import AutoProcessor, AutoModelForCausalLM
@@ -36,48 +37,15 @@ class UploadService:
     def get_upload_progress(self, upload_id):
         """获取上传任务的总进度"""
         if upload_id not in self.UPLOAD_PROGRESS:
-            return {"progress": 0, "total_size": 0}
+            return {"progress": 0}
 
         # 返回整个上传任务的进度
         return {
-            "progress": int(self.UPLOAD_PROGRESS[upload_id]["total_progress"]),
-            "total_size": self.UPLOAD_PROGRESS[upload_id]["total_size"],
+            "progress": int(self.UPLOAD_PROGRESS[upload_id]),
         }
     
-    def update_upload_progress(self, upload_id, file_name, progress, total_size):
-        """更新单个文件的上传进度"""
-        if upload_id not in self.UPLOAD_PROGRESS:
-            self.UPLOAD_PROGRESS[upload_id] = {"files": [], "total_progress": 0, "total_size": 0}
-
-        # 查找文件是否已经在进度列表中
-        file_info = next(
-            (item for item in self.UPLOAD_PROGRESS[upload_id]["files"] if item["file_name"] == file_name),
-            None,
-        )
-
-        if file_info:
-            # 更新文件的进度
-            file_info["progress"] = progress
-            file_info["total_size"] = total_size
-        else:
-            # 新增文件进度
-            self.UPLOAD_PROGRESS[upload_id]["files"].append(
-                {"file_name": file_name, "progress": progress, "total_size": total_size}
-            )
-        # 计算总进度
-        total_progress = 0
-        total_size = 0
-        for file in self.UPLOAD_PROGRESS[upload_id]["files"]:
-            total_progress += file["progress"] * file["total_size"]
-            total_size += file["total_size"]
-
-        # 计算加权平均进度
-        if total_size > 0:
-            self.UPLOAD_PROGRESS[upload_id]["total_progress"] = (total_progress / total_size) if total_size else 0
-        else:
-            self.UPLOAD_PROGRESS[upload_id]["total_progress"] = 0
-
-        self.UPLOAD_PROGRESS[upload_id]["total_size"] = total_size
+    def update_upload_progress(self, upload_id, progress):
+        self.UPLOAD_PROGRESS[upload_id] = progress
 
     def generate_progress(self, upload_id):
             """通过 EventStream 实时推送上传进度"""
@@ -86,7 +54,11 @@ class UploadService:
                 if progress_info["progress"] >= 100:
                     # 上传完成，推送最终进度并结束流
                     yield f"data: {str(progress_info)}\n\n"
+                    self.UPLOAD_PROGRESS[upload_id] = 0
                     break
                 else:
                     # 上传中，推送当前进度
                     yield f"data: {str(progress_info)}\n\n"
+                
+                # 等待1秒，避免频繁获取，给后台上传任务时间更新进度
+                time.sleep(1)

@@ -28,6 +28,13 @@ class Upload(Resource):
 
         uploaded_files = []  # 存储上传文件的信息
         invalid_files = []  # 存储不符合条件的文件
+        files_total_size = sum(len(f.read()) for f in files)
+        uploaded_size = 0
+        UploadService().update_upload_progress(upload_id, 0)  # 初始化进度
+
+        # 重置文件流位置
+        for f in files:
+            f.seek(0)
 
         for file in files:
             if file and UploadService().allowed_file(file.filename):
@@ -37,12 +44,6 @@ class Upload(Resource):
                 )  # 获取唯一文件名
                 upload_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 file_path = os.path.join(upload_path, unique_filename)
-
-                # 获取文件的总大小
-                total_size = len(file.read())
-                UploadService().update_upload_progress(
-                    upload_id, unique_filename, 0, total_size
-                )  # 初始化进度
 
                 # 保存文件到指定目录
                 if not os.path.exists(upload_path):
@@ -58,30 +59,22 @@ class Upload(Resource):
                     }
                 )
 
-                # 重置文件流位置
-                file.seek(0)
-
                 # 进行文件上传并实时更新进度
                 with open(file_path, "wb") as f:
                     chunk_size = 1024 * 1024  # 每次写入1MB
-                    bytes_written = 0
                     for chunk in iter(lambda: file.read(chunk_size), b""):
                         f.write(chunk)
-                        bytes_written += len(chunk)
-                        progress = int((bytes_written / total_size) * 100)
-                        print(f"{UploadService().get_upload_progress(upload_id)}---------{UploadService().UPLOAD_PROGRESS}")
-                        UploadService().update_upload_progress(
-                            upload_id, unique_filename, progress, total_size
-                        )
+                        uploaded_size += len(chunk)  # 更新已上传字节数
+                        progress = (uploaded_size / files_total_size) * 100
+                        print(f"{UploadService().get_upload_progress(upload_id)}")
+                        UploadService().update_upload_progress(upload_id, progress)
 
                         # 在每次写入时加上延迟，模拟上传过程
-                        time.sleep(1)  # 延迟0.5秒，模拟上传延迟
+                        # time.sleep(3)  # 延迟0.5秒，模拟上传延迟
             else:
-                # 如果文件不是有效的图片格式，添加到 invalid_files
                 invalid_files.append(file.filename)
 
             if invalid_files:
-                # 如果有无效文件，返回错误信息并终止上传
                 return res(
                     success=False,
                     message=f"以下文件类型不支持：{', '.join(invalid_files)}",
@@ -98,7 +91,6 @@ class UploadProgress(Resource):
         upload_id = request.args.get("upload_id")
         if not upload_id:
             return res(success=False, message="缺少 upload_id 参数")
-
         # 使用 Response 返回 EventStream 流式响应
         return Response(
             stream_with_context(UploadService().generate_progress(upload_id)),

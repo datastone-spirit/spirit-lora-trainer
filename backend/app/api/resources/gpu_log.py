@@ -12,9 +12,7 @@ class GpuLog(Resource):
         """
         获取 GPU 数据信息。
         """
-
         try:
-
             # 获取 GPU 数据
             gpu_info = TrainingService().get_gpu_info()
 

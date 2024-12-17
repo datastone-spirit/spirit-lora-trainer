@@ -20,7 +20,7 @@ class Dataset:
     batch_size: int
     keep_tokens: int
     resolution: int
-    subsets: Optional[List[Subset]] 
+    subsets: Optional[List[Subset]]
 
     @classmethod
     def from_dict(cls, dikt) -> 'Dataset':

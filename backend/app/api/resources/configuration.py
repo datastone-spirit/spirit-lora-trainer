@@ -30,7 +30,6 @@ class SaveConfig(Resource):
         except json.JSONDecodeError:
             return res(success=False, message="配置内容格式无效，请提供有效的 JSON 内容")
         
-
         # 配置文件路径
         config_file_path = os.path.join(config_dir, f"{config_name}.json")
 

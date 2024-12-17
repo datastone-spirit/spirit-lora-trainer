@@ -60,14 +60,22 @@ class TrainingTask(Task):
             logger.info("beginning to run proc communication with training process")
             #self.proc = subprocess.Popen(self.proc.args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             stdout_lines = []
+            linestr = ''
+            line = bytearray()
             while True:
-                output = self.proc.stdout.readline()
-                if output == '' and self.proc.poll() is not None:
+                ch = self.proc.stdout.read(1)
+                if ch == b'' and self.proc.poll() is not None:
                     break
-                if output:
-                    stdout_lines.append(output.strip())
-                    self.parse_stdout(output.strip())
-                    print(output.strip())
+                line.extend(ch)
+                if ch == b'\n':
+                    linestr = line.decode('utf-8', errors='ignore')
+                    if linestr == "\n":
+                        logger.info("can't parse line str")
+                    print(linestr, end='')
+                    self.parse_progress_line(linestr) 
+                    stdout_lines.append(linestr)
+                    self.parse_stdout(linestr)
+                    line = bytearray()  #
             stdout, stderr = self.proc.communicate()
         except TimeoutExpired as exc:
             self.proc.kill()
@@ -112,4 +120,45 @@ total optimization steps / 学習ステップ数: 100
             match = re.search(regex, stdout)
             if match:
                 self.detail[key] = int(match.group(1))
-        pass
+
+    def parse_progress_line(self, line):
+        """Parse elements from progress bar output
+        
+        Examples:
+            >>> parse_progress_line("steps: 100%|██████████| 40/40 [00:42<00:00,  1.07s/it, avr_loss=0.145]")
+            {
+                'progress': 100,
+                'current': 40,
+                'total': 40,
+                'elapsed': '00:42',
+                'remaining': '00:00',
+                'speed': 1.07,
+                'loss': 0.145
+            }
+        """
+        if not ('|' in line and '%' in line and 'steps' in line and '/' in line ):
+            return
+            
+        patterns = {
+            'progress': r'(\d+)%',
+            'steps': r'\|?\s*(\d+)/(\d+)',
+            'time': r'\[(.*?)(?=<)<(.*?)(?=,)',  # Using lookahead to exclude < and ,
+            'speed': r'([\d.]+)s/it',
+            'loss': r'avr_loss=([\d.]+)'
+        }
+        
+        for key, pattern in patterns.items():
+            match = re.search(pattern, line)
+            if match:
+                if key == 'steps':
+                    self.detail['current'] = int(match.group(1))
+                    self.detail['total'] = int(match.group(2))
+                elif key == 'time':
+                    self.detail['elapsed'] = match.group(1)
+                    self.detail['remaining'] = match.group(2)
+                elif key == 'progress':
+                    self.detail[key] = int(match.group(1))
+                elif key == 'speed':
+                    self.detail[key] = float(match.group(1))
+                elif key == 'loss':
+                    self.detail[key] = float(match.group(1))

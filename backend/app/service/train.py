@@ -84,7 +84,7 @@ class TrainingService:
         customize_env["NCCL_P2P_DISABLE"]="1"
         customize_env["NCCL_IB_DISABLE"]="1"
 
-        return Task.wrap_training(subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=customize_env), training_paramters)
+        return Task.wrap_training(subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env), training_paramters)
 
     def get_gpu_info(self):
         try:

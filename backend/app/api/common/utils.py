@@ -140,8 +140,9 @@ def validate_dataset(dataset) -> 'Tuple[bool, str]':
     
 
 def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
-    if config.output_name is None:
+    if config.output_name is None or config.output_name == "":
         return False, "output_name is required"
+
     if config.bucket_reso_steps is None or config.bucket_reso_steps <= 32 or config.bucket_reso_steps % 64 != 0:
         logging.warning("bucket_reso_steps is not set, set to 64, must be multiple of 64")
         config.bucket_reso_steps = 64
@@ -150,25 +151,25 @@ def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
         logging.warning("clip_l is not set, set to default")
         config.clip_l = getmodelpath() + "/clip/clip_l.safetensors"
     elif not os.path.exists(config.clip_l):
-        return False, "clip_l is not exists"
+        return False, f"file {config.clip_l} is not exists"
 
     if config.t5xxl is None or config.t5xxl == "":
         logging.warning("t5xxl is not set, set to default")
         config.t5xxl = getmodelpath() + "/clip/t5xxl_fp16.safetensors"
     elif not os.path.exists(config.t5xxl):
-        return False, "t5xxl is not exists"
+        return False, f"file t5xxl {config.t5xxl} is not exists"
 
     if config.ae is None or config.ae == "":
         logging.warning("ae is not set, set to default")
         config.ae = getmodelpath() + "/vae/ae.safetensors"
     elif not os.path.exists(config.ae):
-        return False, "ae is not exists"
+        return False, f"file ae {config.ae} is not exists"
 
     if config.pretrained_model_name_or_path is None or config.pretrained_model_name_or_path == "":
         logging.warning("pretrained_model_name_or_path is not set, set to default")
         config.pretrained_model_name_or_path = getmodelpath() + "/unet/flux1-dev.safetensors"
     elif not os.path.exists(config.pretrained_model_name_or_path):
-        return False, "pretrained_model_name_or_path is not exists"
+        return False, f"file pretrained model {config.pretrained_model_name_or_path} is not exists"
     
     if config.resolution is None or config.resolution == "":
         logging.warning("resolution is requirements, set default to 1024,1024")

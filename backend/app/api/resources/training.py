@@ -21,7 +21,6 @@ class Training(Resource):
         data = request.get_json()
 
         parameter = TrainingParameter.from_dict(data)
-
         try:
             task = TrainingService().training(parameter)
             return {
@@ -29,6 +28,12 @@ class Training(Resource):
                     'task_id': task.id,
                     'msg': f"task {task.id} started successfully."
                 }, 200
+        except ValueError as e:
+            logger.warning(f"start training with parameter:{parameter} failed, error: {e}") 
+            return {
+                'success': False,
+                'msg': str(e)
+                }, 400
         except Exception as e:
             logger.warning(f"start training with parameter:{parameter} failed, error: {e}") 
             return {

@@ -1,13 +1,10 @@
 import os
 import shutil
 import yaml
-from flask import Flask, request, jsonify
-from datetime import datetime
-from slugify import slugify
 from typing import Optional
 import sys
 from ..api.model.training_paramter import TrainingParameter
-from ..api.common.utils import config2args, validate_parameter,config2args2, dataset2toml, config2toml
+from ..api.common.utils import validate_parameter, dataset2toml, config2toml
 from utils.util import getprojectpath, resolveProjectPath
 import logging
 import subprocess
@@ -20,7 +17,7 @@ class TrainingService:
         valid, reason = validate_parameter(parameters)
         if not valid:
             logging.warning(f"valid parameters error: {parameters}")
-            raise Exception(f"valid reqest failed, reason{reason}")
+            raise ValueError(f"valid reqest failed, reason{reason}")
         
         dataset_path = dataset2toml(parameters.dataset)
         config_path = config2toml(parameters.config, dataset_path)

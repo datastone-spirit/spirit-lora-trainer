@@ -1,8 +1,8 @@
 /*
  * @Author: mulingyuer 1321968423@qq.com
  * @Date: 2024-12-04 09:25:15
- * @LastEditors: mulingyuer 1321968423@qq.com
- * @LastEditTime: 2024-12-13 10:05:02
+ * @LastEditors: mulingyuer
+ * @LastEditTime: 2024-12-18 17:07:26
  * @FilePath: \frontend\eslint.config.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -51,8 +51,13 @@ export default [
 			"@typescript-eslint/no-unused-vars": [
 				"error",
 				{
+					args: "all",
 					argsIgnorePattern: "^_",
-					varsIgnorePattern: "^_"
+					caughtErrors: "all",
+					caughtErrorsIgnorePattern: "^_",
+					destructuredArrayIgnorePattern: "^_",
+					varsIgnorePattern: "^_",
+					ignoreRestSiblings: true
 				}
 			],
 			"@typescript-eslint/no-unused-expressions": "off"

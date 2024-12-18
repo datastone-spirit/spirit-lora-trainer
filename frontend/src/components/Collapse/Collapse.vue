@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 15:29:23
- * @LastEditTime: 2024-12-12 10:14:44
+ * @LastEditTime: 2024-12-18 16:21:44
  * @LastEditors: mulingyuer
  * @Description: 折叠面板
  * @FilePath: \frontend\src\components\Collapse\Collapse.vue
@@ -55,7 +55,6 @@ function onToggleCollapse() {
 	margin-bottom: $zl-collapse-margin;
 	background-color: var(--zl-collapse-bg);
 	border-radius: $zl-border-radius;
-	overflow: hidden;
 }
 .collapse-header {
 	display: flex;

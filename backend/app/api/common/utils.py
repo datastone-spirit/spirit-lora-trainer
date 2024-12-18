@@ -4,10 +4,14 @@ from flasgger import swag_from
 from dataclasses import asdict
 from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset, TrainingDataset
 from typing import List, Tuple
-from utils.util import getmodelpath
-import logging
+from utils.util import getmodelpath, getprojectpath
 import tempfile
 import toml
+
+from utils.util import setup_logging
+setup_logging()
+import logging
+logger = logging.getLogger(__name__)
     
 # 公共 response 方法
 def res(data=None, message="Ok", success=True, code=200):
@@ -95,37 +99,84 @@ def config2args2(parameter :TrainingConfig) -> 'List[str]':
                 args.append(f'{value}')
     return args
 
-def validate_subsets(subsets: List[Subset]) -> 'Tuple[bool, str]':
+    
+def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[bool, str]':
+    if not os.path.isdir(image_dir):
+        return False, f"{image_dir} is not a valid directory"
+
+    valid_image_extensions = {".png", ".jpg", ".jpeg"}
+    valid_images = []
+    valid_captions = []
+
+    for file_name in os.listdir(image_dir):
+        file_path = os.path.join(image_dir, file_name)
+        if os.path.isfile(file_path):
+            file = os.path.splitext(file_name)
+            if len(file) < 2:
+                logger.warning(f"ignore file {file_name} which hasn't extension")
+                continue
+
+            file_ext = file[1].lower()
+            if file_ext in valid_image_extensions:
+                valid_images.append(file_name)
+                caption_file = file[0] + caption_ext
+                caption_path = os.path.join(image_dir, caption_file)
+                if os.path.isfile(caption_path):
+                    valid_captions.append(caption_file)
+
+    if len(valid_images) < 1 or len(valid_captions) < 1:
+        return False, f"No valid images found in the directory {image_dir}"
+
+    if len(valid_images) != len(valid_captions):
+        return True, f"Mismatch between images {len(valid_images)} and caption files {len(valid_captions)}"
+
+    return True, "OK" 
+
+def validate_subsets(subsets: List[Subset], captioning_ext: str = ".txt") -> 'Tuple[bool, str]':
+    if subsets is None or len(subsets) == 0 :
+        return False, "subsets is required"
+
     for idx in range(len(subsets)):
         if subsets[idx].class_tokens is None:
             return False, "class_tokens is required"
-        if subsets[idx].image_dir is None:
+
+        if subsets[idx].image_dir is None or subsets[idx].image_dir == "":
             return False, "image_dir is required"
+
+        if os.path.exists(subsets[idx].image_dir) and not os.path.isdir(subsets[idx].image_dir):
+            return False, f"image_dir {subsets[idx].image_dir} of subsets must be a directory"
+        
+        valid, reason = validate_training_data(subsets[idx].image_dir, captioning_ext)
+        if not valid :
+            return valid, reason
+
         if subsets[idx].num_repeats is None or subsets[idx].num_repeats <= 0:
-            logging.warning("num_repeats is not set, set to 1")
+            logger.warning("num_repeats is not set, set to 1")
             subsets[idx].num_repeats = 1
     return True, "Ok"
 
-def validate_datasets(datasets :List[Dataset]) -> 'Tuple[bool, str]':
+def validate_datasets(parameter: TrainingParameter, datasets :List[Dataset]) -> 'Tuple[bool, str]':
+    if datasets is None or len(datasets) == 0:
+        return False, "datasets is required"
+
     for idx in range(len(datasets)):
-        if idx >= len(datasets):
-            break
         if datasets[idx].batch_size is None or datasets[idx].batch_size <= 0:
-            logging.warning("batch_size is not set, set to 1")
+            logger.warning("batch_size is not set, set to 1")
             datasets[idx].batch_size = 1
 
-        validate, reason = validate_subsets(datasets[idx].subsets)
+        validate, reason = validate_subsets(datasets[idx].subsets, parameter.config.caption_extension)
         if not validate:
             return validate, reason
 
         if datasets[idx].resolution < 0:
             return False, "resolution must be greater than 0"
-        idx += 1
+
     return True, "Ok"
 
-def validate_dataset(dataset) -> 'Tuple[bool, str]':
+def validate_dataset(parameter :TrainingParameter, dataset) -> 'Tuple[bool, str]':
     if dataset.datasets is None:
         return False, "datasets is required"
+
     if dataset.general is None:
         return False, "general is required"
     
@@ -133,51 +184,61 @@ def validate_dataset(dataset) -> 'Tuple[bool, str]':
         dataset.general.caption_extension = ".txt"
     
     if dataset.general.keep_tokens is None:
-        logging.warning("keep_tokens is not set, set to 1")
+        logger.warning("keep_tokens is not set, set to 1")
         dataset.general.keep_tokens = 1
     
-    return validate_datasets(dataset.datasets)
+    return validate_datasets(parameter, dataset.datasets)
     
 
 def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
     if config.output_name is None or config.output_name == "":
         return False, "output_name is required"
+    
+    if config.output_dir is None or config.output_dir == "":
+        return False, "output_dir is required"
+    elif os.path.isabs(config.output_dir) and not os.path.exists(config.output_dir):
+        return False, f"output_dir {config.output_dir} is not exists"
+    elif not os.path.isabs(config.output_dir) and not os.path.exists(os.path.join(getprojectpath(), config.output_dir)):
+        return False, f"output_dir {os.path.join(getprojectpath(), config.output_dir)} is not exists"
 
     if config.bucket_reso_steps is None or config.bucket_reso_steps <= 32 or config.bucket_reso_steps % 64 != 0:
-        logging.warning("bucket_reso_steps is not set, set to 64, must be multiple of 64")
+        logger.warning("bucket_reso_steps is not set, set to 64, must be multiple of 64")
         config.bucket_reso_steps = 64
     
     if config.clip_l is None or config.clip_l == "":
-        logging.warning("clip_l is not set, set to default")
-        config.clip_l = getmodelpath() + "/clip/clip_l.safetensors"
+        logger.warning("clip_l is not set, set to default")
+        config.clip_l = os.path.join(getmodelpath() , "clip", "clip_l.safetensors")
     elif not os.path.exists(config.clip_l):
         return False, f"file {config.clip_l} is not exists"
 
     if config.t5xxl is None or config.t5xxl == "":
-        logging.warning("t5xxl is not set, set to default")
-        config.t5xxl = getmodelpath() + "/clip/t5xxl_fp16.safetensors"
+        logger.warning("t5xxl is not set, set to default")
+        config.t5xxl = os.path.join(getmodelpath() , "clip", "t5xxl_fp16.safetensors")
     elif not os.path.exists(config.t5xxl):
         return False, f"file t5xxl {config.t5xxl} is not exists"
 
     if config.ae is None or config.ae == "":
-        logging.warning("ae is not set, set to default")
-        config.ae = getmodelpath() + "/vae/ae.safetensors"
+        logger.warning("ae is not set, set to default")
+        config.ae = os.path.join(getmodelpath() , "vae", "ae.safetensors")
     elif not os.path.exists(config.ae):
         return False, f"file ae {config.ae} is not exists"
 
     if config.pretrained_model_name_or_path is None or config.pretrained_model_name_or_path == "":
-        logging.warning("pretrained_model_name_or_path is not set, set to default")
-        config.pretrained_model_name_or_path = getmodelpath() + "/unet/flux1-dev.safetensors"
+        logger.warning("pretrained_model_name_or_path is not set, set to default")
+        config.pretrained_model_name_or_path = os.path.join(getmodelpath() , "unet", "flux1-dev.safetensors")
     elif not os.path.exists(config.pretrained_model_name_or_path):
         return False, f"file pretrained model {config.pretrained_model_name_or_path} is not exists"
     
     if config.resolution is None or config.resolution == "":
-        logging.warning("resolution is requirements, set default to 1024,1024")
+        logger.warning("resolution is requirements, set default to 1024,1024")
         config.resolution = "1024,1024"
 
     if config.network_weights == '':
-        logging.warning('network_wights should be set to None when empty')
+        logger.info('network_wights should be set to None when empty')
         config.network_weights = None
+
+    if config.caption_extension is None or config.caption_extension == "":
+        config.caption_extension = ".txt"
 
     return True, "Ok"
 
@@ -186,23 +247,24 @@ def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
     if not validated:
         return validated, reason
     
-    validated, reason = validate_dataset(parameter.dataset)
+    validated, reason = validate_dataset(parameter, parameter.dataset)
     return validated, reason
 
 
 def config2toml(config: TrainingConfig, dataset_path: str) -> str:
-    
     config.dataset_config = dataset_path
     configdikt = asdict(config)
-    logging.warning(f"configdikt is {configdikt}")
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
     temp_file_path = temp_file.name
+
+    logger.info(f"config file path is {temp_file_path}")
 
     # Write the dictionary to the temporary file in TOML format
     with open(temp_file_path, 'w+', encoding='utf-8') as f:
         toml.dump(configdikt, f)
     return temp_file_path
+
 
 def dataset2toml(dataset :TrainingDataset) -> str:
     # accroding to the value of feild to generate a toml format file 
@@ -213,6 +275,7 @@ def dataset2toml(dataset :TrainingDataset) -> str:
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
     temp_file_path = temp_file.name
+    logger.info(f"dataset file path is {temp_file_path}")
 
     # Write the dictionary to the temporary file in TOML format
     with open(temp_file_path, 'w+', encoding='utf-8') as f:

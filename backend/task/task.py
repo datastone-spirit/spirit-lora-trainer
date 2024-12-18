@@ -69,8 +69,6 @@ class TrainingTask(Task):
                 line.extend(ch)
                 if ch == b'\n':
                     linestr = line.decode('utf-8', errors='ignore')
-                    if linestr == "\n":
-                        logger.info("can't parse line str")
                     print(linestr, end='')
                     self.parse_progress_line(linestr) 
                     stdout_lines.append(linestr)

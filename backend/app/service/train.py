@@ -5,72 +5,81 @@ from typing import Optional
 import sys
 from ..api.model.training_paramter import TrainingParameter
 from ..api.common.utils import validate_parameter, dataset2toml, config2toml
-from utils.util import getprojectpath, resolveProjectPath
+from utils.util import getprojectpath 
 import logging
 import subprocess
 from task.manager import task_decorator
 from task.task import Task
+import re
+
+from utils.util import setup_logging
+setup_logging()
+import logging
+logger = logging.getLogger(__name__)
 
 class TrainingService:
 
-    def training(self,parameters :TrainingParameter):
+    def __init__(self) -> 'TrainingService':
+        self.script = f"{getprojectpath()}/sd-scripts/flux_train_network.py"
+
+
+    def training(self, parameters :TrainingParameter):
         valid, reason = validate_parameter(parameters)
         if not valid:
-            logging.warning(f"valid parameters error: {parameters}")
-            raise ValueError(f"valid reqest failed, reason{reason}")
+            logger.warning(f"valid parameters error: {parameters}")
+            raise ValueError(f"valid reqest failed, reason: {reason}")
         
+        #self.prepare_dataset_dir(parameters.dataset.datasets[0].subsets[0].image_dir, 
+        #                        parameters.dataset.datasets[0].subsets[0].num_repeats, 
+        #                        parameters.config.output_name)
         dataset_path = dataset2toml(parameters.dataset)
-        config_path = config2toml(parameters.config, dataset_path)
-        #self.generate_dir(parameters)
+        config_file = config2toml(parameters.config, dataset_path)
+        return self.run_train(config_file, script=self.script, training_paramters=parameters)
+    
 
-        return self.run_train(config_path, script=f"{getprojectpath()}/sd-scripts/flux_train_network.py", training_paramters=parameters)
+
+    def prepare_dataset_dir(self, root_dir : str, repeat_num : int, lora_name : str ) -> str:
         
-    # 生成训练目录
-    def generate_dir(self, parameters: TrainingParameter):
-        # 创建目标文件夹名
-        train_dir = parameters.dataset.datasets[0].subsets[0].image_dir
-        
-        if not train_dir.startswith('/'):
-           train_dir = f"{getprojectpath()}/{train_dir}/{parameters.config.dataset_repeats}_{parameters.config.output_name}" 
+        # Define the pattern to match old training directories
+        pattern = re.compile(rf"^{repeat_num}_.+$")
+
+        # Iterate through subdirectories
+        for subdir in os.listdir(root_dir):
+            subdir_path = os.path.join(root_dir, subdir)
+            if os.path.isdir(subdir_path) and pattern.match(subdir):
+                # Remove old training directory
+                shutil.rmtree(subdir_path)
+                logger.info(f"Removed old training directory: {subdir_path}")
+
+        # Create new subdirectory
+        new_subdir_name = f"{repeat_num}_{lora_name}"
+        new_subdir_path = os.path.join(root_dir, new_subdir_name)
+        os.makedirs(new_subdir_path, exist_ok=True)
+        logger.info(f"Created new training directory: {new_subdir_path}")
+
+        # Copy image files from root directory to new subdirectory
+        for file_name in os.listdir(root_dir):
+            file_path = os.path.join(root_dir, file_name)
+            if os.path.isfile(file_path) and file_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                shutil.copy(file_path, new_subdir_path)
+                logger.info(f"Copied {file_name} to {new_subdir_path}")
+
+        return new_subdir_path
             
-        folder_name = f"{resolveProjectPath(parameters.dataset.datasets[0].subsets[0].image_dir)}/{parameters.config.dataset_repeats}_{parameters.config.output_name}"
-        folder_path = os.path.abspath(folder_name)
-        # 删除当前目录中所有数字开头的文件夹
-        current_dir = f"{resolveProjectPath(parameters.dataset.datasets[0].subsets[0].image_dir)}"
-        for item in os.listdir(current_dir):
-            item_path = os.path.join(current_dir, item)
-            if os.path.isdir(item_path) and item[0].isdigit():
-                shutil.rmtree(item_path)
-
-        # 创建目标文件夹
-        os.makedirs(folder_path, exist_ok=True)
-        image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff'}
-        # 拷贝 captions_output 目录下的所有 .txt 文件
-        captions_dir = f"{resolveProjectPath(parameters.dataset.datasets[0].subsets[0].image_dir)}"
-        if os.path.exists(captions_dir) and os.path.isdir(captions_dir):
-            for filename in os.listdir(captions_dir):
-                if filename.endswith('.txt'):
-                    src_path = os.path.join(captions_dir, filename)
-                    shutil.copy(src_path, folder_path)
-        # 拷贝当前目录下的所有图片文件
-        for filename in os.listdir(current_dir):
-            file_ext = os.path.splitext(filename)[1].lower()
-            if file_ext in image_extensions:
-                src_path = os.path.join(current_dir, filename)
-                shutil.copy(src_path, folder_path)
     @task_decorator 
     def run_train(self,
-              toml_path: str,
+              config_file: str,
               script: str = "",
               training_paramters: TrainingParameter = None,
               gpu_ids: Optional[list] = None,
               cpu_threads: Optional[int] = 2):
+
         args = [
             sys.executable, "-m", "accelerate.commands.launch",
             "--num_cpu_threads_per_process", str(cpu_threads),
             "--quiet",
             script,
-            "--config_file", toml_path,
+            "--config_file", config_file,
         ]
 
         customize_env = os.environ.copy()

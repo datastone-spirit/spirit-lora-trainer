@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-18 17:08:33
- * @LastEditTime: 2024-12-18 17:18:26
+ * @LastEditTime: 2024-12-18 17:54:06
  * @LastEditors: mulingyuer
  * @Description: 可输入的树选择器
  * @FilePath: \frontend\src\components\Form\InputTreeSelector.vue
@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import type Node from "element-plus/es/components/tree/src/model/node";
 import { ArrowDown } from "@element-plus/icons-vue";
-import { ElTree } from "element-plus";
+import type { ElTree } from "element-plus";
 import { getDirectoryStructure } from "@/api/common";
 import type { GetDirectoryStructureParams, GetDirectoryStructureResult } from "@/api/common";
 

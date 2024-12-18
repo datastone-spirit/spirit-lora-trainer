@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-18 10:07:41
+ * @LastEditTime: 2024-12-18 17:59:07
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -77,6 +77,7 @@ import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/inde
 import type { LoRATrainingMonitorProps } from "@/components/Monitor/LoRATrainingMonitor/index.vue";
 import type { TrainLoraData } from "@/api/lora/types";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
+import { checkDirectoryExists } from "@/api/common";
 
 const settingsStore = useSettingsStore();
 
@@ -193,8 +194,34 @@ const ruleForm = useLocalStorage<RuleForm>(
 const rules = reactive<FormRules<RuleForm>>({
 	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
-	output_dir: [{ required: true, message: "请选择LoRA保存路径", trigger: "blur" }],
-	image_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }]
+	output_dir: [
+		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		}
+	],
+	image_dir: [
+		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		}
+	]
 });
 const ruleFormProps = generateKeyMapFromInterface<RuleForm, RuleFormProps>(ruleForm.value);
 /** 是否专家模式 */
@@ -288,13 +315,48 @@ function onResetData() {
 	ElMessage.success("重置成功");
 }
 
+/** 检测目录是否存在 */
+async function checkDirectory(path: string): Promise<boolean> {
+	try {
+		const result = await checkDirectoryExists({
+			path,
+			has_data: false
+		});
+
+		return result.exists;
+	} catch (_error) {
+		return false;
+	}
+}
+
+/** 检测目录下是否存在数据 */
+async function checkData(path: string): Promise<boolean> {
+	try {
+		const result = await checkDirectoryExists({
+			path,
+			has_data: true
+		});
+
+		return result.has_data;
+	} catch (_error) {
+		return false;
+	}
+}
+
 /** 提交表单 */
 const submitLoading = ref(false);
 function onSubmit() {
 	if (!ruleFormRef.value) return;
-	ruleFormRef.value.validate((valid) => {
+	ruleFormRef.value.validate(async (valid) => {
 		if (!valid) {
 			ElMessage.warning("请填写必填项");
+			return;
+		}
+
+		// 校验数据集是否有数据
+		const isHasData = await checkData(ruleForm.value.image_dir);
+		if (!isHasData) {
+			ElMessage.error("数据集目录下没有数据");
 			return;
 		}
 

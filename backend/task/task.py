@@ -55,11 +55,11 @@ class Task:
         self.status = TaskStatus.COMPLETE
         return
     
-    def to_dict(self):
+    def to_dict(self, verbose: bool = False):
         raise NotImplementedError 
     
     def __str__(self):
-        return f"{self.to_dict()}"
+        return f"{self.to_dict(verbose=True)}"
 
 @dataclass
 class TrainingTask(Task):
@@ -107,19 +107,20 @@ class TrainingTask(Task):
         retcode = self.proc.poll()
         logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
         return CompletedProcess(self.proc.args, retcode, "\n".join(stdout_lines), stderr)
-    def to_dict(self):
+    def to_dict(self, verbose: bool = False):
         """Override to_dict to handle Popen serialization"""
         # Create shallow copy of self.__dict__
         d = dict(self.__dict__)
         # Replace proc with safe dict
-        d['proc'] = self._get_proc_info()
+        if verbose is True and self.proc:
+            d['proc'] = self._get_proc_info()
         # Convert status enum
         d['status'] = self.status.value
         # Convert task_type enum 
         d['task_type'] = self.task_type.value
         
         # Convert training parameters
-        if self.training_parameters:
+        if verbose is True and self.training_parameters:
             d['training_parameters'] = asdict(self.training_parameters)
         return d
 

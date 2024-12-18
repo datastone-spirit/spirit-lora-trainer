@@ -1,9 +1,10 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Callable
 from subprocess import Popen
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
-from subprocess import Popen, PIPE, TimeoutExpired, CalledProcessError, CompletedProcess
+from subprocess import Popen, CompletedProcess, TimeoutExpired
+from copy import deepcopy, copy
 import uuid
 import re
 
@@ -12,6 +13,11 @@ from utils.util import setup_logging
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
+
+class TaskType(Enum):
+    NONE = "none"
+    TRAINING = "training"
+    CAPTIONING = "captioning"
 
 class TaskStatus(Enum):
     CREATED = "created"
@@ -22,6 +28,7 @@ class TaskStatus(Enum):
 @dataclass
 class Task:
     status = TaskStatus.CREATED
+    task_type: TaskType = TaskType.NONE
     id: str = None
     detail: Optional[dict] = None
 
@@ -33,6 +40,7 @@ class Task:
         task.training_parameters = training_paramter
         task.detail = {}
         task.id = uuid.uuid4().hex
+        task.task_type = TaskType.TRAINING
         return task
     
     def run(self):
@@ -47,13 +55,26 @@ class Task:
         self.status = TaskStatus.COMPLETE
         return
     
+    def to_dict(self):
+        raise NotImplementedError 
+    
     def __str__(self):
-        return f"task_id:{self.id}, status: {self.status}, detail: {self.detail}"
+        return f"{self.to_dict()}"
 
 @dataclass
 class TrainingTask(Task):
     proc: Popen = None
     training_parameters: TrainingParameter = None 
+
+    def _get_proc_info(self):
+        """Extract relevant info from Popen object"""
+        if not self.proc:
+            return None
+        return {
+            'pid': self.proc.pid if self.proc.pid else None,
+            'returncode': self.proc.returncode,
+            'args': self.proc.args
+        }
 
     def _run(self):
         try:
@@ -86,8 +107,22 @@ class TrainingTask(Task):
         retcode = self.proc.poll()
         logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
         return CompletedProcess(self.proc.args, retcode, "\n".join(stdout_lines), stderr)
-    
-    
+    def to_dict(self):
+        """Override to_dict to handle Popen serialization"""
+        # Create shallow copy of self.__dict__
+        d = dict(self.__dict__)
+        # Replace proc with safe dict
+        d['proc'] = self._get_proc_info()
+        # Convert status enum
+        d['status'] = self.status.value
+        # Convert task_type enum 
+        d['task_type'] = self.task_type.value
+        
+        # Convert training parameters
+        if self.training_parameters:
+            d['training_parameters'] = asdict(self.training_parameters)
+        return d
+
     def parse_stdout(self, stdout):
         """_summary_
 

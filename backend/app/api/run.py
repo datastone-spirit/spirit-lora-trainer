@@ -9,6 +9,7 @@ from .resources.upload import Upload, UploadProgress
 from .resources.tagging import Tagging,ManualTagging
 from .resources.training import Training
 from .resources.gpu_log import GpuLog
+from .resources.current_task import CurrentTask
 from flasgger import Swagger
 
 
@@ -26,6 +27,7 @@ api.add_resource(Tagging, "/training/tag")  # 打标数据集
 api.add_resource(ManualTagging, "/training/tag_manual")  # 手动打标接口
 api.add_resource(Training, "/training/start")  # 启动训练
 api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
+api.add_resource(CurrentTask, "/tasks/current") # gpu功耗、显存信息
 
 # add port argument
 parser = argparse.ArgumentParser()

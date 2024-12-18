@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:28:33
- * @LastEditTime: 2024-12-11 17:38:14
+ * @LastEditTime: 2024-12-18 09:19:27
  * @LastEditors: mulingyuer
  * @Description: 暗色亮色切换按钮
  * @FilePath: \frontend\src\layout\admin-layout\components\Aside\Footer\LightDarkToggle.vue
@@ -21,14 +21,13 @@
 
 <script setup lang="ts">
 import { useIcon } from "@/hooks/useIcon";
+import { useAppStore } from "@/stores";
+
+const appStore = useAppStore();
 
 const DarkIcon = useIcon({ name: "ri-contrast-2-line", size: 20 });
 const LightIcon = useIcon({ name: "ri-sun-line", size: 20 });
-const isDark = useDark({
-	storageKey: "__spirit-lora-trainer__color-scheme",
-	valueDark: "dark",
-	valueLight: "light"
-});
+const isDark = storeToRefs(appStore).isDark;
 const toggleDark = useToggle(isDark);
 const btnType = computed(() => (isDark.value ? "" : "primary"));
 
@@ -42,7 +41,6 @@ function onToggle(event: MouseEvent) {
 	const y = event.clientY;
 	const endRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
 
-	// @ts-expect-error ts类型问题
 	const transition = document.startViewTransition(() => {
 		toggleDark();
 	});

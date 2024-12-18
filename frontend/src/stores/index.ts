@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 11:43:53
- * @LastEditTime: 2024-12-04 16:24:46
+ * @LastEditTime: 2024-12-18 09:15:01
  * @LastEditors: mulingyuer
  * @Description: 数据仓库
  * @FilePath: \frontend\src\stores\index.ts
@@ -14,7 +14,7 @@ import { createPersistedState } from "pinia-plugin-persistedstate";
 export const store = createPinia();
 store.use(
 	createPersistedState({
-		key: (id) => `__spirit-lora-trainer__${id}`
+		key: (id) => `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}${id}`
 	})
 );
 

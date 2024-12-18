@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 11:22:25
- * @LastEditTime: 2024-12-13 09:03:17
+ * @LastEditTime: 2024-12-18 09:17:49
  * @LastEditors: mulingyuer
  * @Description: 应用配置
- * @FilePath: \spirit-lora-trainer\frontend\src\stores\modules\app\index.ts
+ * @FilePath: \frontend\src\stores\modules\app\index.ts
  * 怎么可能会有bug！！！
  */
 import { defineStore } from "pinia";
@@ -81,7 +81,7 @@ export const useAppStore = defineStore(
 
 		/** 是否暗色模式，useDark自己有持久化 */
 		const isDark = useDark({
-			storageKey: "__spirit-lora-trainer__color-scheme",
+			storageKey: `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}color-scheme`,
 			valueDark: "dark",
 			valueLight: "light"
 		});

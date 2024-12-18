@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 14:25:37
- * @LastEditTime: 2024-12-17 17:39:26
+ * @LastEditTime: 2024-12-18 10:05:46
  * @LastEditors: mulingyuer
  * @Description: 底部配置栏
  * @FilePath: \frontend\src\views\lora\flux\components\Footer\ConfigBtns.vue
@@ -24,6 +24,11 @@
 					<el-button text> 配置导入 </el-button>
 				</el-upload>
 				<el-button text @click="onExportConfig"> 配置导出 </el-button>
+				<el-popconfirm title="确定要重置数据吗？" width="180" @confirm="emits('resetData')">
+					<template #reference>
+						<el-button text> 重置数据 </el-button>
+					</template>
+				</el-popconfirm>
 				<el-popover placement="bottom" trigger="click" width="200" content="请前往智灵后台查看日志">
 					<template #reference>
 						<el-button text> 日志 </el-button>
@@ -54,6 +59,8 @@ const props = withDefaults(defineProps<ConfigProps>(), {
 const emits = defineEmits<{
 	/** 配置导入 */
 	loadConfig: [config: any];
+	/** 重置数据 */
+	resetData: [];
 }>();
 
 // 配置导入

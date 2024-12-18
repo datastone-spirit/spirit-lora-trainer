@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-17 18:19:05
+ * @LastEditTime: 2024-12-18 09:58:11
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -56,7 +56,7 @@ function formatConfig(form: RuleForm): TrainLoraData["config"] {
 		min_bucket_reso: 0,
 		mixed_precision: "",
 		model_prediction_type: "",
-		network_alpha: undefined,
+		network_alpha: null,
 		network_args: "",
 		network_dim: 0,
 		network_dropout: 0,
@@ -81,24 +81,24 @@ function formatConfig(form: RuleForm): TrainLoraData["config"] {
 		seed: 0,
 		shuffle_caption: false,
 		sigmoid_scale: 0,
-		text_encoder_lr: undefined,
+		text_encoder_lr: null,
 		timestep_sampling: "",
 		train_batch_size: 0,
-		unet_lr: undefined,
+		unet_lr: null,
 		weighted_captions: false,
 		ae: "",
 		clip_l: "",
 		t5xxl: "",
 		tagger_model: "",
-		t5xxl_max_token_length: undefined,
-		min_snr_gamma: undefined,
-		scale_weight_norms: undefined,
-		caption_dropout_rate: undefined,
-		caption_dropout_every_n_epochs: undefined,
-		caption_tag_dropout_rate: undefined,
+		t5xxl_max_token_length: null,
+		min_snr_gamma: null,
+		scale_weight_norms: null,
+		caption_dropout_rate: null,
+		caption_dropout_every_n_epochs: null,
+		caption_tag_dropout_rate: null,
 		clip_skip: 0,
-		vae_batch_size: undefined,
-		ddp_timeout: undefined
+		vae_batch_size: null,
+		ddp_timeout: null
 	};
 	// 需要将科学计数法转换为number的对象key数组
 	const scientificToNumberKeys: ScientificToNumberKeys = [
@@ -111,7 +111,7 @@ function formatConfig(form: RuleForm): TrainLoraData["config"] {
 		if (typeof formValue === "string" && formValue.trim() !== "") {
 			config[key] = Number(formValue);
 		} else {
-			config[key] = undefined;
+			config[key] = null;
 		}
 	});
 
@@ -155,13 +155,13 @@ function formatDataset(form: RuleForm): TrainLoraData["dataset"] {
 
 /** 表单数据格式化 */
 export function formatFormData(form: RuleForm): TrainLoraData {
+	const deepCloneForm = structuredClone(toRaw(form));
 	const data: TrainLoraData = {
-		config: formatConfig(form),
-		dataset: formatDataset(form)
+		config: formatConfig(deepCloneForm),
+		dataset: formatDataset(deepCloneForm)
 	};
 
-	// 利用JSON的解析去除value值为undefined的key
-	return JSON.parse(JSON.stringify(data));
+	return data;
 }
 
 /** 将我们定义的toml数据对象数据合并到表单上 */
@@ -181,7 +181,7 @@ export function mergeDataToForm(toml: TrainLoraData, form: RuleForm) {
 		"network_alpha"
 	];
 	scientificToNumberKeys.forEach((key) => {
-		form[key] = config[key]?.toExponential();
+		form[key] = config[key]?.toExponential() ?? null;
 	});
 
 	// datasets

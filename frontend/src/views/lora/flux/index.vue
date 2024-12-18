@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-17 18:20:16
+ * @LastEditTime: 2024-12-18 10:07:41
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -39,7 +39,11 @@
 				<SplitRightPanel :toml="toml" />
 			</template>
 		</TwoSplit>
-		<ConfigBtns @load-config="onLoadConfig" :export-config="onExportConfig" />
+		<ConfigBtns
+			@load-config="onLoadConfig"
+			:export-config="onExportConfig"
+			@reset-data="onResetData"
+		/>
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="flux-footer-bar" :size="40">
 				<SystemMonitor v-if="showSystemMonitor" :data="systemMonitorData" />
@@ -77,7 +81,8 @@ import { formatFormData, mergeDataToForm } from "./flux.helper";
 const settingsStore = useSettingsStore();
 
 const ruleFormRef = ref<FormInstance>();
-const ruleForm = ref<RuleForm>({
+const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_flux_form`;
+const defaultForm = readonly<RuleForm>({
 	output_name: "",
 	class_tokens: "",
 	pretrained_model_name_or_path: "",
@@ -115,7 +120,7 @@ const ruleForm = ref<RuleForm>({
 	model_prediction_type: "raw",
 	discrete_flow_shift: 3.1582,
 	loss_type: "l2",
-	t5xxl_max_token_length: undefined,
+	t5xxl_max_token_length: null,
 	// -----
 	gradient_checkpointing: true,
 	gradient_accumulation_steps: 1,
@@ -128,14 +133,14 @@ const ruleForm = ref<RuleForm>({
 	lr_warmup_steps: 0,
 	lr_scheduler_num_cycles: 0,
 	optimizer_type: "adafactor",
-	min_snr_gamma: undefined,
+	min_snr_gamma: null,
 	optimizer_args: "",
 	// -----
 	network_module: "networks.lora_flux",
 	network_weights: "",
 	network_alpha: "1e-2",
 	network_dropout: 0,
-	scale_weight_norms: undefined,
+	scale_weight_norms: null,
 	network_args: "",
 	enable_base_weight: false,
 	base_weights: [],
@@ -153,8 +158,8 @@ const ruleForm = ref<RuleForm>({
 	weighted_captions: false,
 	keep_tokens: 1,
 	keep_tokens_separator: "|||",
-	caption_dropout_rate: undefined,
-	caption_dropout_every_n_epochs: undefined,
+	caption_dropout_rate: null,
+	caption_dropout_every_n_epochs: null,
 	caption_tag_dropout_rate: 0,
 	// -----
 	color_aug: false,
@@ -176,11 +181,15 @@ const ruleForm = ref<RuleForm>({
 	cache_text_encoder_outputs: true,
 	cache_text_encoder_outputs_to_disk: true,
 	persistent_data_loader_workers: true,
-	vae_batch_size: undefined,
+	vae_batch_size: null,
 	// -----
-	ddp_timeout: undefined,
+	ddp_timeout: null,
 	ddp_gradient_as_bucket_view: false
 });
+const ruleForm = useLocalStorage<RuleForm>(
+	localStorageKey,
+	structuredClone(toRaw(defaultForm) as RuleForm)
+);
 const rules = reactive<FormRules<RuleForm>>({
 	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
@@ -265,6 +274,18 @@ function onLoadConfig(toml: TrainLoraData) {
 /** 导出配置 */
 function onExportConfig() {
 	return formatFormData(ruleForm.value);
+}
+
+/** 重置表单 */
+function onResetData() {
+	// 重置数据
+	ruleForm.value = structuredClone(toRaw(defaultForm) as RuleForm);
+	// 重置表单
+	if (ruleFormRef.value) {
+		ruleFormRef.value.resetFields();
+	}
+
+	ElMessage.success("重置成功");
 }
 
 /** 提交表单 */

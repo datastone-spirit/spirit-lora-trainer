@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-17 17:39:02
+ * @LastEditTime: 2024-12-18 09:50:38
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -92,7 +92,7 @@ export interface TrainLoraData extends Record<string, any> {
 		/** 模型预测类型 */
 		model_prediction_type: string;
 		/** 视为 OFT 的约束。我们建议使用 1e-2 到 1e-4 */
-		network_alpha: number | undefined;
+		network_alpha: number | null;
 		/** 自定义 network_args
 		 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
 		 */
@@ -149,13 +149,13 @@ export interface TrainLoraData extends Record<string, any> {
 		/** sigmoid 缩放 */
 		sigmoid_scale: number;
 		/** 文本编码器学习率，转成数字 */
-		text_encoder_lr: number | undefined;
+		text_encoder_lr: number | null;
 		/** flux 时间步采样 */
 		timestep_sampling: string;
 		/** 批量大小, 越高显存占用越高 */
 		train_batch_size: number;
 		/** U-Net 学习率，转成数字 */
-		unet_lr: number | undefined;
+		unet_lr: number | null;
 		/** 使用带权重的 token，不推荐与 shuffle_caption 一同开启 */
 		weighted_captions: boolean;
 		/** AE 模型文件路径 */
@@ -167,23 +167,23 @@ export interface TrainLoraData extends Record<string, any> {
 		/** 打标模型 */
 		tagger_model: string;
 		/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
-		t5xxl_max_token_length: number | undefined;
+		t5xxl_max_token_length: number | null;
 		/** 最小信噪比伽马值, 如果启用推荐为 5 */
-		min_snr_gamma: number | undefined;
+		min_snr_gamma: number | null;
 		/** 最大范数正则化。如果使用，推荐为 1 */
-		scale_weight_norms: number | undefined;
+		scale_weight_norms: number | null;
 		/** 丢弃全部标签的概率，对一个图片概率不使用 caption 或 class token */
-		caption_dropout_rate: number | undefined;
+		caption_dropout_rate: number | null;
 		/** 每 N 个 epoch 丢弃全部标签 */
-		caption_dropout_every_n_epochs: number | undefined;
+		caption_dropout_every_n_epochs: number | null;
 		/** 按逗号分隔的标签来随机丢弃 tag 的概率 */
-		caption_tag_dropout_rate: number | undefined;
+		caption_tag_dropout_rate: number | null;
 		/** CLIP 跳过层数 玄学 */
 		clip_skip: number;
 		/** vae 编码批量大小 */
-		vae_batch_size: number | undefined;
+		vae_batch_size: number | null;
 		/** 分布式训练超时时间（分钟） */
-		ddp_timeout: number | undefined;
+		ddp_timeout: number | null;
 	};
 	dataset: {
 		datasets: [

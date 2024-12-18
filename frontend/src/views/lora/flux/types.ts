@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-17 17:29:27
+ * @LastEditTime: 2024-12-18 09:50:16
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -84,7 +84,7 @@ export interface RuleForm {
 	/** 损失函数类型 */
 	loss_type: string;
 	/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
-	t5xxl_max_token_length: number | undefined;
+	t5xxl_max_token_length: number | null;
 	// ---------
 	/** 梯度检查点 */
 	gradient_checkpointing: boolean;
@@ -96,9 +96,9 @@ export interface RuleForm {
 	network_train_text_encoder_only: boolean;
 	// ---------
 	/** U-Net 学习率 */
-	unet_lr: string | undefined;
+	unet_lr: string | null;
 	/** 文本编码器学习率 */
-	text_encoder_lr: string | undefined;
+	text_encoder_lr: string | null;
 	/** 学习率调度器设置 */
 	lr_scheduler: string;
 	/** 学习率预热步数 */
@@ -108,7 +108,7 @@ export interface RuleForm {
 	/** 优化器设置 */
 	optimizer_type: string;
 	/** 最小信噪比伽马值, 如果启用推荐为 5 */
-	min_snr_gamma: number | undefined;
+	min_snr_gamma: number | null;
 	/**
 	 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
 	 * 示例：weight_decay=0.01 betas=.9,.999
@@ -120,11 +120,11 @@ export interface RuleForm {
 	/** 从已有的 LoRA 模型上继续训练，填写路径 */
 	network_weights: string;
 	/** 视为 OFT 的约束。我们建议使用 1e-2 到 1e-4 */
-	network_alpha: string | undefined;
+	network_alpha: string | null;
 	/** dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的） */
 	network_dropout: number;
 	/** 最大范数正则化。如果使用，推荐为 1 */
-	scale_weight_norms: number | undefined;
+	scale_weight_norms: number | null;
 	/** 自定义 network_args
 	 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
 	 */
@@ -161,11 +161,11 @@ export interface RuleForm {
 	/** 保留 tokens 时使用的分隔符 */
 	keep_tokens_separator: string;
 	/** 丢弃全部标签的概率，对一个图片概率不使用 caption 或 class token */
-	caption_dropout_rate: number | undefined;
+	caption_dropout_rate: number | null;
 	/** 每 N 个 epoch 丢弃全部标签 */
-	caption_dropout_every_n_epochs: number | undefined;
+	caption_dropout_every_n_epochs: number | null;
 	/** 按逗号分隔的标签来随机丢弃 tag 的概率 */
-	caption_tag_dropout_rate: number | undefined;
+	caption_tag_dropout_rate: number | null;
 	// ---------
 	/** 颜色改变 */
 	color_aug: boolean;
@@ -204,10 +204,10 @@ export interface RuleForm {
 	/** 保留加载训练集的worker，减少每个 epoch 之间的停顿 */
 	persistent_data_loader_workers: boolean;
 	/** vae 编码批量大小 */
-	vae_batch_size: number | undefined;
+	vae_batch_size: number | null;
 	// ---------
 	/** 分布式训练超时时间（分钟） */
-	ddp_timeout: number | undefined;
+	ddp_timeout: number | null;
 	/** 为 DDP 启用 gradient_as_bucket_view  */
 	ddp_gradient_as_bucket_view: boolean;
 }

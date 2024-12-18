@@ -1,9 +1,6 @@
 import os
 import time
 from typing import List, Union
-import torch
-from transformers import AutoProcessor, AutoModelForCausalLM
-from PIL import Image
 from ..api.common.utils import res
 
 class UploadService:

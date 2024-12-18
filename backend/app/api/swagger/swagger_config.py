@@ -4,20 +4,20 @@ file_config = {
     "description": "获取指定目录下的当前层级的文件和目录结构，支持懒加载",
     "parameters": [
         {
-            "name": "parent_id",
+            "name": "parent_path",
             "in": "query",
             "type": "string",
             "required": True,
             "default": "/",
-            "description": "父目录路径",
+            "description": "当前路径",
         },
         {
-            "name": "path",
+            "name": "is_dir",
             "in": "query",
             "type": "string",
-            "required": True,
-            "default": "/",
-            "description": "请求的子目录路径",
+            "required": False,
+            "default": "true",
+            "description": "是否是目录 默认true 只返回目录 不返回文件",
         },
     ],
     "responses": {
@@ -37,55 +37,83 @@ file_config = {
                         "example": "ok",
                     },
                     "data": {
-                        "type": "object",
-                        "properties": {
-                            "directories": {
-                                "type": "array",
-                                "description": "目录列表",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "value": {
-                                            "type": "string",
-                                            "description": "目录 ID",
-                                            "example": "/subdir1",
-                                        },
-                                        "label": {
-                                            "type": "string",
-                                            "description": "目录名称",
-                                            "example": "subdir1",
-                                        },
-                                        "isLeaf": {
-                                            "type": "boolean",
-                                            "description": "是否为叶子节点",
-                                            "example": False,
-                                        },
-                                    },
+                        "type": "array",
+                        "description": "目录和文件列表",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "type": "string",
+                                    "description": "目录或文件路径",
+                                    "example": "/subdir1",
+                                },
+                                "label": {
+                                    "type": "string",
+                                    "description": "目录或文件名称",
+                                    "example": "subdir1",
+                                },
+                                "isLeaf": {
+                                    "type": "boolean",
+                                    "description": "是否为叶子节点",
+                                    "example": False,
                                 },
                             },
-                            "files": {
-                                "type": "array",
-                                "description": "文件列表",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "value": {
-                                            "type": "string",
-                                            "description": "文件 ID",
-                                            "example": "/file1.txt",
-                                        },
-                                        "label": {
-                                            "type": "string",
-                                            "description": "文件名称",
-                                            "example": "file1.txt",
-                                        },
-                                        "isLeaf": {
-                                            "type": "boolean",
-                                            "description": "是否为叶子节点",
-                                            "example": True,
-                                        },
-                                    },
-                                },
+                        },
+                    },
+                },
+            },
+        }
+    },
+}
+
+file_check_config = {
+    "tags": ["Directory"],
+    "description": "检测目录是否存在以及是否有数据",
+    "parameters": [
+        {
+            "name": "path",
+            "in": "query",
+            "type": "string",
+            "required": True,
+            "description": "需要检测的目录路径",
+        },
+        {
+            "name": "has_data",
+            "in": "query",
+            "type": "boolean",
+            "required": False,
+            "default": False,
+            "description": "是否检查目录中是否有数据",
+        },
+    ],
+    "responses": {
+        "200": {
+            "description": "返回目录检测结果",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "description": "是否成功",
+                        "example": True,
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "返回信息",
+                        "example": "目录存在且有数据",
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "exists": {
+                                "type": "boolean",
+                                "description": "目录是否存在",
+                                "example": True,
+                            },
+                            "has_data": {
+                                "type": "boolean",
+                                "description": "目录是否有数据",
+                                "example": True,
                             },
                         },
                     },

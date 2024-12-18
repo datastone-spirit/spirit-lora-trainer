@@ -15,14 +15,12 @@ logger = logging.getLogger(__name__)
     
 # 公共 response 方法
 def res(data=None, message="Ok", success=True, code=200):
-    return jsonify(
-        {
+    return {
             "success": success,
             "message": message,
             "data": data,
-        },
-        code,
-    )
+            "code": code
+        }
 
 
 def allowed_file(filename):
@@ -30,33 +28,36 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def get_directory_structure(directory):
-    """返回当前目录层级的文件和目录结构"""
+def get_directory_structure(directory, is_dir="true"):
+    """
+        返回当前目录层级的文件和目录结构
+        :param directory: 要扫描的目录路径
+        :param is_dir: 是否只返回目录，true 表示只返回目录，其它值返回目录和文件
+    """
     try:
         items = os.listdir(directory)  # 获取指定目录下的所有项（文件和目录）
-        dirs = []
-        files = []
+        result = []  # 存放最终的结果
 
         for item in items:
             item_path = os.path.join(directory, item)
             if os.path.isdir(item_path):
-                dirs.append(
+                result.append(
                     {
-                        "value": item_path,  # 子目录的 id 可以使用目录的路径作为标识
+                        "value": item_path,  # 子目录的路径作为标识
                         "label": item,  # 显示在树形结构中的名称
                         "isLeaf": False,  # 目录肯定不是叶子节点
                     }
                 )
-            elif os.path.isfile(item_path):
-                files.append(
+            elif os.path.isfile(item_path) and is_dir != "true":
+                result.append(
                     {
                         "value": item_path,
                         "label": item,
-                        "isLeaf": True,
+                        "isLeaf": True,  # 文件是叶子节点
                     }
                 )
 
-        return {"directories": dirs, "files": files}
+        return result
 
     except Exception as e:
         return {"error": str(e)}

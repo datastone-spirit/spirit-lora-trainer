@@ -10,6 +10,13 @@ def getmodelpath() -> str:
 def getprojectpath() -> str:
      return str(pathlib.Path(__file__).parent.parent)
 
+def pathFormat(path: str) -> str:
+     # 处理路径，确保拼接的是绝对路径
+     full_path = path
+     if not os.path.isabs(path):
+          full_path = os.path.normpath(os.path.join(getprojectpath(), path))
+     return full_path
+
 def setup_logging(args=None, log_level=None, reset=False):
      if logging.root.handlers:
           if reset:

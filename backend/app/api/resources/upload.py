@@ -8,7 +8,7 @@ from ..schema.upload_valid import validate_upload_args
 from ..common.utils import res, use_swagger_config
 from ..swagger.swagger_config import upload_config, upload_progress_config
 from app.service.upload import UploadService
-
+from utils.util import pathFormat
 
 class Upload(Resource):
     @use_swagger_config(upload_config)
@@ -22,9 +22,9 @@ class Upload(Resource):
         files = args["files"]
         upload_path = args["upload_path"]
         upload_id = args["upload_id"]
-
-        if not os.path.exists(upload_path):
-            os.makedirs(upload_path)
+        full_path = pathFormat(upload_path)
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
 
         uploaded_files = []  # 存储上传文件的信息
         invalid_files = []  # 存储不符合条件的文件
@@ -40,14 +40,14 @@ class Upload(Resource):
             if file and UploadService().allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 unique_filename = UploadService().generate_unique_filename(
-                    filename, upload_path
+                    filename, full_path
                 )  # 获取唯一文件名
                 upload_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                file_path = os.path.join(upload_path, unique_filename)
+                file_path = os.path.join(full_path, unique_filename)
 
                 # 保存文件到指定目录
-                if not os.path.exists(upload_path):
-                    os.makedirs(upload_path)
+                if not os.path.exists(full_path):
+                    os.makedirs(full_path)
 
                 # 将文件信息添加到列表
                 uploaded_files.append(

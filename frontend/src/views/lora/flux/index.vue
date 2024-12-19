@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-18 17:59:07
+ * @LastEditTime: 2024-12-19 16:46:00
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -24,7 +24,12 @@
 							<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
 						<Collapse v-model="openStep2" title="第2步：训练用的数据">
-							<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
+							<TrainingData
+								v-model:form="ruleForm"
+								:form-props="ruleFormProps"
+								:tagger-start="onTaggerStart"
+								:tagger-end="onTaggerEnd"
+							/>
 						</Collapse>
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
 							<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
@@ -36,7 +41,7 @@
 				</div>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" />
+				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
 			</template>
 		</TwoSplit>
 		<ConfigBtns
@@ -48,6 +53,7 @@
 			<el-space class="flux-footer-bar" :size="40">
 				<SystemMonitor v-if="showSystemMonitor" :data="systemMonitorData" />
 				<LoRATrainingMonitor v-if="showLoRATrainingMonitor" :data="loRATrainingMonitorData" />
+				<TagMonitor ref="tagMonitorRef" v-show="showTagMonitor" />
 				<el-button
 					v-if="!showSystemMonitor"
 					type="primary"
@@ -63,21 +69,22 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstance, FormRules } from "element-plus";
-import type { RuleForm, RuleFormProps } from "./types";
-import { generateKeyMapFromInterface } from "@/utils/tools";
-import BasicInfo from "./components/BasicInfo/index.vue";
-import TrainingData from "./components/TrainingData/index.vue";
-import ModelParameters from "./components/ModelParameters/index.vue";
-import AdvancedSettings from "./components/AdvancedSettings/index.vue";
-import ConfigBtns from "./components/Footer/ConfigBtns.vue";
-import { useSettingsStore } from "@/stores";
-import { tomlStringify } from "@/utils/toml";
-import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
-import type { LoRATrainingMonitorProps } from "@/components/Monitor/LoRATrainingMonitor/index.vue";
 import type { TrainLoraData } from "@/api/lora/types";
+import type { LoRATrainingMonitorProps } from "@/components/Monitor/LoRATrainingMonitor/index.vue";
+import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
+import { useSettingsStore } from "@/stores";
+import { checkData, checkDirectory } from "@/utils/lora.helper";
+import { tomlStringify } from "@/utils/toml";
+import { generateKeyMapFromInterface } from "@/utils/tools";
+import type { FormInstance, FormRules } from "element-plus";
+import AdvancedSettings from "./components/AdvancedSettings/index.vue";
+import BasicInfo from "./components/BasicInfo/index.vue";
+import ConfigBtns from "./components/Footer/ConfigBtns.vue";
+import ModelParameters from "./components/ModelParameters/index.vue";
+import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
-import { checkDirectoryExists } from "@/api/common";
+import type { RuleForm, RuleFormProps } from "./types";
+import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
 
@@ -257,35 +264,16 @@ const loRATrainingMonitorData = ref<LoRATrainingMonitorProps["data"]>({
 	stepTime: "00:00:00",
 	averageLoss: "0.000"
 });
-/** 随机显示系统数据 */
-let timer: number | null = null;
-function randomSystemMonitorData() {
-	const keys = Object.keys(systemMonitorData.value) as (keyof typeof systemMonitorData.value)[];
-	for (const key of keys) {
-		systemMonitorData.value[key] = Math.floor(Math.random() * (100 - 1) + 1);
-	}
-	Object.assign(loRATrainingMonitorData.value, {
-		currentRound: Math.floor(Math.random() * (100 - 1) + 1),
-		totalRound: Math.floor(Math.random() * (100 - 1) + 1),
-		usedTime: new Date(Math.floor(Math.random() * (3600000 * 24)) + 1).toISOString().substr(11, 8),
-		remainingTime: new Date(Math.floor(Math.random() * (3600000 * 24)) + 1)
-			.toISOString()
-			.substr(11, 8),
-		stepTime: new Date(Math.floor(Math.random() * 60000) + 1).toISOString().substr(11, 8),
-		averageLoss: (Math.random() * (10 - 0.001) + 0.001).toFixed(3)
-	});
+// 打标监控
+const showTagMonitor = ref(false);
+const tagMonitorRef = ref<InstanceType<typeof TagMonitor>>();
+function onTaggerStart() {
+	showTagMonitor.value = true;
+	tagMonitorRef.value?.start();
 }
-function startRandomSystemMonitorData() {
-	stopRandomSystemMonitorData();
-	timer = setInterval(() => {
-		randomSystemMonitorData();
-	}, 1000);
-}
-function stopRandomSystemMonitorData() {
-	if (timer) {
-		clearInterval(timer);
-		timer = null;
-	}
+function onTaggerEnd() {
+	showTagMonitor.value = false;
+	tagMonitorRef.value?.stop();
 }
 
 /** 导入配置 */
@@ -315,34 +303,6 @@ function onResetData() {
 	ElMessage.success("重置成功");
 }
 
-/** 检测目录是否存在 */
-async function checkDirectory(path: string): Promise<boolean> {
-	try {
-		const result = await checkDirectoryExists({
-			path,
-			has_data: false
-		});
-
-		return result.exists;
-	} catch (_error) {
-		return false;
-	}
-}
-
-/** 检测目录下是否存在数据 */
-async function checkData(path: string): Promise<boolean> {
-	try {
-		const result = await checkDirectoryExists({
-			path,
-			has_data: true
-		});
-
-		return result.has_data;
-	} catch (_error) {
-		return false;
-	}
-}
-
 /** 提交表单 */
 const submitLoading = ref(false);
 function onSubmit() {
@@ -367,12 +327,10 @@ function onSubmit() {
 		submitLoading.value = true;
 		showSystemMonitor.value = true;
 		showLoRATrainingMonitor.value = true;
-		startRandomSystemMonitorData();
 		setTimeout(() => {
 			submitLoading.value = false;
 			showSystemMonitor.value = false;
 			showLoRATrainingMonitor.value = false;
-			stopRandomSystemMonitorData();
 		}, 5000);
 	});
 }

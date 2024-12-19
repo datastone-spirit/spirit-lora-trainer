@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-18 17:08:33
- * @LastEditTime: 2024-12-19 09:55:05
+ * @LastEditTime: 2024-12-19 14:59:01
  * @LastEditors: mulingyuer
  * @Description: 可输入的树选择器
  * @FilePath: \frontend\src\components\Form\InputTreeSelector.vue
@@ -122,7 +122,11 @@ function onTreeLoad(node: Node, resolve: (data: TreeItem[]) => void) {
 	getDirectory({
 		parent_path
 	}).then((data) => {
-		resolve(data);
+		if (!data) {
+			resolve([]);
+		} else {
+			resolve(data);
+		}
 	});
 }
 

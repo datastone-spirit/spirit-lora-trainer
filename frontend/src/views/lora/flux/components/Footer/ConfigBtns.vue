@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 14:25:37
- * @LastEditTime: 2024-12-18 10:05:46
+ * @LastEditTime: 2024-12-19 10:02:15
  * @LastEditors: mulingyuer
  * @Description: 底部配置栏
  * @FilePath: \frontend\src\views\lora\flux\components\Footer\ConfigBtns.vue
@@ -13,7 +13,6 @@
 			<el-space class="lora-flux-config-wrapper" :size="12">
 				<el-upload
 					ref="uploadRef"
-					class="upload-demo"
 					v-model:file-list="uploadFileList"
 					accept=".toml"
 					:limit="1"

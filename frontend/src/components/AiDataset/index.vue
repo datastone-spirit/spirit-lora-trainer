@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-16 16:31:30
+ * @LastEditTime: 2024-12-19 17:53:57
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -16,7 +16,7 @@
 					<div class="file-list" v-else>
 						<component
 							v-for="(item, index) in list"
-							:key="item.id"
+							:key="item.value"
 							:is="componentMap[item.type]"
 							:data="item"
 							:selected="activeItemIndex !== null && activeItemIndex === index"
@@ -34,6 +34,33 @@
 					@change="onChange"
 				/>
 			</div> -->
+			<Transition name="fade">
+				<div v-show="uploadFileList.length > 0" class="upload-wrapper">
+					<div class="upload-content">
+						<div v-if="!uploadSubmitLoading" class="upload-confirm">
+							<div class="upload-confirm-count">
+								当前已上传 <strong>{{ uploadFileList.length }}</strong> 个文件
+							</div>
+							<el-space fill :fill-ratio="30">
+								<el-button @click="onCancelUpload">取消上传</el-button>
+								<el-button class="upload-confirm-btn" type="primary" @click="onConfirmUpload">
+									确定上传
+								</el-button>
+							</el-space>
+						</div>
+						<div v-else class="upload-load">
+							<el-progress
+								class="upload-content-progress"
+								type="circle"
+								:percentage="uploadPercentage"
+								:width="80"
+								color="var(--el-color-primary)"
+							/>
+							<div class="upload-content-text">正在上传</div>
+						</div>
+					</div>
+				</div>
+			</Transition>
 		</div>
 		<div class="ai-dataset-footer">
 			<TagEdit ref="tagEditRef" v-model="tagText" :loading="editTagTextLoading" @save="onSave" />
@@ -45,19 +72,52 @@
 			:left="contextMenuLeft"
 			@menu-click="onMenuClick"
 		/>
+		<Teleport :to="btnTeleportTo" defer>
+			<el-space>
+				<el-button v-show="settingsStore.showAIDataset" :loading="refreshing" @click="onRefresh">
+					刷新
+				</el-button>
+				<el-upload
+					ref="uploadRef"
+					v-model:file-list="uploadFileList"
+					accept="image/*"
+					multiple
+					:show-file-list="false"
+					:auto-upload="false"
+				>
+					<el-button v-show="settingsStore.showAIDataset" type="primary">上传文件</el-button>
+				</el-upload>
+			</el-space>
+		</Teleport>
 	</div>
 </template>
 
 <script setup lang="ts">
 // import DatasetPagination from "./DatasetPagination.vue";
-import TagEdit from "./TagEdit.vue";
+import { uploadFiles } from "@/api/common";
+import { useImageViewer } from "@/hooks/useImageViewer";
+import { useSettingsStore } from "@/stores";
+import { checkDirectory } from "@/utils/lora.helper";
+import { generateUUID, sleep } from "@/utils/tools";
+import type { AxiosProgressEvent } from "axios";
+import type { UploadInstance, UploadUserFile } from "element-plus";
+import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
 import ContextMenu from "./ContextMenu.vue";
 import ImageFile from "./ImageFile.vue";
+import TagEdit from "./TagEdit.vue";
 import TextFile from "./TextFile.vue";
+import type { FileItem, FileList } from "./types";
 import { FileType } from "./types";
-import type { FileList, FileItem } from "./types";
-import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
-import { useImageViewer } from "@/hooks/useImageViewer";
+import { directoryFiles } from "@/api/common";
+import { formatDirectoryFiles } from "./ai-dataset.helper";
+import { manualTag } from "@/api/tag";
+
+export interface AiDatasetProps {
+	/** 按钮传送的容器id */
+	btnTeleportTo: string;
+	/** 目录路径 */
+	dir: string;
+}
 
 /** 组件map */
 const componentMap = {
@@ -65,83 +125,12 @@ const componentMap = {
 	[FileType.TEXT]: TextFile
 };
 
+const props = withDefaults(defineProps<AiDatasetProps>(), {});
+const settingsStore = useSettingsStore();
 const { previewImages } = useImageViewer();
 
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
-const list = ref<FileList>([
-	{
-		id: useId(),
-		name: "图片1.jpg",
-		type: FileType.IMAGE,
-		value: "https://th.wallhaven.cc/lg/vq/vq898p.jpg"
-	},
-	{
-		id: useId(),
-		name: "图片1.jpg.txt",
-		type: FileType.TEXT,
-		value: "asdas,21312,dsada,f1,3ee,sadas"
-	},
-	{
-		id: useId(),
-		name: "图片2.jpg",
-		type: FileType.IMAGE,
-		value: "https://th.wallhaven.cc/lg/9d/9dqojx.jpg"
-	},
-	{
-		id: useId(),
-		name: "图片2.jpg.txt",
-		type: FileType.TEXT,
-		value: "asdas,21312,dsada,f1,3ee,sadas"
-	},
-	{
-		id: useId(),
-		name: "图片3.jpg",
-		type: FileType.IMAGE,
-		value: "https://th.wallhaven.cc/lg/zy/zywwky.jpg"
-	},
-	{
-		id: useId(),
-		name: "图片3.jpg.txt",
-		type: FileType.TEXT,
-		value: "asdas,21312,dsada,f1,3ee,sadas"
-	},
-	{
-		id: useId(),
-		name: "图片4.jpg",
-		type: FileType.IMAGE,
-		value: "https://th.wallhaven.cc/small/zy/zywe5j.jpg"
-	},
-	{
-		id: useId(),
-		name: "图片4.jpg.txt",
-		type: FileType.TEXT,
-		value: "asdas,21312,dsada,f1,3ee,sadas"
-	},
-	{
-		id: useId(),
-		name: "图片5.jpg",
-		type: FileType.IMAGE,
-		value: "https://th.wallhaven.cc/small/yx/yxdrex.jpg"
-	},
-	{
-		id: useId(),
-		name: "图片5.jpg.txt",
-		type: FileType.TEXT,
-		value: "asdas,21312,dsada,f1,3ee,sadas"
-	},
-	{
-		id: useId(),
-		name: "图片6.jpg",
-		type: FileType.IMAGE,
-		value: "https://th.wallhaven.cc/small/yx/yxdvjx.jpg"
-	},
-	{
-		id: useId(),
-		name: "图片6.jpg.txt",
-		type: FileType.TEXT,
-		value: "asdas,21312,dsada,f1,3ee,sadas"
-	}
-]);
+const list = ref<FileList>([]);
 const loading = ref(false);
 const activeItemIndex = ref<number | null>(null);
 
@@ -151,7 +140,9 @@ async function getList() {
 		loading.value = true;
 		onQuitEdit();
 
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		// api
+		const fileList = await directoryFiles({ path: props.dir });
+		list.value = formatDirectoryFiles(fileList);
 
 		loading.value = false;
 	} catch (error) {
@@ -212,8 +203,6 @@ function onContextMenu(event: MouseEvent, data: FileItem) {
 function onMenuClick(menu: ContextMenuItem, data: FileItem) {
 	switch (menu.key) {
 		case ContextMenuKeyEnum.TAG: // 打标
-			ElMessage.info("打标");
-			break;
 		case ContextMenuKeyEnum.EDIT: // 编辑
 			onEdit(data);
 			break;
@@ -225,9 +214,16 @@ function onMenuClick(menu: ContextMenuItem, data: FileItem) {
 
 // 打标
 const tagText = ref("");
+const editData = ref<FileItem | null>(null);
 const editTagTextLoading = ref(false);
 function onEdit(data: FileItem) {
-	tagText.value = data.value;
+	editData.value = data;
+	// 如果是图片需要判断是否存在text文件
+	if (data.type === FileType.IMAGE) {
+		tagText.value = data.hasTagText ? data.raw.txt_content : "";
+	} else {
+		tagText.value = data.value;
+	}
 	tagEditRef.value?.focus();
 	const findIndex = list.value.findIndex((item) => item === data);
 	activeItemIndex.value = findIndex !== -1 ? findIndex : null;
@@ -235,20 +231,104 @@ function onEdit(data: FileItem) {
 function onQuitEdit() {
 	tagText.value = "";
 	tagEditRef.value?.blur();
+	editData.value = null;
 }
-function onSave() {
-	if (loading.value) return;
-	if (tagText.value.trim() === "") {
-		ElMessage.warning("打标内容不能为空");
-		return;
-	}
-	editTagTextLoading.value = true;
-	loading.value = true;
-	setTimeout(() => {
+async function onSave() {
+	try {
+		if (loading.value) return;
+		if (!editData.value) {
+			ElMessage.warning("请选择要打标的文件");
+			return;
+		}
+		if (tagText.value.trim() === "") {
+			ElMessage.warning("打标内容不能为空");
+			return;
+		}
+		loading.value = true;
+		editTagTextLoading.value = true;
+		const editTextName = editData.value.name;
+		// api
+		await manualTag({
+			image_path: editData.value.raw.image_path,
+			caption_text: tagText.value
+		});
 		editTagTextLoading.value = false;
 		loading.value = false;
-		ElMessage.success("保存成功");
-	}, 1000);
+		editData.value = null;
+		// 更新
+		getList();
+
+		ElMessage.success(`${editTextName} 打标保存成功`);
+	} catch (error) {
+		loading.value = false;
+		editTagTextLoading.value = false;
+		console.log("打标失败", error);
+	}
+}
+
+// 刷新
+const refreshing = ref(false);
+async function onRefresh() {
+	refreshing.value = true;
+	getList().finally(() => {
+		refreshing.value = false;
+	});
+}
+
+// 上传文件
+const uploadRef = ref<UploadInstance>();
+const uploadFileList = ref<UploadUserFile[]>([]);
+const uploadSubmitLoading = ref(false);
+const uploadId = ref<string>();
+function onCancelUpload() {
+	uploadFileList.value = [];
+}
+async function onConfirmUpload() {
+	try {
+		// 检测目录是否存在
+		const exists = await checkDirectory(props.dir);
+		if (!exists) {
+			ElMessage.error("目录不存在");
+			return;
+		}
+		uploadSubmitLoading.value = true;
+		uploadId.value = generateUUID();
+		// 生成formdata
+		const formData = new FormData();
+		uploadFileList.value.forEach((file) => {
+			formData.append("files", file.raw!, file.name);
+		});
+		// 上传
+		const _result = await uploadFiles(
+			{
+				upload_path: props.dir,
+				upload_id: uploadId.value
+			},
+			formData,
+			onUploadProgress
+		);
+		await sleep(500);
+		// 上传成功
+		// list.value.push(...result);
+		onConfirmUploadSuccess();
+	} catch (error) {
+		uploadSubmitLoading.value = false;
+		console.error("上传文件失败", error);
+	}
+}
+function onConfirmUploadSuccess() {
+	uploadFileList.value = [];
+	uploadId.value = "";
+	uploadSubmitLoading.value = false;
+	ElMessage.success("上传成功");
+}
+
+// 查询进度
+const uploadPercentage = ref(0);
+function onUploadProgress(progressEvent: AxiosProgressEvent) {
+	if (!progressEvent) return;
+	const value = progressEvent.progress ?? 0;
+	uploadPercentage.value = Math.floor(value * 100);
 }
 
 // 对外暴露方法
@@ -256,6 +336,18 @@ defineExpose({
 	/** 获取数据 */
 	getList
 });
+
+onMounted(() => {
+	getList();
+});
+
+const watchDirCallback = useDebounceFn(getList, 500);
+watch(
+	() => props.dir,
+	() => {
+		watchDirCallback();
+	}
+);
 </script>
 
 <style lang="scss" scoped>
@@ -275,6 +367,8 @@ defineExpose({
 	flex-direction: column;
 	background-color: var(--zl-ai-dataset-bg);
 	border-radius: $zl-border-radius;
+	position: relative;
+	overflow: hidden;
 }
 .ai-dataset-content-body {
 	flex-grow: 1;
@@ -302,5 +396,54 @@ defineExpose({
 .ai-dataset-footer {
 	flex-grow: 1;
 	margin-top: $zl-padding;
+}
+
+// 上传
+.upload-wrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	background-color: var(--zl-ai-dataset-upload-mask);
+}
+.upload-content {
+	margin: auto;
+	min-width: 150px;
+	height: 150px;
+	background-color: var(--zl-ai-dataset-upload-bg);
+	padding: 16px;
+	border-radius: $zl-border-radius;
+}
+.upload-confirm {
+	width: 250px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+}
+.upload-confirm-count {
+	margin-top: auto;
+	margin-bottom: 20px;
+	font-size: 14px;
+	color: var(--el-text-color-primary);
+	strong {
+		color: var(--el-color-primary);
+	}
+}
+.upload-load {
+	height: 100%;
+	text-align: center;
+}
+.upload-content-progress {
+	:deep(.el-progress__text) {
+		font-size: 18px !important;
+	}
+}
+.upload-content-text {
+	margin-top: 8px;
+	font-size: 14px;
+	color: var(--el-text-color-primary);
 }
 </style>

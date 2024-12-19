@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-18 15:40:09
- * @LastEditTime: 2024-12-18 17:39:54
+ * @LastEditTime: 2024-12-19 17:33:20
  * @LastEditors: mulingyuer
  * @Description: 公共api类型
  * @FilePath: \frontend\src\api\common\types.ts
@@ -41,3 +41,38 @@ export interface CheckDirectoryExistsResult {
 	/** 是否有数据 */
 	has_data: boolean;
 }
+
+/** 上传文件参数 */
+export interface UploadFilesParams {
+	/** 上传的文件路径 */
+	upload_path: string;
+	/** 由请求方生成的唯一的 upload_id，标识这一批上传的文件  */
+	upload_id: string;
+}
+
+/** 上传文件结果 */
+export type UploadFilesResult = Array<{
+	/** 文件名 */
+	filename: string;
+	/** 路径 */
+	path: string;
+	/** 上传时间 */
+	upload_time: string;
+	/** 由请求方生成的唯一的 upload_id，标识这一批上传的文件 */
+	upload_id: string;
+}>;
+
+/** 获取目录下的文件 */
+export interface DirectoryFilesParams {
+	/** 目录路径 */
+	path: string;
+}
+
+/** 获取目录下的结果 */
+export type DirectoryFilesResult = Array<{
+	image_name: string;
+	image_path: string;
+	txt_content: string;
+	txt_name: string;
+	txt_path: string;
+}>;

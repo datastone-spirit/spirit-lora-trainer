@@ -10,5 +10,5 @@
 	},
 	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"cSpell.words": ["mulingyuer", "oxlint", "pinia", "popconfirm", "sdxl", "shiki", "VITE"]
+	"cSpell.words": ["Axios", "mulingyuer", "oxlint", "pinia", "popconfirm", "sdxl", "shiki", "VITE"]
 }

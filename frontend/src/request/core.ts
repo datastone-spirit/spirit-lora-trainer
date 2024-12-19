@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2024-12-19 10:00:01
+ * @LastEditTime: 2024-12-19 14:58:03
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -45,7 +45,7 @@ instance.interceptors.request.use((config) => {
 /** 响应后拦截器 */
 instance.interceptors.response.use(
 	(response) => {
-		if (!response.data?.data) return response.data;
+		if (!response.data?.data) return null;
 		// 响应结果
 		const result: RequestResult = response.data;
 		if (!result.success) {
@@ -64,7 +64,6 @@ instance.interceptors.response.use(
 		return result.data;
 	},
 	(error) => {
-		console.log(111);
 		let message = "未知错误";
 
 		if (axios.isCancel(error)) {

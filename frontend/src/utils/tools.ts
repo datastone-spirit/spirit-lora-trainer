@@ -1,12 +1,13 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2024-12-17 17:37:15
+ * @LastEditTime: 2024-12-19 14:36:34
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
  * 怎么可能会有bug！！！
  */
+import { v4 as uuidV4 } from "uuid";
 
 /** 生成一个键值对对象，键为接口的键，值为键名 */
 export function generateKeyMapFromInterface<
@@ -26,4 +27,18 @@ export function generateKeyMapFromInterface<
 /** 简单深度克隆 */
 export function easyDeepClone<T>(obj: T): T {
 	return JSON.parse(JSON.stringify(obj));
+}
+
+/** 生成uuid */
+export function generateUUID() {
+	return uuidV4();
+}
+
+/** 等待指定时间： ms */
+export function sleep(time: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve();
+		}, time);
+	});
 }

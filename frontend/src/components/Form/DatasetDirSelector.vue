@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2024-12-16 11:47:21
+ * @LastEditTime: 2024-12-19 17:34:09
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -36,6 +36,9 @@
 <script setup lang="ts">
 import TaggerModelSelect from "./TaggerModelSelect.vue";
 import type { TaggerModelSelectProps } from "./TaggerModelSelect.vue";
+import { batchTag } from "@/api/tag";
+import { checkDirectory } from "@/utils/lora.helper";
+
 export interface DatasetDirSelectorProps {
 	dirLabel?: string;
 	dirProp?: string;
@@ -45,9 +48,13 @@ export interface DatasetDirSelectorProps {
 	taggerProp?: TaggerModelSelectProps["prop"];
 	taggerPlaceholder?: TaggerModelSelectProps["placeholder"];
 	btnText?: string;
+	/** 打标开始的回调 */
+	taggerStart?: () => void;
+	/** 打标结束的回调 */
+	taggerEnd?: () => void;
 }
 
-withDefaults(defineProps<DatasetDirSelectorProps>(), {
+const props = withDefaults(defineProps<DatasetDirSelectorProps>(), {
 	dirLabel: "数据集目录",
 	dirPlaceholder: "请选择训练用的数据集目录",
 	showBtn: true,
@@ -58,31 +65,45 @@ const dir = defineModel("dir", { type: String, required: true });
 const taggerModel = defineModel("taggerModel", { type: String, required: true });
 
 const loading = ref(false);
-function onBtnClick() {
-	if (typeof dir.value !== "string" || dir.value.trim() === "") {
+async function validate() {
+	try {
+		if (typeof dir.value !== "string" || dir.value.trim() === "") {
+			throw new Error("请先选择训练用的数据集目录");
+		}
+		const exists = await checkDirectory(dir.value);
+		if (!exists) throw new Error("数据集目录不存在");
+
+		if (typeof taggerModel.value !== "string" || taggerModel.value.trim() === "") {
+			throw new Error("请先选择打标模型");
+		}
+
+		return true;
+	} catch (error) {
 		ElMessage({
-			message: "请先选择训练用的数据集目录",
+			message: (error as Error).message ?? "数据集相关信息不完整",
 			type: "warning"
 		});
-		return;
+		return false;
 	}
-
-	if (typeof taggerModel.value !== "string" || taggerModel.value.trim() === "") {
-		ElMessage({
-			message: "请先选择打标模型",
-			type: "warning"
+}
+async function onBtnClick() {
+	try {
+		const valid = await validate();
+		if (!valid) return;
+		loading.value = true;
+		// 打标
+		await batchTag({
+			image_path: dir.value,
+			model_name: taggerModel.value
 		});
-		return;
-	}
-
-	loading.value = true;
-	setTimeout(() => {
 		loading.value = false;
 		ElMessage({
 			message: "一键打标成功",
 			type: "success"
 		});
-	}, 2000);
+	} catch (error) {
+		console.log("打标失败", error);
+	}
 }
 </script>
 

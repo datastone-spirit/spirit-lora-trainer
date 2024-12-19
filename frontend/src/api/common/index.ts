@@ -1,18 +1,23 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-18 15:35:55
- * @LastEditTime: 2024-12-19 10:00:41
+ * @LastEditTime: 2024-12-19 17:33:50
  * @LastEditors: mulingyuer
  * @Description: 公共api
  * @FilePath: \frontend\src\api\common\index.ts
  * 怎么可能会有bug！！！
  */
 import { request } from "@/request";
+import type { AxiosProgressEvent } from "axios";
 import type {
 	CheckDirectoryExistsParams,
 	CheckDirectoryExistsResult,
+	DirectoryFilesParams,
+	DirectoryFilesResult,
 	GetDirectoryStructureParams,
-	GetDirectoryStructureResult
+	GetDirectoryStructureResult,
+	UploadFilesParams,
+	UploadFilesResult
 } from "./types";
 export type * from "./types";
 
@@ -30,6 +35,31 @@ export function getDirectoryStructure(params: GetDirectoryStructureParams) {
 export function checkDirectoryExists(params: CheckDirectoryExistsParams) {
 	return request<CheckDirectoryExistsResult>({
 		url: "/path_check",
+		method: "GET",
+		params,
+		showErrorMessage: false
+	});
+}
+
+/** 上传文件 */
+export function uploadFiles(
+	params: UploadFilesParams,
+	data: FormData,
+	onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
+) {
+	return request<UploadFilesResult>({
+		url: "/upload",
+		method: "POST",
+		params,
+		data,
+		onUploadProgress
+	});
+}
+
+/** 获取目录下的文件 */
+export function directoryFiles(params: DirectoryFilesParams) {
+	return request<DirectoryFilesResult>({
+		url: "/tag_dir_file",
 		method: "GET",
 		params
 	});

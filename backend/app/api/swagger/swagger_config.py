@@ -266,63 +266,64 @@ upload_config = {
 tag_config = {
     "tags": ["Training"],
     "description": "打标多张图片",
-    "parameters": [
-        {
-            "name": "model_name",
-            "in": "query",
-            "type": "string",
-            "required": True,
-            "description": "模型名称，用于选择相应的打标方式",
-        },
-        {
-            "name": "image_path",
-            "in": "query",
-            "type": "string",
-            "required": True,
-            "description": "要打标的图片文件夹路径",
-        },
-    ],
+    "parameters": [{
+        "name": "tagging",
+        "in": "body",
+        "required": True,
+        "schema":{
+            "type": "object",
+            "properties": {
+               "model_name": {
+                    "type": "string",
+                    "description": "模型名称，用于选择相应的打标方式",
+               },
+               "image_path": {
+                    "type": "string",
+                    "description": "要打标的图片文件夹路径",
+               }
+            }
+        }
+    }],
     "responses": {
         "200": {
-            "description": "返回打标结果",
+            "description": "返回训练任务启动结果",
             "schema": {
                 "type": "object",
                 "properties": {
-                    "code": {"type": "integer", "example": 0},
-                    "msg": {"type": "string", "example": "打标成功"},
-                    "data": {
-                        "type": "array",
-                        "description": "打标结果列表",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "image_path": {
-                                    "type": "string",
-                                    "description": "图片路径",
-                                    "example": "/images/image1.jpg",
-                                },
-                                "marking_text": {
-                                    "type": "string",
-                                    "description": "打标文本信息",
-                                    "example": "A beautiful sunset over the mountains.",
-                                },
-                                "marking_file": {
-                                    "type": "string",
-                                    "description": "打标文件路径",
-                                    "example": "xxx.txt",
-                                },
-                            },
-                        },
+                    "success": {"type": "boolean", "example": True},
+                    "task_id": {
+                        "type": "string",
+                        "example": "id of the task",
+                    },
+                    "msg": {
+                        "type": "string",
+                        "example": "训练任务已启动",
+                    }
+                },
+            },
+        },
+        "400": {
+            "description": "请求无效，配置文件不存在或读取失败",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "msg": {
+                        "type": "string",
+                        "example": "配置文件不存在",
                     },
                 },
             },
-            "400": {
-                "description": "打标失败",
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "code": {"type": "integer", "example": 1},
-                        "msg": {"type": "string", "example": "打标失败"},
+        },
+        "500": {
+            "description": "服务器错误，训练启动失败",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "msg": {
+                        "type": "string",
+                        "example": "训练启动失败",
                     },
                 },
             },

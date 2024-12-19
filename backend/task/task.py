@@ -1,10 +1,10 @@
 from enum import Enum
-from typing import Optional, Callable
+from typing import Optional, Callable, List, Dict
 from subprocess import Popen
 from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
+from app.api.model.captioning_model import CaptioningModelInfo
 from subprocess import Popen, CompletedProcess, TimeoutExpired
-from copy import deepcopy, copy
 import uuid
 import re
 
@@ -42,13 +42,30 @@ class Task:
         task.id = uuid.uuid4().hex
         task.task_type = TaskType.TRAINING
         return task
-    
+
+    @staticmethod
+    def wrap_captioning_task(image_paths: List[str], output_dir: str, cap_model: CaptioningModelInfo, captioning : Callable) -> 'Task':
+        task = CaptioningTask()
+        task.status = TaskStatus.CREATED
+        task.image_paths = image_paths
+        task.output_dir = output_dir
+        task.detail = {
+            'captions': [],
+            'total': len(image_paths),
+            'current': -1
+        }
+        task.model_info = cap_model
+        task.id = uuid.uuid4().hex
+        task.task_type = TaskType.CAPTIONING
+        task.captioning = captioning
+        return task    
+
     def run(self):
         self.status = TaskStatus.RUNNING
         try:
             self._run()
         except Exception as e:
-            logger.error(f"task {self.id} running failed {e}")
+            logger.error(f"task {self.id} running failed", exc_info=e)
             self.status = TaskStatus.FAILED
             self.detail = str(e)
             return 
@@ -107,10 +124,13 @@ class TrainingTask(Task):
         retcode = self.proc.poll()
         logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
         return CompletedProcess(self.proc.args, retcode, "\n".join(stdout_lines), stderr)
+
     def to_dict(self, verbose: bool = False):
         """Override to_dict to handle Popen serialization"""
         # Create shallow copy of self.__dict__
         d = dict(self.__dict__)
+        d.pop('training_parameters') 
+        d.pop('proc') 
         # Replace proc with safe dict
         if verbose is True and self.proc:
             d['proc'] = self._get_proc_info()
@@ -118,7 +138,6 @@ class TrainingTask(Task):
         d['status'] = self.status.value
         # Convert task_type enum 
         d['task_type'] = self.task_type.value
-        
         # Convert training parameters
         if verbose is True and self.training_parameters:
             d['training_parameters'] = asdict(self.training_parameters)
@@ -196,3 +215,43 @@ total optimization steps / 学習ステップ数: 100
                     self.detail[key] = float(match.group(1))
                 elif key == 'loss':
                     self.detail[key] = float(match.group(1))
+
+@dataclass
+class CaptioningTask(Task):
+    image_paths: List[str] = None
+    output_dir: str = None
+    captioning: Optional[Callable] = None
+    model_info: Optional[CaptioningModelInfo] = None
+
+    def _run(self):
+        self.captioning(self.image_paths, self.output_dir, self.model_info, self.update_captioning_status)
+
+    def update_captioning_status(self, current_step: int, image_name: str, caption: str, cap_file_path: str, success: bool = False):
+        self.current = current_step
+        self.detail['captions'].append({
+            'image': image_name,
+            'caption': caption,
+            'path': cap_file_path,
+            'success': success
+        })
+        return 
+
+    def to_dict(self, verbose: bool = False):
+        """Override to_dict to enum """
+        logger.info(f"let the task: {self.id} to dict")
+        # Create shallow copy of self.__dict__
+        d = dict(self.__dict__)
+        # Convert status enum
+        d['status'] = self.status.value
+        # Convert task_type enum 
+        d['task_type'] = self.task_type.value
+        
+        d.pop('model_info')
+        d.pop('captioning')
+        # Convert training parameters
+        if verbose is True and self.model_info:
+            d['model_info'] = asdict(self.model_info)
+            d['captioning'] = self.captioning.__name__
+        
+        logger.info(f"task dict result: {d}")
+        return d

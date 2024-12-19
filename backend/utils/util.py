@@ -1,10 +1,11 @@
 import pathlib
 import logging
 import os
+import sys
 
 
 def getmodelpath() -> str:
-     return  getprojectpath() + "/models"
+     return  os.path.join(getprojectpath() , "models")
 
 
 def getprojectpath() -> str:

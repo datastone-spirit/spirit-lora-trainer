@@ -122,6 +122,77 @@ file_check_config = {
         }
     },
 }
+
+# 获取打标文件夹中的图片和txt文件
+tag_dir_config = {
+    "tags": ["Directory"],
+    "description": "获取指定目录中的图片文件和txt文件信息，按名称关联",
+    "parameters": [
+        {
+            "name": "path",
+            "in": "query",
+            "type": "string",
+            "required": True,
+            "default": "/",
+            "description": "当前目录路径",
+        }
+    ],
+    "responses": {
+        "200": {
+            "description": "返回目录中的图片和txt文件配对信息",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "integer",
+                        "description": "返回状态码",
+                        "example": 0,
+                    },
+                    "msg": {
+                        "type": "string",
+                        "description": "返回消息",
+                        "example": "ok",
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "图片和txt文件配对信息列表",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "image_path": {
+                                    "type": "string",
+                                    "description": "图片文件路径",
+                                    "example": "/path/to/image.png",
+                                },
+                                "txt_path": {
+                                    "type": "string",
+                                    "description": "TXT文件路径",
+                                    "example": "/path/to/image_caption.txt",
+                                },
+                                "image_name": {
+                                    "type": "string",
+                                    "description": "图片文件名称",
+                                    "example": "image.png",
+                                },
+                                "txt_name": {
+                                    "type": "string",
+                                    "description": "TXT文件名称",
+                                    "example": "image_caption.txt",
+                                },
+                                "txt_content": {
+                                    "type": "string",
+                                    "description": "TXT文件内容",
+                                    "example": "This is the content of the text file.",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    },
+}
+
 # 文件上传
 upload_config = {
     "tags": ["Upload"],
@@ -191,46 +262,6 @@ upload_config = {
     },
 }
 
-# 上传进度查询
-upload_progress_config = {
-    "tags": ["Upload"],
-    "description": "查询指定文件的上传进度，返回进度信息流。",
-    "parameters": [
-        {
-            "name": "upload_id",
-            "in": "query",
-            "type": "string",
-            "required": True,
-            "description": "上传任务的唯一标识，用于查询该文件的上传进度",
-        }
-    ],
-    "responses": {
-        "200": {
-            "description": "文件上传进度流",
-            "content": {
-                "text/event-stream": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "progress": {"type": "integer", "example": 50},
-                            "total_size": {"type": "integer", "example": 5000000},
-                        },
-                    }
-                }
-            },
-        },
-        "400": {
-            "description": "上传进度查询失败",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "code": {"type": "integer", "example": 1},
-                    "msg": {"type": "string", "example": "查询失败"},
-                },
-            },
-        },
-    },
-}
 
 tag_config = {
     "tags": ["Training"],
@@ -593,10 +624,15 @@ gpu_log_config = {
     "200": {
       "description": "成功获取 GPU 信息",
       "schema": {
-        "type": "object",
-        "additionalProperties": {
+        "type": "array",
+        "items": {
           "type": "object",
           "properties": {
+            "gpu_index": {
+              "type": "integer",
+              "example": 0,
+              "description": "GPU 的索引"
+            },
             "gpu_name": {
               "type": "string",
               "example": "NVIDIA GeForce RTX 4090",
@@ -645,6 +681,7 @@ gpu_log_config = {
     }
   }
 }
+
 
 task_current = {
     "tags": ["Task"],

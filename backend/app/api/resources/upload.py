@@ -6,7 +6,7 @@ from flask_restful import Resource, reqparse
 from datetime import datetime
 from ..schema.upload_valid import validate_upload_args
 from ..common.utils import res, use_swagger_config
-from ..swagger.swagger_config import upload_config, upload_progress_config
+from ..swagger.swagger_config import upload_config
 from app.service.upload import UploadService
 from utils.util import pathFormat
 
@@ -28,9 +28,6 @@ class Upload(Resource):
 
         uploaded_files = []  # 存储上传文件的信息
         invalid_files = []  # 存储不符合条件的文件
-        files_total_size = sum(len(f.read()) for f in files)
-        uploaded_size = 0
-        UploadService().update_upload_progress(upload_id, 0)  # 初始化进度
 
         # 重置文件流位置
         for f in files:
@@ -64,10 +61,6 @@ class Upload(Resource):
                     chunk_size = 1024 * 1024  # 每次写入1MB
                     for chunk in iter(lambda: file.read(chunk_size), b""):
                         f.write(chunk)
-                        uploaded_size += len(chunk)  # 更新已上传字节数
-                        progress = (uploaded_size / files_total_size) * 100
-                        print(f"{UploadService().get_upload_progress(upload_id)}")
-                        UploadService().update_upload_progress(upload_id, progress)
 
                         # 在每次写入时加上延迟，模拟上传过程
                         # time.sleep(3)  # 延迟0.5秒，模拟上传延迟
@@ -81,18 +74,4 @@ class Upload(Resource):
                 )
         return res(success=True, data=uploaded_files)
 
-
-class UploadProgress(Resource):
-    """查询文件上传进度（返回EventStream）"""
-
-    @use_swagger_config(upload_progress_config)
-    def get(self):
-        """获取文件上传进度"""
-        upload_id = request.args.get("upload_id")
-        if not upload_id:
-            return res(success=False, message="缺少 upload_id 参数")
-        # 使用 Response 返回 EventStream 流式响应
-        return Response(
-            stream_with_context(UploadService().generate_progress(upload_id)),
-            mimetype="text/event-stream",
-        )
+        

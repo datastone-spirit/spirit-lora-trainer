@@ -3,6 +3,7 @@ from ..common.utils import use_swagger_config,res
 from ..swagger.swagger_config import tag_config,tag_manual_config
 from ..schema.common_valid import tagging_args_valid, manual_tagging_args_valid
 from app.service.tagging import TaggingService
+from utils.util import pathFormat
 
 is_processing = False
 
@@ -24,13 +25,13 @@ class Tagging(Resource):
 
             # todo 增加joycaption模型反推，现在默认florence2
             model_name = args["model_name"]
-            image_path = args["image_path"]
+            image_path = pathFormat(args["image_path"])
             images = TaggingService().load_images_from_directory(image_path)
             resule = TaggingService().run_captioning(images,image_path)
             return res(success=True, data=resule)
         except Exception as e:
             # 异常处理可以记录日志等
-            return res(success=False, data=str(e))
+            return res(success=False, message=str(e))
         finally:
              is_processing = False
 
@@ -52,6 +53,6 @@ class ManualTagging(Resource):
             return res(success=False, message="Invalid parameters. `image_path` and `caption_text` are required.")
 
         # 手动打标
-        return TaggingService().manual_captioning(image_path, caption_text)
+        return TaggingService().manual_captioning(pathFormat(image_path), caption_text)
 
     

@@ -105,7 +105,7 @@ class TrainingService:
             if result.returncode != 0:
                 raise RuntimeError(f"nvidia-smi error: {result.stderr.strip()}")
 
-            gpu_info_dict = {}
+            gpu_info_list = []
 
             # 分组处理每个 GPU 数据
             for line in result.stdout.strip().split("\n"):
@@ -116,15 +116,17 @@ class TrainingService:
                 memory_used = float(memory_used)
 
                 # 将每个 GPU 的信息存储到字典
-                gpu_info_dict[gpu_index] = {
+                gpu_info_list.append({
+                    "gpu_index": gpu_index,
                     "gpu_name": gpu_name,
                     "power_draw_watts": power_draw,
                     "memory_total_mb": memory_total,
                     "memory_used_mb": memory_used,
                     "memory_free_mb": memory_total - memory_used
-                }
+                })
 
-            return gpu_info_dict
+            return gpu_info_list
+
         except FileNotFoundError:
             return {"error": "nvidia-smi not found"}
         except Exception as e:

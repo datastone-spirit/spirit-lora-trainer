@@ -22,20 +22,15 @@ class TaggingService:
                 txt_file.write(caption_text)
 
             # 返回结果
-            return {
-                "success": True,
-                "data": {
+            return res(data = {
                     "image_path": image_path,
                     "caption": caption_text,
                     "txt_path": txt_file_path
-                }
-            }
+                })
         except Exception as e:
             # 异常处理可以记录日志等
-            return {
-                "success": False,
-                "data": str(e)
-            }
+            return res(success = False,message = str(e))
+            
 
         
     
@@ -124,7 +119,7 @@ class TaggingService:
                 {"image_path": image_path, "caption": caption_text, "txt_path": txt_file_path}
             )
 
-            print(f"Processed image: {image_path}, Caption saved to {txt_file_path}")
+            # print(f"Processed image: {image_path}, Caption saved to {txt_file_path}")
 
         # 清理模型和缓存
         model.to("cpu")

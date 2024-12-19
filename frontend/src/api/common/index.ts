@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-18 15:35:55
- * @LastEditTime: 2024-12-18 17:40:07
+ * @LastEditTime: 2024-12-19 10:00:41
  * @LastEditors: mulingyuer
  * @Description: 公共api
  * @FilePath: \frontend\src\api\common\index.ts
@@ -21,7 +21,8 @@ export function getDirectoryStructure(params: GetDirectoryStructureParams) {
 	return request<GetDirectoryStructureResult>({
 		url: "/file",
 		method: "GET",
-		params
+		params,
+		showErrorMessage: false
 	});
 }
 

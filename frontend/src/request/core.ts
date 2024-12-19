@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2024-12-18 16:16:46
+ * @LastEditTime: 2024-12-19 10:00:01
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -10,12 +10,13 @@
 import { useUserStore } from "@/stores";
 import axios, { AxiosError } from "axios";
 import axiosRetry from "axios-retry";
-import { ElNotification } from "element-plus";
 import type { RequestConfig, RequestResult } from "./types";
 
 const instance = axios.create({
-	baseURL: import.meta.env.VITE_APP_API_BASE_URL
-});
+	baseURL: import.meta.env.VITE_APP_API_BASE_URL,
+	enableRetry: true,
+	showErrorMessage: true
+} as RequestConfig);
 let userStore: ReturnType<typeof useUserStore>;
 
 // 失败重试
@@ -44,15 +45,26 @@ instance.interceptors.request.use((config) => {
 /** 响应后拦截器 */
 instance.interceptors.response.use(
 	(response) => {
-		const result = response.data as RequestResult;
-		// TODO: 这里不一定完善，得空再调
+		if (!response.data?.data) return response.data;
+		// 响应结果
+		const result: RequestResult = response.data;
 		if (!result.success) {
+			const config = response.config as RequestConfig;
+			if (config.showErrorMessage) {
+				ElNotification({
+					type: "error",
+					title: "请求失败",
+					message: result.data?.error ?? result.message ?? "请求失败"
+				});
+			}
 			throw new Error(result.message);
 		}
-		// 根据项目情况做解包处理
-		return (response.data as RequestResult).data;
+
+		// 解包
+		return result.data;
 	},
 	(error) => {
+		console.log(111);
 		let message = "未知错误";
 
 		if (axios.isCancel(error)) {

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 17:33:00
- * @LastEditTime: 2024-12-20 09:21:26
+ * @LastEditTime: 2024-12-20 10:00:53
  * @LastEditors: mulingyuer
  * @Description: 打标api类型
  * @FilePath: \frontend\src\api\tag\types.ts
@@ -17,11 +17,10 @@ export interface BatchTagData {
 }
 
 /** 一键打标参数响应 */
-export type BatchTagResult = Array<{
-	image_path: string;
-	marking_file: string;
-	marking_text: string;
-}>;
+export interface BatchTagResult {
+	/** 任务id */
+	task_id: string;
+}
 
 /** 手动打标参数 */
 export interface ManualTagData {

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-16 17:55:45
+ * @LastEditTime: 2024-12-20 14:55:04
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -41,14 +41,13 @@
 			/>
 		</div>
 		<div class="ai-dataset-page-right">
-			<div class="ai-dataset-header">
-				<el-space>
-					<el-button :loading="refreshing" @click="onRefresh">刷新</el-button>
-					<el-button type="primary">上传文件</el-button>
-				</el-space>
-			</div>
+			<div id="ai-dataset-header" class="ai-dataset-header"></div>
 			<div class="ai-dataset-content">
-				<AiDataset ref="aiDatasetRef" />
+				<AiDataset
+					ref="aiDatasetRef"
+					btn-teleport-to="#ai-dataset-header"
+					:dir="ruleForm.image_dir"
+				/>
 			</div>
 		</div>
 	</div>
@@ -58,7 +57,8 @@
 import AiDataset from "@/components/AiDataset/index.vue";
 import type { FormInstance, FormRules } from "element-plus";
 import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
-import type { TagMonitorProps } from "@/components/Monitor/TagMonitor/index.vue";
+import { checkDirectory } from "@/utils/lora.helper";
+import { batchTag } from "@/api/tag";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -71,10 +71,23 @@ const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const ruleFormRef = ref<FormInstance>();
 const ruleForm = ref<RuleForm>({
 	image_dir: "",
-	tagger_model: ""
+	tagger_model: "florence2"
 });
 const rules = reactive<FormRules<RuleForm>>({
-	image_dir: [{ required: true, message: "请选择训练用的数据集目录", trigger: "change" }],
+	image_dir: [
+		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		}
+	],
 	tagger_model: [{ required: true, message: "请选择打标模型", trigger: "change" }]
 });
 const loading = ref(false);
@@ -88,17 +101,53 @@ const systemMonitorData = ref<SystemMonitorProps["data"]>({
 });
 // 打标监控
 const showTagMonitor = ref(false);
-const tagMonitorData = ref<TagMonitorProps["data"]>({
-	currentRound: 0,
-	totalRound: 0
-});
+
+/** 校验 */
+async function validate() {
+	try {
+		if (typeof ruleForm.value.image_dir !== "string" || ruleForm.value.image_dir.trim() === "") {
+			throw new Error("请先选择训练用的数据集目录");
+		}
+		const exists = await checkDirectory(ruleForm.value.image_dir);
+		if (!exists) throw new Error("数据集目录不存在");
+
+		if (
+			typeof ruleForm.value.tagger_model !== "string" ||
+			ruleForm.value.tagger_model.trim() === ""
+		) {
+			throw new Error("请先选择打标模型");
+		}
+
+		return true;
+	} catch (error) {
+		ElMessage({
+			message: (error as Error).message ?? "数据集相关信息不完整",
+			type: "warning"
+		});
+		return false;
+	}
+}
 
 // 打标
-function onSubmit() {
-	loading.value = true;
-	setTimeout(() => {
+async function onSubmit() {
+	try {
+		const valid = await validate();
+		if (!valid) return;
+		loading.value = true;
+		// 打标
+		await batchTag({
+			image_path: ruleForm.value.image_dir,
+			model_name: ruleForm.value.tagger_model
+		});
 		loading.value = false;
-	}, 1000);
+		ElMessage({
+			message: "一键打标成功",
+			type: "success"
+		});
+	} catch (error) {
+		loading.value = false;
+		console.log("打标失败", error);
+	}
 }
 
 // 刷新

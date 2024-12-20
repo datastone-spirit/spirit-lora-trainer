@@ -1,22 +1,22 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-18 09:58:11
+ * @LastEditTime: 2024-12-20 14:26:35
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
  * 怎么可能会有bug！！！
  */
-import type { TrainLoraData } from "@/api/lora/types";
+import type { StartFluxTrainingData } from "@/api/lora/types";
 import type { RuleForm } from "./types";
 
-type ScientificToNumberKeys = ["unet_lr", "text_encoder_lr", "network_alpha"];
-type ConfigKeys = (keyof TrainLoraData["config"])[];
+type ScientificToNumberKeys = ["unet_lr", "text_encoder_lr", "network_alpha", "learning_rate"];
+type ConfigKeys = (keyof StartFluxTrainingData["config"])[];
 type OtherKeys = Exclude<ConfigKeys, ScientificToNumberKeys>;
 
 /** 表单数据格式化 - config对象 */
-function formatConfig(form: RuleForm): TrainLoraData["config"] {
-	const config: TrainLoraData["config"] = {
+function formatConfig(form: RuleForm): StartFluxTrainingData["config"] {
+	const config: StartFluxTrainingData["config"] = {
 		pretrained_model_name_or_path: "",
 		enable_base_weight: false,
 		enable_bucket: false,
@@ -41,9 +41,6 @@ function formatConfig(form: RuleForm): TrainLoraData["config"] {
 		guidance_scale: 0,
 		keep_tokens_separator: "",
 		learning_rate: 0,
-		log_prefix: "",
-		log_tracker_name: "",
-		log_with: "",
 		logging_dir: "",
 		loss_type: "",
 		lowram: false,
@@ -98,13 +95,16 @@ function formatConfig(form: RuleForm): TrainLoraData["config"] {
 		caption_tag_dropout_rate: null,
 		clip_skip: 0,
 		vae_batch_size: null,
-		ddp_timeout: null
+		ddp_timeout: null,
+		base_weights: "",
+		base_weights_multiplier: 1
 	};
 	// 需要将科学计数法转换为number的对象key数组
 	const scientificToNumberKeys: ScientificToNumberKeys = [
 		"unet_lr",
 		"text_encoder_lr",
-		"network_alpha"
+		"network_alpha",
+		"learning_rate"
 	];
 	scientificToNumberKeys.forEach((key) => {
 		const formValue = form[key];
@@ -126,11 +126,18 @@ function formatConfig(form: RuleForm): TrainLoraData["config"] {
 		config[key] = form[key];
 	});
 
+	// 去除config中所有value为null的属性
+	(Object.keys(config) as (keyof StartFluxTrainingData["config"])[]).forEach((key) => {
+		if (config[key] === null) {
+			Reflect.deleteProperty(config, key);
+		}
+	});
+
 	return config;
 }
 
 /** 格式化dataset */
-function formatDataset(form: RuleForm): TrainLoraData["dataset"] {
+function formatDataset(form: RuleForm): StartFluxTrainingData["dataset"] {
 	const resolution = [form.resolution_width, form.resolution_height].join(",");
 	return {
 		datasets: [
@@ -138,11 +145,13 @@ function formatDataset(form: RuleForm): TrainLoraData["dataset"] {
 				batch_size: form.train_batch_size,
 				keep_tokens: form.keep_tokens,
 				resolution: resolution,
-				subsets: {
-					class_tokens: form.class_tokens,
-					image_dir: form.image_dir,
-					num_repeats: form.num_repeats
-				}
+				subsets: [
+					{
+						class_tokens: form.class_tokens,
+						image_dir: form.image_dir,
+						num_repeats: form.num_repeats
+					}
+				]
 			}
 		],
 		general: {
@@ -154,9 +163,9 @@ function formatDataset(form: RuleForm): TrainLoraData["dataset"] {
 }
 
 /** 表单数据格式化 */
-export function formatFormData(form: RuleForm): TrainLoraData {
+export function formatFormData(form: RuleForm): StartFluxTrainingData {
 	const deepCloneForm = structuredClone(toRaw(form));
-	const data: TrainLoraData = {
+	const data: StartFluxTrainingData = {
 		config: formatConfig(deepCloneForm),
 		dataset: formatDataset(deepCloneForm)
 	};
@@ -165,7 +174,7 @@ export function formatFormData(form: RuleForm): TrainLoraData {
 }
 
 /** 将我们定义的toml数据对象数据合并到表单上 */
-export function mergeDataToForm(toml: TrainLoraData, form: RuleForm) {
+export function mergeDataToForm(toml: StartFluxTrainingData, form: RuleForm) {
 	// 判断是否是我们定义的toml数据对象
 	const isToml = "config" in toml && "dataset" in toml;
 	if (!isToml) throw new Error("当前导入的toml数据存在异常，无法合并到表单上");
@@ -178,7 +187,8 @@ export function mergeDataToForm(toml: TrainLoraData, form: RuleForm) {
 	const scientificToNumberKeys: ScientificToNumberKeys = [
 		"unet_lr",
 		"text_encoder_lr",
-		"network_alpha"
+		"network_alpha",
+		"learning_rate"
 	];
 	scientificToNumberKeys.forEach((key) => {
 		form[key] = config[key]?.toExponential() ?? null;
@@ -201,9 +211,9 @@ export function mergeDataToForm(toml: TrainLoraData, form: RuleForm) {
 	form.resolution_height = Number(resolution[1]);
 	form.train_batch_size = datasets.batch_size;
 	form.keep_tokens = datasets.keep_tokens;
-	form.class_tokens = datasets.subsets.class_tokens;
-	form.image_dir = datasets.subsets.image_dir;
-	form.num_repeats = datasets.subsets.num_repeats;
+	form.class_tokens = datasets.subsets[0].class_tokens;
+	form.image_dir = datasets.subsets[0].image_dir;
+	form.num_repeats = datasets.subsets[0].num_repeats;
 	form.caption_extension = general.caption_extension;
 	form.keep_tokens = general.keep_tokens;
 	form.shuffle_caption = general.shuffle_caption;

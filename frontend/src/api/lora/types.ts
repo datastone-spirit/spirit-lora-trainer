@@ -1,22 +1,24 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-18 09:50:38
+ * @LastEditTime: 2024-12-20 14:26:32
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
  * 怎么可能会有bug！！！
  */
 
-/** 训练lora参数 */
-export interface TrainLoraData extends Record<string, any> {
+/** 启动flux训练参数 */
+export interface StartFluxTrainingData extends Record<string, any> {
 	config: {
 		/** 底模 */
 		pretrained_model_name_or_path: string;
 		/** 启用基础权重（差异炼丹） */
 		enable_base_weight: boolean;
-		// base_weights: string;
-		// base_weights_multiplier: number;
+		/** 基础权重-合并入底模的 LoRA  */
+		base_weights: string;
+		/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
+		base_weights_multiplier: number;
 		/** 启用 arb 桶以允许非固定宽高比的图片 */
 		enable_bucket: boolean;
 		/** arb 桶不放大图片 */
@@ -60,13 +62,7 @@ export interface TrainLoraData extends Record<string, any> {
 		/** 保留 tokens 时使用的分隔符 */
 		keep_tokens_separator: string;
 		/** 总学习率, 在分开设置 U-Net 与文本编码器学习率后这个值失效。格式化成数字 */
-		learning_rate: number;
-		/** 日志前缀 */
-		log_prefix: string;
-		/** 日志追踪器名称 */
-		log_tracker_name: string;
-		/** 日志模块 */
-		log_with: string;
+		learning_rate: number | null;
 		/** 日志保存文件夹 */
 		logging_dir: string;
 		/** 损失函数类型 */
@@ -194,14 +190,16 @@ export interface TrainLoraData extends Record<string, any> {
 				keep_tokens: number;
 				/** 图像分辨率: 512,512 */
 				resolution: string;
-				subsets: {
-					/** 触发词 */
-					class_tokens: string;
-					/** 数据集目录 */
-					image_dir: string;
-					/** 每个图像重复训练次数 */
-					num_repeats: number;
-				};
+				subsets: [
+					{
+						/** 触发词 */
+						class_tokens: string;
+						/** 数据集目录 */
+						image_dir: string;
+						/** 每个图像重复训练次数 */
+						num_repeats: number;
+					}
+				];
 			}
 		];
 		general: {
@@ -213,4 +211,12 @@ export interface TrainLoraData extends Record<string, any> {
 			shuffle_caption: boolean;
 		};
 	};
+}
+
+/** 启动flux训练结果 */
+export interface StartFluxTrainingResult {
+	msg: string;
+	success: boolean;
+	/** 任务id */
+	task_id: string;
 }

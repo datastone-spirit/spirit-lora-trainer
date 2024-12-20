@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-18 09:50:16
+ * @LastEditTime: 2024-12-20 14:27:29
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -65,7 +65,7 @@ export interface RuleForm {
 	/** workers 数量 */
 	max_data_loader_n_workers: number;
 	/** 总学习率, 在分开设置 U-Net 与文本编码器学习率后这个值失效。 */
-	learning_rate: string;
+	learning_rate: string | null;
 	/** 每 N epoch（轮）自动保存一次模型 */
 	save_every_n_epochs: number;
 	/** flux CFG 引导缩放 */
@@ -132,21 +132,15 @@ export interface RuleForm {
 	// NOTE: 给后端要去除该参数
 	/** 启用基础权重（差异炼丹） */
 	enable_base_weight: boolean;
-	/** 基础权重-合并入底模的 LoRA 路径，可以选择多个 */
-	base_weights: Array<string>;
+	/** 基础权重-合并入底模的 LoRA  */
+	base_weights: string;
 	// NOTE: 要转成数组[1,2,3,4]
-	/** 基础权重-合并入底模的 LoRA 权重，英文逗号分隔，与 base_weights 对应 */
-	base_weights_multiplier: string;
+	/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
+	base_weights_multiplier: number;
 	// ---------
 	/** 启用训练预览图 */
 	enable_preview: boolean;
 	// ---------
-	/** 日志模块 */
-	log_with: string;
-	/** 日志前缀 */
-	log_prefix: string;
-	/** 日志追踪器名称 */
-	log_tracker_name: string;
 	/** 日志保存文件夹 */
 	logging_dir: string;
 	// ---------

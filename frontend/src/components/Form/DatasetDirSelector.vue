@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2024-12-19 17:34:09
+ * @LastEditTime: 2024-12-20 10:04:37
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -54,7 +54,7 @@ export interface DatasetDirSelectorProps {
 	taggerEnd?: () => void;
 }
 
-const props = withDefaults(defineProps<DatasetDirSelectorProps>(), {
+withDefaults(defineProps<DatasetDirSelectorProps>(), {
 	dirLabel: "数据集目录",
 	dirPlaceholder: "请选择训练用的数据集目录",
 	showBtn: true,
@@ -102,6 +102,7 @@ async function onBtnClick() {
 			type: "success"
 		});
 	} catch (error) {
+		loading.value = false;
 		console.log("打标失败", error);
 	}
 }

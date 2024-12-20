@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-19 16:46:00
+ * @LastEditTime: 2024-12-20 14:54:49
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TrainLoraData } from "@/api/lora/types";
+import type { StartFluxTrainingData } from "@/api/lora/types";
 import type { LoRATrainingMonitorProps } from "@/components/Monitor/LoRATrainingMonitor/index.vue";
 import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
 import { useSettingsStore } from "@/stores";
@@ -85,6 +85,7 @@ import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
 import type { RuleForm, RuleFormProps } from "./types";
 import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
+import { startFluxTraining } from "@/api/lora";
 
 const settingsStore = useSettingsStore();
 
@@ -104,7 +105,7 @@ const defaultForm = readonly<RuleForm>({
 	save_state: false,
 	// -----
 	image_dir: "",
-	tagger_model: "florence",
+	tagger_model: "florence2",
 	num_repeats: 1,
 	max_train_epochs: 4,
 	train_batch_size: 1,
@@ -151,14 +152,11 @@ const defaultForm = readonly<RuleForm>({
 	scale_weight_norms: null,
 	network_args: "",
 	enable_base_weight: false,
-	base_weights: [],
-	base_weights_multiplier: "",
+	base_weights: "",
+	base_weights_multiplier: 1,
 	// -----
 	enable_preview: false,
 	// -----
-	log_with: "tensorboard",
-	log_prefix: "",
-	log_tracker_name: "",
 	logging_dir: "./logs",
 	// -----
 	caption_extension: ".txt",
@@ -277,7 +275,7 @@ function onTaggerEnd() {
 }
 
 /** 导入配置 */
-function onLoadConfig(toml: TrainLoraData) {
+function onLoadConfig(toml: StartFluxTrainingData) {
 	try {
 		mergeDataToForm(toml, ruleForm.value);
 		ElMessage.success("配置导入成功");
@@ -305,9 +303,22 @@ function onResetData() {
 
 /** 提交表单 */
 const submitLoading = ref(false);
-function onSubmit() {
-	if (!ruleFormRef.value) return;
-	ruleFormRef.value.validate(async (valid) => {
+function validateForm() {
+	return new Promise((resolve) => {
+		if (!ruleFormRef.value) return resolve(false);
+		ruleFormRef.value.validate(async (valid) => {
+			if (!valid) {
+				ElMessage.warning("请填写必填项");
+				return resolve(false);
+			}
+			return resolve(true);
+		});
+	});
+}
+async function onSubmit() {
+	try {
+		if (!ruleFormRef.value) return;
+		const valid = await validateForm();
 		if (!valid) {
 			ElMessage.warning("请填写必填项");
 			return;
@@ -320,19 +331,23 @@ function onSubmit() {
 			return;
 		}
 
-		const data: TrainLoraData = formatFormData(ruleForm.value);
-		console.log("🚀 ~ ruleFormRef.value.validate ~ data:", data);
-
 		// 开始训练
+		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
 		submitLoading.value = true;
 		showSystemMonitor.value = true;
 		showLoRATrainingMonitor.value = true;
-		setTimeout(() => {
-			submitLoading.value = false;
-			showSystemMonitor.value = false;
-			showLoRATrainingMonitor.value = false;
-		}, 5000);
-	});
+		await startFluxTraining(data);
+		// 创建训练任务成功
+		submitLoading.value = false;
+		showSystemMonitor.value = false;
+		showLoRATrainingMonitor.value = false;
+		ElMessage.success("创建训练任务成功");
+	} catch (error) {
+		submitLoading.value = false;
+		showSystemMonitor.value = false;
+		showLoRATrainingMonitor.value = false;
+		console.error("创建训练任务失败", error);
+	}
 }
 </script>
 

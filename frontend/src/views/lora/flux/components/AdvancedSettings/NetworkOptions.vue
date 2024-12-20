@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 16:25:06
- * @LastEditTime: 2024-12-11 11:25:52
+ * @LastEditTime: 2024-12-20 14:19:31
  * @LastEditors: mulingyuer
  * @Description: 网络配置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\NetworkOptions.vue
@@ -64,27 +64,18 @@
 		</PopoverFormItem>
 		<template v-if="ruleForm.enable_base_weight">
 			<PopoverFormItem
-				label="合并入底模的 LoRA 路径，可以选择多个"
+				label="合并入底模的 LoRA 路径"
 				:prop="formProps.base_weights"
 				popover-content="base_weights"
 			>
-				<FileSelector
-					v-model="ruleForm.base_weights"
-					placeholder="请选择合并入底模的 LoRA"
-					multiple
-				/>
+				<FileSelector v-model="ruleForm.base_weights" placeholder="请选择合并入底模的 LoRA" />
 			</PopoverFormItem>
 			<PopoverFormItem
-				label="合并入底模的 LoRA 权重，一行一个数字"
+				label="合并入底模的 LoRA 权重"
 				:prop="formProps.base_weights_multiplier"
 				popover-content="base_weights_multiplier"
 			>
-				<el-input
-					v-model="ruleForm.base_weights_multiplier"
-					type="textarea"
-					placeholder="请输入合并入底模的 LoRA 权重"
-					:autosize="{ minRows: 3 }"
-				/>
+				<el-input-number v-model.number="ruleForm.base_weights_multiplier" :step="0.1" :min="0" />
 			</PopoverFormItem>
 		</template>
 	</FieldSetWrapper>

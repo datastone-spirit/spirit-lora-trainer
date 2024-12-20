@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-12 10:23:43
+ * @LastEditTime: 2024-12-20 14:26:51
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -110,9 +110,6 @@ const ruleForm = ref<RuleForm>({
 	// -----
 	enable_preview: false,
 	// -----,
-	log_with: "tensorboard",
-	log_prefix: "",
-	log_tracker_name: "",
 	logging_dir: "./logs",
 	// -----
 	caption_extension: ".txt",

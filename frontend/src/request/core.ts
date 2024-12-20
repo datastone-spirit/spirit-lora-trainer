@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2024-12-19 14:58:03
+ * @LastEditTime: 2024-12-20 09:53:42
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -9,7 +9,7 @@
  */
 import { useUserStore } from "@/stores";
 import axios, { AxiosError } from "axios";
-import axiosRetry from "axios-retry";
+import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 import type { RequestConfig, RequestResult } from "./types";
 
 const instance = axios.create({
@@ -22,11 +22,18 @@ let userStore: ReturnType<typeof useUserStore>;
 // 失败重试
 axiosRetry(instance, {
 	retries: 3,
-	retryCondition(error: AxiosError) {
+	retryDelay: axiosRetry.exponentialDelay,
+	retryCondition: (error: AxiosError) => {
 		const config: RequestConfig | undefined = error?.config;
 		if (!config) return false;
-		if (config.enableRetry) return true;
+		if (config.enableRetry && isNetworkOrIdempotentRequestError(error)) {
+			return true;
+		}
 		return false;
+	},
+	onMaxRetryTimesExceeded: (error, _retryCount) => {
+		// 错误消息提示
+		errorMessage(error);
 	}
 });
 
@@ -64,33 +71,64 @@ instance.interceptors.response.use(
 		return result.data;
 	},
 	(error) => {
-		let message = "未知错误";
+		// 是否允许失败重试
+		let isRetry = true;
+		if (error instanceof AxiosError) {
+			// @ts-expect-error 临时修复一下
+			isRetry = error.response?.config?.enableRetry ?? true;
+		}
+		// 是否是重试的错误
+		const isRetryError = isNetworkOrIdempotentRequestError(error);
 
-		if (axios.isCancel(error)) {
-			// 请求被取消
-			message = error.message ?? "请求被取消";
-		} else if (error instanceof AxiosError) {
-			// AxiosError
-			message = error.response?.data?.message ?? error.message;
-		} else if (error instanceof Error) {
-			// Error
-			message = error.message;
+		if (!isRetry || !isRetryError) {
+			errorMessage(error);
 		}
 
-		// 消息提示
-		ElNotification({
-			type: "error",
-			title: "请求失败",
-			message
-		});
-
-		return Promise.reject(new Error(message));
+		return Promise.reject(error as Error);
 	}
 );
 
 /** 设置请求的baseUrl */
 function setBaseUrl(baseUrl: string) {
 	instance.defaults.baseURL = baseUrl;
+}
+
+/** 获取错误消息 */
+function getErrorMessage(error: any): string {
+	let message = "未知错误";
+
+	if (axios.isCancel(error)) {
+		// 请求被取消
+		message = error.message ?? "请求被取消";
+	} else if (error instanceof AxiosError) {
+		// AxiosError
+		message = error.response?.data?.message ?? error.message;
+	} else if (error instanceof Error) {
+		// Error
+		message = error.message;
+	}
+
+	return message;
+}
+
+/** 错误消息提示 */
+function errorMessage(error: any) {
+	let showErrorMessage = true;
+	const message = getErrorMessage(error);
+
+	if (error instanceof AxiosError) {
+		// @ts-expect-error 临时修复一下
+		showErrorMessage = error.response?.config?.showErrorMessage ?? showErrorMessage;
+	}
+
+	// 消息提示
+	if (showErrorMessage) {
+		ElNotification({
+			type: "error",
+			title: "请求失败",
+			message
+		});
+	}
 }
 
 export { instance, setBaseUrl };

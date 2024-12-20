@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-06 14:57:11
- * @LastEditTime: 2024-12-11 15:19:05
+ * @LastEditTime: 2024-12-20 14:26:56
  * @LastEditors: mulingyuer
  * @Description: sdxl类型定义
  * @FilePath: \frontend\src\views\lora\sdxl\types.ts
@@ -124,12 +124,6 @@ export interface RuleForm {
 	/** 启用训练预览图 */
 	enable_preview: boolean;
 	// ---------
-	/** 日志模块 */
-	log_with: string;
-	/** 日志前缀 */
-	log_prefix: string;
-	/** 日志追踪器名称 */
-	log_tracker_name: string;
 	/** 日志保存文件夹 */
 	logging_dir: string;
 	// ---------

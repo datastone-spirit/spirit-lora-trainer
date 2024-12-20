@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-06 14:57:11
- * @LastEditTime: 2024-12-20 14:26:56
+ * @LastEditTime: 2024-12-20 16:58:18
  * @LastEditors: mulingyuer
  * @Description: sdxl类型定义
  * @FilePath: \frontend\src\views\lora\sdxl\types.ts
@@ -117,9 +117,9 @@ export interface RuleForm {
 	/** 分层学习-分层学习率置 0 阈值 */
 	block_lr_zero_threshold: number;
 	/** 基础权重-合并入底模的 LoRA 路径，可以选择多个 */
-	base_weights: Array<string>;
+	base_weights: string;
 	/** 基础权重-合并入底模的 LoRA 权重，英文逗号分隔，与 base_weights 对应 */
-	base_weights_multiplier: string;
+	base_weights_multiplier: number | null;
 	// ---------
 	/** 启用训练预览图 */
 	enable_preview: boolean;

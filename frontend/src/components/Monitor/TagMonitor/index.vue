@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2024-12-19 16:43:44
+ * @LastEditTime: 2024-12-20 17:10:14
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
@@ -16,44 +16,59 @@
 			:show-text="false"
 			:stroke-width="8"
 		></el-progress>
-		<el-text class="tag-monitor-round"> {{ currentRound }}/{{ totalRound }} </el-text>
+		<el-text class="tag-monitor-round"> {{ data.current }}/{{ data.total }} </el-text>
 	</div>
 </template>
 
 <script setup lang="ts">
-// export interface TagMonitorProps {
-// 	data: {
-// 		/** 当前第几个 */
-// 		currentRound: number;
-// 		/** 总共多少个 */
-// 		totalRound: number;
-// 	};
-// }
+import { manualTagInfo } from "@/api/monitor";
+import { sleep } from "@/utils/tools";
 
-// const props = withDefaults(defineProps<TagMonitorProps>(), {
-// 	data: () => ({
-// 		currentRound: 0,
-// 		totalRound: 0
-// 	})
-// });
-const currentRound = ref(0);
-const totalRound = ref(0);
+export interface TagMonitorData {
+	/** 当前第几个 */
+	current: number;
+	/** 总共多少个 */
+	total: number;
+}
 
+const data = ref<TagMonitorData>({
+	current: 0,
+	total: 0
+});
 /** 计算百分比 */
 const percentage = computed(() => {
-	if (totalRound.value === 0) return 0;
-	const value = Math.floor((currentRound.value / totalRound.value) * 100);
+	if (data.value.total === 0) return 0;
+	const value = Math.floor((data.value.current / data.value.total) * 100);
 	return value > 100 ? 100 : value;
 });
+const status = ref(false);
+const sleepTime = 3000;
+function update() {
+	if (!status.value) return;
+	manualTagInfo()
+		.then((res) => {
+			if (!res.detail) return;
+			data.value.current = res.current;
+			data.value.total = res.detail.total;
+		})
+		.finally(() => {
+			status.value && sleep(sleepTime).then(update);
+		});
+}
 
-function start() {}
+/** 开始查询 */
+function start() {
+	status.value = true;
+	update();
+}
 
-function stop() {}
+/** 停止查询 */
+function stop() {
+	status.value = false;
+}
 
 defineExpose({
-	/** 开始监听 */
 	start,
-	/** 停止监听 */
 	stop
 });
 </script>

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-20 14:27:29
+ * @LastEditTime: 2024-12-20 16:57:21
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -136,7 +136,7 @@ export interface RuleForm {
 	base_weights: string;
 	// NOTE: 要转成数组[1,2,3,4]
 	/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
-	base_weights_multiplier: number;
+	base_weights_multiplier: number | null;
 	// ---------
 	/** 启用训练预览图 */
 	enable_preview: boolean;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 16:25:06
- * @LastEditTime: 2024-12-11 11:25:59
+ * @LastEditTime: 2024-12-20 16:58:47
  * @LastEditors: mulingyuer
  * @Description: 网络配置
  * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\NetworkOptions.vue
@@ -114,11 +114,7 @@
 				:prop="formProps.base_weights"
 				popover-content="base_weights"
 			>
-				<FileSelector
-					v-model="ruleForm.base_weights"
-					placeholder="请选择合并入底模的 LoRA"
-					multiple
-				/>
+				<FileSelector v-model="ruleForm.base_weights" placeholder="请选择合并入底模的 LoRA" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="合并入底模的 LoRA 权重，一行一个数字"

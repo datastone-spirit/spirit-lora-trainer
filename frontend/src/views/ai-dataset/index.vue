@@ -34,7 +34,7 @@
 				</el-form-item>
 			</el-form>
 			<TagMonitor v-if="showTagMonitor" :data="tagMonitorData" />
-			<SystemMonitor
+			<GPUMonitor
 				v-if="showSystemMonitor"
 				class="ai-dataset-page-left-system-monitor"
 				:data="systemMonitorData"
@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
 import type { FormInstance, FormRules } from "element-plus";
-import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
+import type { SystemMonitorProps } from "@/components/Monitor/GPUMonitor/index.vue";
 import { checkDirectory } from "@/utils/lora.helper";
 import { batchTag } from "@/api/tag";
 

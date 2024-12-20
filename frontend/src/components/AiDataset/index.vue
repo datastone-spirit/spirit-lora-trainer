@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-20 09:27:14
+ * @LastEditTime: 2024-12-20 16:38:17
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -294,6 +294,10 @@ function onCancelUpload() {
 async function onConfirmUpload() {
 	try {
 		// 检测目录是否存在
+		if (typeof props.dir === "string" && props.dir.trim() === "") {
+			ElMessage.error("请先选择目录");
+			return;
+		}
 		const exists = await checkDirectory(props.dir);
 		if (!exists) {
 			ElMessage.error("目录不存在");

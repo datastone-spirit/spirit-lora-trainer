@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-20 14:26:32
+ * @LastEditTime: 2024-12-20 16:57:50
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -18,7 +18,7 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		/** 基础权重-合并入底模的 LoRA  */
 		base_weights: string;
 		/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
-		base_weights_multiplier: number;
+		base_weights_multiplier: number | null;
 		/** 启用 arb 桶以允许非固定宽高比的图片 */
 		enable_bucket: boolean;
 		/** arb 桶不放大图片 */
@@ -180,6 +180,8 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		vae_batch_size: number | null;
 		/** 分布式训练超时时间（分钟） */
 		ddp_timeout: number | null;
+		/** 图像分辨率: 512,512 */
+		resolution: string;
 	};
 	dataset: {
 		datasets: [

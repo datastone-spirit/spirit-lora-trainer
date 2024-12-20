@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2024-12-16 17:54:44
+ * @LastEditTime: 2024-12-20 17:10:06
  * @LastEditors: mulingyuer
  * @Description: lora训练监控
- * @FilePath: \frontend\src\components\LoRATrainingMonitor\index.vue
+ * @FilePath: \frontend\src\components\Monitor\LoRATrainingMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -12,69 +12,91 @@
 		<div class="lo-ra-training-monitor-head">
 			<el-progress
 				class="lo-ra-training-monitor-progress"
-				:percentage="percentage"
+				:percentage="data.progress"
 				:show-text="false"
 				:stroke-width="8"
 			></el-progress>
-			<el-text class="lo-ra-training-monitor-round">
-				{{ data.currentRound }}/{{ data.totalRound }}
-			</el-text>
+			<el-text class="lo-ra-training-monitor-round"> {{ data.current }}/{{ data.total }} </el-text>
 		</div>
 		<div class="lo-ra-training-monitor-body">
 			<div class="lo-ra-training-monitor-item">
 				<div class="lo-ra-training-monitor-item-label">已用时长</div>
-				<div class="lo-ra-training-monitor-item-value">{{ data.usedTime }}</div>
+				<div class="lo-ra-training-monitor-item-value">{{ data.elapsed }}</div>
 			</div>
 			<div class="lo-ra-training-monitor-item">
 				<div class="lo-ra-training-monitor-item-label">预估剩余时长</div>
-				<div class="lo-ra-training-monitor-item-value">{{ data.remainingTime }}</div>
+				<div class="lo-ra-training-monitor-item-value">{{ data.remaining }}</div>
 			</div>
 			<div class="lo-ra-training-monitor-item">
 				<div class="lo-ra-training-monitor-item-label">每步时间</div>
-				<div class="lo-ra-training-monitor-item-value">{{ data.stepTime }}</div>
+				<div class="lo-ra-training-monitor-item-value">{{ data.speed }}</div>
 			</div>
 			<div class="lo-ra-training-monitor-item">
 				<div class="lo-ra-training-monitor-item-label">平均loss</div>
-				<div class="lo-ra-training-monitor-item-value">{{ data.averageLoss }}</div>
+				<div class="lo-ra-training-monitor-item-value">{{ data.loss }}</div>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-export interface LoRATrainingMonitorProps {
-	data: {
-		/** 当前轮数 */
-		currentRound: number;
-		/** 总轮数 */
-		totalRound: number;
-		/** 已用时长 */
-		usedTime: string;
-		/** 预估剩余时长 */
-		remainingTime: string;
-		/** 每步时间 */
-		stepTime: string;
-		/** 平均loss */
-		averageLoss: string;
-	};
+import { loRATrainingInfo } from "@/api/monitor";
+import { sleep } from "@/utils/tools";
+
+export interface LoRATrainingMonitorData {
+	/** 当前进度 */
+	current: number;
+	/** 已经耗时 */
+	elapsed: string;
+	/** 损失 */
+	loss: number;
+	/** 进度 */
+	progress: number;
+	/** 剩余时间 */
+	remaining: string;
+	/** 每秒速度 */
+	speed: number;
+	/** 总进度 */
+	total: number;
 }
 
-const props = withDefaults(defineProps<LoRATrainingMonitorProps>(), {
-	data: () => ({
-		currentRound: 0,
-		totalRound: 0,
-		usedTime: "00:00:00",
-		remainingTime: "00:00:00",
-		stepTime: "00:00:00",
-		averageLoss: "0.000"
-	})
+const data = ref<LoRATrainingMonitorData>({
+	current: 0,
+	elapsed: "00:00",
+	loss: 0,
+	progress: 0,
+	remaining: "00:00",
+	speed: 0,
+	total: 0
 });
+const status = ref(false);
+const sleepTime = 3000;
+function update() {
+	if (!status.value) return;
+	loRATrainingInfo()
+		.then((res) => {
+			if (!res.detail) return;
+			Object.assign(data.value, res.detail);
+		})
+		.finally(() => {
+			status.value && sleep(sleepTime).then(update);
+		});
+}
 
-/** 计算百分比 */
-const percentage = computed(() => {
-	if (props.data.totalRound === 0) return 0;
-	const value = Math.floor((props.data.currentRound / props.data.totalRound) * 100);
-	return value > 100 ? 100 : value;
+/** 开始查询 */
+function start() {
+	status.value = true;
+	update();
+}
+
+/** 停止查询 */
+function stop() {
+	status.value = false;
+}
+
+defineExpose({
+	start,
+	stop
 });
 </script>
 

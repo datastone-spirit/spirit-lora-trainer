@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-20 14:26:35
+ * @LastEditTime: 2024-12-20 16:57:31
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -97,7 +97,8 @@ function formatConfig(form: RuleForm): StartFluxTrainingData["config"] {
 		vae_batch_size: null,
 		ddp_timeout: null,
 		base_weights: "",
-		base_weights_multiplier: 1
+		base_weights_multiplier: null,
+		resolution: ""
 	};
 	// 需要将科学计数法转换为number的对象key数组
 	const scientificToNumberKeys: ScientificToNumberKeys = [
@@ -115,12 +116,13 @@ function formatConfig(form: RuleForm): StartFluxTrainingData["config"] {
 		}
 	});
 
+	// resolution
+	config.resolution = [form.resolution_width, form.resolution_height].join(",");
+
 	// 其他对象key
+	const excludeKeys = [...scientificToNumberKeys, "resolution"];
 	// @ts-expect-error 去除ts类型检查
-	const otherKeys: OtherKeys = Object.keys(config).filter(
-		// @ts-expect-error 去除ts类型检查
-		(key) => !scientificToNumberKeys.includes(key)
-	);
+	const otherKeys: OtherKeys = Object.keys(config).filter((key) => !excludeKeys.includes(key));
 	otherKeys.forEach((key) => {
 		// @ts-expect-error 去除ts类型检查
 		config[key] = form[key];
@@ -219,7 +221,8 @@ export function mergeDataToForm(toml: StartFluxTrainingData, form: RuleForm) {
 	form.shuffle_caption = general.shuffle_caption;
 
 	// 其他
-	const otherKeys = Object.keys(config).filter((key) => !datasetKeys.includes(key));
+	const excludeKeys = [...scientificToNumberKeys, "resolution", ...datasetKeys];
+	const otherKeys = Object.keys(config).filter((key) => !excludeKeys.includes(key));
 	otherKeys.forEach((key) => {
 		// @ts-expect-error 去除ts类型检查
 		form[key] = config[key];

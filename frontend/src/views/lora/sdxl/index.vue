@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-20 14:26:51
+ * @LastEditTime: 2024-12-20 16:58:11
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -105,8 +105,8 @@ const ruleForm = ref<RuleForm>({
 	up_lr_weight: "1,1,1,1,1,1,1,1,1,1,1,1",
 	block_lr_zero_threshold: 0,
 	enable_base_weight: false,
-	base_weights: [],
-	base_weights_multiplier: "",
+	base_weights: "",
+	base_weights_multiplier: null,
 	// -----
 	enable_preview: false,
 	// -----,

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-20 14:54:49
+ * @LastEditTime: 2024-12-20 17:06:59
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -51,11 +51,11 @@
 		/>
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="flux-footer-bar" :size="40">
-				<SystemMonitor v-if="showSystemMonitor" :data="systemMonitorData" />
-				<LoRATrainingMonitor v-if="showLoRATrainingMonitor" :data="loRATrainingMonitorData" />
+				<GPUMonitor ref="gpuMonitorRef" v-show="showGPUMonitor" />
+				<LoRATrainingMonitor ref="loRATrainingMonitorRef" v-show="showLoRATrainingMonitor" />
 				<TagMonitor ref="tagMonitorRef" v-show="showTagMonitor" />
 				<el-button
-					v-if="!showSystemMonitor"
+					v-if="showSubmitBtn"
 					type="primary"
 					size="large"
 					:loading="submitLoading"
@@ -70,8 +70,6 @@
 
 <script setup lang="ts">
 import type { StartFluxTrainingData } from "@/api/lora/types";
-import type { LoRATrainingMonitorProps } from "@/components/Monitor/LoRATrainingMonitor/index.vue";
-import type { SystemMonitorProps } from "@/components/Monitor/SystemMonitor/index.vue";
 import { useSettingsStore } from "@/stores";
 import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
@@ -84,8 +82,10 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
 import type { RuleForm, RuleFormProps } from "./types";
-import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
 import { startFluxTraining } from "@/api/lora";
+import GPUMonitor from "@/components/Monitor/GPUMonitor/index.vue";
+import LoRATrainingMonitor from "@/components/Monitor/LoRATrainingMonitor/index.vue";
+import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
 
@@ -153,7 +153,7 @@ const defaultForm = readonly<RuleForm>({
 	network_args: "",
 	enable_base_weight: false,
 	base_weights: "",
-	base_weights_multiplier: 1,
+	base_weights_multiplier: null,
 	// -----
 	enable_preview: false,
 	// -----
@@ -245,23 +245,12 @@ const generateToml = useDebounceFn(() => {
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
-// 系统监控
-const showSystemMonitor = ref(false);
-const systemMonitorData = ref<SystemMonitorProps["data"]>({
-	gpuUsage: 0, // gpu占用百分比
-	gpuPower: 0, // gpu功率百分比
-	gpuMemory: 0 // gpu显存百分比
-});
+// gpu监控
+const showGPUMonitor = ref(false);
+const gpuMonitorRef = ref<InstanceType<typeof GPUMonitor>>();
 // LoRA训练监控
 const showLoRATrainingMonitor = ref(false);
-const loRATrainingMonitorData = ref<LoRATrainingMonitorProps["data"]>({
-	currentRound: 0,
-	totalRound: 0,
-	usedTime: "00:00:00",
-	remainingTime: "00:00:00",
-	stepTime: "00:00:00",
-	averageLoss: "0.000"
-});
+const loRATrainingMonitorRef = ref<InstanceType<typeof LoRATrainingMonitor>>();
 // 打标监控
 const showTagMonitor = ref(false);
 const tagMonitorRef = ref<InstanceType<typeof TagMonitor>>();
@@ -303,6 +292,11 @@ function onResetData() {
 
 /** 提交表单 */
 const submitLoading = ref(false);
+// 如果任何一个监视器为真，则不显示提交按钮
+const showSubmitBtn = computed(() => {
+	const monitors = [showGPUMonitor.value, showLoRATrainingMonitor.value, showTagMonitor.value];
+	return !monitors.some((monitor) => monitor);
+});
 function validateForm() {
 	return new Promise((resolve) => {
 		if (!ruleFormRef.value) return resolve(false);
@@ -334,18 +328,27 @@ async function onSubmit() {
 		// 开始训练
 		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
 		submitLoading.value = true;
-		showSystemMonitor.value = true;
-		showLoRATrainingMonitor.value = true;
 		await startFluxTraining(data);
-		// 创建训练任务成功
-		submitLoading.value = false;
-		showSystemMonitor.value = false;
-		showLoRATrainingMonitor.value = false;
+		// 监听数据
+		showGPUMonitor.value = true;
+		gpuMonitorRef.value?.start();
+
+		showLoRATrainingMonitor.value = true;
+		loRATrainingMonitorRef.value?.start();
+		// showLoRATrainingMonitor.value = true;
+		// submitLoading.value = false;
+		// showSystemMonitor.value = false;
+		// showLoRATrainingMonitor.value = false;
 		ElMessage.success("创建训练任务成功");
 	} catch (error) {
 		submitLoading.value = false;
-		showSystemMonitor.value = false;
+
+		showGPUMonitor.value = false;
+		gpuMonitorRef.value?.stop();
+
 		showLoRATrainingMonitor.value = false;
+		loRATrainingMonitorRef.value?.stop();
+
 		console.error("创建训练任务失败", error);
 	}
 }

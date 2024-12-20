@@ -12,6 +12,7 @@ import subprocess
 from task.manager import task_decorator
 from task.task import Task
 import re
+from utils.util import pathFormat
 
 from utils.util import setup_logging
 setup_logging()
@@ -42,12 +43,32 @@ class TrainingService:
         dataset_path = dataset2toml(parameters.dataset)
         config_file = config2toml(parameters.config, dataset_path)
         try:
+            # 训练前需清除npz文件
+            self.clear_npz_files(parameters.dataset.datasets[0].subsets[0].image_dir)
             result = self.run_train(config_file, script=self.script, training_paramters=parameters)
         except Exception as e:
             result = {"error11111111----------------": str(e)}
         return result
     
+    def clear_npz_files(self, directory: str):
+        """
+        Deletes all .npz files in the specified directory.
 
+        Args:
+            directory (str): The path to the directory where .npz files will be deleted.
+        """
+        full_path = pathFormat(directory)
+        # Iterate through files in the directory
+        for file_name in os.listdir(full_path):
+            file_path = os.path.join(full_path, file_name)
+            # Check if it is a .npz file and delete it
+            if os.path.isfile(file_path) and file_name.endswith('.npz'):
+                try:
+                    os.remove(file_path)
+                    print(f"Deleted: {file_path}")
+                except Exception as e:
+                    print(f"Error deleting {file_path}: {e}")
+    
 
     def prepare_dataset_dir(self, root_dir : str, repeat_num : int, lora_name : str ) -> str:
         

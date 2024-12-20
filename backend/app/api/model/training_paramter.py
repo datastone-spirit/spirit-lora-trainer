@@ -141,7 +141,10 @@ class TrainingConfig:
     keep_tokens_separator: str  = ""
     learning_rate: float = 2e-06
     log_config: bool = False
+    log_prefix: str  = None
     log_tracker_config: str  = None
+    log_tracker_name: str  = None
+    log_with: str  = None
     logging_dir: str  = None
     loss_type: str  = "l2"
     lowram: bool = False

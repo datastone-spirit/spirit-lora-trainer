@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-18 17:08:33
- * @LastEditTime: 2024-12-19 14:59:01
+ * @LastEditTime: 2024-12-20 15:08:35
  * @LastEditors: mulingyuer
  * @Description: 可输入的树选择器
  * @FilePath: \frontend\src\components\Form\InputTreeSelector.vue
@@ -9,28 +9,31 @@
 -->
 <template>
 	<el-popover
-		v-model:visible="visible"
+		:visible="visible"
 		placement="bottom"
-		trigger="click"
 		width="100%"
 		:teleported="false"
 		:popper-class="['input-tree-selector-popover']"
 	>
 		<template #reference>
-			<el-input
-				v-model="folder"
-				:placeholder="inputPlaceholder"
-				@input="onInput"
-				@keydown.enter="onEnter"
-			>
-				<template #suffix>
-					<el-icon class="input-tree-selector-icon" :class="{ open: visible }" :size="14">
-						<ArrowDown />
-					</el-icon>
-				</template>
-			</el-input>
+			<div ref="inputTreeSelectorRef" class="input-tree-selector">
+				<el-input
+					ref="inputRef"
+					v-model="folder"
+					:placeholder="inputPlaceholder"
+					@input="onInput"
+					@keydown.enter="onEnter"
+					@click="onInputClick"
+				>
+					<template #suffix>
+						<el-icon class="input-tree-selector-icon" :class="{ open: visible }" :size="14">
+							<ArrowDown />
+						</el-icon>
+					</template>
+				</el-input>
+			</div>
 		</template>
-		<div class="input-tree-selector-dropdown">
+		<div ref="popoverRef" class="input-tree-selector-dropdown">
 			<el-scrollbar view-class="input-tree-selector-dropdown-list">
 				<el-tree
 					ref="treeRef"
@@ -53,7 +56,7 @@
 <script setup lang="ts">
 import type Node from "element-plus/es/components/tree/src/model/node";
 import { ArrowDown } from "@element-plus/icons-vue";
-import type { ElTree } from "element-plus";
+import type { ElTree, ElInput } from "element-plus";
 import { getDirectoryStructure } from "@/api/common";
 import type { GetDirectoryStructureParams, GetDirectoryStructureResult } from "@/api/common";
 
@@ -68,6 +71,10 @@ type GetDirectoryParams = Omit<GetDirectoryStructureParams, "is_dir"> & {
 };
 
 const props = withDefaults(defineProps<InputTreeSelectorProps>(), {});
+
+const inputRef = ref<InstanceType<typeof ElInput>>();
+const inputTreeSelectorRef = ref<HTMLDivElement>();
+const popoverRef = ref<HTMLDivElement>();
 const visible = ref(false);
 const treeRef = ref<InstanceType<typeof ElTree>>();
 const folder = defineModel({ type: String, required: true });
@@ -133,8 +140,24 @@ function onTreeLoad(node: Node, resolve: (data: TreeItem[]) => void) {
 /** tree节点点击 */
 function onNodeClick(data: TreeItem) {
 	folder.value = data.value;
+	inputRef.value?.blur();
 	visible.value = false;
 }
+
+/** 输入框点击 */
+function onInputClick() {
+	visible.value = true;
+}
+
+/** 点击其他地方隐藏菜单 */
+useEventListener(document, "click", (event: MouseEvent) => {
+	if (!visible.value) return;
+	const isCurrentClick = [inputTreeSelectorRef.value, popoverRef.value].some((item) => {
+		if (!item) return false;
+		return item.contains(event.target as HTMLElement);
+	});
+	if (!isCurrentClick) visible.value = false;
+});
 
 /** 输入框变化 */
 const onInput = useDebounceFn((value: string) => {
@@ -164,6 +187,9 @@ async function loadTreeData(path = "/") {
 </script>
 
 <style lang="scss" scoped>
+.input-tree-selector {
+	width: 100%;
+}
 .input-tree-selector-icon {
 	transform: rotateZ(0deg);
 	transition: var(--el-transition-duration);

@@ -24,7 +24,7 @@ class CaptioningService:
             os.makedirs(directory_path, exist_ok=True)
 
             # 保存反推词到文件，文件名与图片名一致
-            txt_file_path = os.path.join(directory_path, f"{base_name}_caption.txt")
+            txt_file_path = os.path.join(directory_path, f"{base_name}.txt")
 
             with open(txt_file_path, "w", encoding="utf-8") as txt_file:
                 txt_file.write(caption_text)
@@ -139,7 +139,7 @@ def captioning(image_paths: List[str], output_dir: str, model_info :CaptioningMo
 
                 # 保存反推词到文件，与图片文件名一致
                 base_name = os.path.splitext(os.path.basename(image_path))[0]
-                cap_file_path = os.path.join(output_dir, f"{base_name}_caption.txt")
+                cap_file_path = os.path.join(output_dir, f"{base_name}.txt")
                 with open(cap_file_path, "w", encoding="utf-8") as txt_file:
                     txt_file.write(caption_text)
                 success = True

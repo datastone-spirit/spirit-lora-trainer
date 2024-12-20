@@ -4,6 +4,10 @@ from typing import List, Optional,Tuple
 from .base_model import Model
 import dacite
 
+from utils.util import setup_logging
+setup_logging()
+import logging
+logger = logging.getLogger(__name__)
 @dataclass
 class Subset:
     class_tokens: str
@@ -272,4 +276,9 @@ class TrainingParameter:
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingParameter':
-       return dacite.from_dict(data_class=TrainingParameter, data=dikt) 
+        try: 
+            dacite.from_dict(data_class=TrainingParameter, data=dikt) 
+        except Exception as e:
+            logger.warning(f"TrainingParameter.from_dict failed, error: ", exc_info=e)
+            raise ValueError(f"TrainingParameter.from_dict failed, error: {str(e)}")
+        return 

@@ -19,12 +19,10 @@ class Training(Resource):
         """
         # 解析请求中的 JSON 数据
         data = request.get_json()
-        # print(f"data ---- {data}")
-
         data = set_resolution(data)
-
-        parameter = TrainingParameter.from_dict(data)
+        parameter = None
         try:
+            parameter = TrainingParameter.from_dict(data)
             task = TrainingService().training(parameter)
             return {
                     'success': True,
@@ -35,13 +33,13 @@ class Training(Resource):
             logger.warning(f"start training with parameter:{parameter} failed, error:", exc_info=e) 
             return {
                 'success': False,
-                'msg': str(e)
+                'msg': "Your training parameters were incorrect, please fix them",
                 }, 400
         except Exception as e:
             logger.warning(f"start training with parameter:{parameter} failed, error:", exc_info=e) 
             return {
                 'success': False,
-                'msg': str(e)
+                'msg': "Server Interal Error, please contact the administrator",
                 }, 500
 
     

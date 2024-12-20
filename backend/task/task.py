@@ -47,9 +47,9 @@ class Task:
         task.training_parameters = training_paramter
         task.detail = {}
         if training_paramter.config.log_prefix is None or training_paramter.config.log_prefix == '':
-            task.id = uuid.uuid4().hex
-        else:
-            task.id = training_paramter.config.log_prefix
+            raise Exception("[Bug] log_prefix should not be empty or none")
+
+        task.id = training_paramter.config.log_prefix
         task.task_type = TaskType.TRAINING
         return task
 

@@ -42,13 +42,13 @@ class TrainingService:
 
         dataset_path = dataset2toml(parameters.dataset)
         config_file = config2toml(parameters.config, dataset_path)
+
         try:
-            # 训练前需清除npz文件
             self.clear_npz_files(parameters.dataset.datasets[0].subsets[0].image_dir)
-            result = self.run_train(config_file, script=self.script, training_paramters=parameters)
         except Exception as e:
-            result = {"error11111111----------------": str(e)}
-        return result
+            logger.warning(f"clear npz files failed, ignored, error:", exc_info=e)
+
+        return self.run_train(config_file, script=self.script, training_paramters=parameters)
     
     def clear_npz_files(self, directory: str):
         """
@@ -65,9 +65,9 @@ class TrainingService:
             if os.path.isfile(file_path) and file_name.endswith('.npz'):
                 try:
                     os.remove(file_path)
-                    print(f"Deleted: {file_path}")
+                    logger.info(f"Deleted: {file_path}")
                 except Exception as e:
-                    print(f"Error deleting {file_path}: {e}")
+                    logger.warning(f"Error deleting {file_path}: {e}")
     
 
     def prepare_dataset_dir(self, root_dir : str, repeat_num : int, lora_name : str ) -> str:

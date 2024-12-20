@@ -5,6 +5,8 @@ module.exports = {
     "ComputedRef": true,
     "DirectiveBinding": true,
     "EffectScope": true,
+    "ElMessage": true,
+    "ElNotification": true,
     "ExtractDefaultPropTypes": true,
     "ExtractPropTypes": true,
     "ExtractPublicPropTypes": true,

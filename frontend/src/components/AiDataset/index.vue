@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-19 17:53:57
+ * @LastEditTime: 2024-12-20 09:27:14
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -110,7 +110,7 @@ import type { FileItem, FileList } from "./types";
 import { FileType } from "./types";
 import { directoryFiles } from "@/api/common";
 import { formatDirectoryFiles } from "./ai-dataset.helper";
-import { manualTag } from "@/api/tag";
+import { deleteFile, manualTag } from "@/api/tag";
 
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
@@ -207,7 +207,7 @@ function onMenuClick(menu: ContextMenuItem, data: FileItem) {
 			onEdit(data);
 			break;
 		case ContextMenuKeyEnum.DELETE: // 删除
-			ElMessage.info("删除");
+			onDeleteFile(data);
 			break;
 	}
 }
@@ -266,6 +266,14 @@ async function onSave() {
 	}
 }
 
+// 删除文件
+function onDeleteFile(data: FileItem) {
+	deleteFile({ file_path: data.path }).then(() => {
+		getList();
+		ElMessage.success("删除成功");
+	});
+}
+
 // 刷新
 const refreshing = ref(false);
 async function onRefresh() {
@@ -320,6 +328,7 @@ function onConfirmUploadSuccess() {
 	uploadFileList.value = [];
 	uploadId.value = "";
 	uploadSubmitLoading.value = false;
+	getList();
 	ElMessage.success("上传成功");
 }
 

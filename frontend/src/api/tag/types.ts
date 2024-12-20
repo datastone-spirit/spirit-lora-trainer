@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 17:33:00
- * @LastEditTime: 2024-12-19 17:35:53
+ * @LastEditTime: 2024-12-20 09:21:26
  * @LastEditors: mulingyuer
  * @Description: 打标api类型
  * @FilePath: \frontend\src\api\tag\types.ts
@@ -36,4 +36,10 @@ export interface ManualTagResult {
 	caption_text: string;
 	image_path: string;
 	txt_path: string;
+}
+
+/** 删除文件参数 */
+export interface DeleteFileParams {
+	/** 需要删除的文件的完整路径 */
+	file_path: string;
 }

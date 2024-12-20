@@ -169,7 +169,10 @@ def validate_datasets(parameter: TrainingParameter, datasets :List[Dataset]) -> 
         if not validate:
             return validate, reason
 
-        if datasets[idx].resolution < 0:
+        if datasets[idx].resolution[0] <=  0:
+            return False, "resolution must be greater than 0"
+
+        if datasets[idx].resolution[1] <=  0:
             return False, "resolution must be greater than 0"
 
     return True, "Ok"
@@ -240,6 +243,19 @@ def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
 
     if config.caption_extension is None or config.caption_extension == "":
         config.caption_extension = ".txt"
+    
+    # We need parse the training progress with tensorboard log format, 
+    # so overwrite the log_with value to tensorboard
+    config.log_with = "tensorboard"
+
+    # Set the logging directory
+    if config.logging_dir is None or config.logging_dir == "":
+        config.logging_dir = os.path.join(getprojectpath(), "logs")
+    elif not os.path.isabs(config.logging_dir):
+        config.logging_dir = os.path.join(getprojectpath(), config.logging_dir)
+    
+    if not os.path.exists(config.logging_dir):
+        os.makedirs(config.logging_dir)
 
     return True, "Ok"
 

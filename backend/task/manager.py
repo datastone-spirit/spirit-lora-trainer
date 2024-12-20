@@ -1,5 +1,5 @@
 from typing import Optional, List
-from task.task import Task, TaskStatus
+from task.task import Task, TaskStatus, TaskType, TrainingTask
 from time import sleep
 from functools import wraps
 import logging
@@ -64,6 +64,19 @@ class TaskManager:
                     self.history.append(self.current_task)
                     self.current_task = None
             sleep(0.5)
+    
+    def tensor_board_run_loop(self):
+        while True:
+            try:
+                if self.current_task is not None:
+                    task = self.current_task
+                    if task is not None and task.status == TaskStatus.RUNNING and task.task_type == TaskType.TRAINING:
+                        logger.info(f"task id{task.id} is running, update stats with tensorboard log")
+                        task.update_detail_with_tb()
+            except Exception as e:
+                logger.error(f"TaskManager tensor_board_run_loop error {self.current_task}", exc_info=e)
+            sleep(5)
+
 
 
 def task_decorator(func):
@@ -74,3 +87,5 @@ def task_decorator(func):
 
 tm = TaskManager()
 threading.Thread(target=tm.task_run_loop, daemon=True).start()
+
+threading.Thread(target=tm.tensor_board_run_loop, daemon=True).start()

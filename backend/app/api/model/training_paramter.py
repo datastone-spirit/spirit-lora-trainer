@@ -1,7 +1,6 @@
-from dataclasses import dataclass, asdict
-import toml
-import tempfile
-from typing import List, Optional
+from dataclasses import dataclass
+
+from typing import List, Optional,Tuple
 from .base_model import Model
 import dacite
 
@@ -19,7 +18,7 @@ class Subset:
 class Dataset:
     batch_size: int
     keep_tokens: int
-    resolution: int
+    resolution: Optional[Tuple[int, int]]
     subsets: Optional[List[Subset]]
 
     @classmethod
@@ -43,7 +42,7 @@ class TrainingDataset:
     "datasets": [{
         "batch_size": 1,
         "keep_tokens": 1,
-        "resolution": 512,
+        "resolution": [512, 512],
         "subsets": [{
         "class_tokens": "aaa",
         "image_dir": "/spirit/fluxgym/datasets/aaa",

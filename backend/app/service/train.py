@@ -6,6 +6,7 @@ import sys
 from ..api.model.training_paramter import TrainingParameter
 from ..api.common.utils import validate_parameter, dataset2toml, config2toml
 from utils.util import getprojectpath 
+import uuid
 import logging
 import subprocess
 from task.manager import task_decorator
@@ -16,6 +17,7 @@ from utils.util import setup_logging
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
+
 
 class TrainingService:
 
@@ -29,9 +31,14 @@ class TrainingService:
             logger.warning(f"valid parameters error: {parameters}")
             raise ValueError(f"valid reqest failed, reason: {reason}")
         
-        #self.prepare_dataset_dir(parameters.dataset.datasets[0].subsets[0].image_dir, 
-        #                        parameters.dataset.datasets[0].subsets[0].num_repeats, 
-        #                        parameters.config.output_name)
+        #
+        # FIXME: we pre-create the taskid here, and set it to the log_prefix
+        # for tensorborad log parsing, so the user log_preifix configuration will
+        # be overwrited by this taskid value
+        #
+        taskid = uuid.uuid4().hex
+        parameters.config.log_prefix = taskid
+
         dataset_path = dataset2toml(parameters.dataset)
         config_file = config2toml(parameters.config, dataset_path)
         return self.run_train(config_file, script=self.script, training_paramters=parameters)
@@ -89,8 +96,8 @@ class TrainingService:
         #customize_env["CUDA_VISIBLE_DEVICES"] = "0"
         customize_env["NCCL_P2P_DISABLE"]="1"
         customize_env["NCCL_IB_DISABLE"]="1"
-
-        return Task.wrap_training(subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env), training_paramters)
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env)
+        return Task.wrap_training(proc, training_paramters)
 
     def get_gpu_info(self):
         try:

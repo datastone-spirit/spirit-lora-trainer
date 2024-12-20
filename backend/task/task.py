@@ -7,6 +7,7 @@ from app.api.model.captioning_model import CaptioningModelInfo
 from subprocess import Popen, CompletedProcess, TimeoutExpired
 import uuid
 import re
+from tbparse import SummaryReader
 
 
 from utils.util import setup_logging
@@ -25,6 +26,12 @@ class TaskStatus(Enum):
     COMPLETE = "complete"
     FAILED = "failed"
 
+def get_logdir(log_dir, log_prefix):
+    import os
+    for file in os.listdir(log_dir):
+        if file.startswith(log_prefix):
+            return os.path.join(log_dir, file)
+    return None
 @dataclass
 class Task:
     status = TaskStatus.CREATED
@@ -39,7 +46,10 @@ class Task:
         task.proc = proc
         task.training_parameters = training_paramter
         task.detail = {}
-        task.id = uuid.uuid4().hex
+        if training_paramter.config.log_prefix is None or training_paramter.config.log_prefix == '':
+            task.id = uuid.uuid4().hex
+        else:
+            task.id = training_paramter.config.log_prefix
         task.task_type = TaskType.TRAINING
         return task
 
@@ -203,8 +213,7 @@ total optimization steps / 学習ステップ数: 100
         for key, pattern in patterns.items():
             match = re.search(pattern, line)
             if match:
-                if key == 'steps':
-                    self.detail['current'] = int(match.group(1))
+                if key == 'steps' and self.detail.get('total') is None:
                     self.detail['total'] = int(match.group(2))
                 elif key == 'time':
                     self.detail['elapsed'] = match.group(1)
@@ -213,8 +222,27 @@ total optimization steps / 学習ステップ数: 100
                     self.detail[key] = int(match.group(1))
                 elif key == 'speed':
                     self.detail[key] = float(match.group(1))
-                elif key == 'loss':
-                    self.detail[key] = float(match.group(1))
+
+    def update_detail_with_tb(self):
+        import os
+        log_path = get_logdir(self.training_parameters.config.logging_dir, self.training_parameters.config.log_prefix)
+        if log_path is None:
+            logger.warning(f"task {self.id} log path is not found")
+            return
+        if not os.path.exists(log_path):
+            logger.warning(f"task {self.id} log path {log_path} is not exists, waiting the training start")
+            return
+        reader = SummaryReader(log_path)
+        df=reader.scalars
+        current = max(df['step'])
+        self.detail['current'] = current
+        self.detail['loss_avr'] = float(df[df['step']==current][df['tag']=='loss/average']['value'].values[0])
+        self.detail['loss'] = float(df[df['step']==current][df['tag']=='loss/current']['value'].values[0])
+        self.detail['lr_unet'] = float(df[df['step']==current][df['tag']=='lr/unet']['value'].values[0])
+
+
+
+
 
 @dataclass
 class CaptioningTask(Task):
@@ -255,3 +283,4 @@ class CaptioningTask(Task):
         
         logger.info(f"task dict result: {d}")
         return d
+

@@ -165,7 +165,7 @@ def validate_datasets(parameter: TrainingParameter, datasets :List[Dataset]) -> 
             logger.warning("batch_size is not set, set to 1")
             datasets[idx].batch_size = 1
 
-        validate, reason = validate_subsets(datasets[idx].subsets, '_caption' + parameter.config.caption_extension)
+        validate, reason = validate_subsets(datasets[idx].subsets, parameter.config.caption_extension)
         if not validate:
             return validate, reason
 

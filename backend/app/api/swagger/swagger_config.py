@@ -148,7 +148,7 @@ tag_dir_config = {
                         "description": "返回状态码",
                         "example": 0,
                     },
-                    "msg": {
+                    "message": {
                         "type": "string",
                         "description": "返回消息",
                         "example": "ok",
@@ -192,6 +192,89 @@ tag_dir_config = {
         }
     },
 }
+
+#删除文件
+delete_file_config = {
+  "tags": ["Directory"],
+  "description": "删除指定路径的文件",
+  "parameters": [
+    {
+      "name": "file_path",
+      "in": "query",
+      "type": "string",
+      "required": True,
+      "description": "需要删除的文件的完整路径",
+      "example": "/home/user/documents/example.txt"
+    }
+  ],
+  "responses": {
+    "200": {
+      "description": "文件删除成功",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": True,
+            "description": "操作是否成功"
+          },
+          "message": {
+            "type": "string",
+            "example": "文件已删除: /home/user/documents/example.txt",
+            "description": "操作的详细信息"
+          },
+          "code": {
+            "type": "integer",
+            "description": "返回状态码",
+            "example": 0,
+          },
+          "data": {
+            "type": "null",
+            "description": "",
+            "example": 'null',
+          },
+        }
+      }
+    },
+    "400": {
+      "description": "请求参数错误或文件不存在",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": False,
+            "description": "操作是否成功"
+          },
+          "message": {
+            "type": "string",
+            "example": "文件不存在: /home/user/documents/example.txt",
+            "description": "错误的详细信息"
+          }
+        }
+      }
+    },
+    "500": {
+      "description": "服务器错误，删除失败",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": False,
+            "description": "操作是否成功"
+          },
+          "message": {
+            "type": "string",
+            "example": "删除文件失败: 权限不足",
+            "description": "错误的详细信息"
+          }
+        }
+      }
+    }
+  }
+}
+
 
 # 文件上传
 upload_config = {

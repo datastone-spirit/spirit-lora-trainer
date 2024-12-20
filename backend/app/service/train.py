@@ -41,7 +41,11 @@ class TrainingService:
 
         dataset_path = dataset2toml(parameters.dataset)
         config_file = config2toml(parameters.config, dataset_path)
-        return self.run_train(config_file, script=self.script, training_paramters=parameters)
+        try:
+            result = self.run_train(config_file, script=self.script, training_paramters=parameters)
+        except Exception as e:
+            result = {"error11111111----------------": str(e)}
+        return result
     
 
 
@@ -122,7 +126,6 @@ class TrainingService:
                 memory_total = float(memory_total)
                 memory_used = float(memory_used)
 
-                # 将每个 GPU 的信息存储到字典
                 gpu_info_list.append({
                     "gpu_index": gpu_index,
                     "gpu_name": gpu_name,

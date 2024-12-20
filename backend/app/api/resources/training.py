@@ -19,6 +19,7 @@ class Training(Resource):
         """
         # 解析请求中的 JSON 数据
         data = request.get_json()
+        # print(f"data ---- {data}")
 
         data = set_resolution(data)
 

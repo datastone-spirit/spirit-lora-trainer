@@ -2,7 +2,7 @@ import os
 from flask import request
 from flask_restful import Resource
 from ..common.utils import res, get_directory_structure, use_swagger_config
-from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config
+from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config,delete_file_config
 from utils.util import pathFormat
 
 
@@ -149,6 +149,26 @@ class TagDirFile(Resource):
                     })
 
             return image_txt_pairs
-
         except Exception as e:
             return {"error": str(e)}
+        
+class DeleteFile(Resource):
+    @use_swagger_config(delete_file_config)
+    def delete(self):
+        """
+        删除文件
+        """
+        file_path = request.args.get("file_path", "")
+        full_path = pathFormat(file_path)
+        if not file_path:
+            return res(success=False, message="文件路径未提供")
+
+        # 检查文件是否存在
+        if not os.path.isfile(full_path):
+            return res(success=False, message=f"文件不存在: {file_path}")
+        try:
+            # 删除主文件
+            os.remove(full_path)
+            return res(success=True, message=f"文件已删除: {file_path}")
+        except Exception as e:
+            return res(success=False, message=f"删除文件失败: {str(e)}")

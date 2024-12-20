@@ -29,24 +29,15 @@ class Tagging(Resource):
             images = CaptioningService().load_images_from_directory(image_path)
             result = CaptioningService().run_captioning(images,image_path, model_name=model_name)
             if isinstance(result, Task):
-                return {
-                    "success": True,
-                    "task_id": result.id,
-                    "msg": f"task {result.id} started successfully."
-                }, 200
+                return res(data={"task_id": result.id}, message=f"task {result.id} started successfully.")
+                
             return res(success=True, data=result)
         except ValueError as ve:
-            return {
-                "success": False,
-                "msg": f"captioning failed : {ve}"
-            }, 400
+            return res(success=False, message=f"captioning failed : {ve}",code=400)
         except Exception as e:
             # 异常处理可以记录日志等
             logger.warning(f"runing captioning with model:{model_name}, and image_path{image_path} error", exc_info=e)
-            return {
-                "success": False,
-                "msg": f"Server Internal Error: {e}"
-            }, 500
+            return res(success=False, message=f"Server Internal Error: {e}",code=500)
 
 
     

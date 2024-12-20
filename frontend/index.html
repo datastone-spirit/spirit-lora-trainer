@@ -6,10 +6,42 @@
   <link rel="icon" href="/favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>智灵 LoRA 训练器</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .zl-app-loader-wrapper {
+      height: 100vh;
+      display: flex;
+    }
+
+    .zl-app-loader {
+      margin: auto;
+      width: 120px;
+      height: 20px;
+      -webkit-mask: linear-gradient(90deg, #20bda0 70%, #0000 0) left/20% 100%;
+      background:
+        linear-gradient(#20bda0 0 0) left -25% top 0 /20% 100% no-repeat #ddd;
+      animation: zl-app-loader-l7 1s infinite steps(6);
+    }
+
+    @keyframes zl-app-loader-l7 {
+      100% {
+        background-position: right -25% top 0
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <div id="app"></div>
+  <div id="app">
+    <div class="zl-app-loader-wrapper">
+      <div class="zl-app-loader"></div>
+    </div>
+  </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 

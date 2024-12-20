@@ -49,7 +49,6 @@ declare module 'vue' {
     FluxNetworkModuleSelect: typeof import('./../src/components/Form/FluxNetworkModuleSelect.vue')['default']
     FolderSelector: typeof import('./../src/components/Form/FolderSelector.vue')['default']
     GPUMonitor: typeof import('./../src/components/Monitor/GPUMonitor/index.vue')['default']
-    GPUMonitorInfo: typeof import('./../src/components/Monitor/GPUMonitorInfo/index.vue')['default']
     Icon: typeof import('./../src/components/Icon/Icon.vue')['default']
     ImageFile: typeof import('./../src/components/AiDataset/ImageFile.vue')['default']
     InputTreeSelector: typeof import('./../src/components/Form/InputTreeSelector.vue')['default']

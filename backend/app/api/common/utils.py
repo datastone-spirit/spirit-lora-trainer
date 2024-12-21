@@ -1,4 +1,3 @@
-from flask import jsonify
 import os
 from flasgger import swag_from
 from dataclasses import asdict
@@ -299,3 +298,11 @@ def dataset2toml(dataset :TrainingDataset) -> str:
     with open(temp_file_path, 'w+', encoding='utf-8') as f:
         toml.dump(data, f)
     return temp_file_path
+
+
+def write_caption_file(image_path: str, output_dir: str, caption_text: str) -> Tuple[bool, str]:
+    base_name = os.path.splitext(os.path.basename(image_path))[0]
+    cap_file_path = os.path.join(output_dir, f"{base_name}.txt")
+    with open(cap_file_path, "w", encoding="utf-8") as txt_file:
+        txt_file.write(caption_text)    
+    return True, cap_file_path

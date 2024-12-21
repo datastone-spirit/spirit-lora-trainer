@@ -54,7 +54,7 @@ class Task:
         return task
 
     @staticmethod
-    def wrap_captioning_task(image_paths: List[str], output_dir: str, cap_model: CaptioningModelInfo, captioning : Callable) -> 'Task':
+    def wrap_captioning_task(image_paths: List[str], output_dir: str, cap_model: CaptioningModelInfo) -> 'Task':
         task = CaptioningTask()
         task.status = TaskStatus.CREATED
         task.image_paths = image_paths
@@ -67,7 +67,7 @@ class Task:
         task.model_info = cap_model
         task.id = uuid.uuid4().hex
         task.task_type = TaskType.CAPTIONING
-        task.captioning = captioning
+        task.captioning = cap_model.captioning
         return task    
 
     def run(self):

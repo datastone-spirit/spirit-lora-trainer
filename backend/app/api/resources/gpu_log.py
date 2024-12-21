@@ -1,7 +1,5 @@
-import os
-from datetime import datetime
-from flask_restful import Resource, reqparse, request
-from ..common.utils import res, get_directory_structure, use_swagger_config
+from flask_restful import Resource
+from ..common.utils import res, use_swagger_config
 from ..swagger.swagger_config import gpu_log_config
 from app.service.train import TrainingService
 

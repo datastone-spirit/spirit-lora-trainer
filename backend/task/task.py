@@ -203,7 +203,6 @@ total optimization steps / 学習ステップ数: 100
             return
             
         patterns = {
-            'progress': r'(\d+)%',
             'steps': r'\|?\s*(\d+)/(\d+)',
             'time': r'\[(.*?)(?=<)<(.*?)(?=,)',  # Using lookahead to exclude < and ,
             'speed': r'([\d.]+)s/it',
@@ -218,8 +217,6 @@ total optimization steps / 学習ステップ数: 100
                 elif key == 'time':
                     self.detail['elapsed'] = match.group(1)
                     self.detail['remaining'] = match.group(2)
-                elif key == 'progress':
-                    self.detail[key] = int(match.group(1))
                 elif key == 'speed':
                     self.detail[key] = float(match.group(1))
 
@@ -227,10 +224,10 @@ total optimization steps / 学習ステップ数: 100
         import os
         log_path = get_logdir(self.training_parameters.config.logging_dir, self.training_parameters.config.log_prefix)
         if log_path is None:
-            logger.warning(f"task {self.id} log path is not found")
+            #logger.warning(f"task {self.id} log path is not found")
             return
         if not os.path.exists(log_path):
-            logger.warning(f"task {self.id} log path {log_path} is not exists, waiting the training start")
+            #logger.warning(f"task {self.id} log path {log_path} is not exists, waiting the training start")
             return
         reader = SummaryReader(log_path)
         df=reader.scalars
@@ -239,6 +236,10 @@ total optimization steps / 学習ステップ数: 100
         self.detail['loss_avr'] = float(df[df['step']==current][df['tag']=='loss/average']['value'].values[0])
         self.detail['loss'] = float(df[df['step']==current][df['tag']=='loss/current']['value'].values[0])
         self.detail['lr_unet'] = float(df[df['step']==current][df['tag']=='lr/unet']['value'].values[0])
+        total = int(self.detail.get('total', 0))
+        if total > 0:
+            self.detail['progress'] = round((current / total * 100), 2)
+        
 
 
 

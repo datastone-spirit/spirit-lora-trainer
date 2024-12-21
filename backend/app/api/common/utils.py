@@ -105,7 +105,7 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
     if not os.path.isdir(image_dir):
         return False, f"{image_dir} is not a valid directory"
 
-    valid_image_extensions = {".png", ".jpg", ".jpeg"}
+    valid_image_extensions = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff", ".gif"}
     valid_images = []
     valid_captions = []
 
@@ -129,6 +129,7 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
         return False, f"No valid images found in the directory {image_dir}"
 
     if len(valid_images) != len(valid_captions):
+        logger.warning(f"Mismatch between images:{len(valid_images)} and caption files {len(valid_captions)}")
         return True, f"Mismatch between images {len(valid_images)} and caption files {len(valid_captions)}"
 
     return True, "OK" 

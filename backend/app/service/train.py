@@ -159,6 +159,8 @@ class TrainingService:
             return gpu_info_list
 
         except FileNotFoundError:
-            return {"error": "nvidia-smi not found"}
+            logger.warning("nvidia-smi not found")
+            raise Exception("nvidia-smi not found")
         except Exception as e:
-            return {"error": str(e)}
+            logger.warning("get_gpu_info failed: ", exc_info=e)
+            raise e

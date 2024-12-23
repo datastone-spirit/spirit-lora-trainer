@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2024-12-19 14:36:34
+ * @LastEditTime: 2024-12-23 14:54:34
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -41,4 +41,14 @@ export function sleep(time: number): Promise<void> {
 			resolve();
 		}, time);
 	});
+}
+
+/** 是否是一个空对象 */
+export function isEmptyObject(obj: any): boolean {
+	return Object.keys(obj).length === 0;
+}
+
+/** 判断对象里是否存在指定的key */
+export function objectHasKeys(obj: any, key: string | string[]): boolean {
+	return Array.isArray(key) ? key.every((k) => k in obj) : key in obj;
 }

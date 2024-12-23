@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2024-12-20 17:10:14
+ * @LastEditTime: 2024-12-23 16:17:18
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
@@ -31,6 +31,14 @@ export interface TagMonitorData {
 	total: number;
 }
 
+const emits = defineEmits<{
+	/** 完成 */
+	complete: [];
+	/** 出错 */
+	failed: [];
+}>();
+
+const task_id = ref<string>("");
 const data = ref<TagMonitorData>({
 	current: 0,
 	total: 0
@@ -38,6 +46,7 @@ const data = ref<TagMonitorData>({
 /** 计算百分比 */
 const percentage = computed(() => {
 	if (data.value.total === 0) return 0;
+	if (data.value.current <= 0) return 0;
 	const value = Math.floor((data.value.current / data.value.total) * 100);
 	return value > 100 ? 100 : value;
 });
@@ -45,19 +54,47 @@ const status = ref(false);
 const sleepTime = 3000;
 function update() {
 	if (!status.value) return;
-	manualTagInfo()
+	manualTagInfo({ task_id: task_id.value })
 		.then((res) => {
 			if (!res.detail) return;
-			data.value.current = res.current;
+			data.value.current = res.detail.current;
 			data.value.total = res.detail.total;
+
+			switch (res.status) {
+				case "complete": // 完成
+					complete();
+					break;
+				case "failed": // 出错
+					failed();
+					break;
+			}
 		})
 		.finally(() => {
 			status.value && sleep(sleepTime).then(update);
 		});
 }
 
+/** 完成 */
+function complete() {
+	status.value = false;
+	task_id.value = "";
+	emits("complete");
+}
+
+/** 出错 */
+function failed() {
+	status.value = false;
+	task_id.value = "";
+	emits("failed");
+}
+
 /** 开始查询 */
-function start() {
+function start(taskId: string) {
+	if (typeof taskId !== "string" || taskId.trim() === "") {
+		ElMessage.warning("请传递任务ID");
+		return;
+	}
+	task_id.value = taskId;
 	status.value = true;
 	update();
 }

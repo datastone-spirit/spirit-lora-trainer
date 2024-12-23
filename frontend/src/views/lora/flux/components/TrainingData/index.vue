@@ -1,23 +1,13 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:28:31
- * @LastEditTime: 2024-12-19 15:58:10
+ * @LastEditTime: 2024-12-23 15:27:07
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<DatasetDirSelector
-		v-model:dir="ruleForm.image_dir"
-		v-model:tagger-model="ruleForm.tagger_model"
-		dir-label="数据集目录"
-		:dir-prop="formProps.image_dir"
-		dir-popover-content="image_dir"
-		tagger-label="打标模型"
-		:tagger-start="taggerStart"
-		:tagger-end="taggerEnd"
-	/>
 	<el-row :gutter="16">
 		<el-col :span="10">
 			<PopoverFormItem
@@ -133,10 +123,6 @@ import type { RuleForm, RuleFormProps } from "../../types";
 export interface TrainingDataProps {
 	/** 表单props */
 	formProps: RuleFormProps;
-	/** 打标开始的回调 */
-	taggerStart?: () => void;
-	/** 打标结束的回调 */
-	taggerEnd?: () => void;
 }
 
 defineProps<TrainingDataProps>();

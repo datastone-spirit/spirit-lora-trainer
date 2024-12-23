@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 14:52:03
- * @LastEditTime: 2024-12-20 15:50:16
+ * @LastEditTime: 2024-12-23 15:14:30
  * @LastEditors: mulingyuer
  * @Description: 系统监控：gpu、训练轮数
  * @FilePath: \frontend\src\components\Monitor\GPUMonitor\index.vue
@@ -46,7 +46,7 @@ function update() {
 				return sleep(sleepTime).then(update);
 			}
 			data.value.gpuMemory = calculatePercentage(result.memory_used_mb, result.memory_total_mb);
-			data.value.gpuPower = Math.floor(result.power_draw_watts);
+			data.value.gpuPower = calculatePercentage(result.power_draw_watts, result.power_total_watts);
 		})
 		.finally(() => {
 			status.value && sleep(sleepTime).then(update);

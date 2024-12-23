@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-20 17:06:59
+ * @LastEditTime: 2024-12-23 16:15:31
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -24,12 +24,17 @@
 							<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
 						<Collapse v-model="openStep2" title="第2步：训练用的数据">
-							<TrainingData
-								v-model:form="ruleForm"
-								:form-props="ruleFormProps"
-								:tagger-start="onTaggerStart"
-								:tagger-end="onTaggerEnd"
+							<DatasetDirSelector
+								ref="datasetDirSelectorRef"
+								v-model:dir="ruleForm.image_dir"
+								v-model:tagger-model="ruleForm.tagger_model"
+								dir-label="数据集目录"
+								:dir-prop="ruleFormProps.image_dir"
+								dir-popover-content="image_dir"
+								tagger-label="打标模型"
+								@tagger-start="onTaggerStart"
 							/>
+							<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
 							<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
@@ -52,8 +57,18 @@
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="flux-footer-bar" :size="40">
 				<GPUMonitor ref="gpuMonitorRef" v-show="showGPUMonitor" />
-				<LoRATrainingMonitor ref="loRATrainingMonitorRef" v-show="showLoRATrainingMonitor" />
-				<TagMonitor ref="tagMonitorRef" v-show="showTagMonitor" />
+				<LoRATrainingMonitor
+					ref="loRATrainingMonitorRef"
+					v-show="showLoRATrainingMonitor"
+					@complete="onLoRATrainingComplete"
+					@failed="onLoRATrainingFailed"
+				/>
+				<TagMonitor
+					ref="tagMonitorRef"
+					v-show="showTagMonitor"
+					@complete="onTaggerComplete"
+					@failed="onTaggerFailed"
+				/>
 				<el-button
 					v-if="showSubmitBtn"
 					type="primary"
@@ -86,6 +101,7 @@ import { startFluxTraining } from "@/api/lora";
 import GPUMonitor from "@/components/Monitor/GPUMonitor/index.vue";
 import LoRATrainingMonitor from "@/components/Monitor/LoRATrainingMonitor/index.vue";
 import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
+import DatasetDirSelector from "@/components/Form/DatasetDirSelector.vue";
 
 const settingsStore = useSettingsStore();
 
@@ -254,13 +270,22 @@ const loRATrainingMonitorRef = ref<InstanceType<typeof LoRATrainingMonitor>>();
 // 打标监控
 const showTagMonitor = ref(false);
 const tagMonitorRef = ref<InstanceType<typeof TagMonitor>>();
-function onTaggerStart() {
+const datasetDirSelectorRef = ref<InstanceType<typeof DatasetDirSelector>>();
+function onTaggerStart(taskId: string) {
 	showTagMonitor.value = true;
-	tagMonitorRef.value?.start();
+	tagMonitorRef.value?.start(taskId);
 }
-function onTaggerEnd() {
+function onTaggerComplete() {
 	showTagMonitor.value = false;
 	tagMonitorRef.value?.stop();
+	datasetDirSelectorRef.value?.complete();
+}
+function onTaggerFailed() {
+	showTagMonitor.value = false;
+	tagMonitorRef.value?.stop();
+	datasetDirSelectorRef.value?.complete();
+
+	ElMessage.error("打标失败，请检查日志");
 }
 
 /** 导入配置 */
@@ -328,29 +353,68 @@ async function onSubmit() {
 		// 开始训练
 		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
 		submitLoading.value = true;
-		await startFluxTraining(data);
-		// 监听数据
+		const { task_id } = await startFluxTraining(data);
+		// 监听GPU数据
 		showGPUMonitor.value = true;
 		gpuMonitorRef.value?.start();
-
+		// 监听LoRA训练数据
 		showLoRATrainingMonitor.value = true;
-		loRATrainingMonitorRef.value?.start();
-		// showLoRATrainingMonitor.value = true;
-		// submitLoading.value = false;
-		// showSystemMonitor.value = false;
-		// showLoRATrainingMonitor.value = false;
-		ElMessage.success("创建训练任务成功");
+		loRATrainingMonitorRef.value?.start(task_id);
+
+		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		submitLoading.value = false;
-
+		// 停止监控GPU
 		showGPUMonitor.value = false;
 		gpuMonitorRef.value?.stop();
 
+		// 停止监控LoRA训练数据
 		showLoRATrainingMonitor.value = false;
 		loRATrainingMonitorRef.value?.stop();
 
 		console.error("创建训练任务失败", error);
 	}
+}
+
+/** 训练完成 */
+function onLoRATrainingComplete() {
+	// 停止监控GPU
+	showGPUMonitor.value = false;
+	gpuMonitorRef.value?.stop();
+
+	// 停止监控LoRA训练数据
+	showLoRATrainingMonitor.value = false;
+	loRATrainingMonitorRef.value?.stop();
+
+	submitLoading.value = false;
+
+	ElMessageBox({
+		title: "训练完成",
+		type: "success",
+		showCancelButton: false,
+		confirmButtonText: "知道了",
+		customClass: "lora-success-message",
+		message: h("div", { class: "lora-success-message-content" }, [
+			h("span", {}, "训练完成，请前往"),
+			h("code", {}, ruleForm.value.output_dir),
+			h("span", {}, "查看结果")
+		])
+	});
+}
+
+/** 训练失败 */
+function onLoRATrainingFailed() {
+	// 停止监控GPU
+	showGPUMonitor.value = false;
+	gpuMonitorRef.value?.stop();
+
+	// 停止监控LoRA训练数据
+	showLoRATrainingMonitor.value = false;
+	loRATrainingMonitorRef.value?.stop();
+
+	submitLoading.value = false;
+
+	ElMessage.error("训练失败，请检查日志");
 }
 </script>
 

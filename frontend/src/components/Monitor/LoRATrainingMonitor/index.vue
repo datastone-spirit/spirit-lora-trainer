@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2024-12-20 17:10:06
+ * @LastEditTime: 2024-12-23 16:13:07
  * @LastEditors: mulingyuer
  * @Description: lora训练监控
  * @FilePath: \frontend\src\components\Monitor\LoRATrainingMonitor\index.vue
@@ -9,31 +9,43 @@
 -->
 <template>
 	<div class="lo-ra-training-monitor">
-		<div class="lo-ra-training-monitor-head">
-			<el-progress
-				class="lo-ra-training-monitor-progress"
-				:percentage="data.progress"
-				:show-text="false"
-				:stroke-width="8"
-			></el-progress>
-			<el-text class="lo-ra-training-monitor-round"> {{ data.current }}/{{ data.total }} </el-text>
+		<div v-if="isLoad" class="lo-ra-training-monitor-empty">
+			<el-text> 模型加载中 </el-text>
+			<el-text class="text-dot"></el-text>
 		</div>
-		<div class="lo-ra-training-monitor-body">
-			<div class="lo-ra-training-monitor-item">
-				<div class="lo-ra-training-monitor-item-label">已用时长</div>
-				<div class="lo-ra-training-monitor-item-value">{{ data.elapsed }}</div>
+		<div v-else class="lo-ra-training-monitor-content">
+			<div class="lo-ra-training-monitor-head">
+				<el-progress
+					class="lo-ra-training-monitor-progress"
+					:percentage="progress"
+					:show-text="false"
+					:stroke-width="8"
+				></el-progress>
+				<el-text class="lo-ra-training-monitor-round">
+					{{ data.current }}/{{ data.total }}
+				</el-text>
 			</div>
-			<div class="lo-ra-training-monitor-item">
-				<div class="lo-ra-training-monitor-item-label">预估剩余时长</div>
-				<div class="lo-ra-training-monitor-item-value">{{ data.remaining }}</div>
-			</div>
-			<div class="lo-ra-training-monitor-item">
-				<div class="lo-ra-training-monitor-item-label">每步时间</div>
-				<div class="lo-ra-training-monitor-item-value">{{ data.speed }}</div>
-			</div>
-			<div class="lo-ra-training-monitor-item">
-				<div class="lo-ra-training-monitor-item-label">平均loss</div>
-				<div class="lo-ra-training-monitor-item-value">{{ data.loss }}</div>
+			<div class="lo-ra-training-monitor-body">
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">已用时长</div>
+					<div class="lo-ra-training-monitor-item-value">{{ data.elapsed }}</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">预估剩余时长</div>
+					<div class="lo-ra-training-monitor-item-value">{{ data.remaining }}</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">每步时间</div>
+					<div class="lo-ra-training-monitor-item-value">{{ data.speed }}</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">平均loss</div>
+					<div class="lo-ra-training-monitor-item-value">{{ toFixed(data.loss_avr) }}</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">当前loss</div>
+					<div class="lo-ra-training-monitor-item-value">{{ toFixed(data.loss) }}</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -41,17 +53,18 @@
 
 <script setup lang="ts">
 import { loRATrainingInfo } from "@/api/monitor";
-import { sleep } from "@/utils/tools";
+import type { LoRATrainingInfoResult } from "@/api/monitor";
+import { isEmptyObject, objectHasKeys, sleep } from "@/utils/tools";
 
 export interface LoRATrainingMonitorData {
 	/** 当前进度 */
 	current: number;
 	/** 已经耗时 */
 	elapsed: string;
-	/** 损失 */
+	/** 当前损失 */
 	loss: number;
-	/** 进度 */
-	progress: number;
+	/** 平均损失 */
+	loss_avr: number;
 	/** 剩余时间 */
 	remaining: string;
 	/** 每秒速度 */
@@ -60,38 +73,109 @@ export interface LoRATrainingMonitorData {
 	total: number;
 }
 
+const emits = defineEmits<{
+	/** 完成 */
+	complete: [];
+	/** 出错 */
+	failed: [];
+}>();
+
+const task_id = ref<string>("");
 const data = ref<LoRATrainingMonitorData>({
 	current: 0,
 	elapsed: "00:00",
 	loss: 0,
-	progress: 0,
+	loss_avr: 0,
 	remaining: "00:00",
 	speed: 0,
 	total: 0
 });
+const progress = computed(() => {
+	if (data.value.total === 0) return 0;
+	return Math.floor((data.value.current / data.value.total) * 100);
+});
+const rawData = ref<LoRATrainingInfoResult | null>(null);
+const isLoad = computed(() => {
+	if (!rawData.value) return true;
+	const isEmpty = !rawData.value.detail || isEmptyObject(rawData.value.detail);
+	const hasKey = objectHasKeys(rawData.value.detail, ["current", "loss", "total"]);
+	return isEmpty || !hasKey;
+});
+// 保留5位小数，不四舍五入
+function toFixed(num: number, precision = 5) {
+	if (num === 0) return 0;
+	return Math.floor(num * Math.pow(10, precision)) / Math.pow(10, precision);
+}
+
 const status = ref(false);
 const sleepTime = 3000;
 function update() {
 	if (!status.value) return;
-	loRATrainingInfo()
+	loRATrainingInfo({
+		task_id: task_id.value
+	})
 		.then((res) => {
-			if (!res.detail) return;
-			Object.assign(data.value, res.detail);
+			rawData.value = res;
+			const detail = res.detail;
+			if (!detail) return;
+			if (isEmptyObject(detail)) return;
+			data.value.current = detail.current ?? 0;
+			data.value.elapsed = detail.elapsed ?? "00:00";
+			data.value.loss = detail.loss ?? 0;
+			data.value.loss_avr = detail.loss_avr ?? 0;
+			data.value.remaining = detail.remaining ?? "00:00";
+			data.value.speed = detail.speed ?? 0;
+			data.value.total = detail.total ?? 0;
+
+			switch (res.status) {
+				case "running": // 进行中
+					break;
+				case "complete": // 完成
+					complete();
+					break;
+				case "failed": // 出错
+					failed();
+					break;
+			}
 		})
 		.finally(() => {
 			status.value && sleep(sleepTime).then(update);
 		});
 }
 
+/** 完成 */
+function complete() {
+	status.value = false;
+	rawData.value = null;
+	task_id.value = "";
+	emits("complete");
+}
+
+/** 出错 */
+function failed() {
+	status.value = false;
+	rawData.value = null;
+	task_id.value = "";
+	emits("failed");
+}
+
 /** 开始查询 */
-function start() {
+function start(taskId: string) {
+	if (typeof taskId !== "string" || taskId.trim() === "") {
+		ElMessage.warning("请传递任务ID");
+		return;
+	}
+	task_id.value = taskId;
 	status.value = true;
+	rawData.value = null;
 	update();
 }
 
 /** 停止查询 */
 function stop() {
 	status.value = false;
+	rawData.value = null;
+	task_id.value = "";
 }
 
 defineExpose({
@@ -101,8 +185,14 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.lo-ra-training-monitor {
-	min-width: 280px;
+// .lo-ra-training-monitor {
+// }
+.lo-ra-training-monitor-empty {
+	padding: 0 $zl-padding;
+	display: flex;
+}
+.lo-ra-training-monitor-content {
+	min-width: 350px;
 }
 .lo-ra-training-monitor-head {
 	display: flex;
@@ -118,7 +208,7 @@ defineExpose({
 }
 .lo-ra-training-monitor-body {
 	display: flex;
-	justify-content: space-around;
+	justify-content: space-between;
 	margin-top: 2px;
 }
 .lo-ra-training-monitor-item {

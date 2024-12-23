@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2024-12-20 10:04:37
+ * @LastEditTime: 2024-12-23 15:36:05
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -48,10 +48,6 @@ export interface DatasetDirSelectorProps {
 	taggerProp?: TaggerModelSelectProps["prop"];
 	taggerPlaceholder?: TaggerModelSelectProps["placeholder"];
 	btnText?: string;
-	/** 打标开始的回调 */
-	taggerStart?: () => void;
-	/** 打标结束的回调 */
-	taggerEnd?: () => void;
 }
 
 withDefaults(defineProps<DatasetDirSelectorProps>(), {
@@ -60,6 +56,10 @@ withDefaults(defineProps<DatasetDirSelectorProps>(), {
 	showBtn: true,
 	btnText: "一键打标"
 });
+const emits = defineEmits<{
+	/** 打标开始 */
+	taggerStart: [taskId: string];
+}>();
 
 const dir = defineModel("dir", { type: String, required: true });
 const taggerModel = defineModel("taggerModel", { type: String, required: true });
@@ -92,13 +92,14 @@ async function onBtnClick() {
 		if (!valid) return;
 		loading.value = true;
 		// 打标
-		await batchTag({
+		const { task_id } = await batchTag({
 			image_path: dir.value,
 			model_name: taggerModel.value
 		});
-		loading.value = false;
+		emits("taggerStart", task_id);
+
 		ElMessage({
-			message: "一键打标成功",
+			message: "正在打标...",
 			type: "success"
 		});
 	} catch (error) {
@@ -106,6 +107,15 @@ async function onBtnClick() {
 		console.log("打标失败", error);
 	}
 }
+
+/** 打标结束 */
+function complete() {
+	loading.value = false;
+}
+
+defineExpose({
+	complete
+});
 </script>
 
 <style lang="scss" scoped>

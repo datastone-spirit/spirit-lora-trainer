@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 17:05:19
- * @LastEditTime: 2024-12-19 17:58:18
+ * @LastEditTime: 2024-12-23 16:30:08
  * @LastEditors: mulingyuer
  * @Description: 数据集帮助工具
  * @FilePath: \frontend\src\components\AiDataset\ai-dataset.helper.ts
@@ -21,7 +21,7 @@ const isDev = import.meta.env.DEV;
 function joinImageUrl(imagePath: string): string {
 	let prefix = "";
 	if (isDev) {
-		prefix = import.meta.env.VITE_APP_IMAGE_PREVIEW_PREFIX;
+		prefix = `${import.meta.env.VITE_APP_API_BASE_URL}/image`;
 	} else {
 		prefix = location.origin;
 	}

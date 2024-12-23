@@ -44,6 +44,12 @@ def joycaption2_captioning(image_paths: List[str], output_dir: str, model_info :
                 break
             finally:
                 update_status(i, len(image_paths), cap_file_path, caption_text, success)
+
+    llava_model.to("cpu")
+    del llava_model
+    del processor
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     
 
 

@@ -256,7 +256,7 @@ class CaptioningTask(Task):
         self.captioning(self.image_paths, self.output_dir, self.model_info, self.update_captioning_status)
 
     def update_captioning_status(self, current_step: int, image_name: str, caption: str, cap_file_path: str, success: bool = False):
-        self.current = current_step
+        self.detail['current'] = current_step
         self.detail['captions'].append({
             'image': image_name,
             'caption': caption,

@@ -40,6 +40,7 @@ def florence2_captioning(image_paths: List[str], output_dir: str, model_info :Ca
             caption_text = ""
             cap_file_path = ""
             success = False
+            step = i 
             try:
                 logger.info(f"Processing image: {image_path}")
                 # 加载图片
@@ -71,7 +72,7 @@ def florence2_captioning(image_paths: List[str], output_dir: str, model_info :Ca
                 # 收集结果
                 logger.warning("Failed to process image: {image_path}", exc_info=e)
             finally:
-                update_status(i, image_path, caption_text, cap_file_path, success)
+                update_status(step + 1, image_path, caption_text, cap_file_path, success)
                 logger.info(f"Processed image: {image_path}, Caption saved to {cap_file_path}")
     # 清理模型和缓存
     except Exception as e:

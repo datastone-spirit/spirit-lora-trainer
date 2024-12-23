@@ -1,10 +1,14 @@
 import os
-from flask import request
+import mimetypes
+from flask import request, send_file
 from flask_restful import Resource
 from ..common.utils import res, get_directory_structure, use_swagger_config
-from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config,delete_file_config
-from utils.util import pathFormat
+from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config,delete_file_config, preview_file_config
+from utils.util import pathFormat, setup_logging
 
+setup_logging()
+import logging
+logger = logging.getLogger(__name__)
 
 class File(Resource):
     @use_swagger_config(file_config)
@@ -172,3 +176,21 @@ class DeleteFile(Resource):
             return res(success=True, message=f"文件已删除: {file_path}")
         except Exception as e:
             return res(success=False, message=f"删除文件失败: {str(e)}")
+        
+
+class Image(Resource):
+    @use_swagger_config(preview_file_config)
+    def get(self, image_path):
+        """
+        获取图片内容
+        """
+        full_path = '/' + image_path
+        if not os.path.isfile('/' + full_path):
+            return {"success": False, "message": f"文件不存在: {full_path}"}, 400
+        
+        mime_type, _ = mimetypes.guess_type(full_path)
+
+        try:
+            return send_file(full_path, mimetype=mime_type)  # 根据实际类型修改 mimetype
+        except Exception as e:
+            return {"success": False, "message": f"无法返回图片: {str(e)}"}, 500

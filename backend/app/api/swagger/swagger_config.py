@@ -275,6 +275,63 @@ delete_file_config = {
   }
 }
 
+# 预览图片文件
+preview_file_config = {
+        "tags": ["Directory"],
+        "description": "获取图片内容",
+        "parameters": [
+            {
+                "name": "image_path",
+                "in": "path",
+                "type": "string",
+                "required": True,
+                "description": "图片文件的路径",
+                "example": "/path/to/image.jpg"
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "成功返回图片内容",
+                "schema": {
+                    "type": "file",
+                    "description": "图片文件内容"
+                }
+            },
+            "400": {
+                "description": "请求参数错误或文件不存在",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "success": {
+                            "type": "boolean",
+                            "example": False
+                        },
+                        "message": {
+                            "type": "string",
+                            "example": "文件不存在: path/to/image.jpg"
+                        }
+                    }
+                }
+            },
+            "500": {
+                "description": "服务器错误，返回图片失败",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "success": {
+                            "type": "boolean",
+                            "example": False
+                        },
+                        "message": {
+                            "type": "string",
+                            "example": "无法返回图片: 权限不足"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
 # 文件上传
 upload_config = {

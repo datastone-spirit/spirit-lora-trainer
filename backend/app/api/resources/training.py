@@ -1,6 +1,6 @@
 from flask import request
 from flask_restful import Resource
-from ..common.utils import use_swagger_config
+from ..common.utils import use_swagger_config, res
 from ..swagger.swagger_config import start_training
 from ..model.training_paramter import TrainingParameter
 from app.service.train import TrainingService
@@ -24,11 +24,11 @@ class Training(Resource):
         try:
             parameter = TrainingParameter.from_dict(data)
             task = TrainingService().training(parameter)
-            return {
-                    'success': True,
-                    'task_id': task.id,
-                    'msg': f"task {task.id} started successfully."
-                }, 200
+            return res(
+                data={"task_id": task.id}, 
+                message=f"training task {task.id} started successfully."
+            ) 
+
         except ValueError as e:
             logger.warning(f"start training with parameter:{parameter} failed, error:", exc_info=e) 
             return {

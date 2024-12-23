@@ -52,8 +52,6 @@ def joycaption2_captioning(image_paths: List[str], output_dir: str, model_info :
         torch.cuda.empty_cache()
     
 
-
-
 def captioning_text(image_path: str, llava_model, processor, device: str, vision_dtype=torch.bfloat16):
     # Load and preprocess image
     # Normally you would use the Processor here, but the image module's processor

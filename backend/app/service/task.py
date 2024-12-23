@@ -1,4 +1,5 @@
 from task.manager import tm
+from api.common.utils import res
 
 class TaskService:
 
@@ -6,7 +7,9 @@ class TaskService:
         current_task = tm.current_task
         if current_task == None:
             raise FileNotFoundError("current has no task to run")
-        return current_task.to_dict()
+        return res(
+            data=current_task.to_dict()
+        )
         
 
 

@@ -18,7 +18,7 @@ from utils.util import getprojectpath
 
 logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
 
-app = Flask(__name__, static_folder=os.path.join(getprojectpath(), 'dist'))
+app = Flask(__name__, static_folder=os.path.join(getprojectpath(), 'dist'), static_url_path='/admin')
 Swagger(app)
 CORS(app, resources=r"/*")
 api = Api(app, prefix="/api")
@@ -35,6 +35,11 @@ api.add_resource(Training, "/training/start")  # 启动训练
 api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
 api.add_resource(CurrentTask, "/tasks/current") # gpu功耗、显存信息
 api.add_resource(TaskHistory, "/tasks/history") # gpu功耗、显存信息
+
+# 处理静态文件（如 .js, .css 等）
+@app.route('/admin/assets/<path:filename>')
+def serve_assets(filename):
+    return send_from_directory(os.path.join(getprojectpath(), 'dist', 'assets'), filename)
 
 # Add static file serving route
 @app.route('/spirit_trainer', defaults={'path': ''})

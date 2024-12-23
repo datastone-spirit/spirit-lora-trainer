@@ -260,6 +260,15 @@ def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
     return True, "Ok"
 
 def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
+    if parameter is None:
+        return False, "parameter is none"
+    
+    if parameter.config is None:
+        return False, "config is required"
+
+    if parameter.dataset is None :
+        return False, "dataset is required"
+
     validated, reason = validate_config(parameter.config)
     if not validated:
         return validated, reason

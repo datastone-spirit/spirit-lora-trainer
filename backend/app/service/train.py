@@ -128,22 +128,23 @@ class TrainingService:
         try:
             # 调用 nvidia-smi 获取 GPU 信息
             result = subprocess.run(
-                ["nvidia-smi", "--query-gpu=index,name,power.draw,memory.total,memory.used", "--format=csv,noheader,nounits"],
+                ["nvidia-smi", "--query-gpu=index,name,power.draw,power.limit,memory.total,memory.used", "--format=csv,noheader,nounits"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True
             )
 
             if result.returncode != 0:
-                raise RuntimeError(f"nvidia-smi error: {result.stderr.strip()}")
+                raise RuntimeError(f"nvidia-smi error: {result}")
 
             gpu_info_list = []
 
             # 分组处理每个 GPU 数据
             for line in result.stdout.strip().split("\n"):
-                gpu_index, gpu_name, power_draw, memory_total, memory_used = line.split(", ")
+                gpu_index, gpu_name, power_draw, limit, memory_total, memory_used = line.split(", ")
                 gpu_index = int(gpu_index)
                 power_draw = float(power_draw)
+                power_total = float(limit)
                 memory_total = float(memory_total)
                 memory_used = float(memory_used)
 
@@ -151,6 +152,7 @@ class TrainingService:
                     "gpu_index": gpu_index,
                     "gpu_name": gpu_name,
                     "power_draw_watts": power_draw,
+                    "power_total_watts": power_total,
                     "memory_total_mb": memory_total,
                     "memory_used_mb": memory_used,
                     "memory_free_mb": memory_total - memory_used

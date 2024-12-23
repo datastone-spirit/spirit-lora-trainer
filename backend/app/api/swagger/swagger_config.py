@@ -785,6 +785,12 @@ gpu_log_config = {
               "example": 35.56,
               "description": "GPU 当前功耗（瓦特）"
             },
+            "power_total_watts": {
+              "type": "number",
+              "format": "float",
+              "example": 450,
+              "description": "GPU 总功耗（瓦特）"
+            },
             "memory_total_mb": {
               "type": "number",
               "format": "float",

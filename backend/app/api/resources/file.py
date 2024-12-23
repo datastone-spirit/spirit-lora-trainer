@@ -87,7 +87,7 @@ class TagDirFile(Resource):
     
     def get_image_and_txt_info(self, directory):
         """
-        获取指定目录中的图片文件和txt文件的相关信息，按名称关联  a.jpg 和 a_caption.txt 是一组
+        获取指定目录中的图片文件和txt文件的相关信息，按名称关联  a.jpg 和 a.txt 是一组
         :param directory: 要查询的目录路径
         :return: 包含图片路径、图片名称、txt路径、txt内容和txt文件名称的字典
         """
@@ -117,7 +117,7 @@ class TagDirFile(Resource):
             # 对每个图片，检查是否有对应的txt文件
             for base_name, image_path in images.items():
                 # 查找对应的txt文件
-                txt_path = txt_files.get(f"{base_name}_caption")
+                txt_path = txt_files.get(f"{base_name}")
                 if txt_path:
                     try:
                         with open(txt_path, 'r', encoding='utf-8') as file:

@@ -167,7 +167,7 @@ tag_dir_config = {
                                 "txt_path": {
                                     "type": "string",
                                     "description": "TXT文件路径",
-                                    "example": "/path/to/image_caption.txt",
+                                    "example": "/path/to/image.txt",
                                 },
                                 "image_name": {
                                     "type": "string",
@@ -177,7 +177,7 @@ tag_dir_config = {
                                 "txt_name": {
                                     "type": "string",
                                     "description": "TXT文件名称",
-                                    "example": "image_caption.txt",
+                                    "example": "image.txt",
                                 },
                                 "txt_content": {
                                     "type": "string",
@@ -459,7 +459,7 @@ tag_manual_config = {
                             "txt_path": {
                                 "type": "string",
                                 "description": "保存的打标文件路径",
-                                "example": "/captions_output/image1_caption.txt",
+                                "example": "/captions_output/image1.txt",
                             },
                         },
                     },

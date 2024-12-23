@@ -766,6 +766,85 @@ gpu_log_config = {
   }
 }
 
+task_history = {
+    "tags": ["Task"],
+    "description": "通过id获取Task的信息",
+    "parameters": [
+        {
+            "name": "task_id",
+            "in": "query",
+            "type": "string",
+            "required": True,
+            "description": "任务的唯一标识",
+        }
+    ],
+    "responses": {
+        "200": {
+            "description": "成功返回task_id 所标识的任务务信息",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "message": {"type": "string", "example": "current has no task to run"},
+                    "data": {
+                      "type": "object",
+                      "description": "当前任务信息",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "任务 ID",
+                          "example": "1234567890abcdef"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "任务状态",
+                            "example": "running"
+                        },
+                        "task_type": {
+                          "type": "string",
+                          "description": "任务类型",
+                          "example": "training"
+                        },
+                        "detail": {
+                          "type": "object",
+                          "description": "任务详情",
+                          "example": {
+                            "progress": 50,
+                            "current": 20,
+                            "total": 40,
+                            "elapsed": "00:21",
+                            "remaining": "00:21",
+                            "speed": 1.07,
+                            "loss": 0.145
+                          }
+                        }
+                      }
+                    }
+                }
+            }
+        },
+        "404": {
+            "description": "当前没有正在运行的任务",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "msg": {"type": "string", "example": "current has no task to run"}
+                }
+            }
+        },
+        "500": {
+            "description": "服务器错误，获取任务信息失败",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "msg": {"type": "string", "example": "get current task failed"}
+                }
+            }
+        }
+    }
+}
 
 task_current = {
     "tags": ["Task"],
@@ -776,25 +855,31 @@ task_current = {
             "schema": {
                 "type": "object",
                 "properties": {
-                    "id": {
-                        "type": "string",
-                        "description": "任务 ID",
-                        "example": "1234567890abcdef"
-                    },
-                    "status": {
-                        "type": "string",
-                        "description": "任务状态",
-                        "example": "running"
-                    },
-                    "task_type": {
-                        "type": "string",
-                        "description": "任务类型",
-                        "example": "training"
-                    },
-                    "detail": {
-                        "type": "object",
-                        "description": "任务详情",
-                        "example": {
+                    "success": {"type": "boolean", "example": False},
+                    "message": {"type": "string", "example": "current has no task to run"},
+                    "data": {
+                      "type": "object",
+                      "description": "当前任务信息",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "任务 ID",
+                          "example": "1234567890abcdef"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "任务状态",
+                            "example": "running"
+                        },
+                        "task_type": {
+                          "type": "string",
+                          "description": "任务类型",
+                          "example": "training"
+                        },
+                        "detail": {
+                          "type": "object",
+                          "description": "任务详情",
+                          "example": {
                             "progress": 50,
                             "current": 20,
                             "total": 40,
@@ -802,7 +887,9 @@ task_current = {
                             "remaining": "00:21",
                             "speed": 1.07,
                             "loss": 0.145
+                          }
                         }
+                      }
                     }
                 }
             }

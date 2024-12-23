@@ -287,6 +287,14 @@ preview_file_config = {
                 "required": True,
                 "description": "图片文件的路径",
                 "example": "/path/to/image.jpg"
+            },
+            {
+                "name": "compress",
+                "in": "query",
+                "type": "string",
+                "required": False,
+                "description": "是否压缩 默认false->不压缩 true->压缩",
+                "example": "compress=false"
             }
         ],
         "responses": {

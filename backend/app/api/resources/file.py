@@ -1,10 +1,12 @@
 import os
+import io
 import mimetypes
 from flask import request, send_file
 from flask_restful import Resource
 from ..common.utils import res, get_directory_structure, use_swagger_config
 from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config,delete_file_config, preview_file_config
 from utils.util import pathFormat, setup_logging
+from PIL import Image as PILImage
 
 setup_logging()
 import logging
@@ -189,6 +191,26 @@ class Image(Resource):
             return {"success": False, "message": f"文件不存在: {full_path}"}, 400
         
         mime_type, _ = mimetypes.guess_type(full_path)
+        if not mime_type or not mime_type.startswith("image/"):
+            return {"success": False, "message": f"文件不是图片类型: {full_path}"}, 400
+
+         # 检查是否需要压缩
+        compress = request.args.get("compress", "false").lower() == "true"
+        if compress:
+            try:
+                # 打开图片并压缩
+                with PILImage.open(full_path) as img:
+                    img_format = img.format  # 保留原始格式
+                    img = img.convert("RGB")  # 确保兼容性
+
+                    # 压缩图片到内存中
+                    img_io = io.BytesIO()
+                    img.save(img_io, format=img_format, optimize=True, quality=30)  # 默认压缩30
+                    img_io.seek(0)
+
+                    return send_file(img_io, mimetype=mime_type)
+            except Exception as e:
+                return {"success": False, "message": f"图片压缩失败: {str(e)}"}, 500
 
         try:
             return send_file(full_path, mimetype=mime_type)  # 根据实际类型修改 mimetype

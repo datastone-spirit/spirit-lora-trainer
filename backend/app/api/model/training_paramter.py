@@ -277,8 +277,7 @@ class TrainingParameter:
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingParameter':
         try: 
-            dacite.from_dict(data_class=TrainingParameter, data=dikt) 
+            return dacite.from_dict(data_class=TrainingParameter, data=dikt) 
         except Exception as e:
             logger.warning(f"TrainingParameter.from_dict failed, error: ", exc_info=e)
             raise ValueError(f"TrainingParameter.from_dict failed, error: {str(e)}")
-        return 

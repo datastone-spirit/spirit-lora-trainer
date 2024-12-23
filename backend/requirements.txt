@@ -19,4 +19,5 @@ pytest-watch>=4.2.0
 coverage>=6.0.0
 python-slugify
 toml
+huggingface_hub==0.25.0
 

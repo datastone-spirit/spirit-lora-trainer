@@ -29,7 +29,19 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--port", type=int, default=5002)
 parser.add_argument("--host", type=str, default="0.0.0.0")
 parser.add_argument("--tb_port", type=int, default=6006) # tensorboard-port
+parser.add_argument("--tb_host", type=str, default="127.0.0.1") # tensorboard-port
 args = parser.parse_args()
+
+from flask import Blueprint
+from .proxy_tb import proxy_tb
+
+bp = Blueprint('tensorboard', __name__)
+
+@bp.route('/tensorboard', defaults={'path': ''},  methods=["GET", "POST"])  # Add root path
+@bp.route('/tensorboard/', defaults={'path': ''},  methods=["GET", "POST"])
+@bp.route('/tensorboard/<path:path>',  methods=["GET", "POST"])
+def proxy_tensorboard(path):
+    return proxy_tb(args.tb_host, args.tb_port)
 
 api.add_resource(File, "/file")  # 获取目录结构
 api.add_resource(PathCheck, "/path_check")  # 检测目录是否存在
@@ -57,54 +69,13 @@ def serve_assets(filename):
 def serve_admin(path):
     return send_from_directory(app.static_folder, 'index.html')  # 返回 SPA 的入口文件
 
-# tensorboard 反向代理
-@app.route('/tensorboard/<path:subpath>', methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
-def proxy_tensorboard(subpath):
-    """
-    反向代理 TensorBoard 服务
-    """
-    base_url = request.host.split(':')[0]  # 获取域名部分
-    # 构造目标 URL
-    target_url = f'{base_url}:{args.tb_port}'
-    target_url = f"http://127.0.0.1:6006/{subpath}"  # 添加 http://
-
-    # 根据原始请求构造代理请求
-    method = request.method
-    headers = {key: value for key, value in request.headers if key.lower() != 'host'}
-    data = request.get_data()
-    params = request.args
-
-    # 发起代理请求
-    resp = requests.request(method, target_url, headers=headers, data=data, params=params, stream=True)
-
-    # 处理 HTML 内容，替换相对路径为目标服务路径
-    if 'text/html' in resp.headers.get('Content-Type', ''):
-        content = resp.content.decode("utf-8")
-        # 替换所有以 "/" 开头的相对路径为目标服务路径
-        content = content.replace('="/', f'="http://127.0.0.1:6006/')
-        content = content.replace("='/", f"='http://127.0.0.1:6006/")
-        return Response(content, resp.status_code, resp.headers)
-
-    # 转发响应
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = {key: value for key, value in resp.headers.items() if key.lower() not in excluded_headers}
-
-    return Response(resp.content, resp.status_code, headers)
-
-@app.route('/tensorboard', methods=["GET"])
-def tensorboard_root():
-    """
-    返回 TensorBoard 根路径的重定向
-    """
-    return proxy_tensorboard("")
-
-
+app.register_blueprint(bp)
 from utils.util import setup_logging
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
 
-logging.info(f"args.port is {args.port}, args.host is {args.host}")
+logging.info(f"args.port is {args.port}, args.host is {args.host}, tb_host is {args.tb_host}, tb_port is {args.tb_port}")
 
 if __name__ == "__main__":
     app.run(host=args.host, port=args.port)

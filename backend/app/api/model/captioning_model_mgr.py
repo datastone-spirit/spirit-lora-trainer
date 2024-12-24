@@ -2,8 +2,6 @@ from typing import Optional, Dict, List
 from dataclasses import dataclass
 from .captioning_model import CaptioningModelInfo
 from app.service.florence2_captioning import florence2_captioning
-from app.service.joycaption2_captioning import joycaption2_captioning
-from app.service.joycaption2_nf4_captioning import joycaption2_nf4_captioning
 from app.service.joycaption2_llm_captioning import joycaption2_llm_captioning
 import os
 

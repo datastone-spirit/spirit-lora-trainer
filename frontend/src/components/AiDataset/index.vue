@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-24 09:29:53
+ * @LastEditTime: 2024-12-24 14:35:51
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -22,6 +22,7 @@
 							:selected="activeItemIndex !== null && activeItemIndex === index"
 							@contextmenu.prevent="onContextMenu($event, item)"
 							@dblclick="onDoubleClick(item, index)"
+							@click="onItemClick(item, index)"
 						/>
 					</div>
 				</div>
@@ -178,6 +179,19 @@ function onDoubleClick(data: FileItem, index: number) {
 		case FileType.IMAGE:
 			onQuitEdit();
 			onPreview(data);
+			break;
+		case FileType.TEXT:
+			onEdit(data);
+			break;
+	}
+}
+
+// 单击
+function onItemClick(data: FileItem, index: number) {
+	activeItemIndex.value = index;
+	switch (data.type) {
+		case FileType.IMAGE:
+			onQuitEdit();
 			break;
 		case FileType.TEXT:
 			onEdit(data);

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 15:15:44
- * @LastEditTime: 2024-12-16 10:32:07
+ * @LastEditTime: 2024-12-24 12:00:14
  * @LastEditors: mulingyuer
  * @Description: 文本文件
  * @FilePath: \frontend\src\components\AiDataset\TextFile.vue
@@ -25,7 +25,7 @@ export interface TextFileProps extends BaseFileItemProps {
 }
 
 withDefaults(defineProps<TextFileProps>(), {
-	lazy: true
+	lazy: false
 });
 </script>
 

@@ -17,15 +17,8 @@ function hasText(item: DirectoryFilesResult[number]): boolean {
 }
 
 /** 拼接图片url */
-const isDev = import.meta.env.DEV;
 function joinImageUrl(imagePath: string): string {
-	let prefix = "";
-	if (isDev) {
-		prefix = `${import.meta.env.VITE_APP_API_BASE_URL}/image`;
-	} else {
-		prefix = location.origin;
-	}
-	return `${prefix}${imagePath}`;
+	return `${import.meta.env.VITE_APP_API_BASE_URL}/image${imagePath}`;
 }
 
 /** 格式化api目录下的列表数据 */

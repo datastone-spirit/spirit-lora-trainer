@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2024-12-17 16:45:03
+ * @LastEditTime: 2024-12-24 14:22:56
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -34,14 +34,7 @@
 			placeholder="请选择训练用的底模"
 		/>
 	</PopoverFormItem>
-	<PopoverFormItem
-		v-if="isExpert"
-		label="从某个 save_state 保存的中断状态继续训练"
-		:prop="formProps.resume"
-		popover-content="resume"
-	>
-		<FileSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
-	</PopoverFormItem>
+
 	<template v-if="isExpert">
 		<PopoverFormItem label="AE 模型文件" :prop="formProps.ae" popover-content="ae">
 			<FileSelector v-model="ruleForm.ae" placeholder="请选择AE 模型文件" />
@@ -75,6 +68,14 @@
 			popover-content="save_state"
 		>
 			<el-switch v-model="ruleForm.save_state" />
+		</PopoverFormItem>
+		<PopoverFormItem
+			v-if="isExpert"
+			label="从某个 save_state 保存的中断状态继续训练"
+			:prop="formProps.resume"
+			popover-content="resume"
+		>
+			<FileSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
 		</PopoverFormItem>
 	</template>
 </template>

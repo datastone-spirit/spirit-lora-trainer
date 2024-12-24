@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-20 16:57:21
+ * @LastEditTime: 2024-12-24 10:39:14
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -84,7 +84,7 @@ export interface RuleForm {
 	/** 损失函数类型 */
 	loss_type: string;
 	/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
-	t5xxl_max_token_length: number | null;
+	t5xxl_max_token_length: number | undefined;
 	// ---------
 	/** 梯度检查点 */
 	gradient_checkpointing: boolean;
@@ -108,7 +108,7 @@ export interface RuleForm {
 	/** 优化器设置 */
 	optimizer_type: string;
 	/** 最小信噪比伽马值, 如果启用推荐为 5 */
-	min_snr_gamma: number | null;
+	min_snr_gamma: number | undefined;
 	/**
 	 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
 	 * 示例：weight_decay=0.01 betas=.9,.999
@@ -124,7 +124,7 @@ export interface RuleForm {
 	/** dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的） */
 	network_dropout: number;
 	/** 最大范数正则化。如果使用，推荐为 1 */
-	scale_weight_norms: number | null;
+	scale_weight_norms: number | undefined;
 	/** 自定义 network_args
 	 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
 	 */
@@ -136,7 +136,7 @@ export interface RuleForm {
 	base_weights: string;
 	// NOTE: 要转成数组[1,2,3,4]
 	/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
-	base_weights_multiplier: number | null;
+	base_weights_multiplier: number | undefined;
 	// ---------
 	/** 启用训练预览图 */
 	enable_preview: boolean;
@@ -155,11 +155,11 @@ export interface RuleForm {
 	/** 保留 tokens 时使用的分隔符 */
 	keep_tokens_separator: string;
 	/** 丢弃全部标签的概率，对一个图片概率不使用 caption 或 class token */
-	caption_dropout_rate: number | null;
+	caption_dropout_rate: number | undefined;
 	/** 每 N 个 epoch 丢弃全部标签 */
-	caption_dropout_every_n_epochs: number | null;
+	caption_dropout_every_n_epochs: number | undefined;
 	/** 按逗号分隔的标签来随机丢弃 tag 的概率 */
-	caption_tag_dropout_rate: number | null;
+	caption_tag_dropout_rate: number | undefined;
 	// ---------
 	/** 颜色改变 */
 	color_aug: boolean;
@@ -198,10 +198,10 @@ export interface RuleForm {
 	/** 保留加载训练集的worker，减少每个 epoch 之间的停顿 */
 	persistent_data_loader_workers: boolean;
 	/** vae 编码批量大小 */
-	vae_batch_size: number | null;
+	vae_batch_size: number | undefined;
 	// ---------
 	/** 分布式训练超时时间（分钟） */
-	ddp_timeout: number | null;
+	ddp_timeout: number | undefined;
 	/** 为 DDP 启用 gradient_as_bucket_view  */
 	ddp_gradient_as_bucket_view: boolean;
 }

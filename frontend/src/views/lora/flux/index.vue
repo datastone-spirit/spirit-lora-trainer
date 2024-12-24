@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-24 10:07:48
+ * @LastEditTime: 2024-12-24 11:44:26
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -101,7 +101,7 @@ const defaultForm = readonly<RuleForm>({
 	save_state: false,
 	// -----
 	image_dir: "/",
-	tagger_model: "florence2",
+	tagger_model: "joy-caption-alpha-two",
 	num_repeats: 1,
 	max_train_epochs: 4,
 	train_batch_size: 1,
@@ -125,7 +125,7 @@ const defaultForm = readonly<RuleForm>({
 	model_prediction_type: "raw",
 	discrete_flow_shift: 3.1582,
 	loss_type: "l2",
-	t5xxl_max_token_length: null,
+	t5xxl_max_token_length: undefined,
 	// -----
 	gradient_checkpointing: true,
 	gradient_accumulation_steps: 1,
@@ -138,18 +138,18 @@ const defaultForm = readonly<RuleForm>({
 	lr_warmup_steps: 0,
 	lr_scheduler_num_cycles: 0,
 	optimizer_type: "adafactor",
-	min_snr_gamma: null,
+	min_snr_gamma: undefined,
 	optimizer_args: "",
 	// -----
 	network_module: "networks.lora_flux",
 	network_weights: "",
 	network_alpha: "1e-2",
 	network_dropout: 0,
-	scale_weight_norms: null,
+	scale_weight_norms: undefined,
 	network_args: "",
 	enable_base_weight: false,
 	base_weights: "",
-	base_weights_multiplier: null,
+	base_weights_multiplier: undefined,
 	// -----
 	enable_preview: false,
 	// -----
@@ -160,8 +160,8 @@ const defaultForm = readonly<RuleForm>({
 	weighted_captions: false,
 	keep_tokens: 1,
 	keep_tokens_separator: "|||",
-	caption_dropout_rate: null,
-	caption_dropout_every_n_epochs: null,
+	caption_dropout_rate: undefined,
+	caption_dropout_every_n_epochs: undefined,
 	caption_tag_dropout_rate: 0,
 	// -----
 	color_aug: false,
@@ -183,9 +183,9 @@ const defaultForm = readonly<RuleForm>({
 	cache_text_encoder_outputs: true,
 	cache_text_encoder_outputs_to_disk: true,
 	persistent_data_loader_workers: true,
-	vae_batch_size: null,
+	vae_batch_size: undefined,
 	// -----
-	ddp_timeout: null,
+	ddp_timeout: undefined,
 	ddp_gradient_as_bucket_view: false
 });
 const ruleForm = useLocalStorage<RuleForm>(

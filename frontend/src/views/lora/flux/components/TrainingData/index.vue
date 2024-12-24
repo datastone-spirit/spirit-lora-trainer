@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:28:31
- * @LastEditTime: 2024-12-23 17:56:15
+ * @LastEditTime: 2024-12-24 10:49:23
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue

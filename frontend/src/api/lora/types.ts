@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-20 16:57:50
+ * @LastEditTime: 2024-12-24 11:01:00
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -18,7 +18,7 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		/** 基础权重-合并入底模的 LoRA  */
 		base_weights: string;
 		/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
-		base_weights_multiplier: number | null;
+		base_weights_multiplier: number | undefined;
 		/** 启用 arb 桶以允许非固定宽高比的图片 */
 		enable_bucket: boolean;
 		/** arb 桶不放大图片 */
@@ -62,7 +62,7 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		/** 保留 tokens 时使用的分隔符 */
 		keep_tokens_separator: string;
 		/** 总学习率, 在分开设置 U-Net 与文本编码器学习率后这个值失效。格式化成数字 */
-		learning_rate: number | null;
+		learning_rate: number | undefined;
 		/** 日志保存文件夹 */
 		logging_dir: string;
 		/** 损失函数类型 */
@@ -88,7 +88,7 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		/** 模型预测类型 */
 		model_prediction_type: string;
 		/** 视为 OFT 的约束。我们建议使用 1e-2 到 1e-4 */
-		network_alpha: number | null;
+		network_alpha: number | undefined;
 		/** 自定义 network_args
 		 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
 		 */
@@ -107,10 +107,10 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		network_weights: string;
 		/** 不使用半精度 VAE */
 		no_half_vae: boolean;
-		/** 每个图像重复训练次数 */
+		/** 每个图像重复训练次数（优先级高） */
 		num_repeats: number;
-		// 秋叶没有啊，
-		dataset_repeats?: number;
+		/** 每个图像重复训练次数  */
+		// dataset_repeats: number | undefined;
 		/**
 		 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
 		 * 示例：weight_decay=0.01 betas=.9,.999
@@ -145,13 +145,13 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		/** sigmoid 缩放 */
 		sigmoid_scale: number;
 		/** 文本编码器学习率，转成数字 */
-		text_encoder_lr: number | null;
+		text_encoder_lr: number | undefined;
 		/** flux 时间步采样 */
 		timestep_sampling: string;
 		/** 批量大小, 越高显存占用越高 */
 		train_batch_size: number;
 		/** U-Net 学习率，转成数字 */
-		unet_lr: number | null;
+		unet_lr: number | undefined;
 		/** 使用带权重的 token，不推荐与 shuffle_caption 一同开启 */
 		weighted_captions: boolean;
 		/** AE 模型文件路径 */
@@ -163,23 +163,23 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		/** 打标模型 */
 		tagger_model: string;
 		/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
-		t5xxl_max_token_length: number | null;
+		t5xxl_max_token_length: number | undefined;
 		/** 最小信噪比伽马值, 如果启用推荐为 5 */
-		min_snr_gamma: number | null;
+		min_snr_gamma: number | undefined;
 		/** 最大范数正则化。如果使用，推荐为 1 */
-		scale_weight_norms: number | null;
+		scale_weight_norms: number | undefined;
 		/** 丢弃全部标签的概率，对一个图片概率不使用 caption 或 class token */
-		caption_dropout_rate: number | null;
+		caption_dropout_rate: number | undefined;
 		/** 每 N 个 epoch 丢弃全部标签 */
-		caption_dropout_every_n_epochs: number | null;
+		caption_dropout_every_n_epochs: number | undefined;
 		/** 按逗号分隔的标签来随机丢弃 tag 的概率 */
-		caption_tag_dropout_rate: number | null;
+		caption_tag_dropout_rate: number | undefined;
 		/** CLIP 跳过层数 玄学 */
 		clip_skip: number;
 		/** vae 编码批量大小 */
-		vae_batch_size: number | null;
+		vae_batch_size: number | undefined;
 		/** 分布式训练超时时间（分钟） */
-		ddp_timeout: number | null;
+		ddp_timeout: number | undefined;
 		/** 图像分辨率: 512,512 */
 		resolution: string;
 	};

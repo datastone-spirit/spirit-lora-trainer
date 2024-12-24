@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:19:14
- * @LastEditTime: 2024-12-10 11:38:35
+ * @LastEditTime: 2024-12-24 10:24:22
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\sdxl\components\TrainingData\index.vue
@@ -10,9 +10,11 @@
 <template>
 	<DatasetDirSelector
 		v-model:dir="ruleForm.image_dir"
+		v-model:tagger-model="ruleForm.tagger_model"
 		dir-label="数据集目录"
 		:dir-prop="formProps.image_dir"
 		dir-popover-content="image_dir"
+		tagger-label="打标模型"
 	/>
 	<el-row :gutter="16">
 		<el-col :span="10">

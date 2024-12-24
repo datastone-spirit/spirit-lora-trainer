@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 11:43:02
- * @LastEditTime: 2024-12-20 09:56:51
+ * @LastEditTime: 2024-12-24 11:33:03
  * @LastEditors: mulingyuer
  * @Description: 打标模型选择器
  * @FilePath: \frontend\src\components\Form\TaggerModelSelect.vue
@@ -35,8 +35,8 @@ withDefaults(defineProps<TaggerModelSelectProps>(), {
 const value = defineModel({ type: String, required: true });
 
 const options = ref([
-	{ label: "Joy Caption2", value: "joy_caption2" },
-	{ label: "Florence", value: "florence2" }
+	{ label: "Joy Caption2", value: "joy-caption-alpha-two" },
+	{ label: "Florence2", value: "florence2" }
 ]);
 </script>
 

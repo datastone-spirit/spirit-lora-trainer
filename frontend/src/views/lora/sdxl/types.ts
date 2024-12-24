@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-06 14:57:11
- * @LastEditTime: 2024-12-20 16:58:18
+ * @LastEditTime: 2024-12-24 10:25:01
  * @LastEditors: mulingyuer
  * @Description: sdxl类型定义
  * @FilePath: \frontend\src\views\lora\sdxl\types.ts
@@ -33,6 +33,8 @@ export interface RuleForm {
 	// ---------
 	/** 数据集目录 */
 	image_dir: string;
+	/** 打标模型 */
+	tagger_model: string;
 	/** 每个图像重复训练次数 */
 	num_repeats: number;
 	/** 最大训练 epoch（轮数） */

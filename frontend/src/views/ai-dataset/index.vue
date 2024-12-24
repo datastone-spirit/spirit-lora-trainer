@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-24 10:17:39
+ * @LastEditTime: 2024-12-24 11:44:23
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -67,7 +67,7 @@ const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const ruleFormRef = ref<FormInstance>();
 const ruleForm = ref<RuleForm>({
 	image_dir: "/",
-	tagger_model: "florence2"
+	tagger_model: "joy-caption-alpha-two"
 });
 const rules = reactive<FormRules<RuleForm>>({
 	image_dir: [

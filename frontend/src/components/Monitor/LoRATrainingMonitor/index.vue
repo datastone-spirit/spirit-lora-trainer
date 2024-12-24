@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2024-12-23 16:13:07
+ * @LastEditTime: 2024-12-23 17:49:06
  * @LastEditors: mulingyuer
  * @Description: lora训练监控
  * @FilePath: \frontend\src\components\Monitor\LoRATrainingMonitor\index.vue
@@ -55,6 +55,7 @@
 import { loRATrainingInfo } from "@/api/monitor";
 import type { LoRATrainingInfoResult } from "@/api/monitor";
 import { isEmptyObject, objectHasKeys, sleep } from "@/utils/tools";
+import { EventBus } from "@/utils/event-bus";
 
 export interface LoRATrainingMonitorData {
 	/** 当前进度 */
@@ -148,6 +149,7 @@ function complete() {
 	status.value = false;
 	rawData.value = null;
 	task_id.value = "";
+	EventBus.emit("lora_train_complete");
 	emits("complete");
 }
 
@@ -156,11 +158,12 @@ function failed() {
 	status.value = false;
 	rawData.value = null;
 	task_id.value = "";
+	EventBus.emit("lora_train_failed");
 	emits("failed");
 }
 
 /** 开始查询 */
-function start(taskId: string) {
+function start({ taskId }: { taskId: string }) {
 	if (typeof taskId !== "string" || taskId.trim() === "") {
 		ElMessage.warning("请传递任务ID");
 		return;
@@ -177,6 +180,15 @@ function stop() {
 	rawData.value = null;
 	task_id.value = "";
 }
+
+onMounted(() => {
+	EventBus.on("lora_monitor_train_start", start);
+	EventBus.on("lora_monitor_train_stop", stop);
+});
+onUnmounted(() => {
+	EventBus.off("lora_monitor_train_start", start);
+	EventBus.off("lora_monitor_train_stop", stop);
+});
 
 defineExpose({
 	start,

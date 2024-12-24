@@ -26,6 +26,9 @@ importers:
       element-plus:
         specifier: ^2.9.0
         version: 2.9.0(vue@3.5.13(typescript@5.6.3))
+      mitt:
+        specifier: ^3.0.1
+        version: 3.0.1
       nprogress:
         specifier: ^0.2.0
         version: 0.2.0

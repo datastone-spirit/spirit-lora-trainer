@@ -1,13 +1,21 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:28:31
- * @LastEditTime: 2024-12-23 15:27:07
+ * @LastEditTime: 2024-12-23 17:56:15
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
+	<DatasetDirSelector
+		v-model:dir="ruleForm.image_dir"
+		v-model:tagger-model="ruleForm.tagger_model"
+		dir-label="数据集目录"
+		:dir-prop="formProps.image_dir"
+		dir-popover-content="image_dir"
+		tagger-label="打标模型"
+	/>
 	<el-row :gutter="16">
 		<el-col :span="10">
 			<PopoverFormItem

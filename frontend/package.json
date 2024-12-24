@@ -21,6 +21,7 @@
     "axios-retry": "^4.5.0",
     "dayjs": "^1.11.13",
     "element-plus": "^2.9.0",
+    "mitt": "^3.0.1",
     "nprogress": "^0.2.0",
     "pinia": "^2.2.6",
     "pinia-plugin-persistedstate": "^4.1.3",

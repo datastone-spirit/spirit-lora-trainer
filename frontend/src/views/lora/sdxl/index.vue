@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-20 16:58:11
+ * @LastEditTime: 2024-12-24 09:34:28
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -59,12 +59,12 @@ const ruleForm = ref<RuleForm>({
 	pretrained_model_name_or_path: "",
 	resume: "",
 	vae: "",
-	output_dir: "",
+	output_dir: "/",
 	save_model_as: "safetensors",
 	save_precision: "fp16",
 	save_state: false,
 	// -----
-	image_dir: "",
+	image_dir: "/",
 	num_repeats: 10,
 	max_train_epochs: 10,
 	train_batch_size: 1,

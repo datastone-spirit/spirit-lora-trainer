@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-23 16:36:02
+ * @LastEditTime: 2024-12-24 09:29:53
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -111,6 +111,7 @@ import { FileType } from "./types";
 import { directoryFiles } from "@/api/common";
 import { formatDirectoryFiles } from "./ai-dataset.helper";
 import { deleteFile, manualTag } from "@/api/tag";
+import { EventBus } from "@/utils/event-bus";
 
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
@@ -344,16 +345,7 @@ function onUploadProgress(progressEvent: AxiosProgressEvent) {
 	uploadPercentage.value = Math.floor(value * 100);
 }
 
-// 对外暴露方法
-defineExpose({
-	/** 获取数据 */
-	getList
-});
-
-onMounted(() => {
-	getList();
-});
-
+/** 监听目录变化并获取数据 */
 const watchDirCallback = useDebounceFn(getList, 500);
 watch(
 	() => props.dir,
@@ -361,6 +353,19 @@ watch(
 		watchDirCallback();
 	}
 );
+
+onMounted(() => {
+	getList();
+	EventBus.on("tag_complete", getList);
+});
+onUnmounted(() => {
+	EventBus.off("tag_complete", getList);
+});
+
+defineExpose({
+	/** 获取数据 */
+	getList
+});
 </script>
 
 <style lang="scss" scoped>

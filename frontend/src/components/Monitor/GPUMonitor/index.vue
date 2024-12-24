@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 14:52:03
- * @LastEditTime: 2024-12-23 15:14:30
+ * @LastEditTime: 2024-12-23 17:32:40
  * @LastEditors: mulingyuer
  * @Description: 系统监控：gpu、训练轮数
  * @FilePath: \frontend\src\components\Monitor\GPUMonitor\index.vue
@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { gpuMonitorInfo } from "@/api/monitor";
 import { sleep } from "@/utils/tools";
+import { EventBus } from "@/utils/event-bus";
 
 export interface SystemMonitorData {
 	/** gpu功率百分比 */
@@ -68,6 +69,15 @@ function stop() {
 	status.value = false;
 }
 
+// 支持事件订阅和ref组件方式调用
+onMounted(() => {
+	EventBus.on("gpu_monitor_start", start);
+	EventBus.on("gpu_monitor_stop", stop);
+});
+onUnmounted(() => {
+	EventBus.off("gpu_monitor_start", start);
+	EventBus.off("gpu_monitor_stop", stop);
+});
 defineExpose({
 	start,
 	stop

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2024-12-23 16:17:18
+ * @LastEditTime: 2024-12-24 09:27:44
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { manualTagInfo } from "@/api/monitor";
 import { sleep } from "@/utils/tools";
+import { EventBus } from "@/utils/event-bus";
 
 export interface TagMonitorData {
 	/** 当前第几个 */
@@ -78,18 +79,36 @@ function update() {
 function complete() {
 	status.value = false;
 	task_id.value = "";
+	EventBus.emit("tag_complete");
 	emits("complete");
+
+	ElMessageBox({
+		title: "打标完成",
+		type: "success",
+		showCancelButton: false,
+		confirmButtonText: "知道了",
+		message: "打标完成，可以开始训练LoRA了"
+	});
 }
 
 /** 出错 */
 function failed() {
 	status.value = false;
 	task_id.value = "";
+	EventBus.emit("tag_failed");
 	emits("failed");
+
+	ElMessageBox({
+		title: "打标失败",
+		type: "error",
+		showCancelButton: false,
+		confirmButtonText: "知道了",
+		message: "打标失败，请检查日志或者重新打标"
+	});
 }
 
 /** 开始查询 */
-function start(taskId: string) {
+function start({ taskId }: { taskId: string }) {
 	if (typeof taskId !== "string" || taskId.trim() === "") {
 		ElMessage.warning("请传递任务ID");
 		return;
@@ -103,6 +122,15 @@ function start(taskId: string) {
 function stop() {
 	status.value = false;
 }
+
+onMounted(() => {
+	EventBus.on("tag_monitor_start", start);
+	EventBus.on("tag_monitor_stop", stop);
+});
+onUnmounted(() => {
+	EventBus.off("tag_monitor_start", start);
+	EventBus.off("tag_monitor_stop", stop);
+});
 
 defineExpose({
 	start,

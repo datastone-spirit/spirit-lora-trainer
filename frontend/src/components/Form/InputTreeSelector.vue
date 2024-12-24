@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-18 17:08:33
- * @LastEditTime: 2024-12-20 15:08:35
+ * @LastEditTime: 2024-12-24 10:02:51
  * @LastEditors: mulingyuer
  * @Description: 可输入的树选择器
  * @FilePath: \frontend\src\components\Form\InputTreeSelector.vue
@@ -37,6 +37,7 @@
 			<el-scrollbar view-class="input-tree-selector-dropdown-list">
 				<el-tree
 					ref="treeRef"
+					class="input-tree-selector-tree"
 					:data="treeData"
 					:props="treeOptions.props"
 					:expand-on-click-node="treeOptions.expandOnClickNode"
@@ -47,7 +48,17 @@
 					:empty-text="treeEmptyText"
 					:current-node-key="treeOptions.defaultExpand"
 					@node-click="onNodeClick"
-				/>
+				>
+					<template #default="{ node }">
+						<div class="input-tree-node">
+							<Icon
+								class="input-tree-node-icon"
+								:name="node.isLeaf ? props.fileIcon : props.dirIcon"
+							/>
+							<span class="input-tree-node-label">{{ node.label }}</span>
+						</div>
+					</template>
+				</el-tree>
 			</el-scrollbar>
 		</div>
 	</el-popover>
@@ -64,13 +75,20 @@ export interface InputTreeSelectorProps {
 	placeholder?: string;
 	/** 是否目录选择 */
 	isDir: boolean;
+	/** 目录图标 */
+	dirIcon?: string;
+	/** 文件图标 */
+	fileIcon?: string;
 }
 type TreeItem = GetDirectoryStructureResult[number];
 type GetDirectoryParams = Omit<GetDirectoryStructureParams, "is_dir"> & {
 	is_dir?: GetDirectoryStructureParams["is_dir"];
 };
 
-const props = withDefaults(defineProps<InputTreeSelectorProps>(), {});
+const props = withDefaults(defineProps<InputTreeSelectorProps>(), {
+	dirIcon: "ri-folder-6-line",
+	fileIcon: "ri-file-line"
+});
 
 const inputRef = ref<InstanceType<typeof ElInput>>();
 const inputTreeSelectorRef = ref<HTMLDivElement>();
@@ -202,6 +220,30 @@ async function loadTreeData(path = "/") {
 	:deep(.input-tree-selector-dropdown-list) {
 		max-height: 274px;
 	}
+}
+.input-tree-selector-tree {
+	--el-tree-node-content-height: 40px;
+	:deep(.el-tree-node__expand-icon) {
+		font-size: 16px;
+	}
+}
+.input-tree-node {
+	flex-grow: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	padding-right: 6px;
+	overflow: hidden;
+}
+.input-tree-node-icon {
+	flex-shrink: 0;
+	margin-right: 6px;
+}
+.input-tree-node-label {
+	flex-grow: 1;
+	min-width: 0px;
+	font-size: 16px;
+	@include text-ellipsis();
 }
 </style>
 <style lang="scss">

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2024-12-23 15:36:05
+ * @LastEditTime: 2024-12-24 09:20:55
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -38,6 +38,7 @@ import TaggerModelSelect from "./TaggerModelSelect.vue";
 import type { TaggerModelSelectProps } from "./TaggerModelSelect.vue";
 import { batchTag } from "@/api/tag";
 import { checkDirectory } from "@/utils/lora.helper";
+import { EventBus } from "@/utils/event-bus";
 
 export interface DatasetDirSelectorProps {
 	dirLabel?: string;
@@ -58,7 +59,11 @@ withDefaults(defineProps<DatasetDirSelectorProps>(), {
 });
 const emits = defineEmits<{
 	/** 打标开始 */
-	taggerStart: [taskId: string];
+	taggerStart: [{ taskId: string }];
+	/** 打标完成 */
+	complete: [];
+	/** 打标失败 */
+	failed: [];
 }>();
 
 const dir = defineModel("dir", { type: String, required: true });
@@ -96,7 +101,8 @@ async function onBtnClick() {
 			image_path: dir.value,
 			model_name: taggerModel.value
 		});
-		emits("taggerStart", task_id);
+		EventBus.emit("tag_monitor_start", { taskId: task_id });
+		emits("taggerStart", { taskId: task_id });
 
 		ElMessage({
 			message: "正在打标...",
@@ -104,17 +110,26 @@ async function onBtnClick() {
 		});
 	} catch (error) {
 		loading.value = false;
-		console.log("打标失败", error);
+		console.log("打标任务创建失败", error);
 	}
 }
 
 /** 打标结束 */
-function complete() {
+function stop() {
 	loading.value = false;
 }
 
+onMounted(() => {
+	EventBus.on("tag_complete", stop);
+	EventBus.on("tag_failed", stop);
+});
+onUnmounted(() => {
+	EventBus.off("tag_complete", stop);
+	EventBus.off("tag_failed", stop);
+});
+
 defineExpose({
-	complete
+	stop
 });
 </script>
 

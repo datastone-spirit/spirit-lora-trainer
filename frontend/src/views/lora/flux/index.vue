@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-23 16:15:31
+ * @LastEditTime: 2024-12-24 10:07:48
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -24,16 +24,6 @@
 							<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
 						<Collapse v-model="openStep2" title="第2步：训练用的数据">
-							<DatasetDirSelector
-								ref="datasetDirSelectorRef"
-								v-model:dir="ruleForm.image_dir"
-								v-model:tagger-model="ruleForm.tagger_model"
-								dir-label="数据集目录"
-								:dir-prop="ruleFormProps.image_dir"
-								dir-popover-content="image_dir"
-								tagger-label="打标模型"
-								@tagger-start="onTaggerStart"
-							/>
 							<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
@@ -56,19 +46,9 @@
 		/>
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="flux-footer-bar" :size="40">
-				<GPUMonitor ref="gpuMonitorRef" v-show="showGPUMonitor" />
-				<LoRATrainingMonitor
-					ref="loRATrainingMonitorRef"
-					v-show="showLoRATrainingMonitor"
-					@complete="onLoRATrainingComplete"
-					@failed="onLoRATrainingFailed"
-				/>
-				<TagMonitor
-					ref="tagMonitorRef"
-					v-show="showTagMonitor"
-					@complete="onTaggerComplete"
-					@failed="onTaggerFailed"
-				/>
+				<GPUMonitor v-show="showGPUMonitor" />
+				<LoRATrainingMonitor v-show="showLoRATrainingMonitor" />
+				<TagMonitor v-show="showTagMonitor" />
 				<el-button
 					v-if="showSubmitBtn"
 					type="primary"
@@ -101,7 +81,7 @@ import { startFluxTraining } from "@/api/lora";
 import GPUMonitor from "@/components/Monitor/GPUMonitor/index.vue";
 import LoRATrainingMonitor from "@/components/Monitor/LoRATrainingMonitor/index.vue";
 import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
-import DatasetDirSelector from "@/components/Form/DatasetDirSelector.vue";
+import { EventBus } from "@/utils/event-bus";
 
 const settingsStore = useSettingsStore();
 
@@ -115,12 +95,12 @@ const defaultForm = readonly<RuleForm>({
 	clip_l: "",
 	t5xxl: "",
 	resume: "",
-	output_dir: "",
+	output_dir: "/",
 	save_model_as: "safetensors",
 	save_precision: "bf16",
 	save_state: false,
 	// -----
-	image_dir: "",
+	image_dir: "/",
 	tagger_model: "florence2",
 	num_repeats: 1,
 	max_train_epochs: 4,
@@ -263,29 +243,34 @@ watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 // gpu监控
 const showGPUMonitor = ref(false);
-const gpuMonitorRef = ref<InstanceType<typeof GPUMonitor>>();
+function startGPUMonitor() {
+	showGPUMonitor.value = true;
+	EventBus.emit("gpu_monitor_start");
+}
+function stopGPUMonitor() {
+	showGPUMonitor.value = false;
+	EventBus.emit("gpu_monitor_stop");
+}
 // LoRA训练监控
 const showLoRATrainingMonitor = ref(false);
-const loRATrainingMonitorRef = ref<InstanceType<typeof LoRATrainingMonitor>>();
+function startLoRATrainingMonitor(taskId: string) {
+	showLoRATrainingMonitor.value = true;
+	EventBus.emit("lora_monitor_train_start", { taskId });
+}
+function stopLoRATrainingMonitor() {
+	showLoRATrainingMonitor.value = false;
+	EventBus.emit("lora_monitor_train_stop");
+}
 // 打标监控
 const showTagMonitor = ref(false);
-const tagMonitorRef = ref<InstanceType<typeof TagMonitor>>();
-const datasetDirSelectorRef = ref<InstanceType<typeof DatasetDirSelector>>();
-function onTaggerStart(taskId: string) {
+function onTaggerStart() {
 	showTagMonitor.value = true;
-	tagMonitorRef.value?.start(taskId);
 }
 function onTaggerComplete() {
 	showTagMonitor.value = false;
-	tagMonitorRef.value?.stop();
-	datasetDirSelectorRef.value?.complete();
 }
 function onTaggerFailed() {
 	showTagMonitor.value = false;
-	tagMonitorRef.value?.stop();
-	datasetDirSelectorRef.value?.complete();
-
-	ElMessage.error("打标失败，请检查日志");
 }
 
 /** 导入配置 */
@@ -355,22 +340,17 @@ async function onSubmit() {
 		submitLoading.value = true;
 		const { task_id } = await startFluxTraining(data);
 		// 监听GPU数据
-		showGPUMonitor.value = true;
-		gpuMonitorRef.value?.start();
+		startGPUMonitor();
 		// 监听LoRA训练数据
-		showLoRATrainingMonitor.value = true;
-		loRATrainingMonitorRef.value?.start(task_id);
+		startLoRATrainingMonitor(task_id);
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		submitLoading.value = false;
 		// 停止监控GPU
-		showGPUMonitor.value = false;
-		gpuMonitorRef.value?.stop();
-
+		stopGPUMonitor();
 		// 停止监控LoRA训练数据
-		showLoRATrainingMonitor.value = false;
-		loRATrainingMonitorRef.value?.stop();
+		stopLoRATrainingMonitor();
 
 		console.error("创建训练任务失败", error);
 	}
@@ -379,12 +359,9 @@ async function onSubmit() {
 /** 训练完成 */
 function onLoRATrainingComplete() {
 	// 停止监控GPU
-	showGPUMonitor.value = false;
-	gpuMonitorRef.value?.stop();
-
+	stopGPUMonitor();
 	// 停止监控LoRA训练数据
-	showLoRATrainingMonitor.value = false;
-	loRATrainingMonitorRef.value?.stop();
+	stopLoRATrainingMonitor();
 
 	submitLoading.value = false;
 
@@ -405,17 +382,29 @@ function onLoRATrainingComplete() {
 /** 训练失败 */
 function onLoRATrainingFailed() {
 	// 停止监控GPU
-	showGPUMonitor.value = false;
-	gpuMonitorRef.value?.stop();
-
+	stopGPUMonitor();
 	// 停止监控LoRA训练数据
-	showLoRATrainingMonitor.value = false;
-	loRATrainingMonitorRef.value?.stop();
+	stopLoRATrainingMonitor();
 
 	submitLoading.value = false;
 
 	ElMessage.error("训练失败，请检查日志");
 }
+
+onMounted(() => {
+	EventBus.on("lora_train_complete", onLoRATrainingComplete);
+	EventBus.on("lora_train_failed", onLoRATrainingFailed);
+	EventBus.on("tag_monitor_start", onTaggerStart);
+	EventBus.on("tag_complete", onTaggerComplete);
+	EventBus.on("tag_failed", onTaggerFailed);
+});
+onUnmounted(() => {
+	EventBus.off("lora_train_complete", onLoRATrainingComplete);
+	EventBus.off("lora_train_failed", onLoRATrainingFailed);
+	EventBus.off("tag_monitor_start", onTaggerStart);
+	EventBus.off("tag_complete", onTaggerComplete);
+	EventBus.off("tag_failed", onTaggerFailed);
+});
 </script>
 
 <style lang="scss" scoped>

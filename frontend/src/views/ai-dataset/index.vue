@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-20 14:55:04
+ * @LastEditTime: 2024-12-24 10:17:39
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -26,19 +26,15 @@
 					<el-button
 						class="ai-dataset-page-left-btn"
 						type="primary"
-						:loading="loading"
+						:loading="submitLoading"
 						@click="onSubmit"
 					>
 						一键打标
 					</el-button>
 				</el-form-item>
 			</el-form>
-			<TagMonitor v-if="showTagMonitor" :data="tagMonitorData" />
-			<GPUMonitor
-				v-if="showSystemMonitor"
-				class="ai-dataset-page-left-system-monitor"
-				:data="systemMonitorData"
-			/>
+			<TagMonitor v-show="showTagMonitor" />
+			<GPUMonitor v-show="showGPUMonitor" class="ai-dataset-page-left-gpu-monitor" />
 		</div>
 		<div class="ai-dataset-page-right">
 			<div id="ai-dataset-header" class="ai-dataset-header"></div>
@@ -56,9 +52,9 @@
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
 import type { FormInstance, FormRules } from "element-plus";
-import type { SystemMonitorProps } from "@/components/Monitor/GPUMonitor/index.vue";
 import { checkDirectory } from "@/utils/lora.helper";
 import { batchTag } from "@/api/tag";
+import { EventBus } from "@/utils/event-bus";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -70,7 +66,7 @@ interface RuleForm {
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const ruleFormRef = ref<FormInstance>();
 const ruleForm = ref<RuleForm>({
-	image_dir: "",
+	image_dir: "/",
 	tagger_model: "florence2"
 });
 const rules = reactive<FormRules<RuleForm>>({
@@ -90,17 +86,31 @@ const rules = reactive<FormRules<RuleForm>>({
 	],
 	tagger_model: [{ required: true, message: "请选择打标模型", trigger: "change" }]
 });
-const loading = ref(false);
+const submitLoading = ref(false);
 
 // 系统监控
-const showSystemMonitor = ref(false);
-const systemMonitorData = ref<SystemMonitorProps["data"]>({
-	gpuUsage: 0, // gpu占用百分比
-	gpuPower: 0, // gpu功率百分比
-	gpuMemory: 0 // gpu显存百分比
-});
+const showGPUMonitor = ref(false);
+function startGPUMonitor() {
+	showGPUMonitor.value = true;
+	EventBus.emit("gpu_monitor_start");
+}
+function stopGPUMonitor() {
+	showGPUMonitor.value = false;
+	EventBus.emit("gpu_monitor_stop");
+}
 // 打标监控
 const showTagMonitor = ref(false);
+function onTaggerStart(task_id: string) {
+	showTagMonitor.value = true;
+	EventBus.emit("tag_monitor_start", { taskId: task_id });
+}
+function onTaggerComplete() {
+	showTagMonitor.value = false;
+	submitLoading.value = false;
+}
+function onTaggerFailed() {
+	showTagMonitor.value = false;
+}
 
 /** 校验 */
 async function validate() {
@@ -133,32 +143,40 @@ async function onSubmit() {
 	try {
 		const valid = await validate();
 		if (!valid) return;
-		loading.value = true;
+		submitLoading.value = true;
 		// 打标
-		await batchTag({
+		const { task_id } = await batchTag({
 			image_path: ruleForm.value.image_dir,
 			model_name: ruleForm.value.tagger_model
 		});
-		loading.value = false;
+		// 监控GPU数据
+		startGPUMonitor();
+		// 监控打标数据
+		onTaggerStart(task_id);
+
 		ElMessage({
-			message: "一键打标成功",
+			message: "正在打标...",
 			type: "success"
 		});
 	} catch (error) {
-		loading.value = false;
-		console.log("打标失败", error);
+		// 停止监控GPU
+		stopGPUMonitor();
+		// 停止监控打标
+		onTaggerFailed();
+
+		submitLoading.value = false;
+		console.log("打标任务创建失败", error);
 	}
 }
 
-// 刷新
-const refreshing = ref(false);
-async function onRefresh() {
-	if (!aiDatasetRef.value) return;
-	refreshing.value = true;
-	aiDatasetRef.value.getList().finally(() => {
-		refreshing.value = false;
-	});
-}
+onMounted(() => {
+	EventBus.on("tag_complete", onTaggerComplete);
+	EventBus.on("tag_failed", onTaggerFailed);
+});
+onUnmounted(() => {
+	EventBus.off("tag_complete", onTaggerComplete);
+	EventBus.off("tag_failed", onTaggerFailed);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -176,7 +194,7 @@ async function onRefresh() {
 .ai-dataset-page-left-btn {
 	width: 100%;
 }
-.ai-dataset-page-left-system-monitor {
+.ai-dataset-page-left-gpu-monitor {
 	justify-content: center;
 	margin-top: 24px;
 }

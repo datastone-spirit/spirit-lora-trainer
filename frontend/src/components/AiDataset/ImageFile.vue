@@ -8,7 +8,7 @@
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="file-list-item image-file">
+	<div class="file-list-item image-file" title="双击查看图片细节">
 		<el-image class="file-list-item-img" :src="data.value + '?compress=true'" :fit="fit">
 			<template #placeholder>
 				<img class="file-list-item-default-img" :src="DefaultImageIcon" :alt="data.name" />

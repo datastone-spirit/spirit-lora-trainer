@@ -1,5 +1,5 @@
 <template>
-	<div class="file-manager">
+	<div class="file-manager" :id="fileId">
 		<el-input v-model="folder" :placeholder="inputPlaceholder" class="file-manager-input">
 			<template #append>
 				<el-button @click="tooglePopover" :icon="Folder" title="请选择" />
@@ -11,8 +11,15 @@
 			v-model="visible"
 			placement=""
 			:popper-class="['input-tree-selector-popover']"
+			custom-class="file-manager-dialog"
 		>
-			<vue-finder :features="features" :request="request" :select-button="handleSelectButton" />
+			<vue-finder
+				:features="features"
+				:request="request"
+				:select-button="handleSelectButton"
+				:showTreeView="true"
+				class="file-finder"
+			/>
 		</el-dialog>
 	</div>
 </template>
@@ -38,6 +45,8 @@ const typeValue: any = {
 const visible = ref(false);
 const props = withDefaults(defineProps<InputTreeSelectorProps>(), {});
 const folder = defineModel({ type: String, required: true });
+const firstTimeVisible = ref(true);
+const fileId = Math.random().toString(36).substring(2);
 
 const inputPlaceholder = computed(() => {
 	if (!props.placeholder) {
@@ -56,14 +65,14 @@ const request = {
 	// Additional headers & params & body
 	params: {
 		is_dir: String(props.isDir),
-		path: "./"
+		path: folder.value
 	},
 	body: { additionalBody1: ["yes"] },
 
 	// And/or transform request callback
-	transformRequest: (req: any) => {
-		return req;
-	},
+	// transformRequest: (req: any) => {
+	// 	return req;
+	// },
 
 	// XSRF Token header name
 	xsrfHeaderName: "CSRF-TOKEN"
@@ -75,7 +84,8 @@ const handleSelectButton = {
 	// allow multiple selection
 	multiple: false,
 	// handle click event
-	click: (items: any) => {
+	click: (items: any, event: any) => {
+		event.preventDefault();
 		if (typeValue[items[0].type] !== props.isDir) {
 			ElNotification({
 				type: "error",
@@ -91,14 +101,36 @@ const handleSelectButton = {
 const tooglePopover = () => {
 	visible.value = !visible.value;
 };
+
+watch(visible, (val) => {
+	if (val && firstTimeVisible.value) {
+		firstTimeVisible.value = false;
+		setTimeout(() => {
+			(
+				document.getElementById(fileId)?.querySelector(".vuefinder__treestorageitem__header") as any
+			)?.click();
+		}, 200);
+	}
+});
 </script>
 
 <style lang="scss" scoped>
 .file-manager {
 	width: 100%;
 }
-/* Add any custom styles here */
-.file-manager-input {
-	// width: 100%;
+.file-manager-dialog {
+	height: 500px;
+}
+</style>
+<style>
+.vuefinder__main__container {
+	min-height: 460px !important;
+}
+.vuefinder__main__content {
+	min-height: 350px !important;
+	max-height: 350px !important;
+}
+.vuefinder__treeview__header {
+	display: none;
 }
 </style>

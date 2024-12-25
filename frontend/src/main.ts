@@ -3,6 +3,7 @@ import { piniaStore } from "@/stores";
 import App from "./App.vue";
 import { setupRouter } from "./router";
 import VueFinder from "vuefinder/dist/vuefinder";
+import { init } from "./init";
 
 // style
 import "@/styles/index.scss";
@@ -22,6 +23,9 @@ async function setupApp() {
 	app.use(directives);
 	app.use(VueFinder);
 	await setupRouter(app);
+
+	// 初始化
+	await init();
 
 	app.mount("#app");
 }

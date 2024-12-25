@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-24 11:44:28
+ * @LastEditTime: 2024-12-25 16:31:21
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -23,7 +23,11 @@
 						<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
 					</Collapse>
 					<Collapse v-model="openStep2" title="第2步：训练用的数据">
-						<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
+						<TrainingData
+							v-model:form="ruleForm"
+							:form-props="ruleFormProps"
+							:tag-submit="onTagSubmit"
+						/>
 					</Collapse>
 					<Collapse v-model="openStep3" title="第3步：模型参数调教">
 						<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
@@ -48,7 +52,7 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import { useSettingsStore } from "@/stores";
 import type { RuleForm, RuleFormProps } from "./types";
-import { generateKeyMapFromInterface } from "@/utils/tools";
+import { generateKeyMapFromInterface, sleep } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 
@@ -176,6 +180,11 @@ const openStep1 = ref(true);
 const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
+
+/** 打标 */
+function onTagSubmit() {
+	return sleep(3000);
+}
 </script>
 
 <style lang="scss" scoped>

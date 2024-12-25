@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-24 11:44:26
+ * @LastEditTime: 2024-12-25 16:02:04
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -24,7 +24,11 @@
 							<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
 						<Collapse v-model="openStep2" title="第2步：训练用的数据">
-							<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
+							<TrainingData
+								v-model:form="ruleForm"
+								:form-props="ruleFormProps"
+								:tag-submit="onTagSubmit"
+							/>
 						</Collapse>
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
 							<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
@@ -46,14 +50,14 @@
 		/>
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="flux-footer-bar" :size="40">
-				<GPUMonitor v-show="showGPUMonitor" />
-				<LoRATrainingMonitor v-show="showLoRATrainingMonitor" />
-				<TagMonitor v-show="showTagMonitor" />
+				<GPUMonitor v-show="isListenGPU" />
+				<LoRATrainingMonitor v-show="isListenLora" />
+				<TagMonitor v-show="isListenTag" />
 				<el-button
 					v-if="showSubmitBtn"
 					type="primary"
 					size="large"
-					:loading="submitLoading"
+					:loading="submitLoading || isListenLora"
 					@click="onSubmit"
 				>
 					开始训练
@@ -64,7 +68,15 @@
 </template>
 
 <script setup lang="ts">
+import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
+import { batchTag } from "@/api/tag";
+import GPUMonitor from "@/components/Monitor/GPUMonitor/index.vue";
+import LoRATrainingMonitor from "@/components/Monitor/LoRATrainingMonitor/index.vue";
+import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
+import { useGPU } from "@/hooks/useGPU";
+import { useTag } from "@/hooks/useTag";
+import { useTraining } from "@/hooks/useTraining";
 import { useSettingsStore } from "@/stores";
 import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
@@ -77,13 +89,12 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
 import type { RuleForm, RuleFormProps } from "./types";
-import { startFluxTraining } from "@/api/lora";
-import GPUMonitor from "@/components/Monitor/GPUMonitor/index.vue";
-import LoRATrainingMonitor from "@/components/Monitor/LoRATrainingMonitor/index.vue";
-import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
-import { EventBus } from "@/utils/event-bus";
 
 const settingsStore = useSettingsStore();
+const { isListenTag, startTagListen, stopTagListen, tagTaskStatus, isTagTaskEnd } = useTag();
+const { isListenLora, startLoraListen, stopLoraListen, loraTaskStatus, isLoraTaskEnd } =
+	useTraining();
+const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
 
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_flux_form`;
@@ -241,38 +252,6 @@ const generateToml = useDebounceFn(() => {
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
-// gpu监控
-const showGPUMonitor = ref(false);
-function startGPUMonitor() {
-	showGPUMonitor.value = true;
-	EventBus.emit("gpu_monitor_start");
-}
-function stopGPUMonitor() {
-	showGPUMonitor.value = false;
-	EventBus.emit("gpu_monitor_stop");
-}
-// LoRA训练监控
-const showLoRATrainingMonitor = ref(false);
-function startLoRATrainingMonitor(taskId: string) {
-	showLoRATrainingMonitor.value = true;
-	EventBus.emit("lora_monitor_train_start", { taskId });
-}
-function stopLoRATrainingMonitor() {
-	showLoRATrainingMonitor.value = false;
-	EventBus.emit("lora_monitor_train_stop");
-}
-// 打标监控
-const showTagMonitor = ref(false);
-function onTaggerStart() {
-	showTagMonitor.value = true;
-}
-function onTaggerComplete() {
-	showTagMonitor.value = false;
-}
-function onTaggerFailed() {
-	showTagMonitor.value = false;
-}
-
 /** 导入配置 */
 function onLoadConfig(toml: StartFluxTrainingData) {
 	try {
@@ -300,11 +279,59 @@ function onResetData() {
 	ElMessage.success("重置成功");
 }
 
+/** 打标 */
+async function onTagSubmit() {
+	try {
+		const { image_dir, tagger_model } = ruleForm.value;
+		// 校验
+		let valid = true;
+		let validMsg = "";
+		if (typeof image_dir !== "string" || image_dir.trim() === "") {
+			valid = false;
+			validMsg = "请先选择训练用的数据集目录";
+		}
+		const exists = await checkDirectory(image_dir);
+		if (!exists) {
+			valid = false;
+			validMsg = "数据集目录不存在";
+		}
+		if (typeof tagger_model !== "string" || tagger_model.trim() === "") {
+			valid = false;
+			validMsg = "请先选择打标模型";
+		}
+		if (!valid) {
+			ElMessage({
+				message: validMsg,
+				type: "error"
+			});
+			return;
+		}
+
+		// api
+		const result = await batchTag({
+			image_path: image_dir,
+			model_name: tagger_model
+		});
+		startGPUListen();
+		startTagListen(result.task_id);
+
+		ElMessage({
+			message: "正在打标...",
+			type: "success"
+		});
+	} catch (error) {
+		stopGPUListen();
+		stopTagListen();
+
+		console.log("打标任务创建失败", error);
+	}
+}
+
 /** 提交表单 */
 const submitLoading = ref(false);
 // 如果任何一个监视器为真，则不显示提交按钮
 const showSubmitBtn = computed(() => {
-	const monitors = [showGPUMonitor.value, showLoRATrainingMonitor.value, showTagMonitor.value];
+	const monitors = [isListenGPU.value, isListenLora.value, isListenTag.value];
 	return !monitors.some((monitor) => monitor);
 });
 function validateForm() {
@@ -315,6 +342,13 @@ function validateForm() {
 				ElMessage.warning("请填写必填项");
 				return resolve(false);
 			}
+
+			// 校验数据集是否有数据
+			const isHasData = await checkData(ruleForm.value.image_dir);
+			if (!isHasData) {
+				ElMessage.error("数据集目录下没有数据");
+				return resolve(false);
+			}
 			return resolve(true);
 		});
 	});
@@ -322,88 +356,61 @@ function validateForm() {
 async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
+		submitLoading.value = true;
 		const valid = await validateForm();
 		if (!valid) {
-			ElMessage.warning("请填写必填项");
-			return;
-		}
-
-		// 校验数据集是否有数据
-		const isHasData = await checkData(ruleForm.value.image_dir);
-		if (!isHasData) {
-			ElMessage.error("数据集目录下没有数据");
+			submitLoading.value = false;
 			return;
 		}
 
 		// 开始训练
 		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
-		submitLoading.value = true;
 		const { task_id } = await startFluxTraining(data);
 		// 监听GPU数据
-		startGPUMonitor();
-		// 监听LoRA训练数据
-		startLoRATrainingMonitor(task_id);
+		startGPUListen();
+		// 监听训练数据
+		startLoraListen(task_id);
+
+		submitLoading.value = false;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
-		submitLoading.value = false;
-		// 停止监控GPU
-		stopGPUMonitor();
 		// 停止监控LoRA训练数据
-		stopLoRATrainingMonitor();
+		stopLoraListen();
 
+		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
 }
 
-/** 训练完成 */
-function onLoRATrainingComplete() {
-	// 停止监控GPU
-	stopGPUMonitor();
-	// 停止监控LoRA训练数据
-	stopLoRATrainingMonitor();
-
-	submitLoading.value = false;
-
-	ElMessageBox({
-		title: "训练完成",
-		type: "success",
-		showCancelButton: false,
-		confirmButtonText: "知道了",
-		customClass: "lora-success-message",
-		message: h("div", { class: "lora-success-message-content" }, [
-			h("span", {}, "训练完成，请前往"),
-			h("code", {}, ruleForm.value.output_dir),
-			h("span", {}, "查看结果")
-		])
-	});
-}
-
-/** 训练失败 */
-function onLoRATrainingFailed() {
-	// 停止监控GPU
-	stopGPUMonitor();
-	// 停止监控LoRA训练数据
-	stopLoRATrainingMonitor();
-
-	submitLoading.value = false;
-
-	ElMessage.error("训练失败，请检查日志");
-}
+// 监听是否在打标和训练
+watch(
+	[isListenTag, isListenLora],
+	(newList) => {
+		const isNotListen = newList.every((item) => !item);
+		if (isNotListen) {
+			stopGPUListen();
+		}
+	},
+	{ immediate: true }
+);
 
 onMounted(() => {
-	EventBus.on("lora_train_complete", onLoRATrainingComplete);
-	EventBus.on("lora_train_failed", onLoRATrainingFailed);
-	EventBus.on("tag_monitor_start", onTaggerStart);
-	EventBus.on("tag_complete", onTaggerComplete);
-	EventBus.on("tag_failed", onTaggerFailed);
+	// 组件挂载时，开始监听
+	if (!isTagTaskEnd(tagTaskStatus.value)) {
+		startTagListen();
+		startGPUListen();
+	}
+	if (!isLoraTaskEnd(loraTaskStatus.value)) {
+		startLoraListen();
+		startGPUListen();
+	}
 });
 onUnmounted(() => {
-	EventBus.off("lora_train_complete", onLoRATrainingComplete);
-	EventBus.off("lora_train_failed", onLoRATrainingFailed);
-	EventBus.off("tag_monitor_start", onTaggerStart);
-	EventBus.off("tag_complete", onTaggerComplete);
-	EventBus.off("tag_failed", onTaggerFailed);
+	// 组件销毁时，停止监听
+	stopGPUListen();
+	stopTagListen();
+	stopLoraListen();
 });
 </script>
 

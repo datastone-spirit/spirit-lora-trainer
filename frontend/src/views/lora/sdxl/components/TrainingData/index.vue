@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:19:14
- * @LastEditTime: 2024-12-24 10:24:22
+ * @LastEditTime: 2024-12-25 16:29:38
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\sdxl\components\TrainingData\index.vue
@@ -15,6 +15,7 @@
 		:dir-prop="formProps.image_dir"
 		dir-popover-content="image_dir"
 		tagger-label="打标模型"
+		:tag-submit="tagSubmit"
 	/>
 	<el-row :gutter="16">
 		<el-col :span="10">
@@ -118,10 +119,13 @@
 <script setup lang="ts">
 import { useSettingsStore } from "@/stores";
 import type { RuleForm, RuleFormProps } from "../../types";
+import type { DatasetDirSelectorProps } from "@/components/Form/DatasetDirSelector.vue";
 
 export interface TrainingDataProps {
 	/** 表单props */
 	formProps: RuleFormProps;
+	/** 打标submit函数 */
+	tagSubmit: DatasetDirSelectorProps["tagSubmit"];
 }
 
 defineProps<TrainingDataProps>();

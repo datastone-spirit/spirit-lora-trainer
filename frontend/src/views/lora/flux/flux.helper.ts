@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-24 11:56:21
+ * @LastEditTime: 2024-12-25 14:19:15
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -153,6 +153,13 @@ function formatConfig(form: RuleForm): Config {
 	keys.forEach((key) => {
 		// @ts-expect-error 去除ts类型检查
 		config[key] = form[key];
+	});
+
+	// 去除config中所有value为null的属性
+	(Object.keys(config) as (keyof Config)[]).forEach((key) => {
+		if (config[key] === null) {
+			Reflect.deleteProperty(config, key);
+		}
 	});
 
 	return config;

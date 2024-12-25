@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-24 11:44:23
+ * @LastEditTime: 2024-12-25 16:28:53
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -26,15 +26,15 @@
 					<el-button
 						class="ai-dataset-page-left-btn"
 						type="primary"
-						:loading="submitLoading"
+						:loading="isListenTag"
 						@click="onSubmit"
 					>
 						一键打标
 					</el-button>
 				</el-form-item>
 			</el-form>
-			<TagMonitor v-show="showTagMonitor" />
-			<GPUMonitor v-show="showGPUMonitor" class="ai-dataset-page-left-gpu-monitor" />
+			<TagMonitor v-show="isListenTag" />
+			<GPUMonitor v-show="isListenGPU" class="ai-dataset-page-left-gpu-monitor" />
 		</div>
 		<div class="ai-dataset-page-right">
 			<div id="ai-dataset-header" class="ai-dataset-header"></div>
@@ -50,11 +50,12 @@
 </template>
 
 <script setup lang="ts">
-import AiDataset from "@/components/AiDataset/index.vue";
-import type { FormInstance, FormRules } from "element-plus";
-import { checkDirectory } from "@/utils/lora.helper";
 import { batchTag } from "@/api/tag";
-import { EventBus } from "@/utils/event-bus";
+import AiDataset from "@/components/AiDataset/index.vue";
+import { useGPU } from "@/hooks/useGPU";
+import { useTag } from "@/hooks/useTag";
+import { checkDirectory } from "@/utils/lora.helper";
+import type { FormInstance, FormRules } from "element-plus";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -63,12 +64,20 @@ interface RuleForm {
 	tagger_model: string;
 }
 
+const { isListenTag, startTagListen, stopTagListen, tagTaskStatus, isTagTaskEnd } = useTag();
+const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
+
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const ruleFormRef = ref<FormInstance>();
-const ruleForm = ref<RuleForm>({
+const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}ai_dataset_form`;
+const defaultForm = readonly<RuleForm>({
 	image_dir: "/",
 	tagger_model: "joy-caption-alpha-two"
 });
+const ruleForm = useLocalStorage<RuleForm>(
+	localStorageKey,
+	structuredClone(toRaw(defaultForm) as RuleForm)
+);
 const rules = reactive<FormRules<RuleForm>>({
 	image_dir: [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
@@ -88,44 +97,31 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 const submitLoading = ref(false);
 
-// 系统监控
-const showGPUMonitor = ref(false);
-function startGPUMonitor() {
-	showGPUMonitor.value = true;
-	EventBus.emit("gpu_monitor_start");
-}
-function stopGPUMonitor() {
-	showGPUMonitor.value = false;
-	EventBus.emit("gpu_monitor_stop");
-}
-// 打标监控
-const showTagMonitor = ref(false);
-function onTaggerStart(task_id: string) {
-	showTagMonitor.value = true;
-	EventBus.emit("tag_monitor_start", { taskId: task_id });
-}
-function onTaggerComplete() {
-	showTagMonitor.value = false;
-	submitLoading.value = false;
-}
-function onTaggerFailed() {
-	showTagMonitor.value = false;
-}
-
 /** 校验 */
-async function validate() {
+async function validate(): Promise<boolean> {
 	try {
-		if (typeof ruleForm.value.image_dir !== "string" || ruleForm.value.image_dir.trim() === "") {
-			throw new Error("请先选择训练用的数据集目录");
+		const { image_dir, tagger_model } = ruleForm.value;
+		let valid = true;
+		let validMsg = "";
+		if (typeof image_dir !== "string" || image_dir.trim() === "") {
+			valid = false;
+			validMsg = "请先选择训练用的数据集目录";
 		}
-		const exists = await checkDirectory(ruleForm.value.image_dir);
-		if (!exists) throw new Error("数据集目录不存在");
-
-		if (
-			typeof ruleForm.value.tagger_model !== "string" ||
-			ruleForm.value.tagger_model.trim() === ""
-		) {
-			throw new Error("请先选择打标模型");
+		const exists = await checkDirectory(image_dir);
+		if (!exists) {
+			valid = false;
+			validMsg = "数据集目录不存在";
+		}
+		if (typeof tagger_model !== "string" || tagger_model.trim() === "") {
+			valid = false;
+			validMsg = "请先选择打标模型";
+		}
+		if (!valid) {
+			ElMessage({
+				message: validMsg,
+				type: "error"
+			});
+			return false;
 		}
 
 		return true;
@@ -138,44 +134,60 @@ async function validate() {
 	}
 }
 
-// 打标
+/** 打标 */
 async function onSubmit() {
 	try {
-		const valid = await validate();
-		if (!valid) return;
 		submitLoading.value = true;
-		// 打标
-		const { task_id } = await batchTag({
+		const valid = await validate();
+		if (!valid) {
+			submitLoading.value = false;
+			return;
+		}
+		// api
+		const result = await batchTag({
 			image_path: ruleForm.value.image_dir,
 			model_name: ruleForm.value.tagger_model
 		});
-		// 监控GPU数据
-		startGPUMonitor();
-		// 监控打标数据
-		onTaggerStart(task_id);
+		startGPUListen();
+		startTagListen(result.task_id);
+
+		submitLoading.value = false;
 
 		ElMessage({
 			message: "正在打标...",
 			type: "success"
 		});
 	} catch (error) {
-		// 停止监控GPU
-		stopGPUMonitor();
-		// 停止监控打标
-		onTaggerFailed();
-
 		submitLoading.value = false;
+		stopGPUListen();
+		stopTagListen();
+
 		console.log("打标任务创建失败", error);
 	}
 }
 
+// 监听是否在打标和训练
+watch(
+	isListenTag,
+	(newVal) => {
+		if (!newVal) {
+			stopGPUListen();
+		}
+	},
+	{ immediate: true }
+);
+
 onMounted(() => {
-	EventBus.on("tag_complete", onTaggerComplete);
-	EventBus.on("tag_failed", onTaggerFailed);
+	// 组件挂载时，开始监听
+	if (!isTagTaskEnd(tagTaskStatus.value)) {
+		startTagListen();
+		startGPUListen();
+	}
 });
 onUnmounted(() => {
-	EventBus.off("tag_complete", onTaggerComplete);
-	EventBus.off("tag_failed", onTaggerFailed);
+	// 组件销毁时，停止监听
+	stopGPUListen();
+	stopTagListen();
 });
 </script>
 

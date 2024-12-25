@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-24 14:35:51
+ * @LastEditTime: 2024-12-25 16:25:09
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -95,13 +95,16 @@
 
 <script setup lang="ts">
 // import DatasetPagination from "./DatasetPagination.vue";
-import { uploadFiles } from "@/api/common";
+import { directoryFiles, uploadFiles } from "@/api/common";
+import { deleteFile, manualTag } from "@/api/tag";
 import { useImageViewer } from "@/hooks/useImageViewer";
+import { useTag } from "@/hooks/useTag";
 import { useSettingsStore } from "@/stores";
 import { checkDirectory } from "@/utils/lora.helper";
 import { generateUUID, sleep } from "@/utils/tools";
 import type { AxiosProgressEvent } from "axios";
 import type { UploadInstance, UploadUserFile } from "element-plus";
+import { formatDirectoryFiles } from "./ai-dataset.helper";
 import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
 import ContextMenu from "./ContextMenu.vue";
 import ImageFile from "./ImageFile.vue";
@@ -109,10 +112,6 @@ import TagEdit from "./TagEdit.vue";
 import TextFile from "./TextFile.vue";
 import type { FileItem, FileList } from "./types";
 import { FileType } from "./types";
-import { directoryFiles } from "@/api/common";
-import { formatDirectoryFiles } from "./ai-dataset.helper";
-import { deleteFile, manualTag } from "@/api/tag";
-import { EventBus } from "@/utils/event-bus";
 
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
@@ -130,6 +129,7 @@ const componentMap = {
 const props = withDefaults(defineProps<AiDatasetProps>(), {});
 const settingsStore = useSettingsStore();
 const { previewImages } = useImageViewer();
+const { addTagEventListener, removeTagEventListener } = useTag();
 
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
 const list = ref<FileList>([]);
@@ -368,12 +368,10 @@ watch(
 	}
 );
 
-onMounted(() => {
-	getList();
-	EventBus.on("tag_complete", getList);
-});
+getList();
+addTagEventListener("complete", getList);
 onUnmounted(() => {
-	EventBus.off("tag_complete", getList);
+	removeTagEventListener("complete", getList);
 });
 
 defineExpose({

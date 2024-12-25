@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-23 17:08:46
- * @LastEditTime: 2024-12-23 17:51:06
+ * @LastEditTime: 2024-12-24 16:38:25
  * @LastEditors: mulingyuer
  * @Description: 事件类型
  * @FilePath: \frontend\src\utils\event-bus\events.ts
@@ -25,7 +25,7 @@ export type Events = {
 	/** 停止监听GPU */
 	gpu_monitor_stop: void;
 	/** 开始监听LoRA训练 */
-	lora_monitor_train_start: { taskId: string };
+	lora_monitor_train_start: void;
 	/** 停止监听LoRA训练 */
 	lora_monitor_train_stop: void;
 	/** LoRA训练完成 */
@@ -33,7 +33,7 @@ export type Events = {
 	/** LoRA训练异常 */
 	lora_train_failed: void;
 	/** 开始监听打标 */
-	tag_monitor_start: { taskId: string };
+	tag_monitor_start: void;
 	/** 停止监听打标 */
 	tag_monitor_stop: void;
 	/** 打标完成 */

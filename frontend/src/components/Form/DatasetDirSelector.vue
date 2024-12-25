@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2024-12-24 09:20:55
+ * @LastEditTime: 2024-12-25 11:41:50
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -24,7 +24,7 @@
 			<el-button
 				class="train-data-dir-selector-btn"
 				type="primary"
-				:loading="loading"
+				:loading="loading || isListenTag"
 				@click="onBtnClick"
 			>
 				{{ btnText }}
@@ -34,11 +34,9 @@
 </template>
 
 <script setup lang="ts">
-import TaggerModelSelect from "./TaggerModelSelect.vue";
+import { useTag } from "@/hooks/useTag";
 import type { TaggerModelSelectProps } from "./TaggerModelSelect.vue";
-import { batchTag } from "@/api/tag";
-import { checkDirectory } from "@/utils/lora.helper";
-import { EventBus } from "@/utils/event-bus";
+import TaggerModelSelect from "./TaggerModelSelect.vue";
 
 export interface DatasetDirSelectorProps {
 	dirLabel?: string;
@@ -49,88 +47,33 @@ export interface DatasetDirSelectorProps {
 	taggerProp?: TaggerModelSelectProps["prop"];
 	taggerPlaceholder?: TaggerModelSelectProps["placeholder"];
 	btnText?: string;
+	/** 打标submit函数 */
+	tagSubmit: () => Promise<unknown> | unknown;
 }
 
-withDefaults(defineProps<DatasetDirSelectorProps>(), {
+const props = withDefaults(defineProps<DatasetDirSelectorProps>(), {
 	dirLabel: "数据集目录",
 	dirPlaceholder: "请选择训练用的数据集目录",
-	showBtn: true,
 	btnText: "一键打标"
 });
-const emits = defineEmits<{
-	/** 打标开始 */
-	taggerStart: [{ taskId: string }];
-	/** 打标完成 */
-	complete: [];
-	/** 打标失败 */
-	failed: [];
-}>();
 
 const dir = defineModel("dir", { type: String, required: true });
 const taggerModel = defineModel("taggerModel", { type: String, required: true });
 
+const { isListenTag } = useTag();
 const loading = ref(false);
-async function validate() {
-	try {
-		if (typeof dir.value !== "string" || dir.value.trim() === "") {
-			throw new Error("请先选择训练用的数据集目录");
-		}
-		const exists = await checkDirectory(dir.value);
-		if (!exists) throw new Error("数据集目录不存在");
-
-		if (typeof taggerModel.value !== "string" || taggerModel.value.trim() === "") {
-			throw new Error("请先选择打标模型");
-		}
-
-		return true;
-	} catch (error) {
-		ElMessage({
-			message: (error as Error).message ?? "数据集相关信息不完整",
-			type: "warning"
-		});
-		return false;
-	}
-}
 async function onBtnClick() {
 	try {
-		const valid = await validate();
-		if (!valid) return;
 		loading.value = true;
-		// 打标
-		const { task_id } = await batchTag({
-			image_path: dir.value,
-			model_name: taggerModel.value
-		});
-		EventBus.emit("tag_monitor_start", { taskId: task_id });
-		emits("taggerStart", { taskId: task_id });
 
-		ElMessage({
-			message: "正在打标...",
-			type: "success"
-		});
+		await props.tagSubmit();
+
+		loading.value = false;
 	} catch (error) {
 		loading.value = false;
 		console.log("打标任务创建失败", error);
 	}
 }
-
-/** 打标结束 */
-function stop() {
-	loading.value = false;
-}
-
-onMounted(() => {
-	EventBus.on("tag_complete", stop);
-	EventBus.on("tag_failed", stop);
-});
-onUnmounted(() => {
-	EventBus.off("tag_complete", stop);
-	EventBus.off("tag_failed", stop);
-});
-
-defineExpose({
-	stop
-});
 </script>
 
 <style lang="scss" scoped>

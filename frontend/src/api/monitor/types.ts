@@ -1,12 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2024-12-23 16:06:05
+ * @LastEditTime: 2024-12-25 10:26:55
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
  * 怎么可能会有bug！！！
  */
+
+import type { TaskStatus } from "../types";
 
 /** 监控系统：GPU 响应 */
 export type GPUMonitorInfoResult = Array<{
@@ -31,7 +33,7 @@ export interface LoRATrainingInfoResult {
 	/** 任务 ID */
 	id: string;
 	/** 任务状态 */
-	status: "complete" | "created" | "running" | "failed";
+	status: TaskStatus;
 	/** 任务类型 */
 	task_type: "training";
 	/** 详情，没数据的时候是空对象 */
@@ -83,7 +85,7 @@ export interface ManualTagInfoResult {
 	/** 任务 ID */
 	id: string;
 	/** 任务状态 */
-	status: "complete" | "created" | "running" | "failed";
+	status: TaskStatus;
 	/** 任务类型 */
 	task_type: "captioning";
 	/** 打标输出目录 */

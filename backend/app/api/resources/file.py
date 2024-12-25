@@ -18,22 +18,28 @@ class File(Resource):
         """
         获取存储中目录结构，支持懒加载
         """
-        # 直接从 URL 查询参数获取数据
-        parent_path = request.args.get('parent_path', '')
-        is_dir = request.args.get('is_dir', 'true')  # 默认值 'true'，表示只返回目录
+        # 获取当前请求的域名
+        url = request.host_url
 
-        full_path = pathFormat(parent_path)
+        # 直接从 URL 查询参数获取数据
+        path = request.args.get('path', '')
+        is_dir = request.args.get('is_dir', 'true')  # 默认值 'true'，表示只返回目录
+        q = request.args.get('q', 'index')  # 左侧菜单 
+
+        # 处理路径前缀
+        if path.startswith("local:///"):
+            path = path.replace("local:///", "/")
+        elif path.startswith("local://"):
+            path = path.replace("local://", "./")
+
+        full_path = pathFormat(path)
         # 检查路径是否存在
         if not os.path.exists(full_path):
             return res(success=False, message=f"路径不存在: {full_path}")
 
         # 获取目录结构
-        structure = get_directory_structure(full_path, is_dir)
-        success = True
-        if "error" in structure:
-            success = False
-        # 返回完整的目录和文件结构
-        return res(success=success, data=structure)
+        structure = get_directory_structure(full_path, is_dir, q, url)
+        return structure
 
 class PathCheck(Resource):
     @use_swagger_config(file_check_config)

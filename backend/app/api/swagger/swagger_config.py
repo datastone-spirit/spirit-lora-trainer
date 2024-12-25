@@ -4,7 +4,7 @@ file_config = {
     "description": "获取指定目录下的当前层级的文件和目录结构，支持懒加载",
     "parameters": [
         {
-            "name": "parent_path",
+            "name": "path",
             "in": "query",
             "type": "string",
             "required": True,

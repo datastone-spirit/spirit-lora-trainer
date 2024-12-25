@@ -6,6 +6,7 @@ from typing import List, Tuple
 from utils.util import getmodelpath, getprojectpath
 import tempfile
 import toml
+import mimetypes
 
 from utils.util import setup_logging
 setup_logging()
@@ -27,36 +28,51 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def get_directory_structure(directory, is_dir="true"):
+def get_directory_structure(directory, is_dir="true", type="index", url=""):
     """
         返回当前目录层级的文件和目录结构
         :param directory: 要扫描的目录路径
         :param is_dir: 是否只返回目录，true 表示只返回目录，其它值返回目录和文件
+        :param type: 返回的结构类型，index 表示返回文件和目录，subfolders 表示只返回目录
+        :param url: 当前请求的域名
     """
     try:
-        items = os.listdir(directory)  # 获取指定目录下的所有项（文件和目录）
+        items = sorted(os.listdir(directory), key=lambda x: (not os.path.isdir(os.path.join(directory, x)), x))  # 获取指定目录下的所有项（文件和目录），并将目录放在前面
         result = []  # 存放最终的结果
 
         for item in items:
             item_path = os.path.join(directory, item)
+            item_stat = os.stat(item_path)
+            # logger.info(f"item_stat-------------------------- is {item_stat}")
+            item_info = {
+                "basename": os.path.basename(item_path),
+                "extension": os.path.splitext(item_path)[1],
+                "extra_metadata": [],
+                "last_modified": int(item_stat.st_mtime),
+                "path": f"{item_path}",
+                "storage": "local",
+                "type": "dir" if os.path.isdir(item_path) else "file",
+                "visibility": "public",
+                "adapter": "local"
+            }
             if os.path.isdir(item_path):
-                result.append(
-                    {
-                        "value": item_path,  # 子目录的路径作为标识
-                        "label": item,  # 显示在树形结构中的名称
-                        "isLeaf": False,  # 目录肯定不是叶子节点
-                    }
-                )
-            elif os.path.isfile(item_path) and is_dir != "true":
-                result.append(
-                    {
-                        "value": item_path,
-                        "label": item,
-                        "isLeaf": True,  # 文件是叶子节点
-                    }
-                )
+                result.append(item_info)
+            elif os.path.isfile(item_path) and type == "index":
+                item_info["file_size"] = item_stat.st_size
+                item_info["mime_type"] = mimetypes.guess_type(item_path)[0]
+                if item_info["extension"].lower() in {".png", ".jpg", ".jpeg", ".gif"}:
+                    item_info["url"] = f"{url}api/image{item_path}"
+                result.append(item_info)
 
-        return result
+        if type == "subfolders":
+            return {"folders": result}
+        else:
+            return {
+                "storages": ["local"],
+                "adapter": "local",
+                "dirname": directory,
+                "files": result
+            }
 
     except Exception as e:
         return {"error": str(e)}

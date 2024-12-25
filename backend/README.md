@@ -13,6 +13,11 @@
     python -m app.api.run # 运行
 ```
 
-## swagger文档
+## tensorboard 运行
+```bash
+    tensorboard --logdir=logs
 
+```
+
+## swagger文档
 http://127.0.0.1:5000/apidocs/#/

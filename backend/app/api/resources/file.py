@@ -7,6 +7,7 @@ from ..common.utils import res, get_directory_structure, use_swagger_config
 from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config,delete_file_config, preview_file_config
 from utils.util import pathFormat, setup_logging
 from PIL import Image as PILImage
+import tempfile
 
 setup_logging()
 import logging
@@ -204,17 +205,19 @@ class Image(Resource):
         compress = request.args.get("compress", "false").lower() == "true"
         if compress:
             try:
-                # 打开图片并压缩
+                # 生成缩略图
+                thumbnail_size = (150, 150)  # 缩略图尺寸，可自定义
                 with PILImage.open(full_path) as img:
                     img_format = img.format  # 保留原始格式
-                    img = img.convert("RGB")  # 确保兼容性
+                    img.thumbnail(thumbnail_size)  # 创建缩略图
 
-                    # 压缩图片到内存中
-                    img_io = io.BytesIO()
-                    img.save(img_io, format=img_format, optimize=True, quality=30)  # 默认压缩30
-                    img_io.seek(0)
+                    # 缓存缩略图到临时文件
+                    temp_dir = tempfile.gettempdir()
+                    thumbnail_path = os.path.join(temp_dir, f"thumb_{os.path.basename(full_path)}")
+                    img.save(thumbnail_path, format=img_format)
 
-                    return send_file(img_io, mimetype=mime_type)
+                    # 返回缩略图
+                    return send_file(thumbnail_path, mimetype=mime_type)
             except Exception as e:
                 return {"success": False, "message": f"图片压缩失败: {str(e)}"}, 500
 

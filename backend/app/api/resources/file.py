@@ -31,7 +31,7 @@ class File(Resource):
         if path.startswith("local:///"):
             path = path.replace("local:///", "/")
         elif path.startswith("local://"):
-            path = path.replace("local://", "./")
+            path = path.replace("local://", "/")
 
         full_path = pathFormat(path)
         # 检查路径是否存在

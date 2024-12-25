@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="file-list-item image-file">
-		<el-image class="file-list-item-img" :src="data.value" :fit="fit">
+		<el-image class="file-list-item-img" :src="data.value + '?compress=true'" :fit="fit">
 			<template #placeholder>
 				<img class="file-list-item-default-img" :src="DefaultImageIcon" :alt="data.name" />
 			</template>

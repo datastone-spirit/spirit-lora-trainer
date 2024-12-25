@@ -17,7 +17,10 @@ class TaskService:
             result.append(task.to_dict())
         return 
 
-    def get(self, task_id):
+    def get(self, task_id=None):
+        if task_id == None or task_id == "":
+            return self.all()
+
         current_task = tm.current_task
         if current_task != None and current_task.id == task_id:
             return res(
@@ -31,5 +34,11 @@ class TaskService:
                 )
 
         raise FileNotFoundError(f"task id {task_id} not found")
+    def all(self):
+        data=[task.to_dict() for task in tm.history]
+        current_task = tm.current_task
+        if current_task is not None:
+            data.append(current_task.to_dict())
+        return res(data=data)
 
     

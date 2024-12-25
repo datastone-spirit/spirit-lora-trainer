@@ -16,11 +16,6 @@ class TaskHistory(Resource):
     def get(self):
         try :
             task_id =  request.args.get('task_id')
-            if task_id is None or task_id == "":
-                return {
-                    'success': False,
-                    'msg': "task_id is required"
-                }, 400
             return TaskService().get(task_id), 200
         except FileNotFoundError as e:
             return {

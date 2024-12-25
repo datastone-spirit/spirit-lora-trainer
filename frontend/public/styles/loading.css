@@ -1,0 +1,94 @@
+html,
+body,
+h2,
+p {
+	margin: 0;
+	padding: 0;
+}
+
+.zl-app-loader-wrapper {
+	height: 100vh;
+	display: flex;
+	background-image: url("../images/loading_bg.png");
+	background-color: #f7f9fd;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 2170px 1670px;
+}
+
+.zl-app-loader-content {
+	margin: auto;
+	text-align: center;
+}
+
+.zl-app-loader-title,
+.zl-app-loader-desc {
+	font-weight: bold;
+	color: #141414;
+}
+.zl-app-loader-title {
+	font-size: 64px;
+}
+.zl-app-loader-title strong {
+	color: #24d3b3;
+	position: relative;
+}
+.zl-app-loader-title strong::before {
+	content: "";
+	position: absolute;
+	top: -120px;
+	width: 156px;
+	height: 120px;
+	background-image: url("../images/hey.svg");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	filter: drop-shadow(-18px 12px 30px rgba(36, 211, 179, 0.3));
+}
+.zl-app-loader-desc {
+	margin-top: 16px;
+	font-size: 36px;
+}
+.zl-app-loader-title a {
+	text-decoration: none;
+	color: #20bda0;
+	margin-right: 5px;
+	transition: opacity 0.3s;
+}
+
+.zl-app-loader-title a:hover {
+	opacity: 0.7;
+}
+
+.zl-app-loader {
+	margin: 50px auto 0;
+	height: 8px;
+	width: 250px;
+	--c: no-repeat linear-gradient(#24d3b3 0 0);
+	background: var(--c), var(--c), #a0dfd3;
+	background-size: 60% 100%;
+	animation: l16 3s infinite;
+}
+@keyframes l16 {
+	0% {
+		background-position:
+			-150% 0,
+			-150% 0;
+	}
+	66% {
+		background-position:
+			250% 0,
+			-150% 0;
+	}
+	100% {
+		background-position:
+			250% 0,
+			250% 0;
+	}
+}
+.zl-app-loader-text {
+	margin-top: 12px;
+	font-size: 18px;
+	color: #141414;
+	letter-spacing: 1px;
+}

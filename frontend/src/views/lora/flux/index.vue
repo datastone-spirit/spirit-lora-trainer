@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-25 16:02:04
+ * @LastEditTime: 2024-12-25 16:43:54
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -50,9 +50,9 @@
 		/>
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="flux-footer-bar" :size="40">
-				<GPUMonitor v-show="isListenGPU" />
-				<LoRATrainingMonitor v-show="isListenLora" />
-				<TagMonitor v-show="isListenTag" />
+				<GPUMonitor v-if="isListenGPU" />
+				<LoRATrainingMonitor v-if="isListenLora" />
+				<TagMonitor v-if="isListenTag" />
 				<el-button
 					v-if="showSubmitBtn"
 					type="primary"

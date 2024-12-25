@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 15:38:25
- * @LastEditTime: 2024-12-11 10:26:17
+ * @LastEditTime: 2024-12-25 16:48:48
  * @LastEditors: mulingyuer
  * @Description: 学习率与优化器设置
  * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\LRAndOptimizer.vue
@@ -30,7 +30,7 @@
 			:prop="formProps.lr_warmup_steps"
 			popover-content="lr_warmup_steps"
 		>
-			<el-input-number v-model.number="ruleForm.lr_warmup_steps" :step="1" step-strictly :min="1" />
+			<el-input-number v-model.number="ruleForm.lr_warmup_steps" :step="1" step-strictly :min="0" />
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="重启次数"
@@ -41,7 +41,7 @@
 				v-model.number="ruleForm.lr_scheduler_num_cycles"
 				:step="1"
 				step-strictly
-				:min="1"
+				:min="0"
 			/>
 		</PopoverFormItem>
 		<OptimizerTypeSelect

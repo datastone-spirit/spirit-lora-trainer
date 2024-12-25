@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-25 16:28:53
+ * @LastEditTime: 2024-12-25 16:46:32
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -33,8 +33,8 @@
 					</el-button>
 				</el-form-item>
 			</el-form>
-			<TagMonitor v-show="isListenTag" />
-			<GPUMonitor v-show="isListenGPU" class="ai-dataset-page-left-gpu-monitor" />
+			<TagMonitor v-if="isListenTag" />
+			<GPUMonitor v-if="isListenGPU" class="ai-dataset-page-left-gpu-monitor" />
 		</div>
 		<div class="ai-dataset-page-right">
 			<div id="ai-dataset-header" class="ai-dataset-header"></div>

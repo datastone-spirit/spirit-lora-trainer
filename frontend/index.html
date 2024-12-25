@@ -6,40 +6,18 @@
   <link rel="icon" href="/favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>智灵 LoRA 训练器</title>
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-    }
-
-    .zl-app-loader-wrapper {
-      height: 100vh;
-      display: flex;
-    }
-
-    .zl-app-loader {
-      margin: auto;
-      width: 120px;
-      height: 20px;
-      -webkit-mask: linear-gradient(90deg, #20bda0 70%, #0000 0) left/20% 100%;
-      background:
-        linear-gradient(#20bda0 0 0) left -25% top 0 /20% 100% no-repeat #ddd;
-      animation: zl-app-loader-l7 1s infinite steps(6);
-    }
-
-    @keyframes zl-app-loader-l7 {
-      100% {
-        background-position: right -25% top 0
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/styles/loading.css">
 </head>
 
 <body>
   <div id="app">
     <div class="zl-app-loader-wrapper">
-      <div class="zl-app-loader"></div>
+      <div class="zl-app-loader-content">
+        <h2 class="zl-app-loader-title">通过 <strong>Serverless</strong> 扩展机器学习</h2>
+        <p class="zl-app-loader-desc">快速运行您的AI模型，并在需要时自动扩展</p>
+        <div class="zl-app-loader"></div>
+        <div class="zl-app-loader-text">训练器加载中</div>
+      </div>
     </div>
   </div>
   <script type="module" src="/src/main.ts"></script>

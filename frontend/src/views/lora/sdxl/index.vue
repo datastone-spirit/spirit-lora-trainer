@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-25 16:31:21
+ * @LastEditTime: 2024-12-25 16:49:17
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -93,7 +93,7 @@ const ruleForm = ref<RuleForm>({
 	text_encoder_lr: "1e-4",
 	lr_scheduler: "cosine_with_restarts",
 	lr_warmup_steps: 0,
-	lr_scheduler_num_cycles: 1,
+	lr_scheduler_num_cycles: 0,
 	optimizer_type: "adamw8bit",
 	min_snr_gamma: undefined,
 	optimizer_args: "",

@@ -8,7 +8,8 @@
  * 怎么可能会有bug！！！
 -->
 <template>
-	<InputTreeSelector v-model="value" :is-dir="false" />
+	<!-- <InputTreeSelector v-model="value" :is-dir="false" /> -->
+	<FileManager v-model="value" :is-dir="false" />
 </template>
 
 <script setup lang="ts">

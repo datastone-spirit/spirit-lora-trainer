@@ -9,21 +9,24 @@
  */
 
 declare namespace AdminApp {
-  /** 菜单数据类型 */
-  interface Menu {
-    path: string
-    name: string
-    title: string
-    icon?: string
-    children?: Menu[]
-  }
-  /** navTab数据类型 */
-  interface NavTabData {
-    fullPath: string
-    name?: string
-    title?: string
-    icon?: string
-    /** 是否固定（不允许关闭） */
-    affix?: boolean
-  }
+	/** 菜单数据类型 */
+	interface Menu {
+		path: string;
+		name: string;
+		title: string;
+		icon?: string;
+		children?: Menu[];
+	}
+	/** navTab数据类型 */
+	interface NavTabData {
+		fullPath: string;
+		name?: string;
+		title?: string;
+		icon?: string;
+		/** 是否固定（不允许关闭） */
+		affix?: boolean;
+	}
 }
+
+declare module "vuefinder/dist/vuefinder";
+declare module "vuefinder";

@@ -272,6 +272,10 @@ def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
     
     if not os.path.exists(config.logging_dir):
         os.makedirs(config.logging_dir)
+    
+    if config.optimizer_type == "adafactor":
+        logger.warning(f"optimizer_type {config.optimizer_type} is set, the lr_warmup_steps will be set to 0")
+        config.lr_warmup_steps = 0
 
     return True, "Ok"
 

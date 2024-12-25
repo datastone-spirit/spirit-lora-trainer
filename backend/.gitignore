@@ -6,3 +6,4 @@ outputs
 sd-scripts/
 .vscode/
 venv/
+nohup.out

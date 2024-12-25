@@ -132,8 +132,12 @@ class TrainingTask(Task):
             raise
 
         retcode = self.proc.poll()
+        if retcode != 0:
+            logger.error(f"training subprocess run failed, retcode is {retcode}")
+            raise Exception(f"training subprocess run failed, retcode is {retcode}")
+
         logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
-        return CompletedProcess(self.proc.args, retcode, "\n".join(stdout_lines), stderr)
+        return 
 
     def to_dict(self, verbose: bool = False):
         """Override to_dict to handle Popen serialization"""

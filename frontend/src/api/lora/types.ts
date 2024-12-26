@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-24 11:01:00
+ * @LastEditTime: 2024-12-26 11:18:09
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -182,6 +182,8 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		ddp_timeout: number | undefined;
 		/** 图像分辨率: 512,512 */
 		resolution: string;
+		/** 输出训练配置 */
+		output_config: boolean;
 	};
 	dataset: {
 		datasets: [

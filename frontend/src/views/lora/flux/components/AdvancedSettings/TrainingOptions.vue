@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 15:28:48
- * @LastEditTime: 2024-12-09 10:32:43
+ * @LastEditTime: 2024-12-26 11:16:22
  * @LastEditors: mulingyuer
  * @Description: 训练相关参数
- * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\TrainingOptions.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\TrainingOptions.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -41,6 +41,13 @@
 			popover-content="network_train_text_encoder_only"
 		>
 			<el-switch v-model="ruleForm.network_train_text_encoder_only" />
+		</PopoverFormItem>
+		<PopoverFormItem
+			label="输出训练配置"
+			:prop="formProps.output_config"
+			popover-content="output_config"
+		>
+			<el-switch v-model="ruleForm.output_config" />
 		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>

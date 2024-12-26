@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-24 10:39:14
+ * @LastEditTime: 2024-12-26 11:15:32
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -94,6 +94,8 @@ export interface RuleForm {
 	network_train_unet_only: boolean;
 	/** 仅训练文本编码器 */
 	network_train_text_encoder_only: boolean;
+	/** 输出训练配置 */
+	output_config: boolean;
 	// ---------
 	/** U-Net 学习率 */
 	unet_lr: string | null;

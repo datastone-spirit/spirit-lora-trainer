@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 11:30:00
- * @LastEditTime: 2024-12-20 14:27:02
+ * @LastEditTime: 2024-12-26 10:57:29
  * @LastEditors: mulingyuer
  * @Description: 日志设置
  * @FilePath: \frontend\src\views\lora\sdxl\components\AdvancedSettings\LoggingOptions.vue
@@ -14,7 +14,7 @@
 			:prop="formProps.logging_dir"
 			popover-content="logging_dir"
 		>
-			<el-input v-model="ruleForm.logging_dir" placeholder="请输入日志保存文件夹" />
+			<el-input v-model="ruleForm.logging_dir" placeholder="请输入日志保存文件夹" disabled />
 		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>

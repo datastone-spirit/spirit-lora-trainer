@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-26 09:25:25
+ * @LastEditTime: 2024-12-26 11:15:55
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -142,6 +142,7 @@ const defaultForm = readonly<RuleForm>({
 	gradient_accumulation_steps: 1,
 	network_train_unet_only: true,
 	network_train_text_encoder_only: false,
+	output_config: true,
 	// -----
 	unet_lr: "1e-5",
 	text_encoder_lr: "1e-4",

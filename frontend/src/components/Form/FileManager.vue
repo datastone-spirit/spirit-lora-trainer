@@ -105,6 +105,7 @@ const tooglePopover = () => {
 watch(visible, (val) => {
 	if (val && firstTimeVisible.value) {
 		firstTimeVisible.value = false;
+		// 默认展开左侧树形目录
 		setTimeout(() => {
 			(
 				document.getElementById(fileId)?.querySelector(".vuefinder__treestorageitem__header") as any

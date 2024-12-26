@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 08:41:44
- * @LastEditTime: 2024-12-11 10:07:30
+ * @LastEditTime: 2024-12-26 14:28:11
  * @LastEditors: mulingyuer
  * @Description: 表单项组件
  * @FilePath: \frontend\src\components\Form\PopoverFormItem.vue
@@ -19,7 +19,7 @@
 				:popper-style="{ width: 'auto', minWidth: 'auto' }"
 			>
 				<template #reference>
-					({{ popoverPlacement }})
+					({{ popoverContent }})
 					<!-- <Icon
 						class="popover-form-item-icon"
 						:name="iconName"

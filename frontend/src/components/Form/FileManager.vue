@@ -12,12 +12,13 @@
 			placement=""
 			:popper-class="['input-tree-selector-popover']"
 			custom-class="file-manager-dialog"
+			destroy-on-close
 		>
 			<vue-finder
+				v-if="visible"
 				:features="features"
 				:request="request"
 				:select-button="handleSelectButton"
-				:showTreeView="true"
 				class="file-finder"
 			/>
 		</el-dialog>
@@ -45,7 +46,6 @@ const typeValue: any = {
 const visible = ref(false);
 const props = withDefaults(defineProps<InputTreeSelectorProps>(), {});
 const folder = defineModel({ type: String, required: true });
-const firstTimeVisible = ref(true);
 const fileId = Math.random().toString(36).substring(2);
 
 const inputPlaceholder = computed(() => {
@@ -56,7 +56,20 @@ const inputPlaceholder = computed(() => {
 	}
 });
 
-const request = {
+const getDirectoryPath = (path: string) => {
+	// 使用正则判断是否是带文件名的路径
+	const filePattern = /\/[^\/]+(\.[a-zA-Z0-9]+)?$/;
+
+	// 如果路径中包含文件名，返回文件的目录部分
+	if (filePattern.test(path)) {
+		return path.replace(filePattern, ""); // 移除文件名，返回目录路径
+	}
+
+	// 如果路径本身是目录，直接返回
+	return path;
+};
+
+const request = ref({
 	// ----- CHANGE ME! -----
 	// [REQUIRED] Url for development server endpoint
 	baseUrl: import.meta.env.VITE_APP_API_BASE_URL + "/file",
@@ -64,9 +77,9 @@ const request = {
 
 	// Additional headers & params & body
 	params: {
-		is_dir: String(props.isDir),
-		path: folder.value
+		path: computed(() => getDirectoryPath(folder.value))
 	},
+
 	body: { additionalBody1: ["yes"] },
 
 	// And/or transform request callback
@@ -76,7 +89,7 @@ const request = {
 
 	// XSRF Token header name
 	xsrfHeaderName: "CSRF-TOKEN"
-};
+});
 
 const handleSelectButton = {
 	// show select button
@@ -101,18 +114,6 @@ const handleSelectButton = {
 const tooglePopover = () => {
 	visible.value = !visible.value;
 };
-
-watch(visible, (val) => {
-	if (val && firstTimeVisible.value) {
-		firstTimeVisible.value = false;
-		// 默认展开左侧树形目录
-		setTimeout(() => {
-			(
-				document.getElementById(fileId)?.querySelector(".vuefinder__treestorageitem__header") as any
-			)?.click();
-		}, 200);
-	}
-});
 </script>
 
 <style lang="scss" scoped>
@@ -131,7 +132,13 @@ watch(visible, (val) => {
 	min-height: 350px !important;
 	max-height: 350px !important;
 }
-.vuefinder__treeview__header {
+.vuefinder__treeview__header,
+.vuefinder__status-bar__storage,
+.vuefinder__status-bar__about {
+	visibility: hidden;
+	display: none;
+}
+.Toggle.Tree.View {
 	display: none;
 }
 </style>

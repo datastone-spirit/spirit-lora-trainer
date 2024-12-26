@@ -6,6 +6,7 @@ import vueDevTools from "vite-plugin-vue-devtools";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+import { gitCommitTime } from "./vite-plugins/git-commit-time";
 
 /** esbuild打包配置 */
 function getEsbuildConfig(mode: string): ESBuildOptions | undefined {
@@ -70,6 +71,9 @@ export default defineConfig(({ mode }) => {
 					// silenceDeprecations: ["legacy-js-api"]
 				}
 			}
+		},
+		define: {
+			__GIT_COMMIT_TIME__: JSON.stringify(gitCommitTime())
 		},
 		esbuild: getEsbuildConfig(mode),
 		build: {

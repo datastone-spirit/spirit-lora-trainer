@@ -16,3 +16,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
 	readonly env: ImportMetaEnv;
 }
+
+/** git最后一次提交时间 */
+declare const __GIT_COMMIT_TIME__: string;

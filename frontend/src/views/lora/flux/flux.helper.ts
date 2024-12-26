@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-25 14:19:15
+ * @LastEditTime: 2024-12-26 09:25:22
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -92,13 +92,13 @@ function formatConfig(form: RuleForm): Config {
 		lr_warmup_steps: 0,
 		max_bucket_reso: 0,
 		max_data_loader_n_workers: 0,
-		max_train_epochs: 0,
+		max_train_epochs: 10,
 		min_bucket_reso: 0,
 		mixed_precision: "",
 		model_prediction_type: "",
 		network_alpha: undefined,
 		network_args: "",
-		network_dim: 0,
+		network_dim: 64,
 		network_dropout: 0,
 		network_module: "",
 		network_train_text_encoder_only: false,
@@ -113,7 +113,7 @@ function formatConfig(form: RuleForm): Config {
 		persistent_data_loader_workers: false,
 		random_crop: false,
 		resume: "",
-		save_every_n_epochs: 0,
+		save_every_n_epochs: 4,
 		save_model_as: "",
 		save_precision: "",
 		save_state: false,

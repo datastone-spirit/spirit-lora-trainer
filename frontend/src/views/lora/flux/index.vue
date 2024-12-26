@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-25 16:43:54
+ * @LastEditTime: 2024-12-26 09:25:25
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -113,11 +113,11 @@ const defaultForm = readonly<RuleForm>({
 	// -----
 	image_dir: "/",
 	tagger_model: "joy-caption-alpha-two",
-	num_repeats: 1,
-	max_train_epochs: 4,
+	num_repeats: 4,
+	max_train_epochs: 10,
 	train_batch_size: 1,
-	resolution_width: 768,
-	resolution_height: 768,
+	resolution_width: 1024,
+	resolution_height: 1024,
 	enable_bucket: false,
 	min_bucket_reso: 256,
 	max_bucket_reso: 1024,
@@ -127,10 +127,10 @@ const defaultForm = readonly<RuleForm>({
 	seed: 42,
 	max_data_loader_n_workers: 2,
 	learning_rate: "1e-4",
-	save_every_n_epochs: 1,
+	save_every_n_epochs: 4,
 	guidance_scale: 1,
 	timestep_sampling: "sigmoid",
-	network_dim: 4,
+	network_dim: 64,
 	// -----
 	sigmoid_scale: 1,
 	model_prediction_type: "raw",

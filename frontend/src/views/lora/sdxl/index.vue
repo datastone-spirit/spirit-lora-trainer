@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-25 16:49:17
+ * @LastEditTime: 2024-12-26 09:25:29
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -73,8 +73,8 @@ const ruleForm = ref<RuleForm>({
 	num_repeats: 10,
 	max_train_epochs: 10,
 	train_batch_size: 1,
-	resolution_width: 512,
-	resolution_height: 512,
+	resolution_width: 1024,
+	resolution_height: 1024,
 	enable_bucket: true,
 	min_bucket_reso: 256,
 	max_bucket_reso: 1024,
@@ -82,7 +82,7 @@ const ruleForm = ref<RuleForm>({
 	// -----
 	seed: 1337,
 	learning_rate: "1e-4",
-	save_every_n_epochs: 2,
+	save_every_n_epochs: 4,
 	network_dim: 32,
 	// -----
 	gradient_checkpointing: false,

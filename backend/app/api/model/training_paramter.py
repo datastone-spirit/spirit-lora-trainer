@@ -168,7 +168,7 @@ class TrainingConfig:
     max_timestep: int = None
     max_token_length: int = None
     max_train_epochs: int = None
-    max_train_steps: int = 1600
+    max_train_steps: int = None
     mem_eff_attn: bool = False
     metadata_author: str  = None
     metadata_description: str  = None

@@ -37,10 +37,10 @@ def get_logdir(log_dir, log_prefix):
 class Task:
     status = TaskStatus.CREATED
     task_type: TaskType = TaskType.NONE
+    start_time: float = None
+    end_time: float = None
     id: str = None
     detail: Optional[dict] = None
-    start_time: float
-    end_time: float
 
     @staticmethod
     def wrap_training(proc : Popen, training_paramter: TrainingParameter) -> 'Task':

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-26 11:15:55
+ * @LastEditTime: 2024-12-26 14:25:04
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -129,7 +129,7 @@ const defaultForm = readonly<RuleForm>({
 	learning_rate: "1e-4",
 	save_every_n_epochs: 4,
 	guidance_scale: 1,
-	timestep_sampling: "sigmoid",
+	timestep_sampling: "shift",
 	network_dim: 64,
 	// -----
 	sigmoid_scale: 1,
@@ -137,6 +137,7 @@ const defaultForm = readonly<RuleForm>({
 	discrete_flow_shift: 3.1582,
 	loss_type: "l2",
 	t5xxl_max_token_length: undefined,
+	highvram: true,
 	// -----
 	gradient_checkpointing: true,
 	gradient_accumulation_steps: 1,

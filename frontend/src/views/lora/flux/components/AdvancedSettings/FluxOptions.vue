@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 09:44:26
- * @LastEditTime: 2024-12-10 17:32:23
+ * @LastEditTime: 2024-12-26 14:19:18
  * @LastEditors: mulingyuer
  * @Description: flux相关配置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\FluxOptions.vue
@@ -53,6 +53,9 @@
 			popover-content="t5xxl_max_token_length"
 		>
 			<el-input-number v-model.number="ruleForm.t5xxl_max_token_length" :step="1" step-strictly />
+		</PopoverFormItem>
+		<PopoverFormItem label="高显存模式" :prop="formProps.highvram" popover-content="highvram">
+			<el-switch v-model="ruleForm.highvram" />
 		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>

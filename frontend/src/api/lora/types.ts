@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-26 11:18:09
+ * @LastEditTime: 2024-12-26 14:18:02
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -164,6 +164,8 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		tagger_model: string;
 		/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
 		t5xxl_max_token_length: number | undefined;
+		/** 高显存模式 */
+		highvram: boolean;
 		/** 最小信噪比伽马值, 如果启用推荐为 5 */
 		min_snr_gamma: number | undefined;
 		/** 最大范数正则化。如果使用，推荐为 1 */

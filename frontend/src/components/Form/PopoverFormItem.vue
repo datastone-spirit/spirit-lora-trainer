@@ -19,12 +19,13 @@
 				:popper-style="{ width: 'auto', minWidth: 'auto' }"
 			>
 				<template #reference>
-					<Icon
+					({{ popoverPlacement }})
+					<!-- <Icon
 						class="popover-form-item-icon"
 						:name="iconName"
 						:size="iconSize"
 						:color="iconColor"
-					/>
+					/> -->
 				</template>
 			</el-popover>
 		</template>

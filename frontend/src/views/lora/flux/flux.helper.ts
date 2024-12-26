@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-26 11:18:31
+ * @LastEditTime: 2024-12-26 14:24:29
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -67,8 +67,8 @@ function formatConfig(form: RuleForm): Config {
 		bucket_reso_steps: 0,
 		cache_latents: false,
 		cache_latents_to_disk: false,
-		cache_text_encoder_outputs: false,
-		cache_text_encoder_outputs_to_disk: false,
+		cache_text_encoder_outputs: true,
+		cache_text_encoder_outputs_to_disk: true,
 		caption_extension: "",
 		color_aug: false,
 		ddp_gradient_as_bucket_view: false,
@@ -80,7 +80,7 @@ function formatConfig(form: RuleForm): Config {
 		full_fp16: false,
 		full_bf16: false,
 		gradient_accumulation_steps: 0,
-		gradient_checkpointing: false,
+		gradient_checkpointing: true,
 		guidance_scale: 0,
 		keep_tokens_separator: "",
 		learning_rate: undefined,
@@ -131,6 +131,7 @@ function formatConfig(form: RuleForm): Config {
 		t5xxl: "",
 		tagger_model: "",
 		t5xxl_max_token_length: undefined,
+		highvram: true,
 		min_snr_gamma: undefined,
 		scale_weight_norms: undefined,
 		caption_dropout_rate: undefined,

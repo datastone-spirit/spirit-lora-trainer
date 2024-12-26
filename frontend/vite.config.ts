@@ -7,6 +7,7 @@ import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { gitCommitTime } from "./vite-plugins/git-commit-time";
+import { analyzer } from "vite-bundle-analyzer";
 
 /** esbuild打包配置 */
 function getEsbuildConfig(mode: string): ESBuildOptions | undefined {
@@ -51,7 +52,8 @@ export default defineConfig(({ mode }) => {
 					})
 				],
 				dts: "types/components.d.ts"
-			})
+			}),
+			mode === "analyze" ? analyzer() : undefined
 		],
 		resolve: {
 			alias: {

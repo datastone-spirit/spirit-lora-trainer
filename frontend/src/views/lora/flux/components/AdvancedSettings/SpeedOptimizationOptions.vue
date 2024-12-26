@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 15:14:51
- * @LastEditTime: 2024-12-10 11:19:20
+ * @LastEditTime: 2024-12-26 14:08:24
  * @LastEditors: mulingyuer
  * @Description: 速度优化选项
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\SpeedOptimizationOptions.vue
@@ -83,14 +83,14 @@
 			<el-switch v-model="ruleForm.cache_latents_to_disk" />
 		</PopoverFormItem>
 		<PopoverFormItem
-			label="缓存文本编码器的输出，减少显存使用。使用时需要关闭 shuffle_caption"
+			label="是否缓存文本编码器结果"
 			:prop="formProps.cache_text_encoder_outputs"
 			popover-content="cache_text_encoder_outputs"
 		>
 			<el-switch v-model="ruleForm.cache_text_encoder_outputs" />
 		</PopoverFormItem>
 		<PopoverFormItem
-			label="缓存文本编码器的输出到磁盘"
+			label="是否把文本编码器结果缓存在磁盘"
 			:prop="formProps.cache_text_encoder_outputs_to_disk"
 			popover-content="cache_text_encoder_outputs_to_disk"
 		>

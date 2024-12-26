@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-26 11:15:32
+ * @LastEditTime: 2024-12-26 14:17:00
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -85,6 +85,8 @@ export interface RuleForm {
 	loss_type: string;
 	/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
 	t5xxl_max_token_length: number | undefined;
+	/** 高显存模式 */
+	highvram: boolean;
 	// ---------
 	/** 梯度检查点 */
 	gradient_checkpointing: boolean;

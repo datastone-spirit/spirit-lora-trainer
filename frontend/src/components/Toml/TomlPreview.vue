@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 14:46:06
- * @LastEditTime: 2024-12-16 16:32:42
+ * @LastEditTime: 2024-12-26 12:22:24
  * @LastEditors: mulingyuer
  * @Description: toml预览组件
  * @FilePath: \frontend\src\components\Toml\TomlPreview.vue
@@ -16,9 +16,6 @@
 <script setup lang="ts">
 import { createHighlighter } from "shiki";
 import type { Highlighter } from "shiki";
-import githubLightTheme from "shiki/themes/github-light.mjs";
-import githubDarkTheme from "shiki/themes/github-dark.mjs";
-import tomlLang from "shiki/langs/toml.mjs";
 import { useAppStore } from "@/stores";
 
 export interface TomlPreviewProps {
@@ -34,8 +31,8 @@ const tomlHtml = ref("");
 
 async function init() {
 	highlighter.value = await createHighlighter({
-		themes: [githubLightTheme, githubDarkTheme],
-		langs: [tomlLang]
+		themes: ["github-light", "github-dark"],
+		langs: ["toml"]
 	});
 }
 

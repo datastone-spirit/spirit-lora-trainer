@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-26 09:25:29
+ * @LastEditTime: 2024-12-26 14:24:39
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -85,7 +85,7 @@ const ruleForm = ref<RuleForm>({
 	save_every_n_epochs: 4,
 	network_dim: 32,
 	// -----
-	gradient_checkpointing: false,
+	gradient_checkpointing: true,
 	gradient_accumulation_steps: undefined,
 	network_train_unet_only: false,
 	network_train_text_encoder_only: false,
@@ -147,8 +147,8 @@ const ruleForm = ref<RuleForm>({
 	lowram: false,
 	cache_latents: true,
 	cache_latents_to_disk: true,
-	cache_text_encoder_outputs: false,
-	cache_text_encoder_outputs_to_disk: false,
+	cache_text_encoder_outputs: true,
+	cache_text_encoder_outputs_to_disk: true,
 	persistent_data_loader_workers: true,
 	vae_batch_size: undefined,
 	// -----

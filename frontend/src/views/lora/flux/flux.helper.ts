@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-26 14:24:29
+ * @LastEditTime: 2024-12-26 17:02:24
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -107,7 +107,7 @@ function formatConfig(form: RuleForm): Config {
 		no_half_vae: false,
 		num_repeats: 0,
 		optimizer_args: "",
-		optimizer_type: "",
+		optimizer_type: "adamw8bit",
 		output_dir: "",
 		output_name: "",
 		persistent_data_loader_workers: false,

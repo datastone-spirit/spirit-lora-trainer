@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-26 14:25:04
+ * @LastEditTime: 2024-12-26 17:00:48
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -150,7 +150,7 @@ const defaultForm = readonly<RuleForm>({
 	lr_scheduler: "constant_with_warmup",
 	lr_warmup_steps: 0,
 	lr_scheduler_num_cycles: 0,
-	optimizer_type: "adafactor",
+	optimizer_type: "adamw8bit",
 	min_snr_gamma: undefined,
 	optimizer_args: "",
 	// -----

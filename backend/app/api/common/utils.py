@@ -28,11 +28,10 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def get_directory_structure(directory, is_dir="true", type="index", url=""):
+def get_directory_structure(directory, url=""):
     """
         返回当前目录层级的文件和目录结构
         :param directory: 要扫描的目录路径
-        :param is_dir: 是否只返回目录，true 表示只返回目录，其它值返回目录和文件
         :param type: 返回的结构类型，index 表示返回文件和目录，subfolders 表示只返回目录
         :param url: 当前请求的域名
     """
@@ -50,22 +49,18 @@ def get_directory_structure(directory, is_dir="true", type="index", url=""):
                 "extra_metadata": [],
                 "last_modified": int(item_stat.st_mtime),
                 "path": f"{item_path}",
-                "storage": "local",
                 "type": "dir" if os.path.isdir(item_path) else "file",
                 "visibility": "public",
-                "adapter": "local"
             }
             if os.path.isdir(item_path):
                 result.append(item_info)
-            elif os.path.isfile(item_path) and type == "index":
+            elif os.path.isfile(item_path):
                 item_info["file_size"] = item_stat.st_size
                 item_info["mime_type"] = mimetypes.guess_type(item_path)[0]
                 if item_info["extension"].lower() in {".png", ".jpg", ".jpeg", ".gif"}:
                     item_info["url"] = f"{url}api/image{item_path}"
                 result.append(item_info)
 
-        if type == "subfolders":
-            return {"folders": result}
         else:
             return {
                 "storages": ["local"],

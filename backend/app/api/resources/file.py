@@ -24,8 +24,6 @@ class File(Resource):
 
         # 直接从 URL 查询参数获取数据
         path = request.args.get('path', '')
-        is_dir = request.args.get('is_dir', 'true')  # 默认值 'true'，表示只返回目录
-        q = request.args.get('q', 'index')  # 左侧菜单 
 
         # 处理路径前缀
         if path.startswith("local:///"):
@@ -39,7 +37,7 @@ class File(Resource):
             return res(success=False, message=f"路径不存在: {full_path}")
 
         # 获取目录结构
-        structure = get_directory_structure(full_path, is_dir, q, url)
+        structure = get_directory_structure(full_path, url)
         return structure
 
 class PathCheck(Resource):

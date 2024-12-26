@@ -264,6 +264,8 @@ class TrainingConfig:
     zero3_save_16bit_model: bool = False
     zero_stage: int = 2
     zero_terminal_snr: bool = False
+    cache_text_encoder_outputs : bool = False # cache_text_encoder_outputs is introduce from sdxl, for low memory usage
+    cache_text_encoder_outputs_to_disk: bool = False  # when train text encode, this option must be set to False
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingConfig':

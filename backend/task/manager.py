@@ -74,7 +74,7 @@ class TaskManager:
                         logger.info(f"task id{task.id} is running, update stats with tensorboard log")
                         task.update_detail_with_tb()
             except Exception as e:
-                logger.error(f"TaskManager tensor_board_run_loop error {self.current_task}", exc_info=e)
+                logger.warning(f"TaskManager tensor_board_run_loop error {self.current_task}, ignored", exc_info=e)
             sleep(5)
 
 

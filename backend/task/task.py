@@ -8,6 +8,7 @@ from subprocess import Popen, CompletedProcess, TimeoutExpired
 import uuid
 import re
 from tbparse import SummaryReader
+import time
 
 
 from utils.util import setup_logging
@@ -38,6 +39,8 @@ class Task:
     task_type: TaskType = TaskType.NONE
     id: str = None
     detail: Optional[dict] = None
+    start_time: float
+    end_time: float
 
     @staticmethod
     def wrap_training(proc : Popen, training_paramter: TrainingParameter) -> 'Task':
@@ -51,6 +54,7 @@ class Task:
 
         task.id = training_paramter.config.log_prefix
         task.task_type = TaskType.TRAINING
+        task.start_time = time.time()
         return task
 
     @staticmethod
@@ -73,13 +77,17 @@ class Task:
     def run(self):
         self.status = TaskStatus.RUNNING
         try:
+            self.start_time = time.time()
             self._run()
         except Exception as e:
             logger.error(f"task {self.id} running failed", exc_info=e)
             self.status = TaskStatus.FAILED
             self.detail = str(e)
+            self.end_time = time.time()
             return 
+            
         self.status = TaskStatus.COMPLETE
+        self.end_time = time.time()
         return
     
     def to_dict(self, verbose: bool = False):

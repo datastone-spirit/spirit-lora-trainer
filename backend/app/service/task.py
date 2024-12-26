@@ -34,6 +34,7 @@ class TaskService:
                 )
 
         raise FileNotFoundError(f"task id {task_id} not found")
+
     def all(self):
         data=[task.to_dict() for task in tm.history]
         current_task = tm.current_task

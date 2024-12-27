@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-26 17:00:48
+ * @LastEditTime: 2024-12-27 10:00:25
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -33,7 +33,7 @@
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
 							<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
-						<SimpleCollapse v-if="isExpert" v-model="openStep4" title="其它：高级设置">
+						<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
 							<AdvancedSettings v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</SimpleCollapse>
 					</el-form>
@@ -82,7 +82,9 @@ import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
 import { generateKeyMapFromInterface } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
-import AdvancedSettings from "./components/AdvancedSettings/index.vue";
+const AdvancedSettings = defineAsyncComponent(
+	() => import("./components/AdvancedSettings/index.vue")
+);
 import BasicInfo from "./components/BasicInfo/index.vue";
 import ConfigBtns from "./components/Footer/ConfigBtns.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";

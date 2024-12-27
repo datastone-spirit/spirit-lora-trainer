@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:19:14
- * @LastEditTime: 2024-12-25 16:29:38
+ * @LastEditTime: 2024-12-27 10:01:38
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\sdxl\components\TrainingData\index.vue
@@ -76,7 +76,7 @@
 			</PopoverFormItem>
 		</el-col>
 	</el-row>
-	<el-row v-if="isExpert" :gutter="16">
+	<el-row v-show="isExpert" :gutter="16">
 		<el-col :span="24">
 			<PopoverFormItem
 				label="启用 arb 桶以允许非固定宽高比的图片"

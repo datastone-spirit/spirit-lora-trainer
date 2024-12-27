@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 09:56:30
- * @LastEditTime: 2024-12-12 10:02:24
+ * @LastEditTime: 2024-12-27 09:52:29
  * @LastEditors: mulingyuer
  * @Description: 简化的折叠面板
  * @FilePath: \frontend\src\components\Collapse\SimpleCollapse.vue
@@ -9,20 +9,24 @@
 -->
 <template>
 	<div class="simple-collapse">
-		<div class="simple-collapse-header">
-			<h2 class="simple-collapse-title">{{ title }}</h2>
-			<el-button
-				class="simple-collapse-arrow"
-				:class="{ closed: !open }"
-				:icon="CollapseIcon"
-				circle
-				text
-				size="small"
-				@click="onToggleCollapse"
-			/>
+		<div class="simple-collapse-top">
+			<div class="simple-collapse-header">
+				<h2 class="simple-collapse-title">{{ title }}</h2>
+				<el-button
+					class="simple-collapse-arrow"
+					:class="{ closed: !open }"
+					:icon="CollapseIcon"
+					circle
+					text
+					size="small"
+					@click="onToggleCollapse"
+				/>
+			</div>
+		</div>
+		<div v-show="open" class="simple-collapse-content">
+			<slot></slot>
 		</div>
 	</div>
-	<slot v-if="open"></slot>
 </template>
 
 <script setup lang="ts">
@@ -46,7 +50,7 @@ function onToggleCollapse() {
 </script>
 
 <style lang="scss" scoped>
-.simple-collapse {
+.simple-collapse-top {
 	margin-bottom: 10px;
 	background-color: var(--zl-collapse-bg);
 	border-radius: $zl-border-radius;

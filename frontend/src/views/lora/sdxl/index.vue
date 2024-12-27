@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-26 14:24:39
+ * @LastEditTime: 2024-12-27 10:01:02
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -32,7 +32,7 @@
 					<Collapse v-model="openStep3" title="第3步：模型参数调教">
 						<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
 					</Collapse>
-					<Collapse v-if="isExpert" v-model="openStep4" title="其它：高级设置">
+					<Collapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
 						<AdvancedSettings v-model:form="ruleForm" :form-props="ruleFormProps" />
 					</Collapse>
 				</el-form>

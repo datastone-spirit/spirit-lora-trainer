@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:24:19
- * @LastEditTime: 2024-12-27 09:36:07
+ * @LastEditTime: 2024-12-27 17:40:19
  * @LastEditors: mulingyuer
  * @Description: 任务详情
  * @FilePath: \frontend\src\views\task\components\TagTaskDetail.vue
@@ -22,19 +22,24 @@
 			<el-descriptions-item label="结束时间">
 				{{ unixFormat(data.end_time) }}
 			</el-descriptions-item>
-			<el-descriptions-item label="正在打标第几张图片">
+			<el-descriptions-item v-if="!isFailed" label="正在打标第几张图片">
 				{{ data.detail.current <= 0 ? 0 : data.detail.current }}
 			</el-descriptions-item>
-			<el-descriptions-item label="总共打标几张图片">
+			<el-descriptions-item v-if="!isFailed" label="总共打标几张图片">
 				{{ data.detail.total }}
 			</el-descriptions-item>
 			<el-descriptions-item label="输出目录" :span="2">{{ data.output_dir }}</el-descriptions-item>
 			<el-descriptions-item label="图片素材数组" :span="2" class-name="task-detail-json">
 				{{ formatJson(data.image_paths) }}
 			</el-descriptions-item>
-			<el-descriptions-item label="打标结果" :span="2" class-name="task-detail-json">
-				{{ formatJson(data.detail.captions) }}
+			<el-descriptions-item v-if="isFailed" label="失败信息">
+				{{ data.detail }}
 			</el-descriptions-item>
+			<template v-else>
+				<el-descriptions-item label="打标结果" :span="2" class-name="task-detail-json">
+					{{ formatJson(data.detail.captions) }}
+				</el-descriptions-item>
+			</template>
 		</el-descriptions>
 	</div>
 </template>
@@ -47,7 +52,10 @@ export interface TaskDetailProps {
 	data: ManualTagInfoResult;
 }
 
-defineProps<TaskDetailProps>();
+const props = defineProps<TaskDetailProps>();
+
+/** 是否失败 */
+const isFailed = computed(() => typeof props.data.detail === "string");
 </script>
 
 <style lang="scss" scoped>

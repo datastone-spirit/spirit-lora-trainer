@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:21:01
- * @LastEditTime: 2024-12-27 09:31:28
+ * @LastEditTime: 2024-12-27 17:22:00
  * @LastEditors: mulingyuer
  * @Description: 任务列表页
  * @FilePath: \frontend\src\views\task\index.vue
@@ -44,10 +44,6 @@ import LoraTaskDetail from "./components/LoraTaskDetail.vue";
 const loading = ref(true);
 const list = ref<TaskListResult>([]);
 const activeItemData = ref<TaskListResult[number]>();
-const taskDetailMap = {
-	captioning: TagTaskDetail,
-	training: LoraTaskDetail
-};
 
 function onItemClick(item: TaskListResult[number]) {
 	if (activeItemData.value && activeItemData.value.id === item.id) {
@@ -62,7 +58,7 @@ function getTaskList() {
 	loading.value = true;
 	taskList()
 		.then((res) => {
-			list.value = res;
+			list.value = res.toReversed();
 		})
 		.finally(() => {
 			loading.value = false;

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:52:15
- * @LastEditTime: 2024-12-25 15:47:38
+ * @LastEditTime: 2024-12-27 15:45:23
  * @LastEditors: mulingyuer
  * @Description: 初始化脚本
  * @FilePath: \frontend\src\init.ts

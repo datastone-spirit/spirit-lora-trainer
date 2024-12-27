@@ -24,32 +24,3 @@ $--colors: (
 );
 
 @use "./dark.scss";
-
-html {
-	--zl-admin-layout-bg: #f2f3f8;
-	--zl-page-bg: #fff;
-	--zl-aside-footer-box-shadow: rgba(0, 0, 0, 0.12);
-	--zl-footer-bar-bg: #fff;
-	--zl-switch-bg: #f0f0f0;
-	--zl-switch-color: #606266;
-	--zl-switch-color-active: #fff;
-	--zl-scrollbar: rgba(144, 147, 153, 0.4);
-	--zl-two-split-gutter-bg: #f2f3f8;
-	--zl-two-split-gutter-bg-hover: #fff;
-	--zl-collapse-bg: #fff;
-	--zl-field-set-wrapper-bg: #fff;
-	--zl-split-right-panel-bg: #fff;
-	--zl-toml-preview-bg: #fff;
-	--zl-toml-preview-code-bg: transparent;
-	--zl-ai-dataset-bg: #fff;
-	--zl-context-menu-box-shadow: rgba(0, 0, 0, 0.2);
-	--zl-context-menu-item-bg: #fff;
-	--zl-ai-dataset-upload-mask: rgba(0, 0, 0, 0.3);
-	--zl-ai-dataset-upload-bg: #fff;
-	--zl-dashboard-bg: #fff;
-	--zl-about-page-bg: #fff;
-	--zl-about-page-color: #000;
-	--zl-popover-form-item-color: #000;
-	--zl-popover-form-item-tips-color: #888;
-	--zl-task-item-color: #000;
-}

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-13 17:41:25
- * @LastEditTime: 2024-12-19 17:03:46
+ * @LastEditTime: 2024-12-27 16:35:59
  * @LastEditors: mulingyuer
  * @Description: 右键菜单帮助工具
  * @FilePath: \frontend\src\components\AiDataset\context-menu.helper.ts
@@ -38,7 +38,7 @@ export const menuList = ref<ContextMenu>([
 		disabled: false
 	},
 	{
-		label: "打标",
+		label: "手动打标",
 		key: ContextMenuKeyEnum.TAG,
 		show: true,
 		disabled: false

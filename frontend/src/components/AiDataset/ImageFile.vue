@@ -1,15 +1,20 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 15:15:16
- * @LastEditTime: 2024-12-16 10:35:46
+ * @LastEditTime: 2024-12-27 16:36:46
  * @LastEditors: mulingyuer
  * @Description: 图片文件
  * @FilePath: \frontend\src\components\AiDataset\ImageFile.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="file-list-item image-file" title="双击查看图片细节">
-		<el-image class="file-list-item-img" :src="data.value + '?compress=true'" :fit="fit">
+	<div class="file-list-item image-file">
+		<el-image
+			class="file-list-item-img"
+			:src="data.value + '?compress=true'"
+			:fit="fit"
+			title="双击查看图片细节"
+		>
 			<template #placeholder>
 				<img class="file-list-item-default-img" :src="DefaultImageIcon" :alt="data.name" />
 			</template>
@@ -17,7 +22,7 @@
 				<img class="file-list-item-default-img" :src="DefaultImageIcon" :alt="data.name" />
 			</template>
 		</el-image>
-		<div class="file-list-item-name">{{ data.name }}</div>
+		<div class="file-list-item-name" :title="data.name">{{ data.name }}</div>
 	</div>
 </template>
 

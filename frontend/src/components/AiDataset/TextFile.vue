@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 15:15:44
- * @LastEditTime: 2024-12-24 12:00:14
+ * @LastEditTime: 2024-12-27 16:37:15
  * @LastEditors: mulingyuer
  * @Description: 文本文件
  * @FilePath: \frontend\src\components\AiDataset\TextFile.vue
@@ -10,7 +10,7 @@
 <template>
 	<div class="file-list-item text-file" :class="{ selected: selected }">
 		<el-image class="file-list-item-img" :src="TextIcon" fit="contain" :lazy="lazy" />
-		<div class="file-list-item-name">{{ data.name }}</div>
+		<div class="file-list-item-name" :title="data.name">{{ data.name }}</div>
 	</div>
 </template>
 

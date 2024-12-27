@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:03
- * @LastEditTime: 2024-12-23 15:16:06
+ * @LastEditTime: 2024-12-27 17:13:32
  * @LastEditors: mulingyuer
  * @Description: 监控api
  * @FilePath: \frontend\src\api\monitor\index.ts
@@ -21,7 +21,8 @@ export type * from "./types";
 export function gpuMonitorInfo() {
 	return request<GPUMonitorInfoResult>({
 		url: "/training/gpu_log",
-		method: "GET"
+		method: "GET",
+		showErrorMessage: false
 	});
 }
 
@@ -32,7 +33,8 @@ export function loRATrainingInfo(params: LoRATrainingInfoParams) {
 	return request<LoRATrainingInfoResult>({
 		url: "/tasks/history",
 		method: "GET",
-		params
+		params,
+		showErrorMessage: false
 	});
 }
 
@@ -41,6 +43,7 @@ export function manualTagInfo(params: ManualTagInfoParams) {
 	return request<ManualTagInfoResult>({
 		url: "/tasks/history",
 		method: "GET",
-		params
+		params,
+		showErrorMessage: false
 	});
 }

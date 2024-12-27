@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-27 11:44:30
- * @LastEditTime: 2024-12-27 15:32:06
+ * @LastEditTime: 2024-12-27 16:19:29
  * @LastEditors: mulingyuer
  * @Description: banner
  * @FilePath: \frontend\src\views\website\components\banner.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="website-banner">
+	<div class="website-banner" :class="{ dark: isDark }">
 		<div class="website-banner-content">
 			<h2 class="website-banner-title">通过 <strong>Serverless</strong> 扩展机器学习</h2>
 			<p class="website-banner-desc">快速运行您的AI模型，并在需要时自动扩展</p>
@@ -135,7 +135,7 @@ const list = ref<List>([
 .website-banner {
 	height: calc(100vh - $zl-padding * 2);
 	display: flex;
-	background-image: url("/images/loading_bg.png");
+	background-image: url("/images/loading_bg_light.png");
 	background-color: var(--zl-website-banner-bg);
 	background-position: center;
 	background-repeat: no-repeat;
@@ -143,6 +143,9 @@ const list = ref<List>([
 	padding-top: 194px;
 	border-radius: $zl-border-radius;
 	position: relative;
+	&.dark {
+		background-image: url("/images/loading_bg_dark.png");
+	}
 }
 .website-banner-content {
 	margin: 10px auto auto;

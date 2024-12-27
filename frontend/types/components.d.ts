@@ -16,7 +16,6 @@ declare module 'vue' {
     ElAside: typeof import('element-plus/es')['ElAside']
     ElBacktop: typeof import('element-plus/es')['ElBacktop']
     ElButton: typeof import('element-plus/es')['ElButton']
-    ElButtonGroup: typeof import('element-plus/es')['ElButtonGroup']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
     ElContainer: typeof import('element-plus/es')['ElContainer']
@@ -62,7 +61,6 @@ declare module 'vue' {
     ModelSavePrecisionSelector: typeof import('./../src/components/Form/ModelSavePrecisionSelector.vue')['default']
     OptimizerTypeSelect: typeof import('./../src/components/Form/OptimizerTypeSelect.vue')['default']
     PopoverFormItem: typeof import('./../src/components/Form/PopoverFormItem.vue')['default']
-    PreviewSwitch: typeof import('./../src/components/Split/SplitRightPanel/PreviewSwitch.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SDXLNetworkModuleSelect: typeof import('./../src/components/Form/SDXLNetworkModuleSelect.vue')['default']
@@ -74,7 +72,6 @@ declare module 'vue' {
     TextFile: typeof import('./../src/components/AiDataset/TextFile.vue')['default']
     TomlPreview: typeof import('./../src/components/Toml/TomlPreview.vue')['default']
     TwoSplit: typeof import('./../src/components/Split/TwoSplit/index.vue')['default']
-    ZlSwitch: typeof import('./../src/components/Form/ZlSwitch.vue')['default']
     ZLSwitch: typeof import('./../src/components/Form/ZLSwitch.vue')['default']
   }
   export interface ComponentCustomProperties {

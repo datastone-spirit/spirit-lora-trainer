@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:28:31
- * @LastEditTime: 2024-12-27 10:00:58
+ * @LastEditTime: 2024-12-27 16:14:47
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue
@@ -18,7 +18,7 @@
 		:tag-submit="tagSubmit"
 	/>
 	<el-row :gutter="16">
-		<el-col :span="10">
+		<el-col :span="12">
 			<PopoverFormItem
 				label="每个图像重复训练次数"
 				:prop="formProps.num_repeats"
@@ -27,7 +27,7 @@
 				<el-input-number v-model.number="ruleForm.num_repeats" :step="1" step-strictly />
 			</PopoverFormItem>
 		</el-col>
-		<el-col :span="10">
+		<el-col :span="12">
 			<PopoverFormItem
 				label="最大训练 epoch（轮数）"
 				prop="max_train_epochs"
@@ -41,7 +41,7 @@
 				/>
 			</PopoverFormItem>
 		</el-col>
-		<el-col :span="10">
+		<el-col :span="12">
 			<PopoverFormItem
 				label="批量大小, 越高显存占用越高"
 				prop="train_batch_size"
@@ -57,7 +57,7 @@
 		</el-col>
 	</el-row>
 	<el-row :gutter="16">
-		<el-col :span="10">
+		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-宽度px"
 				:prop="formProps.resolution_width"
@@ -66,7 +66,7 @@
 				<el-input-number v-model.number="ruleForm.resolution_width" :controls="false" />
 			</PopoverFormItem>
 		</el-col>
-		<el-col :span="10">
+		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-高度px"
 				:prop="formProps.resolution_height"
@@ -86,7 +86,7 @@
 				<el-switch v-model="ruleForm.enable_bucket" />
 			</PopoverFormItem>
 		</el-col>
-		<el-col :span="10">
+		<el-col :span="12">
 			<PopoverFormItem
 				label="arb 桶最小分辨率"
 				:prop="formProps.min_bucket_reso"
@@ -95,7 +95,7 @@
 				<el-input-number v-model.number="ruleForm.min_bucket_reso" />
 			</PopoverFormItem>
 		</el-col>
-		<el-col :span="10">
+		<el-col :span="12">
 			<PopoverFormItem
 				label="arb 桶最大分辨率"
 				:prop="formProps.max_bucket_reso"

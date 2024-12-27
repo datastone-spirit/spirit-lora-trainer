@@ -9,7 +9,7 @@ p {
 .zl-app-loader-wrapper {
 	height: 100vh;
 	display: flex;
-	background-image: url("../images/loading_bg.png");
+	background-image: url("../images/loading_bg_light.png");
 	background-color: #f7f9fd;
 	background-position: center;
 	background-repeat: no-repeat;

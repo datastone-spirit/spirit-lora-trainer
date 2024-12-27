@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 09:56:30
- * @LastEditTime: 2024-12-27 09:52:29
+ * @LastEditTime: 2024-12-27 10:28:36
  * @LastEditors: mulingyuer
  * @Description: 简化的折叠面板
  * @FilePath: \frontend\src\components\Collapse\SimpleCollapse.vue
@@ -24,7 +24,14 @@
 			</div>
 		</div>
 		<div v-show="open" class="simple-collapse-content">
-			<slot></slot>
+			<Suspense>
+				<slot></slot>
+				<template #fallback>
+					<div class="simple-collapse-skeleton">
+						<el-skeleton />
+					</div>
+				</template>
+			</Suspense>
 		</div>
 	</div>
 </template>
@@ -72,5 +79,11 @@ function onToggleCollapse() {
 }
 .simple-collapse-arrow.closed {
 	transform: rotate(-180deg);
+}
+.simple-collapse-skeleton {
+	background-color: var(--zl-collapse-bg);
+	border-radius: $zl-border-radius;
+	padding: 18px 12px;
+	margin-bottom: $zl-padding;
 }
 </style>

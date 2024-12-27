@@ -26,7 +26,8 @@ $--colors: (
 @use "./dark.scss";
 
 html {
-	--zl-page-bg: #f2f3f8;
+	--zl-admin-layout-bg: #f2f3f8;
+	--zl-page-bg: #fff;
 	--zl-aside-footer-box-shadow: rgba(0, 0, 0, 0.12);
 	--zl-footer-bar-bg: #fff;
 	--zl-complexity-setting-bg: #f0f0f0;
@@ -51,4 +52,7 @@ html {
 	--zl-dashboard-bg: #fff;
 	--zl-about-page-bg: #fff;
 	--zl-about-page-color: #000;
+	--zl-popover-form-item-color: #000;
+	--zl-popover-form-item-tips-color: #888;
+	--zl-task-item-color: #000;
 }

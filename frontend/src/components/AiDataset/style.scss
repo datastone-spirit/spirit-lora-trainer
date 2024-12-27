@@ -13,10 +13,10 @@
 	cursor: pointer;
 	@include no-select();
 	&.selected {
-		background-color: var(--zl-page-bg);
+		background-color: var(--zl-admin-layout-bg);
 	}
 	&:hover {
-		background-color: var(--zl-page-bg);
+		background-color: var(--zl-admin-layout-bg);
 	}
 	&:active {
 		opacity: 0.7;

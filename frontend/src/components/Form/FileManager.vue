@@ -2,7 +2,7 @@
 	<div class="file-manager" :id="fileId">
 		<el-input v-model="folder" :placeholder="inputPlaceholder" class="file-manager-input">
 			<template #append>
-				<el-button @click="tooglePopover" :icon="Folder" title="请选择" />
+				<el-button :icon="FolderIcon" title="请选择" @click="tooglePopover" />
 			</template>
 		</el-input>
 		<el-dialog
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { Folder } from "@element-plus/icons-vue";
+import { useIcon } from "@/hooks/useIcon";
 
 export interface InputTreeSelectorProps {
 	placeholder?: string;
@@ -47,6 +47,7 @@ const visible = ref(false);
 const props = withDefaults(defineProps<InputTreeSelectorProps>(), {});
 const folder = defineModel({ type: String, required: true });
 const fileId = Math.random().toString(36).substring(2);
+const FolderIcon = useIcon({ name: "ri-folder-line" });
 
 const inputPlaceholder = computed(() => {
 	if (!props.placeholder) {

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 08:41:44
- * @LastEditTime: 2024-12-26 14:28:11
+ * @LastEditTime: 2024-12-26 15:56:09
  * @LastEditors: mulingyuer
  * @Description: 表单项组件
  * @FilePath: \frontend\src\components\Form\PopoverFormItem.vue
@@ -10,24 +10,10 @@
 <template>
 	<el-form-item class="popover-form-item" :prop="prop">
 		<template #label>
-			{{ label }}
-			<el-popover
-				:placement="popoverPlacement"
-				:trigger="popoverTrigger"
-				:content="popoverContent"
-				popper-class="popover-form-item-wrapper"
-				:popper-style="{ width: 'auto', minWidth: 'auto' }"
-			>
-				<template #reference>
-					({{ popoverContent }})
-					<!-- <Icon
-						class="popover-form-item-icon"
-						:name="iconName"
-						:size="iconSize"
-						:color="iconColor"
-					/> -->
-				</template>
-			</el-popover>
+			<span class="popover-form-item-label">
+				{{ label }}
+				<span class="popover-form-item-tips">&lt;{{ popoverContent }}&gt;</span>
+			</span>
 		</template>
 		<slot></slot>
 	</el-form-item>
@@ -35,33 +21,31 @@
 
 <script setup lang="ts">
 import type { FormItemProps, PopoverProps } from "element-plus";
-import type { IconProps } from "@/components/Icon/Icon.vue";
 
 export interface PopoverFormItemProps {
 	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
-	iconName?: IconProps["name"];
-	iconSize?: IconProps["size"];
-	iconColor?: IconProps["color"];
-	popoverPlacement?: PopoverProps["placement"];
-	popoverTrigger?: PopoverProps["trigger"];
 	popoverContent?: PopoverProps["content"];
 }
 
-withDefaults(defineProps<PopoverFormItemProps>(), {
-	iconName: "ri-information-fill",
-	popoverTrigger: "hover",
-	popoverPlacement: "top-start",
-	iconColor: "var(--el-text-color-placeholder)"
-});
+withDefaults(defineProps<PopoverFormItemProps>(), {});
 </script>
 
 <style lang="scss" scoped>
+.popover-form-item {
+	--font-size: 16px;
+}
 .popover-form-item :deep(.el-form-item__label) {
 	white-space: break-spaces;
+	color: var(--zl-popover-form-item-color);
 }
 .popover-form-item-icon {
 	vertical-align: -0.185em;
 	cursor: pointer;
+}
+.popover-form-item-tips {
+	margin-left: 4px;
+	font-size: 14px;
+	color: var(--zl-popover-form-item-tips-color);
 }
 </style>

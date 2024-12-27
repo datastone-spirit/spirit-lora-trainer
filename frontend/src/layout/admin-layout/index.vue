@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-26 17:10:59
- * @LastEditTime: 2024-12-13 09:43:56
+ * @LastEditTime: 2024-12-26 16:05:44
  * @LastEditors: mulingyuer
  * @Description: admin布局
- * @FilePath: \spirit-lora-trainer\frontend\src\layout\admin-layout\index.vue
+ * @FilePath: \frontend\src\layout\admin-layout\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -26,6 +26,6 @@ import FooterBar from "./components/FooterBar/index.vue";
 <style lang="scss" scoped>
 .admin-layout {
 	min-height: 100vh;
-	background-color: var(--zl-page-bg);
+	background-color: var(--zl-admin-layout-bg);
 }
 </style>

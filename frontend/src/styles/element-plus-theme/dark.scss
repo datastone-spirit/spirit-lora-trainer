@@ -25,7 +25,8 @@ $--colors: (
 );
 
 html.dark {
-	--zl-page-bg: #0a0a0a;
+	--zl-admin-layout-bg: #0a0a0a;
+	--zl-page-bg: #141414;
 	--zl-aside-footer-box-shadow: rgba(255, 255, 255, 0.12);
 	--zl-footer-bar-bg: #141414;
 	--zl-complexity-setting-bg: #000;
@@ -50,4 +51,7 @@ html.dark {
 	--zl-dashboard-bg: #141414;
 	--zl-about-page-bg: #141414;
 	--zl-about-page-color: #fff;
+	--zl-popover-form-item-color: #fff;
+	--zl-popover-form-item-tips-color: #2cabe3;
+	--zl-task-item-color: #fff;
 }

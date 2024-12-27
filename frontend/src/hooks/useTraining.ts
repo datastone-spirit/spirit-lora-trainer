@@ -77,7 +77,8 @@ export const useTraining = (() => {
 
 		/** 格式化数据 */
 		function formatData(data: LoRATrainingInfoResult): LoraData {
-			const detail = data.detail ?? {};
+			let detail = data.detail ?? {};
+			if (typeof detail === "string") detail = {};
 			const loraData: LoraData = {
 				current: detail.current ?? 0,
 				elapsed: detail.elapsed ?? "00:00",

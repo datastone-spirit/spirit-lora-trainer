@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:40:03
- * @LastEditTime: 2024-09-30 09:14:03
+ * @LastEditTime: 2024-12-27 11:39:41
  * @LastEditors: mulingyuer
  * @Description: 菜单
- * @FilePath: \spirit-app-microservice-admin\src\layout\admin-layout\components\Aside\Menu.vue
+ * @FilePath: \frontend\src\layout\admin-layout\components\Aside\Menu.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -16,6 +16,7 @@
 			popper-effect="dark"
 			:unique-opened="false"
 			:collapse-transition="false"
+			:default-openeds="defaultOpeneds"
 			@select="onMenuSelect"
 		>
 			<MenuItem v-for="item in menuList" :key="item.path" :menu="item" />
@@ -43,6 +44,15 @@ function onMenuSelect(path: string) {
 		router.push(path);
 	}
 }
+
+/** 默认打开的菜单：目前全部打开算了 */
+const defaultOpeneds = computed(() => {
+	return menuList.value
+		.filter((item) => item.children)
+		.map((item) => {
+			return item.path;
+		});
+});
 </script>
 
 <style lang="scss" scoped>

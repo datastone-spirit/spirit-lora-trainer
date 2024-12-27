@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:29:28
- * @LastEditTime: 2024-12-06 16:50:12
+ * @LastEditTime: 2024-12-27 10:36:51
  * @LastEditors: mulingyuer
  * @Description: logo
  * @FilePath: \frontend\src\layout\admin-layout\components\Aside\Logo.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<router-link class="logo-link" to="/">
+	<router-link class="logo-link" to="/website">
 		<img v-if="!isDark" class="logo-img" src="@/assets/images/logo_light.svg" :alt="logoTitle" />
 		<img v-else class="logo-img" src="@/assets/images/logo_dark.svg" :alt="logoTitle" />
 		<h1 v-if="!appStore.isCollapse" class="logo-title">{{ logoTitle }}</h1>

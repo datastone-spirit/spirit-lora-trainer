@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2024-12-16 11:25:01
+ * @LastEditTime: 2024-12-27 11:33:56
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
@@ -11,7 +11,12 @@
 	<Transition name="el-zoom-in-bottom">
 		<footer v-show="appStore.showFooter" class="footer-bar">
 			<div class="footer-bar-left">
-				<ComplexitySetting />
+				<ZLSwitch
+					v-model="openComplexity"
+					off-text="新手"
+					on-text="专家"
+					@change="onComplexityChange"
+				/>
 			</div>
 			<div class="footer-bar-content">
 				<div id="footer-bar-left" class="footer-bar-content-left"></div>
@@ -22,10 +27,18 @@
 </template>
 
 <script setup lang="ts">
-import ComplexitySetting from "./ComplexitySetting.vue";
 import { useAppStore } from "@/stores";
+import { useSettingsStore } from "@/stores";
+import { ComplexityEnum } from "@/enums/complexity.enum";
 
 const appStore = useAppStore();
+const settingsStore = useSettingsStore();
+
+const openComplexity = ref(settingsStore.complexity === ComplexityEnum.EXPERT);
+function onComplexityChange(val: boolean) {
+	const value = val ? ComplexityEnum.EXPERT : ComplexityEnum.BEGINNER;
+	settingsStore.setComplexity(value);
+}
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 14:50:29
- * @LastEditTime: 2024-12-19 11:32:23
+ * @LastEditTime: 2024-12-27 11:32:19
  * @LastEditors: mulingyuer
  * @Description: 右侧内容
  * @FilePath: \frontend\src\components\Split\SplitRightPanel\index.vue
@@ -11,7 +11,13 @@
 	<div class="split-right-panel">
 		<div class="split-right-content-header">
 			<div class="split-right-content-header-box">
-				<PreviewSwitch />
+				<ZLSwitch
+					v-model="openPreview"
+					off-text="AI数据集"
+					on-text="TOML"
+					:item-width="80"
+					@change="onPreviewChange"
+				/>
 				<div id="split-right-content-header-right" class="split-right-content-header-right"></div>
 			</div>
 		</div>
@@ -30,7 +36,7 @@
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
 import { useSettingsStore } from "@/stores";
-import PreviewSwitch from "./PreviewSwitch.vue";
+import { SplitRightEnum } from "@/enums/split-right.enum";
 
 export interface SplitRightContentProps {
 	toml: string;
@@ -42,6 +48,11 @@ defineProps<SplitRightContentProps>();
 
 const settingsStore = useSettingsStore();
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
+const openPreview = ref(settingsStore.splitRightType === SplitRightEnum.TOML_PREVIEW);
+function onPreviewChange(val: boolean) {
+	const value = val ? SplitRightEnum.TOML_PREVIEW : SplitRightEnum.AI_DATASET;
+	settingsStore.setSplitRightType(value);
+}
 </script>
 
 <style lang="scss" scoped>

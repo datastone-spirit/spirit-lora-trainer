@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 11:24:17
- * @LastEditTime: 2024-12-16 09:10:06
+ * @LastEditTime: 2024-12-27 10:38:39
  * @LastEditors: mulingyuer
  * @Description: 标签编辑器
  * @FilePath: \frontend\src\components\AiDataset\TagEdit.vue
@@ -22,7 +22,7 @@
 		/>
 		<div class="tag-edit-footer">
 			<div class="tag-edit-footer-left">
-				<span class="tag-edit-tips"> <kbd>Ctrl</kbd> + <kbd>S</kbd> 可以快捷保存</span>
+				<span class="tag-edit-tips"> <span>Ctrl</span> + <span>S</span> 可以快捷保存</span>
 			</div>
 			<div class="tag-edit-footer-right">
 				<el-button type="primary" :loading="loading" @click="emits('save')">保存</el-button>

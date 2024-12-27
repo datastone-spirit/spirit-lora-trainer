@@ -73,6 +73,8 @@ declare module 'vue' {
     TextFile: typeof import('./../src/components/AiDataset/TextFile.vue')['default']
     TomlPreview: typeof import('./../src/components/Toml/TomlPreview.vue')['default']
     TwoSplit: typeof import('./../src/components/Split/TwoSplit/index.vue')['default']
+    ZlSwitch: typeof import('./../src/components/Form/ZlSwitch.vue')['default']
+    ZLSwitch: typeof import('./../src/components/Form/ZLSwitch.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

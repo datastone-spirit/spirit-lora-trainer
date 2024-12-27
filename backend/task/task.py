@@ -4,7 +4,7 @@ from subprocess import Popen
 from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
-from subprocess import Popen, CompletedProcess, TimeoutExpired
+from subprocess import Popen, TimeoutExpired
 import uuid
 import re
 from tbparse import SummaryReader
@@ -43,7 +43,7 @@ class Task:
     detail: Optional[dict] = None
 
     @staticmethod
-    def wrap_training(proc : Popen, training_paramter: TrainingParameter) -> 'Task':
+    def wrap_training(proc : Popen, training_paramter: TrainingParameter, task_id: str) -> 'Task':
         task = TrainingTask()
         task.status = TaskStatus.CREATED
         task.proc = proc
@@ -52,7 +52,13 @@ class Task:
         if training_paramter.config.log_prefix is None or training_paramter.config.log_prefix == '':
             raise Exception("[Bug] log_prefix should not be empty or none")
 
-        task.id = training_paramter.config.log_prefix
+        if task_id is not None or task_id != '':
+            task.id = task_id
+        elif training_paramter.config.log_prefix is not None or training_paramter.config.log_prefix != '':
+            task.id = training_paramter.config.log_prefix
+        else:
+            task.id = uuid.uuid4().hex
+
         task.task_type = TaskType.TRAINING
         task.start_time = time.time()
         return task

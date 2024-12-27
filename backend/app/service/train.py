@@ -38,7 +38,7 @@ class TrainingService:
         # be overwrited by this taskid value
         #
         taskid = uuid.uuid4().hex
-        parameters.config.log_prefix = taskid
+        parameters.config.log_prefix = f"{taskid}-"
 
         dataset_path = dataset2toml(parameters.dataset)
         config_file = config2toml(parameters.config, dataset_path)
@@ -48,7 +48,7 @@ class TrainingService:
         except Exception as e:
             logger.warning(f"clear npz files failed, ignored, error:", exc_info=e)
 
-        return self.run_train(config_file, script=self.script, training_paramters=parameters)
+        return self.run_train(config_file, script=self.script, training_paramters=parameters, task_id=taskid)
     
     def clear_npz_files(self, directory: str):
         """
@@ -68,43 +68,14 @@ class TrainingService:
                     logger.info(f"Deleted: {file_path}")
                 except Exception as e:
                     logger.warning(f"Error deleting {file_path}: {e}")
-    
-
-    def prepare_dataset_dir(self, root_dir : str, repeat_num : int, lora_name : str ) -> str:
-        
-        # Define the pattern to match old training directories
-        pattern = re.compile(rf"^{repeat_num}_.+$")
-
-        # Iterate through subdirectories
-        for subdir in os.listdir(root_dir):
-            subdir_path = os.path.join(root_dir, subdir)
-            if os.path.isdir(subdir_path) and pattern.match(subdir):
-                # Remove old training directory
-                shutil.rmtree(subdir_path)
-                logger.info(f"Removed old training directory: {subdir_path}")
-
-        # Create new subdirectory
-        new_subdir_name = f"{repeat_num}_{lora_name}"
-        new_subdir_path = os.path.join(root_dir, new_subdir_name)
-        os.makedirs(new_subdir_path, exist_ok=True)
-        logger.info(f"Created new training directory: {new_subdir_path}")
-
-        # Copy image files from root directory to new subdirectory
-        for file_name in os.listdir(root_dir):
-            file_path = os.path.join(root_dir, file_name)
-            if os.path.isfile(file_path) and file_name.lower().endswith(('.png', '.jpg', '.jpeg')):
-                shutil.copy(file_path, new_subdir_path)
-                logger.info(f"Copied {file_name} to {new_subdir_path}")
-
-        return new_subdir_path
             
     @task_decorator 
     def run_train(self,
               config_file: str,
               script: str = "",
               training_paramters: TrainingParameter = None,
-              gpu_ids: Optional[list] = None,
-              cpu_threads: Optional[int] = 2):
+              cpu_threads: Optional[int] = 2,
+              task_id: str=None):
 
         args = [
             sys.executable, "-m", "accelerate.commands.launch",
@@ -118,11 +89,10 @@ class TrainingService:
         customize_env["ACCELERATE_DISABLE_RICH"] = "1"
         customize_env["PYTHONUNBUFFERED"] = "1"
         customize_env["PYTHONWARNINGS"] = "ignore::FutureWarning,ignore::UserWarning"
-        #customize_env["CUDA_VISIBLE_DEVICES"] = "0"
-        customize_env["NCCL_P2P_DISABLE"]="1"
+        customize_env["NCCL_P2P_DISABLE"]="1" # For flux training, we disable NCCL P2P and IB
         customize_env["NCCL_IB_DISABLE"]="1"
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env)
-        return Task.wrap_training(proc, training_paramters)
+        return Task.wrap_training(proc, training_paramters, task_id)
 
     def get_gpu_info(self):
         try:

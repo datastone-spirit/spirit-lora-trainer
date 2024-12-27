@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:31:23
- * @LastEditTime: 2024-12-27 09:27:54
+ * @LastEditTime: 2024-12-27 09:35:53
  * @LastEditors: mulingyuer
  * @Description: LoRA任务详情
  * @FilePath: \frontend\src\views\task\components\LoraTaskDetail.vue
@@ -91,8 +91,13 @@ export interface TaskDetailProps {
 defineProps<TaskDetailProps>();
 </script>
 
-<style lang="scss">
-.task-detail-json {
-	white-space: pre-wrap;
+<style lang="scss" scoped>
+.task-detail {
+	:deep(.el-descriptions__label) {
+		vertical-align: top;
+	}
+	:deep(.task-detail-json) {
+		white-space: pre-wrap;
+	}
 }
 </style>

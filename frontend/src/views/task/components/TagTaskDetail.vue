@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:24:19
- * @LastEditTime: 2024-12-27 09:27:52
+ * @LastEditTime: 2024-12-27 09:36:07
  * @LastEditors: mulingyuer
  * @Description: 任务详情
  * @FilePath: \frontend\src\views\task\components\TagTaskDetail.vue
@@ -50,8 +50,13 @@ export interface TaskDetailProps {
 defineProps<TaskDetailProps>();
 </script>
 
-<style lang="scss">
-.task-detail-json {
-	white-space: pre-wrap;
+<style lang="scss" scoped>
+.task-detail {
+	:deep(.el-descriptions__label) {
+		vertical-align: top;
+	}
+	:deep(.task-detail-json) {
+		white-space: pre-wrap;
+	}
 }
 </style>

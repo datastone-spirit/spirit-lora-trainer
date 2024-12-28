@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def florence2_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, update_status :Callable) -> List[dict]:
+def florence2_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, update_status :Callable, class_token=None) -> List[dict]:
     """
     """
     torch_dtype = torch.float16
@@ -67,7 +67,7 @@ def florence2_captioning(image_paths: List[str], output_dir: str, model_info :Ca
                     .replace("The image shows ", "")
                     .strip()
                 )
-                success, cap_file_path = write_caption_file(image_path, output_dir, caption_text)
+                success, cap_file_path = write_caption_file(image_path, output_dir, caption_text, class_token=class_token)
             except Exception as e:
                 # 收集结果
                 logger.warning("Failed to process image: {image_path}", exc_info=e)

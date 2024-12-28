@@ -64,10 +64,11 @@ class Task:
         return task
 
     @staticmethod
-    def wrap_captioning_task(image_paths: List[str], output_dir: str, cap_model: CaptioningModelInfo) -> 'Task':
+    def wrap_captioning_task(image_paths: List[str], output_dir: str, class_token: str, cap_model: CaptioningModelInfo) -> 'Task':
         task = CaptioningTask()
         task.status = TaskStatus.CREATED
         task.image_paths = image_paths
+        task.class_token = class_token
         task.output_dir = output_dir
         task.detail = {
             'captions': [],
@@ -251,27 +252,31 @@ total optimization steps / 学習ステップ数: 100
         df=reader.scalars
         current = max(df['step'])
         self.detail['current'] = current
-        self.detail['loss_avr'] = float(df[df['step']==current][df['tag']=='loss/average']['value'].values[0])
-        self.detail['loss'] = float(df[df['step']==current][df['tag']=='loss/current']['value'].values[0])
-        self.detail['lr_unet'] = float(df[df['step']==current][df['tag']=='lr/unet']['value'].values[0])
+        
+        # Replace chained indexing with single filter query operation to suppress warning messages
+        
+        self.detail['loss_avr'] = float(df.query('step==@current and tag=="loss/average"')['value'].iloc[0])
+        self.detail['loss'] = float(df.query('step==@current and tag=="loss/current"')['value'].iloc[0]) 
+        self.detail['lr_unet'] = float(df.query('step==@current and tag=="lr/unet"')['value'].iloc[0])        
+        
+        #self.detail['loss_avr'] = float(df[df['step']==current][df['tag']=='loss/average']['value'].values[0])
+        #self.detail['loss'] = float(df[df['step']==current][df['tag']=='loss/current']['value'].values[0])
+        #self.detail['lr_unet'] = float(df[df['step']==current][df['tag']=='lr/unet']['value'].values[0])
+        
         total = int(self.detail.get('total', 0))
         if total > 0:
             self.detail['progress'] = round((current / total * 100), 2)
-        
-
-
-
-
 
 @dataclass
 class CaptioningTask(Task):
     image_paths: List[str] = None
     output_dir: str = None
+    class_token: str = None
     captioning: Optional[Callable] = None
     model_info: Optional[CaptioningModelInfo] = None
 
     def _run(self):
-        self.captioning(self.image_paths, self.output_dir, self.model_info, self.update_captioning_status)
+        self.captioning(self.image_paths, self.output_dir, self.model_info, self.update_captioning_status, class_token=self.class_token)
 
     def update_captioning_status(self, current_step: int, image_name: str, caption: str, cap_file_path: str, success: bool = False):
         self.detail['current'] = current_step

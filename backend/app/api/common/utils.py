@@ -324,9 +324,11 @@ def dataset2toml(dataset :TrainingDataset) -> str:
     return temp_file_path
 
 
-def write_caption_file(image_path: str, output_dir: str, caption_text: str) -> Tuple[bool, str]:
+def write_caption_file(image_path: str, output_dir: str, caption_text: str, class_token=None) -> Tuple[bool, str]:
     base_name = os.path.splitext(os.path.basename(image_path))[0]
     cap_file_path = os.path.join(output_dir, f"{base_name}.txt")
     with open(cap_file_path, "w", encoding="utf-8") as txt_file:
+        if class_token is not None:
+            caption_text = f"{class_token}, {caption_text}"
         txt_file.write(caption_text)    
     return True, cap_file_path

@@ -26,8 +26,9 @@ class Tagging(Resource):
             # todo 增加joycaption模型反推，现在默认florence2
             model_name = json["model_name"]
             image_path = json["image_path"]
+            class_token = json.get("class_token", None)
             images = CaptioningService().load_images_from_directory(image_path)
-            result = CaptioningService().run_captioning(images,image_path, model_name=model_name)
+            result = CaptioningService().run_captioning(images,image_path, model_name=model_name, class_token=class_token)
             if isinstance(result, Task):
                 return res(data={"task_id": result.id}, message=f"task {result.id} started successfully.")
                 

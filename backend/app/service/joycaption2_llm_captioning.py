@@ -253,7 +253,7 @@ class JoyCaptioner:
 
 
 
-def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, update_status :Callable) -> List[dict]:
+def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, update_status :Callable, class_token=None) -> List[dict]:
     joy_captioner = None
     try:
         joy_captioner = JoyCaptioner(model_info) 
@@ -265,7 +265,7 @@ def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_in
                 logger.info(f"Processing image: {image_path}")
                 image = Image.open(image_path).convert("RGB")
                 caption_text = joy_captioner.generate(image)[0]
-                success, cap_file_path = write_caption_file(image_path, output_dir, caption_text)
+                success, cap_file_path = write_caption_file(image_path, output_dir, caption_text, class_token=class_token)
             except Exception as e:
                 logger.warning(f"Error processing image: {image_path}", exc_info=e)
             finally:

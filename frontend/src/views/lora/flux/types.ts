@@ -117,7 +117,7 @@ export interface RuleForm {
 	 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
 	 * 示例：weight_decay=0.01 betas=.9,.999
 	 */
-	optimizer_args: string;
+	optimizer_args: string | null;
 	// ---------
 	/** 训练网络模块 */
 	network_module: string;
@@ -132,7 +132,7 @@ export interface RuleForm {
 	/** 自定义 network_args
 	 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
 	 */
-	network_args: string;
+	network_args: string | null;
 	// NOTE: 给后端要去除该参数
 	/** 启用基础权重（差异炼丹） */
 	enable_base_weight: boolean;

@@ -92,7 +92,7 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		/** 自定义 network_args
 		 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
 		 */
-		network_args: string;
+		network_args: string | null;
 		/** 网络维度，常用 4~128，不是越大越好, 低dim可以降低显存占用 */
 		network_dim: number;
 		/** dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的） */
@@ -115,7 +115,7 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
 		 * 示例：weight_decay=0.01 betas=.9,.999
 		 */
-		optimizer_args: string;
+		optimizer_args: string | null;
 		/** 优化器设置 */
 		optimizer_type: string;
 		/** lora保存路径 */

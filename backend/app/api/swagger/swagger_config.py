@@ -428,6 +428,10 @@ tag_config = {
                "image_path": {
                     "type": "string",
                     "description": "要打标的图片文件夹路径",
+               },
+               "class_token": {
+                    "type": "string",
+                    "description": "token of class, if it is not empty, the class token will be written before the caption text, split by comma",
                }
             }
         }

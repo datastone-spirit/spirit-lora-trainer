@@ -282,7 +282,7 @@ class CaptioningTask(Task):
         self.detail['current'] = current_step
         self.detail['captions'].append({
             'image': image_name,
-            'caption': caption,
+            'caption': caption if self.class_token is None or self.class_token == "" else f"{self.class_token}, {caption}",
             'path': cap_file_path,
             'success': success
         })

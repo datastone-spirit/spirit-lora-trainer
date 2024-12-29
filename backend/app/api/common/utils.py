@@ -328,7 +328,7 @@ def write_caption_file(image_path: str, output_dir: str, caption_text: str, clas
     base_name = os.path.splitext(os.path.basename(image_path))[0]
     cap_file_path = os.path.join(output_dir, f"{base_name}.txt")
     with open(cap_file_path, "w", encoding="utf-8") as txt_file:
-        if class_token is not None:
+        if class_token is not None or class_token != "":
             caption_text = f"{class_token}, {caption_text}"
         txt_file.write(caption_text)    
     return True, cap_file_path

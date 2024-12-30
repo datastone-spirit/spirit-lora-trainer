@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-25 16:25:09
+ * @LastEditTime: 2024-12-30 10:35:14
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -74,10 +74,8 @@
 			@menu-click="onMenuClick"
 		/>
 		<Teleport :to="btnTeleportTo" defer>
-			<el-space>
-				<el-button v-show="settingsStore.showAIDataset" :loading="refreshing" @click="onRefresh">
-					刷新
-				</el-button>
+			<el-space v-show="showTeleportBtn">
+				<el-button :loading="refreshing" @click="onRefresh"> 刷新 </el-button>
 				<el-upload
 					ref="uploadRef"
 					v-model:file-list="uploadFileList"
@@ -86,7 +84,7 @@
 					:show-file-list="false"
 					:auto-upload="false"
 				>
-					<el-button v-show="settingsStore.showAIDataset" type="primary">上传文件</el-button>
+					<el-button type="primary">上传文件</el-button>
 				</el-upload>
 			</el-space>
 		</Teleport>
@@ -99,7 +97,6 @@ import { directoryFiles, uploadFiles } from "@/api/common";
 import { deleteFile, manualTag } from "@/api/tag";
 import { useImageViewer } from "@/hooks/useImageViewer";
 import { useTag } from "@/hooks/useTag";
-import { useSettingsStore } from "@/stores";
 import { checkDirectory } from "@/utils/lora.helper";
 import { generateUUID, sleep } from "@/utils/tools";
 import type { AxiosProgressEvent } from "axios";
@@ -116,6 +113,8 @@ import { FileType } from "./types";
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
 	btnTeleportTo: string;
+	/** 是否显示Teleport按钮 */
+	showTeleportBtn?: boolean;
 	/** 目录路径 */
 	dir: string;
 }
@@ -126,8 +125,9 @@ const componentMap = {
 	[FileType.TEXT]: TextFile
 };
 
-const props = withDefaults(defineProps<AiDatasetProps>(), {});
-const settingsStore = useSettingsStore();
+const props = withDefaults(defineProps<AiDatasetProps>(), {
+	showTeleportBtn: true
+});
 const { previewImages } = useImageViewer();
 const { addTagEventListener, removeTagEventListener } = useTag();
 

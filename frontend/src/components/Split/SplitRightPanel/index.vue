@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 14:50:29
- * @LastEditTime: 2024-12-27 11:32:19
+ * @LastEditTime: 2024-12-30 10:33:57
  * @LastEditors: mulingyuer
  * @Description: 右侧内容
  * @FilePath: \frontend\src\components\Split\SplitRightPanel\index.vue
@@ -24,11 +24,12 @@
 		<div class="split-right-content">
 			<AiDataset
 				ref="aiDatasetRef"
-				v-show="settingsStore.showAIDataset"
+				v-show="showAIDataset"
 				btn-teleport-to="#split-right-content-header-right"
+				:show-teleport-btn="showAIDataset"
 				:dir="dir"
 			/>
-			<TomlPreview v-show="settingsStore.showTomlPreview" :toml="toml" />
+			<TomlPreview v-show="showTomlPreview" :toml="toml" />
 		</div>
 	</div>
 </template>
@@ -48,6 +49,9 @@ defineProps<SplitRightContentProps>();
 
 const settingsStore = useSettingsStore();
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
+const showAIDataset = storeToRefs(settingsStore).showAIDataset;
+const showTomlPreview = storeToRefs(settingsStore).showTomlPreview;
+// 打开toml预览
 const openPreview = ref(settingsStore.splitRightType === SplitRightEnum.TOML_PREVIEW);
 function onPreviewChange(val: boolean) {
 	const value = val ? SplitRightEnum.TOML_PREVIEW : SplitRightEnum.AI_DATASET;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-30 09:27:04
+ * @LastEditTime: 2024-12-30 11:51:32
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -93,12 +93,14 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
 import type { RuleForm, RuleFormProps } from "./types";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 
 const settingsStore = useSettingsStore();
 const { isListenTag, startTagListen, stopTagListen, tagTaskStatus, isTagTaskEnd } = useTag();
 const { isListenLora, startLoraListen, stopLoraListen, loraTaskStatus, isLoraTaskEnd } =
 	useTraining();
 const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
+const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_flux_form`;
@@ -206,7 +208,7 @@ const defaultForm = readonly<RuleForm>({
 	ddp_timeout: undefined,
 	ddp_gradient_as_bucket_view: false
 });
-const ruleForm = useLocalStorage<RuleForm>(
+const ruleForm = useEnhancedLocalStorage<RuleForm>(
 	localStorageKey,
 	structuredClone(toRaw(defaultForm) as RuleForm)
 );

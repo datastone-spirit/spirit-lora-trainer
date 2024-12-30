@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-30 10:04:26
+ * @LastEditTime: 2024-12-30 11:48:50
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -72,6 +72,7 @@ import { useTag } from "@/hooks/useTag";
 import { checkDirectory } from "@/utils/lora.helper";
 import type { FormInstance, FormRules } from "element-plus";
 import { validateForm } from "@/utils/tools";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -86,6 +87,7 @@ interface RuleForm {
 
 const { isListenTag, startTagListen, stopTagListen, tagTaskStatus, isTagTaskEnd } = useTag();
 const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
+const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const ruleFormRef = ref<FormInstance>();
@@ -96,7 +98,7 @@ const defaultForm = readonly<RuleForm>({
 	output_trigger_words: true,
 	class_tokens: ""
 });
-const ruleForm = useLocalStorage<RuleForm>(
+const ruleForm = useEnhancedLocalStorage<RuleForm>(
 	localStorageKey,
 	structuredClone(toRaw(defaultForm) as RuleForm)
 );

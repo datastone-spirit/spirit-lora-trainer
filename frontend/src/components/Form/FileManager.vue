@@ -58,6 +58,15 @@ const inputPlaceholder = computed(() => {
 });
 
 const getDirectoryPath = (path: string) => {
+	if (path === "/") {
+		return "/";
+	}
+
+	// 如果路径是以单一斜杠开头且没有其他子目录或文件，则返回根目录 '/'
+	if (/^\/[^\/]+$/.test(path)) {
+		return "/";
+	}
+
 	// 使用正则判断是否是带文件名的路径
 	const filePattern = /\/[^\/]+(\.[a-zA-Z0-9]+)?$/;
 

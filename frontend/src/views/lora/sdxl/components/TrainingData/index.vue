@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:19:14
- * @LastEditTime: 2024-12-27 10:01:38
+ * @LastEditTime: 2024-12-30 14:18:18
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\sdxl\components\TrainingData\index.vue
@@ -15,6 +15,8 @@
 		:dir-prop="formProps.image_dir"
 		dir-popover-content="image_dir"
 		tagger-label="打标模型"
+		:tagger-prop="formProps.tagger_model"
+		tagger-popover-content="tagger_model"
 		:tag-submit="tagSubmit"
 	/>
 	<el-row :gutter="16">

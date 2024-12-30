@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2024-12-25 11:41:50
+ * @LastEditTime: 2024-12-30 10:13:31
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -18,6 +18,7 @@
 				:label="taggerLabel"
 				:prop="taggerProp"
 				:placeholder="taggerPlaceholder"
+				:popover-content="taggerPopoverContent"
 			/>
 		</div>
 		<div class="dataset-dir-selector-right">
@@ -45,6 +46,7 @@ export interface DatasetDirSelectorProps {
 	dirPlaceholder?: string;
 	taggerLabel?: TaggerModelSelectProps["label"];
 	taggerProp?: TaggerModelSelectProps["prop"];
+	taggerPopoverContent: string;
 	taggerPlaceholder?: TaggerModelSelectProps["placeholder"];
 	btnText?: string;
 	/** 打标submit函数 */

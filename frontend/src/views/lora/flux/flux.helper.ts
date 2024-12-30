@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-26 17:02:24
+ * @LastEditTime: 2024-12-30 10:11:24
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -149,7 +149,7 @@ function formatConfig(form: RuleForm): Config {
 
 	// 其他
 	const excludeKeys = [...scientificToNumberKeys, "resolution"];
-	const keys = Object.keys(form).filter((key) => {
+	const keys = Object.keys(config).filter((key) => {
 		return !excludeKeys.includes(key) && Object.hasOwn(form, key);
 	});
 	keys.forEach((key) => {

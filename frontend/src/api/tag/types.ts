@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 17:33:00
- * @LastEditTime: 2024-12-20 10:00:53
+ * @LastEditTime: 2024-12-30 09:24:52
  * @LastEditors: mulingyuer
  * @Description: 打标api类型
  * @FilePath: \frontend\src\api\tag\types.ts
@@ -14,6 +14,8 @@ export interface BatchTagData {
 	model_name: string;
 	/** 要打标的图片文件夹路径 */
 	image_path: string;
+	/** 是否把触发词输出到打标文件中  */
+	class_token?: string;
 }
 
 /** 一键打标参数响应 */

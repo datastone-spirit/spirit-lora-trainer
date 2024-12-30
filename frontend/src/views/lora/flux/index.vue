@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-27 10:29:43
+ * @LastEditTime: 2024-12-30 09:27:04
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -118,6 +118,7 @@ const defaultForm = readonly<RuleForm>({
 	// -----
 	image_dir: "/root",
 	tagger_model: "joy-caption-alpha-two",
+	output_trigger_words: true,
 	num_repeats: 16,
 	max_train_epochs: 24,
 	train_batch_size: 1,
@@ -288,7 +289,7 @@ function onResetData() {
 /** 打标 */
 async function onTagSubmit() {
 	try {
-		const { image_dir, tagger_model } = ruleForm.value;
+		const { image_dir, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
 		// 校验
 		let valid = true;
 		let validMsg = "";
@@ -305,6 +306,11 @@ async function onTagSubmit() {
 			valid = false;
 			validMsg = "请先选择打标模型";
 		}
+		if (output_trigger_words && class_tokens.trim() === "") {
+			valid = false;
+			validMsg = "请填写触发词";
+		}
+
 		if (!valid) {
 			ElMessage({
 				message: validMsg,
@@ -316,7 +322,8 @@ async function onTagSubmit() {
 		// api
 		const result = await batchTag({
 			image_path: image_dir,
-			model_name: tagger_model
+			model_name: tagger_model,
+			class_token: output_trigger_words ? class_tokens : undefined
 		});
 		startGPUListen();
 		startTagListen(result.task_id);

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-25 16:46:32
+ * @LastEditTime: 2024-12-30 10:04:26
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -22,6 +22,21 @@
 					<FolderSelector v-model="ruleForm.image_dir" placeholder="请选择训练用的数据集目录" />
 				</el-form-item>
 				<TaggerModelSelect v-model="ruleForm.tagger_model" prop="tagger_model" />
+				<el-form-item label="是否把触发词输出到打标文件中" prop="output_trigger_words">
+					<el-switch v-model="ruleForm.output_trigger_words" />
+				</el-form-item>
+				<el-form-item
+					v-show="ruleForm.output_trigger_words"
+					label="LoRA 触发词"
+					prop="class_tokens"
+				>
+					<el-input
+						v-model="ruleForm.class_tokens"
+						placeholder="请输入触发词，多个词用英文逗号分隔"
+						type="textarea"
+						:rows="4"
+					/>
+				</el-form-item>
 				<el-form-item>
 					<el-button
 						class="ai-dataset-page-left-btn"
@@ -56,12 +71,17 @@ import { useGPU } from "@/hooks/useGPU";
 import { useTag } from "@/hooks/useTag";
 import { checkDirectory } from "@/utils/lora.helper";
 import type { FormInstance, FormRules } from "element-plus";
+import { validateForm } from "@/utils/tools";
 
 interface RuleForm {
 	/** 图片目录 */
 	image_dir: string;
 	/** 打标模型 */
 	tagger_model: string;
+	/** 是否把触发词输出到打标文件中 */
+	output_trigger_words: boolean;
+	/** LoRA 触发词 */
+	class_tokens: string;
 }
 
 const { isListenTag, startTagListen, stopTagListen, tagTaskStatus, isTagTaskEnd } = useTag();
@@ -72,7 +92,9 @@ const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}ai_dataset_form`;
 const defaultForm = readonly<RuleForm>({
 	image_dir: "/",
-	tagger_model: "joy-caption-alpha-two"
+	tagger_model: "joy-caption-alpha-two",
+	output_trigger_words: true,
+	class_tokens: ""
 });
 const ruleForm = useLocalStorage<RuleForm>(
 	localStorageKey,
@@ -90,69 +112,47 @@ const rules = reactive<FormRules<RuleForm>>({
 					}
 					callback();
 				});
-			}
+			},
+			trigger: "change"
 		}
 	],
-	tagger_model: [{ required: true, message: "请选择打标模型", trigger: "change" }]
+	tagger_model: [{ required: true, message: "请选择打标模型", trigger: "change" }],
+	class_tokens: [
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (!ruleForm.value.output_trigger_words) return callback();
+				if (typeof value !== "string" || value.trim() === "") {
+					callback(new Error("请填写触发词"));
+					return;
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	]
 });
 const submitLoading = ref(false);
-
-/** 校验 */
-async function validate(): Promise<boolean> {
-	try {
-		const { image_dir, tagger_model } = ruleForm.value;
-		let valid = true;
-		let validMsg = "";
-		if (typeof image_dir !== "string" || image_dir.trim() === "") {
-			valid = false;
-			validMsg = "请先选择训练用的数据集目录";
-		}
-		const exists = await checkDirectory(image_dir);
-		if (!exists) {
-			valid = false;
-			validMsg = "数据集目录不存在";
-		}
-		if (typeof tagger_model !== "string" || tagger_model.trim() === "") {
-			valid = false;
-			validMsg = "请先选择打标模型";
-		}
-		if (!valid) {
-			ElMessage({
-				message: validMsg,
-				type: "error"
-			});
-			return false;
-		}
-
-		return true;
-	} catch (error) {
-		ElMessage({
-			message: (error as Error).message ?? "数据集相关信息不完整",
-			type: "warning"
-		});
-		return false;
-	}
-}
 
 /** 打标 */
 async function onSubmit() {
 	try {
+		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
-		const valid = await validate();
+		const valid = await validateForm(ruleFormRef.value);
 		if (!valid) {
 			submitLoading.value = false;
 			return;
 		}
+
 		// api
 		const result = await batchTag({
 			image_path: ruleForm.value.image_dir,
-			model_name: ruleForm.value.tagger_model
+			model_name: ruleForm.value.tagger_model,
+			class_token: ruleForm.value.output_trigger_words ? ruleForm.value.class_tokens : undefined
 		});
 		startGPUListen();
 		startTagListen(result.task_id);
-
 		submitLoading.value = false;
-
 		ElMessage({
 			message: "正在打标...",
 			type: "success"
@@ -161,7 +161,6 @@ async function onSubmit() {
 		submitLoading.value = false;
 		stopGPUListen();
 		stopTagListen();
-
 		console.log("打标任务创建失败", error);
 	}
 }

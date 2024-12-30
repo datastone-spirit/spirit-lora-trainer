@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:28:31
- * @LastEditTime: 2024-12-27 16:14:47
+ * @LastEditTime: 2024-12-30 10:16:29
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue
@@ -15,9 +15,20 @@
 		:dir-prop="formProps.image_dir"
 		dir-popover-content="image_dir"
 		tagger-label="打标模型"
+		:tagger-prop="formProps.tagger_model"
+		tagger-popover-content="tagger_model"
 		:tag-submit="tagSubmit"
 	/>
 	<el-row :gutter="16">
+		<el-col :span="24">
+			<PopoverFormItem
+				label="是否把触发词输出到打标文件中 "
+				:prop="formProps.output_trigger_words"
+				popover-content="output_trigger_words"
+			>
+				<el-switch v-model="ruleForm.output_trigger_words" />
+			</PopoverFormItem>
+		</el-col>
 		<el-col :span="12">
 			<PopoverFormItem
 				label="每个图像重复训练次数"

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 08:41:44
- * @LastEditTime: 2024-12-26 15:56:09
+ * @LastEditTime: 2024-12-30 09:20:23
  * @LastEditors: mulingyuer
  * @Description: 表单项组件
  * @FilePath: \frontend\src\components\Form\PopoverFormItem.vue
@@ -12,7 +12,9 @@
 		<template #label>
 			<span class="popover-form-item-label">
 				{{ label }}
-				<span class="popover-form-item-tips">&lt;{{ popoverContent }}&gt;</span>
+				<span v-if="popoverContent" class="popover-form-item-tips">
+					&lt;{{ popoverContent }}&gt;
+				</span>
 			</span>
 		</template>
 		<slot></slot>

@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 11:43:02
- * @LastEditTime: 2024-12-24 11:33:03
+ * @LastEditTime: 2024-12-30 10:14:10
  * @LastEditors: mulingyuer
  * @Description: 打标模型选择器
  * @FilePath: \frontend\src\components\Form\TaggerModelSelect.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<el-form-item :label="label" :prop="prop">
+	<PopoverFormItem :label="label" :prop="prop" :popover-content="popoverContent">
 		<el-select v-model="value" :placeholder="placeholder">
 			<el-option
 				v-for="item in options"
@@ -17,7 +17,7 @@
 				:value="item.value"
 			/>
 		</el-select>
-	</el-form-item>
+	</PopoverFormItem>
 </template>
 
 <script setup lang="ts">
@@ -25,6 +25,7 @@ export interface TaggerModelSelectProps {
 	label?: string;
 	prop?: string;
 	placeholder?: string;
+	popoverContent?: string;
 }
 
 withDefaults(defineProps<TaggerModelSelectProps>(), {

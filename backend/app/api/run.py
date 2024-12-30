@@ -64,7 +64,7 @@ def serve_assets(filename):
     return send_from_directory(os.path.join(getprojectpath(), 'dist', 'assets'), filename)
 
 # 匹配 /admin 和所有 /admin 开头的路径，返回 index.html
-@app.route('/admin', defaults={'path': ''})
+@app.route('/', defaults={'path': ''})
 @app.route('/admin/<path:path>')
 def serve_admin(path):
     return send_from_directory(app.static_folder, 'index.html')  # 返回 SPA 的入口文件

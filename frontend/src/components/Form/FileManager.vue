@@ -57,28 +57,6 @@ const inputPlaceholder = computed(() => {
 	}
 });
 
-const getDirectoryPath = (path: string) => {
-	if (path === "/") {
-		return "/";
-	}
-
-	// 如果路径是以单一斜杠开头且没有其他子目录或文件，则返回根目录 '/'
-	if (/^\/[^\/]+$/.test(path)) {
-		return "/";
-	}
-
-	// 使用正则判断是否是带文件名的路径
-	const filePattern = /\/[^\/]+(\.[a-zA-Z0-9]+)?$/;
-
-	// 如果路径中包含文件名，返回文件的目录部分
-	if (filePattern.test(path)) {
-		return path.replace(filePattern, ""); // 移除文件名，返回目录路径
-	}
-
-	// 如果路径本身是目录，直接返回
-	return path;
-};
-
 const request = ref({
 	// ----- CHANGE ME! -----
 	// [REQUIRED] Url for development server endpoint
@@ -87,7 +65,7 @@ const request = ref({
 
 	// Additional headers & params & body
 	params: {
-		path: computed(() => getDirectoryPath(folder.value))
+		path: computed(() => folder.value)
 	},
 
 	body: { additionalBody1: ["yes"] },

@@ -31,13 +31,15 @@ class File(Resource):
         elif path.startswith("local://"):
             path = path.replace("local://", "/")
 
+
         full_path = pathFormat(path)
+        parent_path = os.path.dirname(full_path)
         # 检查路径是否存在
-        if not os.path.exists(full_path):
-            return res(success=False, message=f"路径不存在: {full_path}")
+        if not os.path.exists(parent_path):
+            return res(success=False, message=f"路径不存在: {parent_path}")
 
         # 获取目录结构
-        structure = get_directory_structure(full_path, url)
+        structure = get_directory_structure(parent_path, url)
         return structure
 
 class PathCheck(Resource):

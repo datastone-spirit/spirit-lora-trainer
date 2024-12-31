@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch# Define Image Adapter Model
 
 import os
+import gc
 import logging
 from PIL import Image
 from pathlib import Path
@@ -250,9 +251,7 @@ class JoyCaptioner:
         except Exception as e:
             logger.info("unload model failed, ignored", exc_info=e)
 
-
-
-
+@torch.no_grad()
 def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, update_status :Callable, class_token=None) -> List[dict]:
     joy_captioner = None
     try:
@@ -273,3 +272,6 @@ def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_in
     finally:
         if joy_captioner is not None:
             joy_captioner.unload_model()
+            del joy_captioner
+        gc.collect()
+        torch.cuda.empty_cache()

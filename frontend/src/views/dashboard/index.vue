@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:39:40
- * @LastEditTime: 2024-12-24 16:30:24
+ * @LastEditTime: 2024-12-31 08:46:21
  * @LastEditors: mulingyuer
  * @Description: 仪表盘
  * @FilePath: \frontend\src\views\dashboard\index.vue
@@ -16,8 +16,7 @@
 </template>
 
 <script setup lang="ts">
-const path = ref("/tensorboard");
-// const path = ref("https://juejin.cn/");
+const path = ref("/tensorboard/");
 const iframeSrc = computed(() => {
 	return `${location.origin}${path.value}`;
 });

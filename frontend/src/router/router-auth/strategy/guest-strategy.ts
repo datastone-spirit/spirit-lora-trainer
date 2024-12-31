@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-27 08:52:42
- * @LastEditTime: 2024-09-27 08:54:52
+ * @LastEditTime: 2024-12-31 09:13:09
  * @LastEditors: mulingyuer
  * @Description: 访客路由策略
- * @FilePath: \spirit-app-microservice-admin\src\router\router-auth\strategy\guest-strategy.ts
+ * @FilePath: \frontend\src\router\router-auth\strategy\guest-strategy.ts
  * 怎么可能会有bug！！！
  */
 import { RouterAuthContext } from "../context";
@@ -15,7 +15,7 @@ export class GuestStrategy implements AuthStrategy {
 		const { isLogin, next } = context;
 
 		if (isLogin) {
-			next({ name: "Dashboard" });
+			next({ path: "/" });
 		} else {
 			next();
 		}

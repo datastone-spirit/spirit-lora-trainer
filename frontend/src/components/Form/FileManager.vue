@@ -38,7 +38,7 @@ export interface InputTreeSelectorProps {
 	fileIcon?: string;
 }
 
-const features = ["select", "preview"];
+const features = ["select", "preview", "newfolder"];
 const typeValue: any = {
 	file: false,
 	dir: true

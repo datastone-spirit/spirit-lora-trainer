@@ -43,7 +43,7 @@ bp = Blueprint('tensorboard', __name__)
 def proxy_tensorboard(path):
     return proxy_tb(args.tb_host, args.tb_port)
 
-api.add_resource(File, "/file")  # 获取目录结构
+api.add_resource(File, "/file", methods=['GET', 'POST'])  # 获取目录结构
 api.add_resource(PathCheck, "/path_check")  # 检测目录是否存在
 api.add_resource(TagDirFile, "/tag_dir_file")  # 获取目录中图片和txt文件
 api.add_resource(DeleteFile, "/delete_file")  # 删除文件

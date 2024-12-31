@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 15:26:11
- * @LastEditTime: 2024-12-25 15:02:07
+ * @LastEditTime: 2024-12-31 17:26:33
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag.ts
@@ -155,6 +155,9 @@ export const useTag = (() => {
 			if (isTagTaskEnd(tagTaskStatus.value)) {
 				trainingStore.resetTagData();
 				tagTaskStatus.value = "none";
+			}
+			if (tagTaskStatus.value === "none") {
+				tagTaskStatus.value = "created";
 			}
 			trainingStore.setIsListenTag(true);
 			trainingStore.setIsTagPolling(true);

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:06:24
- * @LastEditTime: 2024-12-25 15:59:41
+ * @LastEditTime: 2024-12-31 17:20:53
  * @LastEditors: mulingyuer
  * @Description: 训练lora hooks
  * @FilePath: \frontend\src\hooks\useTraining.ts
@@ -165,6 +165,9 @@ export const useTraining = (() => {
 			if (isLoraTaskEnd(loraTaskStatus.value)) {
 				trainingStore.resetLoraData();
 				loraTaskStatus.value = "none";
+			}
+			if (loraTaskStatus.value === "none") {
+				loraTaskStatus.value = "created";
 			}
 			trainingStore.setIsListenLora(true);
 			trainingStore.setIsLoraPolling(true);

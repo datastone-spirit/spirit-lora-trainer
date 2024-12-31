@@ -6,7 +6,7 @@ import vueDevTools from "vite-plugin-vue-devtools";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-import { gitCommitTime } from "./vite-plugins/git-commit-time";
+import { getCommitInfo } from "./vite-plugins/git-commit-info";
 import { analyzer } from "vite-bundle-analyzer";
 
 /** esbuild打包配置 */
@@ -22,6 +22,7 @@ function getEsbuildConfig(mode: string): ESBuildOptions | undefined {
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
 	const viteEnv = loadEnv(mode, process.cwd()) as ImportMetaEnv;
+	const commitInfo = getCommitInfo();
 
 	return {
 		/** 路由的 baseURL，控制 BASE_URL 环境变量 */
@@ -75,7 +76,8 @@ export default defineConfig(({ mode }) => {
 			}
 		},
 		define: {
-			__GIT_COMMIT_TIME__: JSON.stringify(gitCommitTime())
+			__GIT_COMMIT_TIME__: JSON.stringify(commitInfo.lastTime),
+			__GIT_COMMIT_ID__: JSON.stringify(commitInfo.lastId)
 		},
 		esbuild: getEsbuildConfig(mode),
 		build: {

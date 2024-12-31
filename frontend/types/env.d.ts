@@ -19,3 +19,5 @@ interface ImportMeta {
 
 /** git最后一次提交时间 */
 declare const __GIT_COMMIT_TIME__: string;
+/** git最后一次commit id */
+declare const __GIT_COMMIT_ID__: string;

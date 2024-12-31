@@ -23,6 +23,7 @@
 			</div>
 			<div class="about-page-left-footer">
 				<div class="about-page-left-footer-title">最后更新时间</div>
+				<div class="about-page-left-footer-value">{{ commitId }}</div>
 				<div class="about-page-left-footer-value">{{ commitTime }}</div>
 			</div>
 		</div>
@@ -136,6 +137,7 @@ const linkList = ref<LinkList>([
 ]);
 
 const commitTime = formatDate(__GIT_COMMIT_TIME__, "YYYY/MM/DD HH:mm:ss");
+const commitId = __GIT_COMMIT_ID__;
 </script>
 
 <style lang="scss" scoped>

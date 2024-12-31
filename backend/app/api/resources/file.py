@@ -19,31 +19,35 @@ class File(Resource):
         """
         获取存储中目录结构，支持懒加载
         """
-        # 获取当前请求的域名
-        url = request.host_url
+        try:
+           # 获取当前请求的域名
+           url = request.host_url
 
-        # 直接从 URL 查询参数获取数据
-        path = request.args.get('path', '')
+           # 直接从 URL 查询参数获取数据
+           path = request.args.get('path', '')
 
-        # 处理路径前缀
-        if path.startswith("local:///"):
-            path = path.replace("local:///", "/")
-        elif path.startswith("local://"):
-            path = path.replace("local://", "/")
+           # 处理路径前缀
+           if path.startswith("local:///"):
+               path = path.replace("local:///", "/")
+           elif path.startswith("local://"):
+               path = path.replace("local://", "/")
 
 
-        full_path = pathFormat(path)
-        # 检查路径是否存在
-        # if not os.path.exists(full_path):
-        #     return res(success=False, message=f"路径不存在: {full_path}")
+           full_path = pathFormat(path)
+           # 检查路径是否存在
+           # if not os.path.exists(full_path):
+           #     return res(success=False, message=f"路径不存在: {full_path}")
 
-        # 如果路径包含文件名（通过检查是否有扩展名）
-        if os.path.isfile(full_path):
-            full_path = os.path.dirname(full_path)  # 获取文件所在目录
+           # 如果路径包含文件名（通过检查是否有扩展名）
+           if os.path.isfile(full_path):
+               full_path = os.path.dirname(full_path)  # 获取文件所在目录
 
-        # 获取目录结构
-        structure = get_directory_structure(full_path, url)
-        return structure
+           # 获取目录结构
+           structure = get_directory_structure(full_path, url)
+           return structure
+        except Exception as e:
+            logger.warning(f"获取目录结构失败:", exc_info=e)
+            return res(success=False, message=f"获取目录结构失败: {str(e)}", code=400)
     
     def post(self):
         """
@@ -65,7 +69,8 @@ class File(Resource):
             os.makedirs(full_path)
             return res(success=True, message=f"文件夹 {folder_name} 创建成功: {full_path}")
         except Exception as e:
-            return res(success=False, message=f"创建文件夹失败: {str(e)}", code=400)
+            logger.warning("create folder failed:", exc_info=e)
+            return res(success=False, message=f"创建文件夹失败: {str(e)}", code=500), 500
 
 class PathCheck(Resource):
     @use_swagger_config(file_check_config)

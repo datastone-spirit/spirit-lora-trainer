@@ -40,27 +40,30 @@ def get_directory_structure(directory, url=""):
         result = []  # 存放最终的结果
 
         for item in items:
-            item_path = os.path.join(directory, item)
-            item_stat = os.stat(item_path)
-            # logger.info(f"item_stat-------------------------- is {item_stat}")
-            item_info = {
-                "basename": os.path.basename(item_path),
-                "extension": os.path.splitext(item_path)[1],
-                "extra_metadata": [],
-                "last_modified": int(item_stat.st_mtime),
-                "path": f"{item_path}",
-                "type": "dir" if os.path.isdir(item_path) else "file",
-                "visibility": "public",
-            }
-            if os.path.isdir(item_path):
-                result.append(item_info)
-            elif os.path.isfile(item_path):
-                item_info["file_size"] = item_stat.st_size
-                item_info["mime_type"] = mimetypes.guess_type(item_path)[0]
-                if item_info["extension"].lower() in {".png", ".jpg", ".jpeg", ".gif"}:
-                    item_info["url"] = f"{url}api/image{item_path}"
-                result.append(item_info)
-
+            try:
+                item_path = os.path.join(directory, item)
+                item_stat = os.stat(item_path)
+                # logger.info(f"item_stat-------------------------- is {item_stat}")
+                item_info = {
+                    "basename": os.path.basename(item_path),
+                    "extension": os.path.splitext(item_path)[1],
+                    "extra_metadata": [],
+                    "last_modified": int(item_stat.st_mtime),
+                    "path": f"{item_path}",
+                    "type": "dir" if os.path.isdir(item_path) else "file",
+                    "visibility": "public",
+                }
+                if os.path.isdir(item_path):
+                    result.append(item_info)
+                elif os.path.isfile(item_path):
+                    item_info["file_size"] = item_stat.st_size
+                    item_info["mime_type"] = mimetypes.guess_type(item_path)[0]
+                    if item_info["extension"].lower() in {".png", ".jpg", ".jpeg", ".gif"}:
+                        item_info["url"] = f"{url}api/image{item_path}"
+                    result.append(item_info)
+            except Exception as e:
+                logger.warning(f"get directory structure failed, error:{str(e)}")
+                continue
         else:
             return {
                 "storages": ["local"],
@@ -70,6 +73,7 @@ def get_directory_structure(directory, url=""):
             }
 
     except Exception as e:
+        logger.warning(f"get directory structure failed, error:", exc_info=e)
         return {"error": str(e)}
 
 

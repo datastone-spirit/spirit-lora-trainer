@@ -32,7 +32,7 @@ class Training(Resource):
         except ValueError as e:
             logger.warning(f"start training with parameter:{parameter} failed, error:", exc_info=e) 
             return res(success=False, 
-                       message=f"Your training parameters were incorrect, please fix them. detail info:{e}", code=400), 400
+                       message=f"Your training parameters were incorrect, please fix them. detail info:{str(e)}", code=400), 400
         except Exception as e:
             logger.warning(f"start training with parameter:{parameter} failed, error:", exc_info=e) 
             return res(success=False, message="Server Interal Error, please contact the administrator", code=500), 500

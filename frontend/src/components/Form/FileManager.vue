@@ -46,7 +46,6 @@ const typeValue: any = {
 const visible = ref(false);
 const props = withDefaults(defineProps<InputTreeSelectorProps>(), {});
 const folder = defineModel({ type: String, required: true });
-const fileId = Math.random().toString(36).substring(2);
 const FolderIcon = useIcon({ name: "ri-folder-line" });
 
 const inputPlaceholder = computed(() => {
@@ -71,9 +70,12 @@ const request = ref({
 	body: { additionalBody1: ["yes"] },
 
 	// And/or transform request callback
-	// transformRequest: (req: any) => {
-	// 	return req;
-	// },
+	transformRequest: (req: any) => {
+		if (req.method === "post") {
+			refresh();
+		}
+		return req;
+	},
 
 	// XSRF Token header name
 	xsrfHeaderName: "CSRF-TOKEN"
@@ -98,6 +100,26 @@ const handleSelectButton = {
 		visible.value = false;
 	}
 };
+
+const refresh = () => {
+	// 新增完成后，刷新文件管理器
+	setTimeout(() => {
+		const refreshSvg = document.querySelector(`#${fileId} span[title='Refresh'] svg`);
+		if (refreshSvg) {
+			(refreshSvg as HTMLElement).style.pointerEvents = "all";
+			refreshSvg?.dispatchEvent(new Event("click", { bubbles: true }));
+		}
+	}, 500);
+};
+const generateRandomString = () => {
+	const characters = "abcdefghijklmnopqrstuvwxyz"; // 小写字母字符集
+	let result = "";
+	for (let i = 0; i < 10; i++) {
+		result += characters.charAt(Math.floor(Math.random() * characters.length));
+	}
+	return result;
+};
+const fileId = generateRandomString();
 
 const tooglePopover = () => {
 	visible.value = !visible.value;

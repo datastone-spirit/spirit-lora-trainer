@@ -101,7 +101,6 @@ Before running the trainer, you need to prepare the models. There are two catego
 |Model Name|Model Path|Model Description|Download Link|Category|
 |-|-|-|-|-|
 |flux1-dev.safetensors|`backend/models/unet/`|The Unet model, released by the BlackForestLib | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)|Training|
-|
 |ae.safetensors|`backend/models/vae/`|The Variation Auto Encoder model, released by the BlackForestLib | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)|Training|
 |clip_l.safetensors|`backend/models/clip/`|The Flux Text Encoder model, released by the BlackForestLib | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)|Training|
 |t5xxl_fp16.safetensors|`backend/models/clip/`|The Text to Text model, released by the Google | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true)|Training|

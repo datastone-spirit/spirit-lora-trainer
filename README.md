@@ -1,4 +1,8 @@
-# Spirit Lora Trainer 智灵训练器
+<div align="center">
+  <img src="public/images/logo.png" alt="智灵训练器" style="max-width: 100%;" />
+  <hr/>
+  <p text-aligin="center"><span style="font-weight:bold">A robust, simplicity and reliability Flux1-LoRA trainer</span></p>
+</div>
 
 
 ## Introduction

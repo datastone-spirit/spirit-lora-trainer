@@ -169,7 +169,7 @@ python -m app.api.run.py
 
 - [ ] Support Windows OS
 - [ ] Support SDXL Model Lora Training
-- [ ] Support CogVideoX Model Lora Training
+- [ ] Support HunyuanVideo Model Lora Training
 - [ ] Persistence the task status into the database
 
 ## Acknowledge

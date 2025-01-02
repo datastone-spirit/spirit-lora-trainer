@@ -2,12 +2,12 @@
   <img src="/public/images/logo.png" alt="智灵训练器" style="max-width: 100%;" />
   <p text-aligin="center"><span style="font-weight:bold">A robust, simplicity and reliability Flux1-LoRA trainer</span></p>
   <div align="center">
-    <a href="https://serverless.datastone.cn/">official website</a>&emsp;|&emsp;
+    <a href="https://serverless.datastone.cn/">Official website</a>&emsp;|&emsp;
     <a href="https://serverless.datastone.cn/sprite/app/login">Try Online</a>&emsp;|&emsp;
-    <a href="https://serverless.datastone.cn/sprite/docs">docs</a>
+    <a href="https://serverless.datastone.cn/sprite/docs">Docs</a>&emsp;|&emsp;
+    <a href="./docs/README.zh-CN.md">中文README</a>
   </div>
   <div>
-    <a href="./docs/README.zh-CN.md"><image src="https://img.shields.io/badge/README.zh-CN-red.svg" alt="README.zh-CN" style="max-width: 100%;" /></a>
   </div>
 </div>
 

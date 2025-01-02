@@ -1,4 +1,3 @@
-
 <p align="center">
   <img src="../public/images/logo.png" alt="智灵训练器" style="max-width: 100%;" />
 </p>
@@ -7,13 +6,13 @@
 
 ## 介绍
 
-Spirit Lora Trainer 是一款功能强大的工具，旨在提供简单且可靠的方式来训练 Flux1-LoRA 模型。它基于 [kohya-ss script](https://github.com/kohya-ss/sd-scripts)构建，拥有简洁直观的用户界面，能够有效简化模型训练过程，同时提供实时监控功能。其分离架构确保了训练过程的稳定性。支持基本的训练工作流程，包括模型训练和图像打标。
+Spirit Lora Trainer 是一款功能强大的工具，旨在提供简单且可靠的方式来训练 Flux1-LoRA 模型。它基于 [kohya-ss script](https://github.com/kohya-ss/sd-scripts) 构建，拥有简洁直观的用户界面，能够有效简化模型训练过程，同时提供实时监控功能，其分离架构确保了训练过程的稳定性。训练器支持基本的训练工作流程，包括模型训练和图像打标。
 
 ## 功能特点
 
-- **简单**：Spirit Lora Trainer 是一个用户友好且直观的工具，用户只需配置少量参数即可训练自己的 Flux1 LoRA 模型。
+- **简单**：Spirit Lora Trainer 是一个对用户友好且直观的工具，用户只需配置少量参数即可训练自己的 Flux1 LoRA 模型。
 
-- **可观察**：过实时显示关键指标（如损失值、训练步数、剩余预估时间等），用户可以轻松监控训练过程。
+- **可观察**：通过实时显示关键指标（如损失值、训练步数、剩余预估时间等），用户可以轻松监控训练过程。
 
 - **稳定**：基于分离式架构设计，确保训练状态持久化。即使在重新打开前端页面后，训练进度也不会丢失。
 
@@ -55,7 +54,7 @@ pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121
 另外，xformers 库可以提升性能。你需要安装与 torch 版本匹配的正确版本：
 
 ```bash
-pip install -U xformers==0.0.28.post3 --index-url https://download.pytorch.org/whl/cu121 
+pip install -U xformers==0.0.28.post3 --index-url https://download.pytorch.org/whl/cu121
 ```
 
 ## 构建和运行
@@ -65,7 +64,7 @@ pip install -U xformers==0.0.28.post3 --index-url https://download.pytorch.org/w
 在运行前端之前，你必须先将前端项目打包构建。为此，请进入到 `frontend` 目录，并运行以下命令以安装依赖项：
 
 ```bash
-pnpm install 
+pnpm install
 ```
 
 安装依赖项后，运行以下命令构建前端。构建完成后，生成的文件将保存到 `frontend/dist` 目录中：
@@ -102,12 +101,12 @@ pip install -r requirements.txt
 
 #### 训练模型
 
-|模型名称|模型路径|模型描述|下载链接|分类|
-|-|-|-|-|-|
-|flux1-dev.safetensors|`backend/models/unet/`|The Unet model, released by the BlackForestLib | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)|Training|
-|ae.safetensors|`backend/models/vae/`|The Variation Auto Encoder model, released by the BlackForestLib | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)|Training|
-|clip_l.safetensors|`backend/models/clip/`|The Flux Text Encoder model, released by the BlackForestLib | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)|Training|
-|t5xxl_fp16.safetensors|`backend/models/clip/`|The Text to Text model, released by the Google | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true)|Training|
+| 模型名称               | 模型路径               | 模型描述                                                         | 下载链接                                                                                                               | 分类     |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| flux1-dev.safetensors  | `backend/models/unet/` | The Unet model, released by the BlackForestLib                   | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)       | Training |
+| ae.safetensors         | `backend/models/vae/`  | The Variation Auto Encoder model, released by the BlackForestLib | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)              | Training |
+| clip_l.safetensors     | `backend/models/clip/` | The Flux Text Encoder model, released by the BlackForestLib      | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
+| t5xxl_fp16.safetensors | `backend/models/clip/` | The Text to Text model, released by the Google                   | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
 
 #### 打标模型
 
@@ -118,7 +117,7 @@ pip install -r requirements.txt
 - **模型名称**: Florence2
 - **模型路径**: `backend/models/florence2/models--multimodalart--Florence-2-large-no-flash-attn`
 - **模型描述**: Florence2 是一个多模态模型，能够生成图像描述，基于 MultimodalArt。
-- **下载命令**: 进入  `backend/models/florence2/models--multimodalart--Florence-2-large-no-flash-attn` 目录并运行命令: `huggingface-cli download multimodalart/Florence-2-large-no-flash-attn --localdir .`
+- **下载命令**: 进入 `backend/models/florence2/models--multimodalart--Florence-2-large-no-flash-attn` 目录并运行命令: `huggingface-cli download multimodalart/Florence-2-large-no-flash-attn --localdir .`
 
 ##### Joy-Caption-Two-Alpha
 
@@ -131,7 +130,7 @@ Llama3.1 模型
 - **模型描述**: Llama3.1 是一个基于 Meta 发布的 Llama3.1 模型的大型语言模型（LLM）。
 - **下载命令**:
   - 创建目录 `backend/models/llm/Meta-Llama-3.1-8B-Instruct-bnb-4bit`
-  - 进入目录  `backend/models/llm/Meta-Llama-3.1-8B-Instruct-bnb-4bit` 并运行命令：`huggingface-cli download unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit --local-dir .`
+  - 进入目录 `backend/models/llm/Meta-Llama-3.1-8B-Instruct-bnb-4bit` 并运行命令：`huggingface-cli download unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit --local-dir .`
 
 Joy-Caption-Alpha-Two 模型
 
@@ -149,7 +148,7 @@ siglip-so400m-patch14-384
 - **模型描述**: siglip-so400m-patch14-384 是一个基于 Google 发布的 CLIP 模型。
 - **下载命令**:
   - 创建目录 `backend/models/clip/siglip-so400m-patch14-384`
-  - 进入目录  `backend/models/clip/siglip-so400m-patch14-384` 并运行命令：`huggingface-cli download google/siglip-so400m-patch14-384 --local-dir .`
+  - 进入目录 `backend/models/clip/siglip-so400m-patch14-384` 并运行命令：`huggingface-cli download google/siglip-so400m-patch14-384 --local-dir .`
 
 ### 运行训练器
 
@@ -175,6 +174,6 @@ python -m app.api.run.py
 - [ ] 支持 混元视频模型 Lora 训练
 - [ ] 持久化任务状态到数据库
 
-## 感谢
+## 鸣谢
 
 - 感谢 [kohya-ss](https://github.com/kohya-ss/sd-scripts) 为 Flux1 训练贡献了如此优秀的脚本，这些脚本使我们能够构建此训练器。

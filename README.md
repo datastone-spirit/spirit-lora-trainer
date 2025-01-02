@@ -3,7 +3,7 @@
 
 ## Introduction
 
-Spirit Lora Trainer is a robust toolkit for training Flux1-LoRA models with a focus on simplicity and reliability. It features a clean, intuitive interface that simplifies the model training process while providing real-time monitoring capabilities. Built on a decoupled architecture, it ensures stable training sessions. The toolkit supports essential machine learning workflows including model training and image captioning.
+Spirit Lora Trainer is a robust toolkit for training Flux1-LoRA models with a focus on simplicity and reliability and based on [kohya-ss script](https://github.com/kohya-ss/sd-scripts). It features a clean, intuitive interface that simplifies the model training process while providing real-time monitoring capabilities. Built on a decoupled architecture, it ensures stable training sessions. The toolkit supports essential machine learning workflows including model training and image captioning.
 
 ## Features
 
@@ -171,3 +171,7 @@ python -m app.api.run.py
 - [ ] Support SDXL Model Lora Training
 - [ ] Support CogVideoX Model Lora Training
 - [ ] Persistence the task status into the database
+
+## Acknowledge
+
+- [kohya-ss](https://github.com/kohya-ss/sd-scripts) contributed so amazing scripts for the Flux1 training, we leverage the scripts to build the trainer.

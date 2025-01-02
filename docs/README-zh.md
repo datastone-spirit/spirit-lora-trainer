@@ -103,10 +103,10 @@ pip install -r requirements.txt
 
 | 模型名称               | 模型路径               | 模型描述                                                         | 下载链接                                                                                                               | 分类     |
 | ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
-| flux1-dev.safetensors  | `backend/models/unet/` | The Unet model, released by the BlackForestLib                   | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)       | Training |
-| ae.safetensors         | `backend/models/vae/`  | The Variation Auto Encoder model, released by the BlackForestLib | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)              | Training |
-| clip_l.safetensors     | `backend/models/clip/` | The Flux Text Encoder model, released by the BlackForestLib      | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
-| t5xxl_fp16.safetensors | `backend/models/clip/` | The Text to Text model, released by the Google                   | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
+| flux1-dev.safetensors  | `backend/models/unet/` | 由 BlackForestLib 发布的 Unet 模型                   | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)       | Training |
+| ae.safetensors         | `backend/models/vae/`  | 由 BlackForestLib 发布的变分自编码器模型 | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)              | Training |
+| clip_l.safetensors     | `backend/models/clip/` | 由 BlackForestLib 发布的 Flux 文本编码器模型      | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
+| t5xxl_fp16.safetensors | `backend/models/clip/` | 由 Google 发布的 Text to Text 模型                   | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
 
 #### 打标模型
 

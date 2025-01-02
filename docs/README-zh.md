@@ -1,11 +1,10 @@
 <div align="center">
   <img src="/public/images/logo.png" alt="智灵训练器" style="max-width: 100%;" />
-  <hr style="height: 1px;"/>
   <p text-aligin="center"><span style="font-weight:bold">一个强大、简单且可靠的 Flux1-LoRA 训练器</span></p>
   <div align="center">
-    <a href="https://serverless.datastone.cn/" target="_blank">官网</a>&emsp;|&emsp;
-    <a href="https://serverless.datastone.cn/sprite/app/login"  target="_blank">在线体验</a>&emsp;|&emsp;
-    <a href="https://serverless.datastone.cn/sprite/docs/zh" target="_blank">文档</a>
+    <a href="https://serverless.datastone.cn/">官网</a>&emsp;|&emsp;
+    <a href="https://serverless.datastone.cn/sprite/app/login">在线体验</a>&emsp;|&emsp;
+    <a href="https://serverless.datastone.cn/sprite/docs/zh">文档</a>
   </div>
 </div>
 
@@ -108,12 +107,12 @@ pip install -r requirements.txt
 
 #### 训练模型
 
-| 模型名称               | 模型路径               | 模型描述                                                         | 下载链接                                                                                                               | 分类     |
-| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
-| flux1-dev.safetensors  | `backend/models/unet/` | 由 BlackForestLib 发布的 Unet 模型                   | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)       | Training |
-| ae.safetensors         | `backend/models/vae/`  | 由 BlackForestLib 发布的变分自编码器模型 | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)              | Training |
-| clip_l.safetensors     | `backend/models/clip/` | 由 BlackForestLib 发布的 Flux 文本编码器模型      | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
-| t5xxl_fp16.safetensors | `backend/models/clip/` | 由 Google 发布的 Text to Text 模型                   | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
+| 模型名称               | 模型路径               | 模型描述                                     | 下载链接                                                                                                               | 分类     |
+| ---------------------- | ---------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| flux1-dev.safetensors  | `backend/models/unet/` | 由 BlackForestLib 发布的 Unet 模型           | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)       | Training |
+| ae.safetensors         | `backend/models/vae/`  | 由 BlackForestLib 发布的变分自编码器模型     | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)              | Training |
+| clip_l.safetensors     | `backend/models/clip/` | 由 BlackForestLib 发布的 Flux 文本编码器模型 | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
+| t5xxl_fp16.safetensors | `backend/models/clip/` | 由 Google 发布的 Text to Text 模型           | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
 
 #### 打标模型
 

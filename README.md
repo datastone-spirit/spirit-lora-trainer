@@ -6,7 +6,12 @@
     <a href="https://serverless.datastone.cn/sprite/app/login">Try Online</a>&emsp;|&emsp;
     <a href="https://serverless.datastone.cn/sprite/docs">docs</a>
   </div>
+  <div>
+    <a href="./docs/README.zh-CN.md"><image src="https://img.shields.io/badge/README.zh-CN-red.svg" alt="README.zh-CN" style="max-width: 100%;" /></a>
+  </div>
 </div>
+
+
 
 ## Introduction
 

@@ -1,6 +1,13 @@
-<p align="center">
-  <img src="../public/images/logo.png" alt="智灵训练器" style="max-width: 100%;" />
-</p>
+<div align="center">
+  <img src="/public/images/logo.png" alt="智灵训练器" style="max-width: 100%;" />
+  <hr style="height: 1px;"/>
+  <p text-aligin="center"><span style="font-weight:bold">一个强大、简单且可靠的 Flux1-LoRA 训练器</span></p>
+  <div align="center">
+    <a href="https://serverless.datastone.cn/" target="_blank">官网</a>&emsp;|&emsp;
+    <a href="https://serverless.datastone.cn/sprite/app/login"  target="_blank">在线体验</a>&emsp;|&emsp;
+    <a href="https://serverless.datastone.cn/sprite/docs/zh" target="_blank">文档</a>
+  </div>
+</div>
 
 # Spirit Lora Trainer 智灵训练器
 

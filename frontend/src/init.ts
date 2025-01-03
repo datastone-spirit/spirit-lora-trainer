@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:52:15
- * @LastEditTime: 2024-12-27 15:45:23
+ * @LastEditTime: 2025-01-03 16:07:22
  * @LastEditors: mulingyuer
  * @Description: 初始化脚本
  * @FilePath: \frontend\src\init.ts
@@ -50,7 +50,7 @@ async function initTraining(data: CurrentTaskResult) {
 
 export async function init() {
 	try {
-		const taskData = await currentTask();
+		const taskData = await currentTask(8000);
 		let initPromise: Promise<void>;
 
 		switch (taskData.task_type) {

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:53:10
- * @LastEditTime: 2024-12-26 16:19:48
+ * @LastEditTime: 2025-01-03 15:15:38
  * @LastEditors: mulingyuer
  * @Description: 任务api
  * @FilePath: \frontend\src\api\task\index.ts
@@ -12,11 +12,12 @@ import type { CurrentTaskResult, TaskListResult } from "./types";
 export type * from "./types";
 
 /** 查询当前正在运行的任务 */
-export function currentTask() {
+export function currentTask(timeout?: number) {
 	return request<CurrentTaskResult>({
 		url: "/tasks/current",
 		method: "GET",
-		showErrorMessage: false
+		showErrorMessage: false,
+		timeout
 	});
 }
 

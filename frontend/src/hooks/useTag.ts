@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 15:26:11
- * @LastEditTime: 2025-01-03 11:45:13
+ * @LastEditTime: 2025-01-03 17:38:02
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag.ts
@@ -12,7 +12,6 @@ import { manualTagInfo } from "@/api/monitor";
 import type { TaskStatus } from "@/api/types";
 import type { TagData, TagTaskStatus } from "@/stores";
 import { useTrainingStore } from "@/stores";
-import { sleep } from "@/utils/tools";
 
 type EventType = Extract<TaskStatus, "complete" | "failed">;
 type EventCallback = () => void;
@@ -41,6 +40,8 @@ export const useTag = (() => {
 		const isTagPolling = trainingRefs.isTagPolling;
 		/** 当前打标任务状态 */
 		const tagTaskStatus = trainingRefs.tagTaskStatus;
+		/** 定时器 */
+		let timer: number | null = null;
 
 		/** 订阅打标完成 */
 		function addTagEventListener(type: EventType, callback: EventCallback) {
@@ -86,6 +87,14 @@ export const useTag = (() => {
 			};
 		}
 
+		/** 清理定时器 */
+		function clearTimer() {
+			if (timer) {
+				clearInterval(timer);
+				timer = null;
+			}
+		}
+
 		/** 轮询获取打标信息 */
 		function updateTagData() {
 			if (!isListenTag.value) return;
@@ -93,29 +102,26 @@ export const useTag = (() => {
 
 			manualTagInfo({
 				task_id: tagTaskId.value
-			})
-				.then((res) => {
-					if (!res.detail) return;
-					trainingStore.setTagData(formatData(res));
-					trainingStore.setTagTaskStatus(res.status);
+			}).then((res) => {
+				if (!res.detail) return;
+				trainingStore.setTagData(formatData(res));
+				trainingStore.setTagTaskStatus(res.status);
 
-					switch (res.status) {
-						case "complete": // 完成
-							tagComplete();
-							break;
-						case "failed": // 出错
-							tagFailed();
-							break;
-					}
-				})
-				.finally(() => {
-					isListenTag.value && sleep(tagSleepTime.value).then(updateTagData);
-				});
+				switch (res.status) {
+					case "complete": // 完成
+						tagComplete();
+						break;
+					case "failed": // 出错
+						tagFailed();
+						break;
+				}
+			});
 		}
 
 		/** 打标完成 */
 		function tagComplete() {
 			// 关闭轮询
+			if (timer) clearTimer();
 			trainingStore.setIsTagPolling(false);
 			trainingStore.setIsListenTag(false);
 			tagTaskStatus.value = "none";
@@ -134,6 +140,7 @@ export const useTag = (() => {
 		/** 打标失败 */
 		function tagFailed() {
 			// 关闭轮询
+			if (timer) clearTimer();
 			trainingStore.setIsTagPolling(false);
 			trainingStore.setIsListenTag(false);
 			tagTaskStatus.value = "none";
@@ -152,6 +159,7 @@ export const useTag = (() => {
 		/** 开始监听 */
 		function startTagListen(taskId?: string) {
 			if (isTagPolling.value) return;
+			if (timer) clearTimer();
 			taskId && (tagTaskId.value = taskId);
 			if (isTagTaskEnd(tagTaskStatus.value)) {
 				trainingStore.resetTagData();
@@ -162,12 +170,13 @@ export const useTag = (() => {
 			}
 			trainingStore.setIsListenTag(true);
 			trainingStore.setIsTagPolling(true);
-			updateTagData();
+			timer = setInterval(updateTagData, tagSleepTime.value);
 		}
 
 		/** 停止监听 */
 		function stopTagListen() {
 			if (!isTagPolling.value) return;
+			if (timer) clearTimer();
 			trainingStore.setIsTagPolling(false);
 			trainingStore.setIsListenTag(false);
 			// 如果已经完成或者失败，就停止

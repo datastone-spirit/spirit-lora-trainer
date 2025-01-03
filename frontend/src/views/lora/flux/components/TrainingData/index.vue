@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:28:31
- * @LastEditTime: 2024-12-30 10:16:29
+ * @LastEditTime: 2025-01-03 16:39:56
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue
@@ -20,6 +20,15 @@
 		:tag-submit="tagSubmit"
 	/>
 	<el-row :gutter="16">
+		<el-col v-if="ruleForm.tagger_model === 'joy-caption-alpha-two'" :span="24">
+			<JoyCaptionPromptTypeSelect
+				v-model="ruleForm.prompt_type"
+				label="Joy Caption 提示词类型"
+				:prop="formProps.prompt_type"
+				popover-content="prompt_type"
+				placeholder="请选择Joy Caption 提示词类型"
+			/>
+		</el-col>
 		<el-col :span="24">
 			<PopoverFormItem
 				label="是否把触发词输出到打标文件中 "

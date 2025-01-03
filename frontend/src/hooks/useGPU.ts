@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 17:37:15
- * @LastEditTime: 2024-12-25 15:12:44
+ * @LastEditTime: 2025-01-03 17:35:55
  * @LastEditors: mulingyuer
  * @Description: gpu hooks
  * @FilePath: \frontend\src\hooks\useGPU.ts
@@ -9,9 +9,9 @@
  */
 import { gpuMonitorInfo } from "@/api/monitor";
 import type { GPUMonitorInfoResult } from "@/api/monitor";
-import { sleep } from "@/utils/tools";
 import { useTrainingStore } from "@/stores";
 import type { GPUData } from "@/stores";
+// import axios from "axios";
 
 export function useGPU() {
 	const trainingStore = useTrainingStore();
@@ -25,6 +25,8 @@ export function useGPU() {
 	const gpuSleepTime = readonly(trainingRefs.gpuSleepTime);
 	/** 是否开启了gpu轮询 */
 	const isGpuPolling = readonly(trainingRefs.isGpuPolling);
+	/** 定时器 */
+	let timer: number | null = null;
 
 	/** 计算百分比 */
 	function calculatePercentage(current: number, total: number) {
@@ -39,35 +41,40 @@ export function useGPU() {
 		};
 	}
 
+	/** 清理定时器 */
+	function clearTimer() {
+		if (timer) {
+			clearInterval(timer);
+			timer = null;
+		}
+	}
+
 	/** 轮询获取gpu数据 */
 	function updateGpuData() {
-		if (!isListenGPU.value) return;
-		gpuMonitorInfo()
-			.then((res) => {
-				const result = res[0];
-				if (!result) return;
+		gpuMonitorInfo().then((res) => {
+			const result = res[0];
+			if (!result) return;
 
-				isListenGPU.value && trainingStore.setGpuData(formatData(result));
-			})
-			.finally(() => {
-				isListenGPU.value && sleep(gpuSleepTime.value).then(updateGpuData);
-			});
+			trainingStore.setGpuData(formatData(result));
+		});
 	}
 
 	/** 开始监听 */
 	function startGPUListen() {
 		if (isGpuPolling.value) return;
+		if (timer) clearTimer();
 		trainingStore.resetGpuData();
 		trainingStore.setIsGpuPolling(true);
 		trainingStore.setIsListenGPU(true);
-		updateGpuData();
+		timer = setInterval(updateGpuData, gpuSleepTime.value);
 	}
 
 	/** 停止监听 */
 	function stopGPUListen() {
 		if (!isGpuPolling.value) return;
-		trainingStore.setIsGpuPolling(false);
+		if (timer) clearTimer();
 		trainingStore.setIsListenGPU(false);
+		trainingStore.setIsGpuPolling(false);
 		trainingStore.resetGpuData();
 	}
 

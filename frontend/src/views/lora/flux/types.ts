@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2024-12-30 09:14:24
+ * @LastEditTime: 2025-01-03 16:39:20
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -39,6 +39,8 @@ export interface RuleForm {
 	image_dir: string;
 	/** 打标模型 */
 	tagger_model: string;
+	/** joy-caption-alpha-two打标模型的提示词类型 */
+	prompt_type: string;
 	/** 是否把触发词输出到打标文件中 */
 	output_trigger_words: boolean;
 	/** 每个图像重复训练次数 */

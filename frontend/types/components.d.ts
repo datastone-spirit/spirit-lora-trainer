@@ -55,6 +55,7 @@ declare module 'vue' {
     Icon: typeof import('./../src/components/Icon/Icon.vue')['default']
     ImageFile: typeof import('./../src/components/AiDataset/ImageFile.vue')['default']
     InputTreeSelector: typeof import('./../src/components/Form/InputTreeSelector.vue')['default']
+    JoyCaptionPromptTypeSelect: typeof import('./../src/components/Form/JoyCaptionPromptTypeSelect.vue')['default']
     LoRATrainingMonitor: typeof import('./../src/components/Monitor/LoRATrainingMonitor/index.vue')['default']
     LrSchedulerSelect: typeof import('./../src/components/Form/LrSchedulerSelect.vue')['default']
     ModelSaveFormatSelector: typeof import('./../src/components/Form/ModelSaveFormatSelector.vue')['default']

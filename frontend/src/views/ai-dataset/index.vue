@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-01-03 11:58:07
+ * @LastEditTime: 2025-01-03 16:46:19
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -22,6 +22,13 @@
 					<FolderSelector v-model="ruleForm.image_dir" placeholder="请选择训练用的数据集目录" />
 				</el-form-item>
 				<TaggerModelSelect v-model="ruleForm.tagger_model" prop="tagger_model" />
+				<JoyCaptionPromptTypeSelect
+					v-if="ruleForm.tagger_model === 'joy-caption-alpha-two'"
+					v-model="ruleForm.prompt_type"
+					label="Joy Caption 提示词类型"
+					prop="prompt_type"
+					placeholder="请选择Joy Caption 提示词类型"
+				/>
 				<el-form-item label="是否把触发词输出到打标文件中" prop="output_trigger_words">
 					<el-switch v-model="ruleForm.output_trigger_words" />
 				</el-form-item>
@@ -80,6 +87,8 @@ interface RuleForm {
 	image_dir: string;
 	/** 打标模型 */
 	tagger_model: string;
+	/** joy-caption-alpha-two打标模型的提示词类型 */
+	prompt_type: string;
 	/** 是否把触发词输出到打标文件中 */
 	output_trigger_words: boolean;
 	/** LoRA 触发词 */
@@ -97,6 +106,7 @@ const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}ai_dataset_
 const defaultForm = readonly<RuleForm>({
 	image_dir: "/root",
 	tagger_model: "joy-caption-alpha-two",
+	prompt_type: "Training Prompt",
 	output_trigger_words: true,
 	class_tokens: ""
 });
@@ -160,7 +170,8 @@ async function onSubmit() {
 		const result = await batchTag({
 			image_path: ruleForm.value.image_dir,
 			model_name: ruleForm.value.tagger_model,
-			class_token: ruleForm.value.output_trigger_words ? ruleForm.value.class_tokens : undefined
+			class_token: ruleForm.value.output_trigger_words ? ruleForm.value.class_tokens : undefined,
+			prompt_type: ruleForm.value.prompt_type
 		});
 		startGPUListen();
 		startTagListen(result.task_id);
@@ -208,7 +219,7 @@ onUnmounted(() => {
 	height: 100%;
 }
 .ai-dataset-page-left {
-	width: 300px;
+	width: 320px;
 	background-color: var(--zl-ai-dataset-bg);
 	padding: $zl-padding;
 	border-radius: $zl-border-radius;

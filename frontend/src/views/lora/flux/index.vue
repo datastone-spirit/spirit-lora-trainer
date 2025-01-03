@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-03 11:58:16
+ * @LastEditTime: 2025-01-03 16:46:06
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -119,6 +119,7 @@ const defaultForm = readonly<RuleForm>({
 	// -----
 	image_dir: "/root",
 	tagger_model: "joy-caption-alpha-two",
+	prompt_type: "Training Prompt",
 	output_trigger_words: true,
 	num_repeats: 16,
 	max_train_epochs: 24,
@@ -329,7 +330,8 @@ async function onTagSubmit() {
 		const result = await batchTag({
 			image_path: image_dir,
 			model_name: tagger_model,
-			class_token: output_trigger_words ? class_tokens : undefined
+			class_token: output_trigger_words ? class_tokens : undefined,
+			prompt_type: ruleForm.value.prompt_type
 		});
 		startGPUListen();
 		startTagListen(result.task_id);

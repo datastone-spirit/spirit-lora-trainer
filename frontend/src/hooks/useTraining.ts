@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:06:24
- * @LastEditTime: 2025-01-03 11:44:57
+ * @LastEditTime: 2025-01-03 17:48:41
  * @LastEditors: mulingyuer
  * @Description: 训练lora hooks
  * @FilePath: \frontend\src\hooks\useTraining.ts
@@ -12,7 +12,7 @@ import { useTrainingStore } from "@/stores";
 import type { LoraTaskStatus, LoraData } from "@/stores";
 import { loRATrainingInfo } from "@/api/monitor";
 import type { LoRATrainingInfoResult } from "@/api/monitor";
-import { isEmptyObject, sleep } from "@/utils/tools";
+import { isEmptyObject } from "@/utils/tools";
 
 type EventType = Extract<TaskStatus, "complete" | "failed">;
 type EventCallback = () => void;
@@ -41,6 +41,8 @@ export const useTraining = (() => {
 		const isLoraPolling = trainingRefs.isLoraPolling;
 		/** 训练任务状态 */
 		const loraTaskStatus = trainingRefs.loraTaskStatus;
+		/** 定时器 */
+		let timer: number | null = null;
 
 		/** 订阅lora训练 */
 		function addLoraEventListener(type: EventType, callback: EventCallback) {
@@ -95,6 +97,14 @@ export const useTraining = (() => {
 			return loraData;
 		}
 
+		/** 清理定时器 */
+		function clearTimer() {
+			if (timer) {
+				clearInterval(timer);
+				timer = null;
+			}
+		}
+
 		/** 轮询获取lora训练信息 */
 		function updateLoraData() {
 			if (!isListenLora.value) return;
@@ -102,30 +112,27 @@ export const useTraining = (() => {
 
 			loRATrainingInfo({
 				task_id: loraTaskId.value
-			})
-				.then((res) => {
-					if (!res.detail) return;
-					if (isEmptyObject(res.detail)) return;
-					trainingStore.setLoraData(formatData(res));
-					trainingStore.setLoraTaskStatus(res.status);
+			}).then((res) => {
+				if (!res.detail) return;
+				if (isEmptyObject(res.detail)) return;
+				trainingStore.setLoraData(formatData(res));
+				trainingStore.setLoraTaskStatus(res.status);
 
-					switch (res.status) {
-						case "complete": // 完成
-							loraComplete();
-							break;
-						case "failed": // 出错
-							loraFailed();
-							break;
-					}
-				})
-				.finally(() => {
-					isListenLora.value && sleep(loraSleepTime.value).then(updateLoraData);
-				});
+				switch (res.status) {
+					case "complete": // 完成
+						loraComplete();
+						break;
+					case "failed": // 出错
+						loraFailed();
+						break;
+				}
+			});
 		}
 
 		/** LoRA训练完成 */
 		function loraComplete() {
 			// 关闭轮询
+			if (timer) clearTimer();
 			trainingStore.setIsLoraPolling(false);
 			trainingStore.setIsListenLora(false);
 			loraTaskStatus.value = "none";
@@ -144,6 +151,7 @@ export const useTraining = (() => {
 		/** LoRA训练失败 */
 		function loraFailed() {
 			// 关闭轮询
+			if (timer) clearTimer();
 			trainingStore.setIsLoraPolling(false);
 			trainingStore.setIsListenLora(false);
 			loraTaskStatus.value = "none";
@@ -162,6 +170,7 @@ export const useTraining = (() => {
 		/** 开始监听 */
 		function startLoraListen(taskId?: string) {
 			if (isLoraPolling.value) return;
+			if (timer) clearTimer();
 			taskId && (loraTaskId.value = taskId);
 			if (isLoraTaskEnd()) {
 				trainingStore.resetLoraData();
@@ -172,12 +181,13 @@ export const useTraining = (() => {
 			}
 			trainingStore.setIsListenLora(true);
 			trainingStore.setIsLoraPolling(true);
-			updateLoraData();
+			timer = setInterval(updateLoraData, loraSleepTime.value);
 		}
 
 		/** 停止监听 */
 		function stopLoraListen() {
 			if (!isLoraPolling.value) return;
+			if (timer) clearTimer();
 			trainingStore.setIsLoraPolling(false);
 			trainingStore.setIsListenLora(false);
 			// 如果已经完成或者失败，就停止

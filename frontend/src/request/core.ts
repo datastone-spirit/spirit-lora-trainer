@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2025-01-03 16:07:34
+ * @LastEditTime: 2025-01-03 18:19:34
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -10,7 +10,7 @@
 import { useUserStore } from "@/stores";
 import axios, { AxiosError } from "axios";
 import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
-import type { RequestConfig, RequestResult } from "./types";
+import type { RequestConfig } from "./types";
 
 const instance = axios.create({
 	baseURL: import.meta.env.VITE_APP_API_BASE_URL,
@@ -32,14 +32,13 @@ axiosRetry(instance, {
 		return false;
 	},
 	onMaxRetryTimesExceeded: (error, _retryCount) => {
-		// 错误消息提示
-		errorMessage(error);
+		showErrorMessage(error);
 	}
 });
 
 /** 请求前拦截器 */
 instance.interceptors.request.use((config) => {
-	if (!userStore) userStore = useUserStore();
+	userStore = userStore || useUserStore();
 
 	// 请求头
 	if (userStore.token && !config.headers.Authorization) {
@@ -53,35 +52,20 @@ instance.interceptors.request.use((config) => {
 instance.interceptors.response.use(
 	(response) => {
 		if (!response.data) return null;
-		const result: RequestResult = response.data;
+
+		const { success, data, message } = response.data;
+
 		// 是否报错
-		const resultSuccess = response.data?.success;
-		if (typeof resultSuccess === "boolean" && resultSuccess === false) {
-			const config = response.config as RequestConfig;
-			if (config.showErrorMessage) {
-				ElNotification({
-					type: "error",
-					title: "请求失败",
-					message: result.data?.error ?? result.message ?? "请求失败"
-				});
-			}
-			throw new Error(result.message);
+		if (success === false) {
+			handleError(response.config, message);
+			throw new Error(message);
 		}
 
-		// 解包
-		return result.data;
+		return data;
 	},
 	(error) => {
-		// 是否允许失败重试
-		let isRetry = true;
-		if (error instanceof AxiosError) {
-			// @ts-expect-error 临时修复一下
-			isRetry = error.response?.config?.enableRetry ?? true;
-		}
-		// 是否是重试的错误
-		const isRetryError = isNetworkOrIdempotentRequestError(error);
-		if (!isRetry || !isRetryError) {
-			errorMessage(error);
+		if (!shouldRetry(error)) {
+			showErrorMessage(error);
 		}
 
 		return Promise.reject(error as Error);
@@ -93,42 +77,53 @@ function setBaseUrl(baseUrl: string) {
 	instance.defaults.baseURL = baseUrl;
 }
 
-/** 获取错误消息 */
-function getErrorMessage(error: any): string {
-	let message = "未知错误";
-
-	if (axios.isCancel(error)) {
-		// 请求被取消
-		message = error.message ?? "请求被取消";
-	} else if (error instanceof AxiosError) {
-		// AxiosError
-		message = error.response?.data?.message ?? error.message;
-	} else if (error instanceof Error) {
-		// Error
-		message = error.message;
+/** 响应成功但是获取内容出现错误 */
+function handleError(config: RequestConfig, message: string) {
+	if (config?.showErrorMessage) {
+		ElNotification({
+			type: "error",
+			title: "请求失败",
+			message: message ?? "请求失败"
+		});
 	}
-
-	return message;
 }
 
-/** 错误消息提示 */
-function errorMessage(error: any) {
-	let showErrorMessage = true;
+/** 获取错误消息 */
+function getErrorMessage(error: any): string {
+	if (axios.isCancel(error)) return error.message ?? "请求被取消";
+	if (error instanceof AxiosError) return error.response?.data?.message ?? error.message;
+	if (error instanceof Error) return error.message;
+
+	return "未知错误";
+}
+
+/** 错误消息弹窗 */
+function showErrorMessage(error: any) {
 	const message = getErrorMessage(error);
-
-	if (error instanceof AxiosError) {
-		// @ts-expect-error 去除ts类型警告
-		showErrorMessage = error.config?.showErrorMessage ?? showErrorMessage;
-	}
-
-	// 消息提示
-	if (showErrorMessage) {
+	if (shouldShowErrorMessage(error)) {
 		ElNotification({
 			type: "error",
 			title: "请求失败",
 			message
 		});
 	}
+}
+
+/** 是否是重试错误 */
+function shouldRetry(error: any): boolean {
+	if (error instanceof AxiosError) {
+		const isRetry = (error.response?.config as RequestConfig)?.enableRetry ?? true;
+		return isRetry && isNetworkOrIdempotentRequestError(error);
+	}
+	return true;
+}
+
+/** 是否显示错误消息弹窗 */
+function shouldShowErrorMessage(error: any): boolean {
+	if (axios.isCancel(error) && "config" in error) {
+		return (error.config as RequestConfig)?.showErrorMessage ?? true;
+	}
+	return true;
 }
 
 export { instance, setBaseUrl };

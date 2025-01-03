@@ -30,14 +30,14 @@ logger = logging.getLogger(__name__)
 
 def get_prompt(type: str="Descriptive", tone: str="casual", length: str="medium-length") -> str:
     CAPTION_TYPE_MAP = {
-        "Descriptive": "Write a {lenght} descriptive caption for this image in a {tone} tone.",
-        "Training Prompt": "Write a {length} stable diffusion prompt for this image.",
-        "MidJourney":  "Write a {length} MidJourney prompt for this image.", 
-        "Booru tag list": "Write a {length} list of Booru tags for this image.",
-        "Booru-like tag list": "Write a {length} list of Booru-like tags for this image.",
-        "Art Critic": "Analyze this image like an art critic would with information about its composition, style, symbolism, the use of color, light, any artistic movement it might belong to, etc. Keep it {length}.",
-        "Product Listing": "Write a {length} caption for this image as though it were a product listing.",
-        "Social Media Post": "Write a {length} caption for this image as if it were being used for a social media post.",
+        "Descriptive": "Write a {lenght} descriptive caption for this image in a {tone} tone.", #描述性提示词
+        "Training Prompt": "Write a {length} stable diffusion prompt for this image.", # 用于SD训练型提示词
+        "MidJourney":  "Write a {length} MidJourney prompt for this image.",  # MidJourney式提示词
+        "Booru tag list": "Write a {length} list of Booru tags for this image.", # Booru Tag 样式列表提示词
+        "Booru-like tag list": "Write a {length} list of Booru-like tags for this image.", # Booru Like Tag 样式列表提示词
+        "Art Critic": "Analyze this image like an art critic would with information about its composition, style, symbolism, the use of color, light, any artistic movement it might belong to, etc. Keep it {length}.", # 艺术评论家式提示词
+        "Product Listing": "Write a {length} caption for this image as though it were a product listing.", # 产品列表式提示词
+        "Social Media Post": "Write a {length} caption for this image as if it were being used for a social media post.", # 社交媒体式提示词
     }
     caption_type = CAPTION_TYPE_MAP.get(type, None)
     return caption_type.format(length=length, tone=tone) if caption_type is not None \

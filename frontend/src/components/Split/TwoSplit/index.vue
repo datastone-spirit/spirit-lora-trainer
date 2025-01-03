@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 10:13:40
- * @LastEditTime: 2024-12-16 16:32:31
+ * @LastEditTime: 2025-01-03 18:34:40
  * @LastEditors: mulingyuer
  * @Description: 2分割组件
  * @FilePath: \frontend\src\components\Split\TwoSplit\index.vue
@@ -50,8 +50,7 @@ export interface TwoSplitProps {
 
 const props = withDefaults(defineProps<TwoSplitProps>(), {
 	direction: "horizontal",
-	gutterSize: 12,
-	minSize: () => [550, 520]
+	gutterSize: 12
 });
 
 const splitLeft = ref<HTMLDivElement>();

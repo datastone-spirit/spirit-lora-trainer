@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-03 16:46:06
+ * @LastEditTime: 2025-01-03 18:32:33
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="lora-flux-page">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]">
+		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
 			<template #left>
 				<div class="lora-flux-content">
 					<el-form

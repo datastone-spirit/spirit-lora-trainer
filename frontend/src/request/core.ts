@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2024-12-23 10:02:35
+ * @LastEditTime: 2025-01-03 16:07:34
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -52,10 +52,11 @@ instance.interceptors.request.use((config) => {
 /** 响应后拦截器 */
 instance.interceptors.response.use(
 	(response) => {
-		if (!response.data?.data) return null;
-		// 响应结果
+		if (!response.data) return null;
 		const result: RequestResult = response.data;
-		if (!result.success) {
+		// 是否报错
+		const resultSuccess = response.data?.success;
+		if (typeof resultSuccess === "boolean" && resultSuccess === false) {
 			const config = response.config as RequestConfig;
 			if (config.showErrorMessage) {
 				ElNotification({
@@ -79,7 +80,6 @@ instance.interceptors.response.use(
 		}
 		// 是否是重试的错误
 		const isRetryError = isNetworkOrIdempotentRequestError(error);
-
 		if (!isRetry || !isRetryError) {
 			errorMessage(error);
 		}
@@ -117,8 +117,8 @@ function errorMessage(error: any) {
 	const message = getErrorMessage(error);
 
 	if (error instanceof AxiosError) {
-		// @ts-expect-error 临时修复一下
-		showErrorMessage = error.response?.config?.showErrorMessage ?? showErrorMessage;
+		// @ts-expect-error 去除ts类型警告
+		showErrorMessage = error.config?.showErrorMessage ?? showErrorMessage;
 	}
 
 	// 消息提示

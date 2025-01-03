@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 10:02:58
- * @LastEditTime: 2024-12-26 10:45:52
+ * @LastEditTime: 2025-01-03 15:05:22
  * @LastEditors: mulingyuer
  * @Description: about页面
  * @FilePath: \frontend\src\views\about\index.vue
@@ -127,13 +127,13 @@ const linkList = ref<LinkList>([
 		icon: "ri-booklet-fill",
 		link: "https://serverless.datastone.cn/sprite/docs/zh/",
 		target: "_blank"
+	},
+	{
+		title: "查看训练器使用教程",
+		icon: "ri-movie-fill",
+		link: "https://www.bilibili.com/video/BV1VW61YxE5N",
+		target: "_blank"
 	}
-	// {
-	// 	title: "查看训练器使用教程",
-	// 	icon: "ri-movie-fill",
-	// 	link: "",
-	// 	target: "_blank"
-	// }
 ]);
 
 const commitTime = formatDate(__GIT_COMMIT_TIME__, "YYYY/MM/DD HH:mm:ss");

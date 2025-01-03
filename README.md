@@ -4,14 +4,12 @@
   <div align="center">
     <a href="https://serverless.datastone.cn/">Official website</a>&emsp;|&emsp;
     <a href="https://serverless.datastone.cn/sprite/app/login">Try Online</a>&emsp;|&emsp;
-    <a href="https://serverless.datastone.cn/sprite/docs">Docs</a>&emsp;|&emsp;
+    <a href="https://serverless.datastone.cn/sprite/docs/zh/lora-trainer/quick-start">Docs</a>&emsp;|&emsp;
     <a href="./docs/README.zh-CN.md">中文README</a>
   </div>
   <div>
   </div>
 </div>
-
-
 
 ## Introduction
 

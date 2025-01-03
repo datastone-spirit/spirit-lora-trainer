@@ -4,7 +4,7 @@
   <div align="center">
     <a href="https://serverless.datastone.cn/">官网</a>&emsp;|&emsp;
     <a href="https://serverless.datastone.cn/sprite/app/login">在线体验</a>&emsp;|&emsp;
-    <a href="https://serverless.datastone.cn/sprite/docs/zh">文档</a>
+    <a href="https://serverless.datastone.cn/sprite/docs/zh/lora-trainer/quick-start">文档</a>
   </div>
 </div>
 

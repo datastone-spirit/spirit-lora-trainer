@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2024-12-30 10:35:14
+ * @LastEditTime: 2025-01-03 09:42:19
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -298,6 +298,14 @@ async function onRefresh() {
 	});
 }
 
+// 查询进度
+const uploadPercentage = ref(0);
+function onUploadProgress(progressEvent: AxiosProgressEvent) {
+	if (!progressEvent) return;
+	const value = progressEvent.progress ?? 0;
+	uploadPercentage.value = Math.floor(value * 100);
+}
+
 // 上传文件
 const uploadRef = ref<UploadInstance>();
 const uploadFileList = ref<UploadUserFile[]>([]);
@@ -347,16 +355,9 @@ function onConfirmUploadSuccess() {
 	uploadFileList.value = [];
 	uploadId.value = "";
 	uploadSubmitLoading.value = false;
+	uploadPercentage.value = 0;
 	getList();
 	ElMessage.success("上传成功");
-}
-
-// 查询进度
-const uploadPercentage = ref(0);
-function onUploadProgress(progressEvent: AxiosProgressEvent) {
-	if (!progressEvent) return;
-	const value = progressEvent.progress ?? 0;
-	uploadPercentage.value = Math.floor(value * 100);
 }
 
 /** 监听目录变化并获取数据 */

@@ -28,6 +28,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def get_prompt(type: str="Descriptive", tone: str="casual", length: str="medium-length") -> str:
+    CAPTION_TYPE_MAP = {
+        "Descriptive": "Write a {lenght} descriptive caption for this image in a {tone} tone.",
+        "Training Prompt": "Write a {length} stable diffusion prompt for this image.",
+        "MidJourney":  "Write a {length} MidJourney prompt for this image.", 
+        "Booru tag list": "Write a {length} list of Booru tags for this image.",
+        "Booru-like tag list": "Write a {length} list of Booru-like tags for this image.",
+        "Art Critic": "Analyze this image like an art critic would with information about its composition, style, symbolism, the use of color, light, any artistic movement it might belong to, etc. Keep it {length}.",
+        "Product Listing": "Write a {length} caption for this image as though it were a product listing.",
+        "Social Media Post": "Write a {length} caption for this image as if it were being used for a social media post.",
+    }
+    caption_type = CAPTION_TYPE_MAP.get(type, None)
+    return caption_type.format(length=length, tone=tone) if caption_type is not None \
+        else f"Write a {length} descriptive caption for this image in a {tone} tone."
+
 class ImageAdapter(nn.Module):
     def __init__(
         self,
@@ -152,7 +167,7 @@ class JoyCaptioner:
         self.transform = T.ToPILImage()
 
     @torch.no_grad()
-    def generate(self, item, type="descriptive", 
+    def generate(self, item, type="Descriptive", 
                  tone="casual", length="medium-length", 
                  system_prompt="You are a helpful image captioner, never reject the prompt."):
 
@@ -167,11 +182,14 @@ class JoyCaptioner:
             vision_outputs = self.clip_model(pixel_values=pixel_values, output_hidden_states=True)
             embedded_images = self.image_adapter(vision_outputs.hidden_states).to(self.device)
 
-        prompt_str = (f"Write a {length} {type} caption for this image in a {tone} tone.")
+        prompt_str = (get_prompt(type, tone, length))
         convo = [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt_str},
         ]
+
+        logger.info(f"captioning prompt is:{convo}")
+
         convo_string = self.tokenizer.apply_chat_template(convo, tokenize=False, add_generation_prompt=True)
         convo_tokens = self.tokenizer.encode(
                 convo_string,
@@ -252,7 +270,8 @@ class JoyCaptioner:
             logger.info("unload model failed, ignored", exc_info=e)
 
 @torch.no_grad()
-def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, update_status :Callable, class_token=None) -> List[dict]:
+def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, 
+                               update_status :Callable, class_token=None, prompt_type: str = "Descriptive") -> List[dict]:
     joy_captioner = None
     try:
         joy_captioner = JoyCaptioner(model_info) 
@@ -263,7 +282,7 @@ def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_in
             try:
                 logger.info(f"Processing image: {image_path}")
                 image = Image.open(image_path).convert("RGB")
-                caption_text = joy_captioner.generate(image)[0]
+                caption_text = joy_captioner.generate(image, prompt_type)[0]
                 success, cap_file_path = write_caption_file(image_path, output_dir, caption_text, class_token=class_token)
             except Exception as e:
                 logger.warning(f"Error processing image: {image_path}", exc_info=e)

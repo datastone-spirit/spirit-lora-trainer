@@ -65,7 +65,7 @@ class CaptioningService:
 
         return image_paths
     
-    def run_captioning(self, image_paths: List[str], output_dir: str, model_name: str="florence2", class_token=None) -> List[dict]:
+    def run_captioning(self, image_paths: List[str], output_dir: str, model_name: str="florence2", class_token=None, prompt_type: str = None) -> List[dict]:
         cap_model = cap_model_mgr.get_model(model_name)
         if cap_model is None:
             raise ValueError(f"only support model name: {cap_model_mgr.keys()}, but request model name is {model_name}")
@@ -74,10 +74,10 @@ class CaptioningService:
             not os.path.exists(cap_model.path) :
             raise Exception(f"model path {cap_model.cache_dir} not exists")
 
-        return self._captioning(image_paths, output_dir, class_token, cap_model)
+        return self._captioning(image_paths, output_dir, class_token, cap_model, prompt_type)
 
     @task_decorator
-    def _captioning(self, image_paths: List[str], output_dir: str, class_token: str, model):
-        return Task.wrap_captioning_task(image_paths, output_dir, class_token, model)
+    def _captioning(self, image_paths: List[str], output_dir: str, class_token: str, model, prompt_type: str = None) -> List[dict]:
+        return Task.wrap_captioning_task(image_paths, output_dir, class_token, model, prompt_type)
 
 

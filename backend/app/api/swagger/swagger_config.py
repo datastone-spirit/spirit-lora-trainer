@@ -432,6 +432,10 @@ tag_config = {
                "class_token": {
                     "type": "string",
                     "description": "token of class, if it is not empty, the class token will be written before the caption text, split by comma",
+               },
+               "prompt_type": {
+                    "type": "string",
+                    "description": "dedicated to joy-caption-alpha-two, valid value are:\n- Descriptive\n - Training Prompt\n- \"MidJourney\"\n- \"Booru tag list\"\n- \"Booru-like tag list\"\n- \"Art Critic\"\n- \"Product Listing\"\n- \"Social Media Post\":"
                }
             }
         }

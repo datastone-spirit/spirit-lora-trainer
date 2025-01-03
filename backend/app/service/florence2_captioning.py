@@ -12,7 +12,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def florence2_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, update_status :Callable, class_token=None) -> List[dict]:
+def florence2_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, 
+                         update_status :Callable, class_token=None, prompt_type : str = None) -> List[dict]:
     """
     """
     torch_dtype = torch.float16

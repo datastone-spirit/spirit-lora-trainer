@@ -64,12 +64,13 @@ class Task:
         return task
 
     @staticmethod
-    def wrap_captioning_task(image_paths: List[str], output_dir: str, class_token: str, cap_model: CaptioningModelInfo) -> 'Task':
+    def wrap_captioning_task(image_paths: List[str], output_dir: str, class_token: str, cap_model: CaptioningModelInfo, prompt_type) -> 'Task':
         task = CaptioningTask()
         task.status = TaskStatus.CREATED
         task.image_paths = image_paths
         task.class_token = class_token
         task.output_dir = output_dir
+        task.prompt_type = prompt_type
         task.detail = {
             'captions': [],
             'total': len(image_paths),
@@ -274,9 +275,11 @@ class CaptioningTask(Task):
     class_token: str = None
     captioning: Optional[Callable] = None
     model_info: Optional[CaptioningModelInfo] = None
+    prompt_type: str = None
 
     def _run(self):
-        self.captioning(self.image_paths, self.output_dir, self.model_info, self.update_captioning_status, class_token=self.class_token)
+        self.captioning(self.image_paths, self.output_dir, self.model_info, self.update_captioning_status, 
+                        class_token=self.class_token, prompt_type=self.prompt_type)
 
     def update_captioning_status(self, current_step: int, image_name: str, caption: str, cap_file_path: str, success: bool = False):
         self.detail['current'] = current_step

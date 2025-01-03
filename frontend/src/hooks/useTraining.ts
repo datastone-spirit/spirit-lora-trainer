@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:06:24
- * @LastEditTime: 2024-12-31 17:20:53
+ * @LastEditTime: 2025-01-03 11:44:57
  * @LastEditors: mulingyuer
  * @Description: 训练lora hooks
  * @FilePath: \frontend\src\hooks\useTraining.ts
@@ -63,7 +63,8 @@ export const useTraining = (() => {
 		}
 
 		/** 根据任务状态判断是否已经结束 */
-		function isLoraTaskEnd(status: LoraTaskStatus) {
+		function isLoraTaskEnd(status?: LoraTaskStatus) {
+			status = status ?? loraTaskStatus.value;
 			return ["complete", "failed", "none"].includes(status);
 		}
 
@@ -162,7 +163,7 @@ export const useTraining = (() => {
 		function startLoraListen(taskId?: string) {
 			if (isLoraPolling.value) return;
 			taskId && (loraTaskId.value = taskId);
-			if (isLoraTaskEnd(loraTaskStatus.value)) {
+			if (isLoraTaskEnd()) {
 				trainingStore.resetLoraData();
 				loraTaskStatus.value = "none";
 			}
@@ -181,7 +182,7 @@ export const useTraining = (() => {
 			trainingStore.setIsListenLora(false);
 			// 如果已经完成或者失败，就停止
 			// 如果没有完成或者失败，就暂停轮询
-			if (isLoraTaskEnd(loraTaskStatus.value)) {
+			if (isLoraTaskEnd()) {
 				loraTaskId.value = "";
 				trainingStore.resetLoraData();
 				loraTaskStatus.value = "none";

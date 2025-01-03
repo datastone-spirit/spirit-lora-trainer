@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2024-12-30 11:51:32
+ * @LastEditTime: 2025-01-03 11:58:16
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -96,9 +96,8 @@ import type { RuleForm, RuleFormProps } from "./types";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 
 const settingsStore = useSettingsStore();
-const { isListenTag, startTagListen, stopTagListen, tagTaskStatus, isTagTaskEnd } = useTag();
-const { isListenLora, startLoraListen, stopLoraListen, loraTaskStatus, isLoraTaskEnd } =
-	useTraining();
+const { isListenTag, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
+const { isListenLora, startLoraListen, stopLoraListen, isLoraTaskEnd } = useTraining();
 const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
@@ -293,32 +292,37 @@ async function onTagSubmit() {
 	try {
 		const { image_dir, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
 		// 校验
-		let valid = true;
-		let validMsg = "";
-		if (typeof image_dir !== "string" || image_dir.trim() === "") {
-			valid = false;
-			validMsg = "请先选择训练用的数据集目录";
-		}
-		const exists = await checkDirectory(image_dir);
-		if (!exists) {
-			valid = false;
-			validMsg = "数据集目录不存在";
-		}
-		if (typeof tagger_model !== "string" || tagger_model.trim() === "") {
-			valid = false;
-			validMsg = "请先选择打标模型";
-		}
-		if (output_trigger_words && class_tokens.trim() === "") {
-			valid = false;
-			validMsg = "请填写触发词";
-		}
+		const validations = [
+			{
+				condition: () => !isLoraTaskEnd(),
+				message: "训练任务未结束，请等待训练完成再执行打标"
+			},
+			{
+				condition: () => typeof image_dir !== "string" || image_dir.trim() === "",
+				message: "请先选择训练用的数据集目录"
+			},
+			{
+				condition: async () => !(await checkDirectory(image_dir)),
+				message: "数据集目录不存在"
+			},
+			{
+				condition: () => typeof tagger_model !== "string" || tagger_model.trim() === "",
+				message: "请先选择打标模型"
+			},
+			{
+				condition: () => output_trigger_words && class_tokens.trim() === "",
+				message: "请填写触发词"
+			}
+		];
 
-		if (!valid) {
-			ElMessage({
-				message: validMsg,
-				type: "error"
-			});
-			return;
+		for (const validation of validations) {
+			if (await validation.condition()) {
+				ElMessage({
+					message: validation.message,
+					type: "error"
+				});
+				return;
+			}
 		}
 
 		// api
@@ -358,12 +362,19 @@ function validateForm() {
 				return resolve(false);
 			}
 
+			// 是否在打标
+			if (!isTagTaskEnd()) {
+				ElMessage.warning("打标任务未结束，请等待打标完成再执行训练");
+				return resolve(false);
+			}
+
 			// 校验数据集是否有数据
 			const isHasData = await checkData(ruleForm.value.image_dir);
 			if (!isHasData) {
 				ElMessage.error("数据集目录下没有数据");
 				return resolve(false);
 			}
+
 			return resolve(true);
 		});
 	});
@@ -412,11 +423,11 @@ watch(
 
 onMounted(() => {
 	// 组件挂载时，开始监听
-	if (!isTagTaskEnd(tagTaskStatus.value)) {
+	if (!isTagTaskEnd()) {
 		startTagListen();
 		startGPUListen();
 	}
-	if (!isLoraTaskEnd(loraTaskStatus.value)) {
+	if (!isLoraTaskEnd()) {
 		startLoraListen();
 		startGPUListen();
 	}

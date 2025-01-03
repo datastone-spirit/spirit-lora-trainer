@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2024-12-30 11:48:50
+ * @LastEditTime: 2025-01-03 11:58:07
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -73,6 +73,7 @@ import { checkDirectory } from "@/utils/lora.helper";
 import type { FormInstance, FormRules } from "element-plus";
 import { validateForm } from "@/utils/tools";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import { useTraining } from "@/hooks/useTraining";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -85,15 +86,16 @@ interface RuleForm {
 	class_tokens: string;
 }
 
-const { isListenTag, startTagListen, stopTagListen, tagTaskStatus, isTagTaskEnd } = useTag();
+const { isListenTag, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
 const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
+const { isLoraTaskEnd } = useTraining();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}ai_dataset_form`;
 const defaultForm = readonly<RuleForm>({
-	image_dir: "/",
+	image_dir: "/root",
 	tagger_model: "joy-caption-alpha-two",
 	output_trigger_words: true,
 	class_tokens: ""
@@ -145,6 +147,14 @@ async function onSubmit() {
 			submitLoading.value = false;
 			return;
 		}
+		if (!isLoraTaskEnd()) {
+			submitLoading.value = false;
+			ElMessage({
+				message: "训练任务未结束，请等待训练完成再执行打标",
+				type: "error"
+			});
+			return;
+		}
 
 		// api
 		const result = await batchTag({
@@ -180,7 +190,7 @@ watch(
 
 onMounted(() => {
 	// 组件挂载时，开始监听
-	if (!isTagTaskEnd(tagTaskStatus.value)) {
+	if (!isTagTaskEnd()) {
 		startTagListen();
 		startGPUListen();
 	}

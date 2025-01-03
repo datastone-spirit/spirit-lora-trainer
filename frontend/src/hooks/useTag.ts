@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 15:26:11
- * @LastEditTime: 2024-12-31 17:26:33
+ * @LastEditTime: 2025-01-03 11:45:13
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag.ts
@@ -63,7 +63,8 @@ export const useTag = (() => {
 		}
 
 		/** 根据任务状态判断是否已经结束 */
-		function isTagTaskEnd(status: TagTaskStatus) {
+		function isTagTaskEnd(status?: TagTaskStatus) {
+			status = status ?? tagTaskStatus.value;
 			return ["complete", "failed", "none"].includes(status);
 		}
 

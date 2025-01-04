@@ -276,6 +276,12 @@ def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
         logger.warning(f"optimizer_type {config.optimizer_type} is set, the lr_warmup_steps will be set to 0")
         config.lr_warmup_steps = 0
 
+    openai_tokenizer_cache_dir = os.path.join(getmodelpath(), "clip", "openai_clip-vit-large-patch14")
+    google_tokenizer_cache_dir = os.path.join(getmodelpath(), "clip", "google_t5-v1_1-xxl")
+
+    if (config.tokenizer_cache_dir is None or config.tokenizer_cache_dir == "") and \
+        (os.path.exists(openai_tokenizer_cache_dir) and os.path.exists(google_tokenizer_cache_dir)):
+        config.tokenizer_cache_dir = os.path.join(getmodelpath(), "clip")
     return True, "Ok"
 
 def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':

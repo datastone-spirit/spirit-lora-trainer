@@ -116,7 +116,7 @@ Before running the trainer, you need to prepare the models. There are two catego
 | t5xxl_fp16.safetensors | `backend/models/clip/` | The Text to Text model, released by the Google                   | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
 
 
-### Tokenizers
+#### Tokenizers
 
 kohya-ss script requires the tokenizersd. If you have not downloaded the tokenizers, the kohya-ss script will download them automatically. but we recommend you download the tokenizers manually and place them in the `backend/models` directory. The following commands will help you download the tokenizers and place it in the proper directory:
 

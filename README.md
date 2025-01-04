@@ -115,6 +115,27 @@ Before running the trainer, you need to prepare the models. There are two catego
 | clip_l.safetensors     | `backend/models/clip/` | The Flux Text Encoder model, released by the BlackForestLib      | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
 | t5xxl_fp16.safetensors | `backend/models/clip/` | The Text to Text model, released by the Google                   | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
 
+
+**Tokenizers**
+
+kohya-ss script requires the tokenizers to be downloaded and placed in the `backend/models` directory. If you have not downloaded the tokenizers, the kohya-ss script will download them automatically. but we recommend you download the tokenizers manually and place them in the `backend/models` directory. The following commands will help you download the tokenizers and place it in the proper directory:
+
+1. openai/clip-vit-large-patch14, navigate to `backend/models/clip/` and run command:
+
+```bash
+mkdir -p openai_clip-vit-large-patch14
+cd openai_clip-vit-large-patch14
+huggingface-cli download openai/clip-vit-large-patch14  --exclude "*.bin" "*.msgpack" "*.h5" "*.safetensors"  --local-dir .
+```
+
+2. google/t5-v1_1-xxl, navigate to `backend/models/clip/` and run command:
+
+```bash
+mkdir -p google_t5-v1_1-xxl
+cd google_t5-v1_1-xxl
+huggingface-cli down google/t5-v1_1-xxl --exclude "*.bin" "*.h5" --local-dir .
+```
+
 #### Captioning models
 
 ##### Florence2

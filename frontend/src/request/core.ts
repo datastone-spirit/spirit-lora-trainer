@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2025-01-03 18:19:34
+ * @LastEditTime: 2025-01-06 09:04:29
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -120,7 +120,7 @@ function shouldRetry(error: any): boolean {
 
 /** 是否显示错误消息弹窗 */
 function shouldShowErrorMessage(error: any): boolean {
-	if (axios.isCancel(error) && "config" in error) {
+	if (!axios.isCancel(error) && "config" in error) {
 		return (error.config as RequestConfig)?.showErrorMessage ?? true;
 	}
 	return true;

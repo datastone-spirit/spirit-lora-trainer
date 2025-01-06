@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:28:31
- * @LastEditTime: 2025-01-03 16:39:56
+ * @LastEditTime: 2025-01-06 08:50:22
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue
@@ -81,7 +81,7 @@
 			<PopoverFormItem
 				label="图片尺寸-宽度px"
 				:prop="formProps.resolution_width"
-				popover-content="resolution"
+				popover-content="resolution_width"
 			>
 				<el-input-number v-model.number="ruleForm.resolution_width" :controls="false" />
 			</PopoverFormItem>
@@ -90,7 +90,7 @@
 			<PopoverFormItem
 				label="图片尺寸-高度px"
 				:prop="formProps.resolution_height"
-				popover-content="resolution"
+				popover-content="resolution_height"
 			>
 				<el-input-number v-model.number="ruleForm.resolution_height" :controls="false" />
 			</PopoverFormItem>

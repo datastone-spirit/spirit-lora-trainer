@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2024-12-30 10:11:24
+ * @LastEditTime: 2025-01-06 09:00:11
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -32,7 +32,7 @@ function convertScientificToNumber(form: RuleForm, config: Config) {
 }
 
 /** 转换数值到科学计数法 */
-function convertNumberToScientific(config: Config, form: RuleForm) {
+function _convertNumberToScientific(config: Config, form: RuleForm) {
 	scientificToNumberKeys.forEach((key) => {
 		const configValue = config[key];
 		if (typeof configValue === "number" && Object.hasOwn(form, key)) {
@@ -47,7 +47,7 @@ function convertResolutionToString(form: RuleForm) {
 }
 
 /** 转换图片分辨率数组字符串到对象 */
-function convertResolutionToObject(config: Config) {
+function _convertResolutionToObject(config: Config) {
 	const resolution = config.resolution.split(",");
 	return {
 		resolution_width: Number(resolution[0]),
@@ -206,52 +206,13 @@ export function formatFormData(form: RuleForm): StartFluxTrainingData {
 
 /** 将我们定义的toml数据对象数据合并到表单上 */
 export function mergeDataToForm(toml: StartFluxTrainingData, form: RuleForm) {
-	// 判断是否是我们定义的toml数据对象
-	const isToml = "config" in toml && "dataset" in toml;
-	if (!isToml) throw new Error("当前导入的toml数据存在异常，无法合并到表单上");
-
-	const { config, dataset } = toml;
-	const datasets = dataset.datasets[0];
-	const general = dataset.general;
-
-	// 科学计数法转换
-	convertNumberToScientific(config, form);
-
-	// 图片分辨率
-	const resolution = convertResolutionToObject(config);
-	form.resolution_width = resolution.resolution_width;
-	form.resolution_height = resolution.resolution_height;
-
-	// datasets
-	form.train_batch_size = datasets.batch_size;
-	form.keep_tokens = datasets.keep_tokens;
-	form.class_tokens = datasets.subsets[0].class_tokens;
-	form.image_dir = datasets.subsets[0].image_dir;
-	form.num_repeats = datasets.subsets[0].num_repeats;
-	form.caption_extension = general.caption_extension;
-	form.keep_tokens = general.keep_tokens;
-	form.shuffle_caption = general.shuffle_caption;
-
-	// 其他
-	const excludeKeys = [
-		...scientificToNumberKeys,
-		"train_batch_size",
-		"keep_tokens",
-		"class_tokens",
-		"image_dir",
-		"num_repeats",
-		"caption_extension",
-		"keep_tokens",
-		"shuffle_caption",
-		"resolution"
-	];
-	const keys = Object.keys(form).filter((key) => {
-		return !excludeKeys.includes(key) && Object.hasOwn(config, key);
-	});
-	keys.forEach((key) => {
-		// @ts-expect-error 去除ts类型检查
-		form[key] = config[key];
-	});
+	const formKeys = Object.keys(form) as (keyof RuleForm)[];
+	formKeys
+		.filter((key) => Object.hasOwn(toml, key))
+		.forEach((key) => {
+			// @ts-expect-error 去除ts类型检查
+			form[key] = toml[key];
+		});
 
 	return form;
 }

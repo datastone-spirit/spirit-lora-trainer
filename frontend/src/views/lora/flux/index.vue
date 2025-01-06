@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-03 18:32:33
+ * @LastEditTime: 2025-01-06 08:52:21
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -257,7 +257,7 @@ const openStep4 = ref(true);
 /** toml */
 const toml = ref("");
 const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(formatFormData(ruleForm.value));
+	toml.value = tomlStringify(ruleForm.value);
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
@@ -273,7 +273,7 @@ function onLoadConfig(toml: StartFluxTrainingData) {
 }
 /** 导出配置 */
 function onExportConfig() {
-	return formatFormData(ruleForm.value);
+	return ruleForm.value;
 }
 
 /** 重置表单 */

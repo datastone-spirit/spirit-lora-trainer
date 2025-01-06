@@ -114,6 +114,26 @@ pip install -r requirements.txt
 | clip_l.safetensors     | `backend/models/clip/` | 由 BlackForestLib 发布的 Flux 文本编码器模型 | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
 | t5xxl_fp16.safetensors | `backend/models/clip/` | 由 Google 发布的 Text to Text 模型           | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
 
+#### 分词器
+
+kohya-ss 脚本需要使用分词器。如果您尚未下载分词器，kohya-ss 脚本会自动下载它们。不过，我们建议您手动下载分词器并将其放置在 `backend/models` 目录下。以下命令将帮助您下载分词器并将它们放置在正确的目录中：
+
+1. 对于 openai/clip-vit-large-patch14，请进入 `backend/models/clip/` 目录并运行以下命令：
+
+```bash
+mkdir -p openai_clip-vit-large-patch14
+cd openai_clip-vit-large-patch14
+huggingface-cli download openai/clip-vit-large-patch14  --exclude "*.bin" "*.msgpack" "*.h5" "*.safetensors"  --local-dir .
+```
+
+2. 对于 google/t5-v1_1-xxl, 请进入 `backend/models/clip/` 目录并运行以下命令：
+
+```bash
+mkdir -p google_t5-v1_1-xxl
+cd google_t5-v1_1-xxl
+huggingface-cli down google/t5-v1_1-xxl --exclude "*.bin" "*.h5" --local-dir .
+```
+
 #### 打标模型
 
 ##### Florence2

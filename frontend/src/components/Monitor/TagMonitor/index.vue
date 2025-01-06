@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2024-12-25 11:15:18
+ * @LastEditTime: 2025-01-06 09:59:47
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
@@ -9,14 +9,20 @@
 -->
 <template>
 	<div class="tag-monitor">
-		<el-text class="tag-monitor-label"> 打标进度 </el-text>
-		<el-progress
-			class="tag-monitor-progress"
-			:percentage="tagData.percentage"
-			:show-text="false"
-			:stroke-width="8"
-		></el-progress>
-		<el-text class="tag-monitor-round"> {{ tagData.current }}/{{ tagData.total }} </el-text>
+		<div v-if="isLoad" class="tag-monitor-head">
+			<el-text class="tag-monitor-tips"> 打标模型加载中，请耐心等待 </el-text>
+			<el-text class="text-dot"></el-text>
+		</div>
+		<div v-else class="tag-monitor-body">
+			<el-text class="tag-monitor-label"> 打标进度 </el-text>
+			<el-progress
+				class="tag-monitor-progress"
+				:percentage="tagData.percentage"
+				:show-text="false"
+				:stroke-width="8"
+			></el-progress>
+			<el-text class="tag-monitor-round"> {{ tagData.current }}/{{ tagData.total }} </el-text>
+		</div>
 	</div>
 </template>
 
@@ -31,14 +37,26 @@ export interface TagMonitorData {
 }
 
 const { tagData } = useTag();
+
+/** 是否在加载中 */
+const isLoad = computed(() => {
+	return tagData.value.current <= 0;
+});
 </script>
 
 <style lang="scss" scoped>
 .tag-monitor {
-	display: flex;
-	align-items: center;
 	min-width: 250px;
 }
+.tag-monitor-head {
+	text-align: center;
+	margin-bottom: 6px;
+}
+.tag-monitor-body {
+	display: flex;
+	align-items: center;
+}
+.tag-monitor-tips,
 .tag-monitor-label,
 .tag-monitor-round {
 	flex-shrink: 0;

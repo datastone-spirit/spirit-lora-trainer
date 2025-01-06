@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-01-03 09:42:19
+ * @LastEditTime: 2025-01-06 14:56:43
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -139,6 +139,7 @@ const activeItemIndex = ref<number | null>(null);
 // 请求数据
 async function getList() {
 	try {
+		if (typeof props.dir !== "string" || props.dir.trim() === "") return;
 		loading.value = true;
 		onQuitEdit();
 

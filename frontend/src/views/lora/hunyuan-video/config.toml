@@ -1,0 +1,111 @@
+# 训练运行的输出路径。每次训练运行都会在这里新建一个目录。
+output_dir = '/data/diffusion_pipe_training_runs/hunyuan_video_test'
+
+# 数据集配置文件。
+dataset = 'examples/dataset.toml'
+# 您可以有单独的评估数据集。为 Tensorboard 指标给它们指定一个名称。
+# eval_datasets = [
+#     {name = 'something', config = 'path/to/eval_dataset.toml'},
+# ]
+
+# 训练设置
+
+# 我通常将这个值设置得很高，因为我不知道想训练多久。
+epochs = 1000
+# 单个 GPU 的一次前向/后向传递的批大小。
+micro_batch_size_per_gpu = 1
+# 流水线并行度。模型的一个实例被划分到这么多 GPU 上。
+pipeline_stages = 1
+# 每个训练步骤中通过流水线的微批次数量。
+# 如果 pipeline_stages > 1，较高的 GAS 表示由于更小的流水线空洞（GPU 没有重叠计算），GPU 利用率更高。
+gradient_accumulation_steps = 4
+# 梯度范数裁剪。
+gradient_clipping = 1.0
+# 学习率预热。
+warmup_steps = 100
+
+# 评估设置
+
+eval_every_n_epochs = 1
+eval_before_first_step = true
+# 可能想在评估时将这些设置得更低，以便丢弃更少的图像（评估数据集的大小通常远小于训练集）。
+# 每个图像/视频的尺寸桶被舍入到全局批大小的最接近倍数，较高的全局批大小意味着
+# 丢弃更多的图像。通常对训练不重要，但评估集要小得多，所以可能会有影响。
+eval_micro_batch_size_per_gpu = 1
+eval_gradient_accumulation_steps = 1
+
+# 杂项设置
+
+# 如果数据集较小，可能希望将此设置得更高，以免最终保存大量模型。
+save_every_n_epochs = 2
+# 可以每 n 个纪元或分钟检查一次训练状态。只设置其中一个。您可以使用 --resume_from_checkpoint 参数从检查点恢复。
+#checkpoint_every_n_epochs = 1
+checkpoint_every_n_minutes = 120
+# 除非您有大量 VRAM，否则始终设置为 true。
+activation_checkpointing = true
+# 控制 Deepspeed 如何决定将层划分到 GPU 上。可能不要更改此设置。
+partition_method = 'parameters'
+# 将 LoRA 或模型保存的 dtype，如果不同于训练 dtype
+save_dtype = 'bfloat16'
+# 缓存潜在变量和文本嵌入的批大小。增加可以在缓存阶段提高 GPU 利用率，但会使用更多内存。
+caching_batch_size = 1
+# Deepspeed 记录到控制台的频率。
+steps_per_print = 1
+# 如何从单个输入视频文件中提取用于训练的视频剪辑。
+# 视频文件首先分配给一个已配置的帧桶，但我们必须提取一个或多个正好匹配该桶帧数的剪辑。
+# single_beginning: 一个从视频开头开始的剪辑
+# single_middle: 一个从视频中间开始的剪辑（等量裁剪掉开始和结束）
+# multiple_overlapping: 提取最少数量的剪辑以覆盖视频的全部范围。它们可能会有一些重叠。
+# 默认是 single_middle
+video_clip_mode = 'single_middle'
+
+[model]
+# flux, ltx-video, 或 hunyuan-video  这个不要传
+type = 'hunyuan-video' 
+# 可以从为官方推理脚本设置的 ckpt 路径完全加载 Hunyuan Video。
+#ckpt_path = '/home/anon/HunyuanVideo/ckpts'
+# 或者您可以通过指向所有 ComfyUI 文件来加载。
+transformer_path = '/data2/imagegen_models/hunyuan_video_comfyui/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors'
+vae_path = '/data2/imagegen_models/hunyuan_video_comfyui/hunyuan_video_vae_bf16.safetensors'
+llm_path = '/data2/imagegen_models/hunyuan_video_comfyui/llava-llama-3-8b-text-encoder-tokenizer'
+clip_path = '/data2/imagegen_models/hunyuan_video_comfyui/clip-vit-large-patch14'
+# 用于所有模型的基础 dtype。
+dtype = 'bfloat16'
+# 在训练 LoRA 时，Hunyuan Video 支持 transformer 使用 fp8。
+transformer_dtype = 'float8'
+# 如何采样时间步以进行训练。可以是 logit_normal 或 uniform。
+timestep_sample_method = 'logit_normal'
+
+# flux 示例
+# [model]
+# type = 'flux'
+# # Flux 的 Huggingface Diffusers 目录路径。
+# diffusers_path = '/data2/imagegen_models/FLUX.1-dev'
+# # 可以从 BFL 格式的检查点覆盖 transformer。
+# transformer_path = '/data2/imagegen_models/flux-dev-single-files/consolidated_s6700-schnell.safetensors'
+# dtype = 'bfloat16'
+# flux_shift = true
+
+# LTV-Video 示例
+# [model]
+# type = 'ltx-video'
+# diffusers_path = '/data2/imagegen_models/LTX-Video'
+# dtype = 'bfloat16'
+# timestep_sample_method = 'logit_normal'
+
+[adapter]
+type = 'lora'
+rank = 32
+# 您正在训练的 LoRA 权重的 dtype。
+dtype = 'bfloat16'
+# 您可以从先前训练的 lora 初始化 lora 权重。
+#init_from_existing = '/data/diffusion_pipe_training_runs/something/epoch50'
+
+[optimizer]
+# optimi 库中的 AdamW 是一个很好的默认值，因为它在训练 bfloat16 权重时自动使用 Kahan 求和。
+# 查看 train.py 中的其他选项。您也可以轻松编辑文件并添加自己的。
+type = 'adamw_optimi'
+lr = 2e-5
+betas = [0.9, 0.99]
+weight_decay = 0.01
+eps = 1e-8

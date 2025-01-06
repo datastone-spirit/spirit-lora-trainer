@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-26 14:18:02
+ * @LastEditTime: 2025-01-06 16:56:35
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -221,6 +221,125 @@ export interface StartFluxTrainingData extends Record<string, any> {
 
 /** 启动flux训练结果 */
 export interface StartFluxTrainingResult {
+	msg: string;
+	success: boolean;
+	/** 任务id */
+	task_id: string;
+}
+
+/** 启动混元视频训练参数 */
+export interface StartHyVideoTrainingData {
+	// --------- LoRA 基本信息 ---------
+	/** lora名称 */
+	output_name: string;
+	/** 触发词 */
+	class_tokens: string;
+	// --------- 模型配置 ---------
+	model: {
+		/** 底模路径 */
+		transformer_path: string;
+		/** vae路径 */
+		vae_path: string;
+		/** llm路径 */
+		llm_path: string;
+		/** clip路径 */
+		clip_path: string;
+		/** 用于所有模型的基础 dtype */
+		dtype: string;
+		/** 底模 dtype */
+		transformer_dtype: string;
+		/** 采样时间方式 */
+		timestep_sample_method: string;
+	};
+	/** 保存路径 */
+	output_dir: string;
+	// --------- 数据集配置 ---------
+	/** 数据集目录 */
+	directory: {
+		/** 数据集路径 */
+		path: string;
+		/** 数据集重复训练次数 */
+		num_repeats: number;
+	};
+	/** 图片尺寸-宽度 */
+	resolution_width: number; //resolution = [512, 512]
+	/** 图片尺寸-高度 */
+	resolution_height: number; //resolution = [512, 512]
+	/** 启用长宽比分桶 */
+	enable_ar_bucket: boolean;
+	/** 最小长宽比 */
+	min_ar: number;
+	/** 最大长宽比 */
+	max_ar: number;
+	/** 长宽比桶的总数，在 min_ar 和 max_ar 之间均匀分布（在对数空间中） */
+	num_ar_buckets: number;
+	/** 对于视频训练，您需要配置帧桶（类似于长宽比桶）,示例：1, 33, 65 */
+	frame_buckets: string;
+	// --------- 训练设置 ---------
+	/** epochs */
+	epochs: number;
+	/** 单个 GPU 的一次前向/后向传递的批大小 */
+	micro_batch_size_per_gpu: number;
+	/** 流水线并行度。模型的一个实例被划分到这么多 GPU 上 */
+	pipeline_stages: number;
+	/** 如果 pipeline_stages > 1，较高的 GAS 表示由于更小的流水线空洞（GPU 没有重叠计算），GPU 利用率更高 */
+	gradient_accumulation_steps: number;
+	/** 梯度范数裁剪 */
+	gradient_clipping: number;
+	/** 学习率预热 */
+	warmup_steps: number;
+	// --------- 评估设置 ---------
+	/** 每n个epochs评估一次 */
+	eval_every_n_epochs: number;
+	/** 第一步前评估 */
+	eval_before_first_step: boolean;
+	/** 评估每个GPU的微批量大小 */
+	eval_micro_batch_size_per_gpu: number;
+	/** 评估梯度累积步骤 */
+	eval_gradient_accumulation_steps: number;
+	// --------- 杂项设置 ---------
+	/** 每 N epoch（轮）自动保存一次模型 */
+	save_every_n_epochs: number;
+	/** 可以每 n 轮或分钟检查一次训练状态 */
+	checkpoint_every_n_minutes: number;
+	/** 除非您有大量 VRAM，否则始终设置为 true */
+	activation_checkpointing: boolean;
+	/** 控制 Deepspeed 如何决定将层划分到 GPU 上 */
+	partition_method: string;
+	/** 将 LoRA 或模型保存的 dtype */
+	save_dtype: string;
+	/** 缓存潜在变量和文本嵌入的批大小 */
+	caching_batch_size: number;
+	/** Deepspeed 记录到控制台的频率 */
+	steps_per_print: number;
+	/** 提取视频帧的方式 */
+	video_clip_mode: string;
+	// --------- 适配器配置 ---------
+	adapter: {
+		/** 适配器类型 */
+		type: string;
+		/** rank */
+		rank: number;
+		/** 您正在训练的 LoRA 权重的 dtype */
+		dtype: string;
+	};
+	// --------- 优化器配置 ---------
+	optimizer: {
+		/** 优化器类型 */
+		type: string;
+		/** lr */
+		lr: number;
+		/** betas */
+		betas: number[];
+		/** weight_decay */
+		weight_decay: number;
+		/** eps */
+		eps: number;
+	};
+}
+
+/** 启动混元视频训练结果 */
+export interface StartHyVideoTrainingResult {
 	msg: string;
 	success: boolean;
 	/** 任务id */

@@ -131,7 +131,7 @@ huggingface-cli download openai/clip-vit-large-patch14  --exclude "*.bin" "*.msg
 ```bash
 mkdir -p google_t5-v1_1-xxl
 cd google_t5-v1_1-xxl
-huggingface-cli down google/t5-v1_1-xxl --exclude "*.bin" "*.h5" --local-dir .
+huggingface-cli download google/t5-v1_1-xxl --exclude "*.bin" "*.h5" --local-dir .
 ```
 
 #### 打标模型

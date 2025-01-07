@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 15:29:03
- * @LastEditTime: 2025-01-06 16:04:38
+ * @LastEditTime: 2025-01-07 09:54:24
  * @LastEditors: mulingyuer
  * @Description: 训练数据
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\TrainingData\index.vue
@@ -9,10 +9,10 @@
 -->
 <template>
 	<DatasetDirSelector
-		v-model:dir="ruleForm.directory.path"
+		v-model:dir="ruleForm.directory_path"
 		dir-label="数据集目录"
-		dir-prop="directory.path"
-		dir-popover-content="path"
+		dir-prop="directory_path"
+		dir-popover-content="directory_path"
 		v-model:tagger-model="ruleForm.tagger_model"
 		tagger-label="打标模型"
 		tagger-prop="tagger_model"
@@ -41,26 +41,19 @@
 		<el-col :span="24">
 			<PopoverFormItem
 				label="数据集重复训练次数"
-				prop="directory.num_repeats"
-				popover-content="num_repeats"
+				prop="directory_num_repeats"
+				popover-content="directory_num_repeats"
 			>
-				<el-input-number v-model.number="ruleForm.directory.num_repeats" :step="1" step-strictly />
+				<el-input-number v-model.number="ruleForm.directory_num_repeats" :step="1" step-strictly />
 			</PopoverFormItem>
 		</el-col>
-		<el-col :span="24">
-			<el-alert
-				class="training-data-alert"
-				title="24g显存最大只能跑 512*512 分辨率的图片"
-				type="warning"
-				effect="dark"
-				:closable="false"
-			/>
-		</el-col>
+
 		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-宽度px"
 				prop="resolution_width"
 				popover-content="resolution_width"
+				class="resolution-width"
 			>
 				<el-input-number v-model.number="ruleForm.resolution_width" :controls="false" />
 			</PopoverFormItem>
@@ -70,9 +63,19 @@
 				label="图片尺寸-高度px"
 				prop="resolution_height"
 				popover-content="resolution_height"
+				class="resolution-height"
 			>
 				<el-input-number v-model.number="ruleForm.resolution_height" :controls="false" />
 			</PopoverFormItem>
+		</el-col>
+		<el-col :span="24">
+			<el-alert
+				class="training-data-alert"
+				title="24g显存最大只能跑 512*512 分辨率的图片"
+				type="info"
+				:closable="false"
+				show-icon
+			/>
 		</el-col>
 	</el-row>
 	<el-row v-show="isExpert" :gutter="16">
@@ -110,12 +113,7 @@
 				prop="frame_buckets"
 				popover-content="frame_buckets"
 			>
-				<el-input
-					v-model="ruleForm.frame_buckets"
-					:autosize="{ minRows: 4 }"
-					type="textarea"
-					placeholder="请输入帧桶配置"
-				/>
+				<el-input v-model="ruleForm.frame_buckets" placeholder="请输入帧桶配置" />
 			</PopoverFormItem>
 		</el-col>
 	</el-row>
@@ -142,7 +140,13 @@ const isExpert = computed(() => settingsStore.isExpert);
 </script>
 
 <style lang="scss" scoped>
+.resolution-width,
+.resolution-height {
+	margin-bottom: 12px;
+}
 .training-data-alert {
-	margin-bottom: 10px;
+	margin-bottom: 22px;
+	--el-alert-bg-color: var(--el-color-error-light-9);
+	color: var(--el-color-error);
 }
 </style>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-06 08:52:21
+ * @LastEditTime: 2025-01-07 10:32:05
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -262,7 +262,7 @@ const generateToml = useDebounceFn(() => {
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 /** 导入配置 */
-function onLoadConfig(toml: StartFluxTrainingData) {
+function onLoadConfig(toml: RuleForm) {
 	try {
 		mergeDataToForm(toml, ruleForm.value);
 		ElMessage.success("配置导入成功");

@@ -23,5 +23,6 @@
 		"sdxl",
 		"shiki",
 		"VITE"
-	]
+	],
+	"editor.wordWrap": "on"
 }

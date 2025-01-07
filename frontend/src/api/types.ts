@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 10:20:37
- * @LastEditTime: 2024-12-25 10:26:09
+ * @LastEditTime: 2025-01-07 10:41:16
  * @LastEditors: mulingyuer
  * @Description: 通用类型
  * @FilePath: \frontend\src\api\types.ts
@@ -18,6 +18,6 @@ export type TaskStatus = "complete" | "created" | "running" | "failed";
 
 /** 任务类型
  *  - captioning: 打标
- *  - training: 训练
+ *  - training: flux 训练
  */
 export type TaskType = "captioning" | "training";

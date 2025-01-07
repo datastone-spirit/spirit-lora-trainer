@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 17:00:20
- * @LastEditTime: 2025-01-06 17:06:20
+ * @LastEditTime: 2025-01-07 09:27:25
  * @LastEditors: mulingyuer
  * @Description: 适配器设置
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\AdvancedSettings\AdapterSettings.vue
@@ -10,21 +10,21 @@
 <template>
 	<FieldSetWrapper title="适配器设置">
 		<AdapterTypeSelector
-			v-model="ruleForm.adapter.type"
+			v-model="ruleForm.adapter_type"
 			label="适配器类型"
-			prop="adapter.type"
+			prop="adapter_type"
 			placeholder="请选择适配器类型"
-			popover-content="type"
+			popover-content="adapter_type"
 		/>
-		<PopoverFormItem label="rank" prop="adapter.rank" popover-content="rank">
-			<el-input-number v-model.number="ruleForm.adapter.rank" :step="1" step-strictly />
+		<PopoverFormItem label="rank" prop="adapter_rank" popover-content="adapter_rank">
+			<el-input-number v-model.number="ruleForm.adapter_rank" :step="1" step-strictly />
 		</PopoverFormItem>
 		<ModelDtypeSelector
-			v-model="ruleForm.adapter.dtype"
+			v-model="ruleForm.adapter_dtype"
 			label="训练的 LoRA 权重的 dtype"
-			prop="adapter.dtype"
+			prop="adapter_dtype"
 			placeholder="请选择训练的 LoRA 权重的 dtype"
-			popover-content="adapter.dtype"
+			popover-content="adapter_dtype"
 		/>
 	</FieldSetWrapper>
 </template>

@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 def get_prompt(type: str="Descriptive", tone: str="casual", length: str="medium-length") -> str:
     CAPTION_TYPE_MAP = {
-        "Descriptive": "Write a {lenght} descriptive caption for this image in a {tone} tone.", #描述性提示词
+        "Descriptive": "Write a {length} descriptive caption for this image in a {tone} tone.", #描述性提示词
         "Training Prompt": "Write a {length} stable diffusion prompt for this image.", # 用于SD训练型提示词
         "MidJourney":  "Write a {length} MidJourney prompt for this image.",  # MidJourney式提示词
         "Booru tag list": "Write a {length} list of Booru tags for this image.", # Booru Tag 样式列表提示词

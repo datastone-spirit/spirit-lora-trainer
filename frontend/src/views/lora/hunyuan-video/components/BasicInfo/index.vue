@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 14:43:24
- * @LastEditTime: 2025-01-07 09:25:12
+ * @LastEditTime: 2025-01-07 16:43:57
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\BasicInfo\index.vue

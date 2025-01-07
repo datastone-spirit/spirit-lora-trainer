@@ -1,16 +1,13 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 16:07:29
- * @LastEditTime: 2025-01-06 16:32:03
+ * @LastEditTime: 2025-01-07 16:44:40
  * @LastEditors: mulingyuer
  * @Description: 模型参数调整
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\ModelParameters\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem label="epochs" prop="epochs" popover-content="epochs">
-		<el-input-number v-model.number="ruleForm.epochs" :step="1" step-strictly />
-	</PopoverFormItem>
 	<PopoverFormItem
 		label="单个 GPU 的一次前向/后向传递的批大小"
 		prop="micro_batch_size_per_gpu"
@@ -45,15 +42,15 @@
 </template>
 
 <script setup lang="ts">
-import { useSettingsStore } from "@/stores";
+// import { useSettingsStore } from "@/stores";
 import type { RuleForm } from "../../types";
 
-const settingsStore = useSettingsStore();
+// const settingsStore = useSettingsStore();
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 
 /** 是否专家模式 */
-const isExpert = computed(() => settingsStore.isExpert);
+// const isExpert = computed(() => settingsStore.isExpert);
 </script>
 
 <style scoped></style>

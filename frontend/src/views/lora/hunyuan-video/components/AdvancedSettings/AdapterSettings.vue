@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 17:00:20
- * @LastEditTime: 2025-01-07 09:27:25
+ * @LastEditTime: 2025-01-07 16:40:16
  * @LastEditors: mulingyuer
  * @Description: 适配器设置
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\AdvancedSettings\AdapterSettings.vue
@@ -16,7 +16,7 @@
 			placeholder="请选择适配器类型"
 			popover-content="adapter_type"
 		/>
-		<PopoverFormItem label="rank" prop="adapter_rank" popover-content="adapter_rank">
+		<PopoverFormItem label="维度" prop="adapter_rank" popover-content="adapter_rank">
 			<el-input-number v-model.number="ruleForm.adapter_rank" :step="1" step-strictly />
 		</PopoverFormItem>
 		<ModelDtypeSelector

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2024-12-25 15:58:05
+ * @LastEditTime: 2025-01-07 16:44:56
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -12,6 +12,15 @@ import type { GPUData, LoraData, LoraTaskStatus, TagData, TagTaskStatus } from "
 export type * from "./types";
 
 export const useTrainingStore = defineStore("training", () => {
+	/** gpu是否在使用中 */
+	// const isUseGPU = ref(false);
+	// function setIsUseGPU(value: boolean) {
+	// 	isUseGPU.value = value;
+	// }
+
+	/** 当前进行的任务数据 */
+	// const trainingTaskData = ref<>({});
+
 	/** 是否监听gpu */
 	const isListenGPU = ref(false);
 	function setIsListenGPU(value: boolean) {

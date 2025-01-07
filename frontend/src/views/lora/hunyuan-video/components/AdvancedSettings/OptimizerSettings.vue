@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 17:06:44
- * @LastEditTime: 2025-01-07 09:31:11
+ * @LastEditTime: 2025-01-07 16:41:00
  * @LastEditors: mulingyuer
  * @Description: 优化器设置
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\AdvancedSettings\OptimizerSettings.vue
@@ -40,7 +40,7 @@
 			</el-col>
 		</el-row>
 		<PopoverFormItem
-			label="weight_decay"
+			label="权重衰减"
 			prop="optimizer_weight_decay"
 			popover-content="optimizer_weight_decay"
 		>

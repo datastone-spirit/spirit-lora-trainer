@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-01-07 10:44:12
+ * @LastEditTime: 2025-01-07 16:49:06
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -73,10 +73,12 @@ import { useSettingsStore } from "@/stores";
 import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import ConfigBtns from "./components/Footer/ConfigBtns.vue";
-import { mergeDataToForm } from "./hunyuan.helper";
+import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
 import { useGPU } from "@/hooks/useGPU";
 import { useTraining } from "@/hooks/useTraining";
 import { useTag } from "@/hooks/useTag";
+import { batchTag } from "@/api/tag";
+import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
 
 const settingsStore = useSettingsStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
@@ -215,8 +217,65 @@ function onResetData() {
 	ElMessage.success("重置成功");
 }
 
-// 打标
-function onTagSubmit() {}
+/** 打标 */
+async function onTagSubmit() {
+	try {
+		const { directory_path, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
+		// 校验
+		const validations = [
+			// {
+			// 	condition: () => !isLoraTaskEnd(),
+			// 	message: "训练任务未结束，请等待训练完成再执行打标"
+			// },
+			{
+				condition: () => typeof directory_path !== "string" || directory_path.trim() === "",
+				message: "请先选择训练用的数据集目录"
+			},
+			{
+				condition: async () => !(await checkDirectory(directory_path)),
+				message: "数据集目录不存在"
+			},
+			{
+				condition: () => typeof tagger_model !== "string" || tagger_model.trim() === "",
+				message: "请先选择打标模型"
+			},
+			{
+				condition: () => output_trigger_words && class_tokens.trim() === "",
+				message: "请填写触发词"
+			}
+		];
+
+		for (const validation of validations) {
+			if (await validation.condition()) {
+				ElMessage({
+					message: validation.message,
+					type: "error"
+				});
+				return;
+			}
+		}
+
+		// api
+		const result = await batchTag({
+			image_path: directory_path,
+			model_name: tagger_model,
+			class_token: output_trigger_words ? class_tokens : undefined,
+			prompt_type: ruleForm.value.prompt_type
+		});
+		startGPUListen();
+		startTagListen(result.task_id);
+
+		ElMessage({
+			message: "正在打标...",
+			type: "success"
+		});
+	} catch (error) {
+		stopGPUListen();
+		stopTagListen();
+
+		console.log("打标任务创建失败", error);
+	}
+}
 
 /** 提交表单 */
 const submitLoading = ref(false);
@@ -262,8 +321,9 @@ async function onSubmit() {
 		}
 
 		// // 开始训练
-		// const data: StartFluxTrainingData = formatFormData(ruleForm.value);
-		// const { task_id } = await startFluxTraining(data);
+		const data: StartHyVideoTrainingData = formatFormData(ruleForm.value);
+		const { task_id } = await startHyVideoTraining(data);
+		console.log("🚀 ~ onSubmit ~ task_id:", task_id);
 		// // 监听GPU数据
 		// startGPUListen();
 		// // 监听训练数据

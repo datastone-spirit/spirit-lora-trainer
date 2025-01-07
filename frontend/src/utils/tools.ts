@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2024-12-30 09:57:44
+ * @LastEditTime: 2025-01-07 17:27:19
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -60,4 +60,24 @@ export function validateForm(form: FormInstance): Promise<boolean> {
 		if (!form) return resolve(false);
 		form.validate(resolve);
 	});
+}
+
+/** a链接下载文件 */
+export function downloadFile(url: string, filename?: string) {
+	// 创建一个临时a标签来触发下载
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = filename ?? "";
+	link.target = "_blank";
+
+	// 使用MouseEvent初始化点击事件
+	const clickEvent = new MouseEvent("click", {
+		view: window,
+		bubbles: true,
+		cancelable: false
+	});
+	link.dispatchEvent(clickEvent);
+
+	// 销毁
+	link.remove();
 }

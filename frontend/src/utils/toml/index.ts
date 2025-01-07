@@ -1,14 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:17:12
- * @LastEditTime: 2024-12-17 17:44:00
+ * @LastEditTime: 2025-01-07 17:32:20
  * @LastEditors: mulingyuer
  * @Description: toml相关工具
- * @FilePath: \frontend\src\utils\toml.ts
+ * @FilePath: \frontend\src\utils\toml\index.ts
  * 怎么可能会有bug！！！
  */
 import { stringify, parse } from "smol-toml";
 import { formatDate } from "@/utils/dayjs";
+import { downloadFile } from "@/utils/tools";
+import type { DownloadTomlFileOptions } from "./types";
 
 /** 生成toml字符串 */
 export function tomlStringify(obj: any): string {
@@ -39,25 +41,14 @@ export function readTomlFile<T = string>(file: File): Promise<T> {
 }
 
 /** 将toml字符串转成文件并下载 */
-export function downloadTomlFile(text: string, fileName?: string) {
-	fileName = fileName || `${formatDate(new Date(), "YYYY-MM-DD HH-mm-ss")}.toml`;
+export function downloadTomlFile(options: DownloadTomlFileOptions) {
+	const { text, fileNamePrefix } = options;
+	let { fileName } = options;
+	fileName = fileName ?? `${formatDate(new Date(), "YYYY-MM-DD HH-mm-ss")}.toml`;
+	if (fileNamePrefix) fileName = `${fileNamePrefix}_${fileName}`;
 
 	const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
 	const url = URL.createObjectURL(blob);
 
-	// 创建一个临时a标签来触发下载
-	const link = document.createElement("a");
-	link.href = url;
-	link.download = fileName;
-
-	// 使用MouseEvent初始化点击事件
-	const clickEvent = new MouseEvent("click", {
-		view: window,
-		bubbles: true,
-		cancelable: false
-	});
-	link.dispatchEvent(clickEvent);
-
-	// 销毁
-	link.remove();
+	downloadFile(url, fileName);
 }

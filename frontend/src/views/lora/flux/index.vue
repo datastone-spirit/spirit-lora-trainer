@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-07 10:32:05
+ * @LastEditTime: 2025-01-07 17:36:12
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -47,11 +47,13 @@
 				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
 			</template>
 		</TwoSplit>
-		<ConfigBtns
+		<FooterButtonGroup
+			left-to="#footer-bar-left"
+			:getExportConfig="onExportConfig"
+			export-config-prefix="flux"
 			@load-config="onLoadConfig"
-			:export-config="onExportConfig"
 			@reset-data="onResetData"
-		/>
+		></FooterButtonGroup>
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="flux-footer-bar" :size="40">
 				<GPUMonitor v-if="isListenGPU" />
@@ -88,7 +90,6 @@ import { generateKeyMapFromInterface } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettingsCollapse from "./components/AdvancedSettingsCollapse/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
-import ConfigBtns from "./components/Footer/ConfigBtns.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";

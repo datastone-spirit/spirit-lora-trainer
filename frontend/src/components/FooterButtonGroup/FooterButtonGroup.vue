@@ -1,16 +1,16 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2024-12-12 14:25:37
- * @LastEditTime: 2024-12-19 10:02:15
+ * @Date: 2025-01-07 17:09:02
+ * @LastEditTime: 2025-01-07 17:33:01
  * @LastEditors: mulingyuer
- * @Description: 底部配置栏
- * @FilePath: \frontend\src\views\lora\flux\components\Footer\ConfigBtns.vue
+ * @Description: 页脚按钮组
+ * @FilePath: \frontend\src\components\FooterButtonGroup\FooterButtonGroup.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<Teleport :to="to" :defer="defer">
-		<div class="lora-flux-config-panel">
-			<el-space class="lora-flux-config-wrapper" :size="12">
+	<Teleport :to="leftTo" :defer="leftDefer">
+		<div class="footer-button-group-left">
+			<el-space class="footer-button-group-left-content" :size="12">
 				<el-upload
 					ref="uploadRef"
 					v-model:file-list="uploadFileList"
@@ -44,16 +44,24 @@ import type { UploadInstance, UploadProps, UploadRawFile, UploadUserFile } from 
 import type { TeleportProps } from "vue";
 import { downloadTomlFile, readTomlFile, tomlParse, tomlStringify } from "@/utils/toml";
 
+type ExportConfig = Record<string, any>;
+
 export interface ConfigProps {
-	to?: TeleportProps["to"];
-	defer?: TeleportProps["defer"];
+	/** 左按钮组teleport节点 */
+	leftTo: TeleportProps["to"];
+	leftDefer?: TeleportProps["defer"];
+	/** 右按钮组teleport节点 */
+	rightTo?: TeleportProps["to"];
+	rightDefer?: TeleportProps["defer"];
 	/** 获取导出的配置对象 */
-	exportConfig: () => Promise<Record<string, any>> | Record<string, any>;
+	getExportConfig: (() => Promise<ExportConfig> | ExportConfig) | ExportConfig;
+	/** 导出的配置对象文件名前缀 */
+	exportConfigPrefix?: string;
 }
 
 const props = withDefaults(defineProps<ConfigProps>(), {
-	to: "#footer-bar-left",
-	defer: true
+	leftDefer: true,
+	rightDefer: true
 });
 const emits = defineEmits<{
 	/** 配置导入 */
@@ -85,9 +93,14 @@ const onUploadRequest: UploadProps["beforeUpload"] = async (file) => {
 // 配置导出
 async function onExportConfig() {
 	try {
-		const configData = await props.exportConfig();
+		let configData: ExportConfig;
+		if (typeof props.getExportConfig === "function") {
+			configData = await props.getExportConfig();
+		} else {
+			configData = props.getExportConfig;
+		}
 		const tomlStr = tomlStringify(configData);
-		downloadTomlFile(tomlStr);
+		downloadTomlFile({ text: tomlStr, fileNamePrefix: props.exportConfigPrefix });
 	} catch (error) {
 		ElMessage.error(`配置导出发生错误：${(error as Error)?.message ?? "未知错误"}`);
 		console.error(error);
@@ -96,10 +109,10 @@ async function onExportConfig() {
 </script>
 
 <style lang="scss" scoped>
-.lora-flux-config-panel {
+.footer-button-group-left {
 	height: 100%;
 }
-.lora-flux-config-wrapper {
+.footer-button-group-left-content {
 	height: 100%;
 }
 </style>

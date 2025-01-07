@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-01-07 16:49:06
+ * @LastEditTime: 2025-01-07 17:35:30
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -25,7 +25,7 @@
 					<Collapse v-model="openStep2" title="第2步：训练用的数据">
 						<TrainingData :form="ruleForm" :tag-submit="onTagSubmit" />
 					</Collapse>
-					<Collapse v-model="openStep3" title="第3步：模型参数调教">
+					<Collapse v-show="isExpert" v-model="openStep3" title="模型参数调教">
 						<ModelParameters v-model:form="ruleForm" />
 					</Collapse>
 					<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
@@ -37,11 +37,13 @@
 				<SplitRightPanel :toml="toml" :dir="ruleForm.directory_path" />
 			</template>
 		</TwoSplit>
-		<ConfigBtns
+		<FooterButtonGroup
+			left-to="#footer-bar-left"
+			:getExportConfig="onExportConfig"
+			export-config-prefix="hunyuan-video"
 			@load-config="onLoadConfig"
-			:export-config="onExportConfig"
 			@reset-data="onResetData"
-		/>
+		></FooterButtonGroup>
 		<Teleport to="#footer-bar-center" defer>
 			<el-space class="hunyuan-footer-bar" :size="40">
 				<GPUMonitor v-if="isListenGPU" />
@@ -72,7 +74,6 @@ import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import { useSettingsStore } from "@/stores";
 import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import ConfigBtns from "./components/Footer/ConfigBtns.vue";
 import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
 import { useGPU } from "@/hooks/useGPU";
 import { useTraining } from "@/hooks/useTraining";

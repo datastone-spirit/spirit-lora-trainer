@@ -998,15 +998,15 @@ task_current = {
 
 
 huanyuan_training = {
-    "tags": ["Training"],
-    "description": "混元模型LoRA训练",
-    "responses": {
-        "200": {
-            "description": "成功获取当前任务信息",
-            "schema": {  
-    "type": "object",
-    "properties": {
-        "config": {
+  "tags": ["Training"],
+  "description": "混元模型LoRA训练",
+  "parameters": [
+    {
+      "name": "config",
+      "in": "body",
+      "required": True,
+      "description": "包含所有训练配置的对象",
+      "schema": {
             "type": "object",
             "required": ["output_dir"],
             "properties": {
@@ -1067,50 +1067,83 @@ huanyuan_training = {
                     }
                 }
             }
-        },
-        "dataset": {
-            "type": "object",
-            "properties": {
+        }
+     },
+     {
+      "name": "dataset",
+      "in": "body",
+      "required": True,
+      "description": "数据集配置",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "resolutions": {
+            "type": "array",
+            "items": {"type": "integer"},
+            "default": [512]
+          },
+          "enable_ar_bucket": {"type": "boolean", "default": True},
+          "min_ar": {"type": "number", "default": 0.5},
+          "max_ar": {"type": "number", "default": 2.0},
+          "num_ar_buckets": {"type": "integer", "default": 7},
+          "frame_buckets": {
+            "type": "array",
+            "items": {"type": "integer"},
+            "default": [1, 33, 65]
+          },
+          "directories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {"type": "string"},
+                "num_repeats": {"type": "integer", "minimum": 1, "default": 10},
                 "resolutions": {
-                    "type": "array",
-                    "items": {"type": "integer"},
-                    "default": [512]
+                  "type": "array",
+                  "items": {"type": "integer"}
                 },
-                "enable_ar_bucket": {"type": "boolean", "default": True},
-                "min_ar": {"type": "number", "default": 0.5},
-                "max_ar": {"type": "number", "default": 2.0},
-                "num_ar_buckets": {"type": "integer", "default": 7},
                 "frame_buckets": {
-                    "type": "array",
-                    "items": {"type": "integer"},
-                    "default": [1, 33, 65]
-                },
-                "directories": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "path": {"type": "string"},
-                            "num_repeats": {"type": "integer", "minimum": 1, "default": 10},
-                            "resolutions": {
-                                "type": "array",
-                                "items": {"type": "integer"}
-                            },
-                            "frame_buckets": {
-                                "type": "array",
-                                "items": {"type": "integer"}
-                            }
-                        },
-                        "required": ["path", "num_repeats"]
-                    }
+                  "type": "array",
+                  "items": {"type": "integer"}
                 }
+              },
+              "required": ["path", "num_repeats"]
             }
+          }
         }
-    },
-    "required": ["config", "dataset"]
-}
-
-
-        }
+      }
     }
+  ],
+  "responses": {
+    "200": {
+      "description": "任务提交成功",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean", "example": True},
+          "msg": {"type": "string", "example": "The training task was submitted successfully."},
+        }
+      }
+    },
+    "400": {
+      "description": "参数错误训练失败",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean", "example": False},
+          "msg": {"type": "string", "example": "output is required but empty"}
+        }
+      }
+    },
+    "500": {
+      "description": "服务器错误，训练失败",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean", "example": False},
+          "msg": {"type": "string", "example": "start hunyuan_video training failed, please contract the admin"}
+        }
+      }
+    }        
+  }
 }

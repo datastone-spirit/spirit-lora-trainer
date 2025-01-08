@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 15:26:11
- * @LastEditTime: 2025-01-03 17:38:02
+ * @LastEditTime: 2025-01-08 15:11:43
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag.ts
@@ -12,6 +12,7 @@ import { manualTagInfo } from "@/api/monitor";
 import type { TaskStatus } from "@/api/types";
 import type { TagData, TagTaskStatus } from "@/stores";
 import { useTrainingStore } from "@/stores";
+import { animatedFavicon } from "@/utils/animated-favicon";
 
 type EventType = Extract<TaskStatus, "complete" | "failed">;
 type EventCallback = () => void;
@@ -127,6 +128,7 @@ export const useTag = (() => {
 			tagTaskStatus.value = "none";
 			// 触发回调
 			events.complete.forEach((callback) => callback());
+			animatedFavicon.stopAnimation();
 
 			ElMessageBox({
 				title: "打标完成",
@@ -146,6 +148,7 @@ export const useTag = (() => {
 			tagTaskStatus.value = "none";
 			// 触发回调
 			events.failed.forEach((callback) => callback());
+			animatedFavicon.stopAnimation();
 
 			ElMessageBox({
 				title: "打标失败",
@@ -171,6 +174,7 @@ export const useTag = (() => {
 			trainingStore.setIsListenTag(true);
 			trainingStore.setIsTagPolling(true);
 			timer = setInterval(updateTagData, tagSleepTime.value);
+			animatedFavicon.startAnimation();
 		}
 
 		/** 停止监听 */

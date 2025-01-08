@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:06:24
- * @LastEditTime: 2025-01-03 17:48:41
+ * @LastEditTime: 2025-01-08 15:25:34
  * @LastEditors: mulingyuer
  * @Description: 训练lora hooks
  * @FilePath: \frontend\src\hooks\useTraining.ts
@@ -13,6 +13,7 @@ import type { LoraTaskStatus, LoraData } from "@/stores";
 import { loRATrainingInfo } from "@/api/monitor";
 import type { LoRATrainingInfoResult } from "@/api/monitor";
 import { isEmptyObject } from "@/utils/tools";
+import { animatedFavicon } from "@/utils/animated-favicon";
 
 type EventType = Extract<TaskStatus, "complete" | "failed">;
 type EventCallback = () => void;
@@ -138,6 +139,7 @@ export const useTraining = (() => {
 			loraTaskStatus.value = "none";
 			// 触发回调
 			events.complete.forEach((callback) => callback());
+			animatedFavicon.stopAnimation();
 
 			ElMessageBox({
 				title: "训练完成",
@@ -157,6 +159,7 @@ export const useTraining = (() => {
 			loraTaskStatus.value = "none";
 			// 触发回调
 			events.failed.forEach((callback) => callback());
+			animatedFavicon.stopAnimation();
 
 			ElMessageBox({
 				title: "训练失败",
@@ -182,6 +185,7 @@ export const useTraining = (() => {
 			trainingStore.setIsListenLora(true);
 			trainingStore.setIsLoraPolling(true);
 			timer = setInterval(updateLoraData, loraSleepTime.value);
+			animatedFavicon.startAnimation();
 		}
 
 		/** 停止监听 */
@@ -212,62 +216,3 @@ export const useTraining = (() => {
 		};
 	};
 })();
-
-// import { startFluxTraining } from "@/api/lora";
-// import type { StartFluxTrainingData } from "@/api/lora";
-
-// type TrainingStatus = "complete" | "created" | "running" | "failed" | "null";
-
-// /** 是否在训练 */
-// const isTraining = ref(false);
-// /** 训练的状态 */
-// const trainingStatus = ref<TrainingStatus>("null");
-// /** 训练任务id */
-// const trainingTaskId = ref<string | null>(null);
-
-// export function useTraining() {
-// 	/** 更新是否在训练 */
-// 	function updateIsTraining(value: boolean) {
-// 		isTraining.value = value;
-// 	}
-
-// 	/** 更新训练状态 */
-// 	function updateTrainingStatus(status: TrainingStatus) {
-// 		trainingStatus.value = status;
-// 	}
-
-// 	/** 更新任务id */
-// 	function updateTaskId(taskId: string | null) {
-// 		trainingTaskId.value = taskId;
-// 	}
-
-// 	/** 开始训练 */
-// 	async function startTraining(data: StartFluxTrainingData) {
-// 		const { task_id } = await startFluxTraining(data);
-
-// 		// 更新数据
-// 		trainingTaskId.value = task_id;
-// 		trainingStatus.value = "running";
-// 		isTraining.value = true;
-
-// 		return task_id;
-// 	}
-
-// 	/** 停止训练 */
-// 	function stopTraining() {
-// 		trainingTaskId.value = null;
-// 		trainingStatus.value = "null";
-// 		isTraining.value = false;
-// 	}
-
-// 	return {
-// 		isTraining: readonly(isTraining),
-// 		trainingStatus: readonly(trainingStatus),
-// 		trainingTaskId: readonly(trainingTaskId),
-// 		updateIsTraining,
-// 		updateTrainingStatus,
-// 		updateTaskId,
-// 		startTraining,
-// 		stopTraining
-// 	};
-// }

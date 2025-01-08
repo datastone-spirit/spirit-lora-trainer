@@ -3,6 +3,7 @@ from typing import Optional, Callable, List, Dict
 from subprocess import Popen
 from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
+from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
 from subprocess import Popen, TimeoutExpired
 import uuid
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 class TaskType(Enum):
     NONE = "none"
     TRAINING = "training"
+    HUNYUAN_TRAINING = "hunyuan_training"
     CAPTIONING = "captioning"
 
 class TaskStatus(Enum):
@@ -311,3 +313,8 @@ class CaptioningTask(Task):
         logger.info(f"task dict result: {d}")
         return d
 
+@dataclass
+class HunyuanTrainingTask(Task):
+    proc: Popen = None
+    hunyuan_parameters: HunyuanTrainingParameter = None 
+    

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-07 10:00:01
- * @LastEditTime: 2025-01-08 11:13:58
+ * @LastEditTime: 2025-01-08 11:56:52
  * @LastEditors: mulingyuer
  * @Description: 换源视频训练帮助
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.helper.ts
@@ -89,7 +89,7 @@ function formatConfig(form: RuleForm): Config {
 
 	// 其他
 	const excludeKeys = ["model", "adapter", "optimizer"];
-	const flatKeys = Object.keys(form).filter((key) => {
+	const flatKeys = Object.keys(config).filter((key) => {
 		return !excludeKeys.includes(key) && Object.hasOwn(form, key);
 	});
 	flatKeys.forEach((key) => {

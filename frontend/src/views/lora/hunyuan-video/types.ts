@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-06 10:37:35
- * @LastEditTime: 2025-01-07 09:39:48
+ * @LastEditTime: 2025-01-08 11:15:15
  * @LastEditors: mulingyuer
  * @Description: 混元视频类型定义
  * @FilePath: \frontend\src\views\lora\hunyuan-video\types.ts
@@ -103,6 +103,8 @@ export interface RuleForm {
 	adapter_rank: number;
 	/** 您正在训练的 LoRA 权重的 dtype */
 	adapter_dtype: string;
+	/** 您可以从先前训练的 lora 继续训练 */
+	adapter_init_from_existing: string;
 	// --------- 优化器配置 ---------
 	/** 优化器类型 */
 	optimizer_type: string;

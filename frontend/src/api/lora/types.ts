@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-01-07 10:28:55
+ * @LastEditTime: 2025-01-08 11:13:44
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -264,7 +264,7 @@ export interface StartHyVideoTrainingData {
 			type: string;
 			rank: number;
 			dtype: string;
-			init_from_existing?: string;
+			init_from_existing: string;
 		};
 		optimizer: {
 			type: string;

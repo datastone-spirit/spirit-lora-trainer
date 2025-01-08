@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-01-07 17:35:30
+ * @LastEditTime: 2025-01-08 11:16:00
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -133,6 +133,7 @@ const defaultForm = readonly<RuleForm>({
 	adapter_type: "lora",
 	adapter_rank: 32,
 	adapter_dtype: "bfloat16",
+	adapter_init_from_existing: "",
 	optimizer_type: "adamw_optimi",
 	optimizer_lr: "2e-5",
 	optimizer_betas: [0.9, 0.99],

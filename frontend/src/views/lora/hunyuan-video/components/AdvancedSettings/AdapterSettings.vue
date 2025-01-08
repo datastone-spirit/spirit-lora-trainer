@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 17:00:20
- * @LastEditTime: 2025-01-07 16:40:16
+ * @LastEditTime: 2025-01-08 11:17:11
  * @LastEditors: mulingyuer
  * @Description: 适配器设置
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\AdvancedSettings\AdapterSettings.vue
@@ -26,6 +26,16 @@
 			placeholder="请选择训练的 LoRA 权重的 dtype"
 			popover-content="adapter_dtype"
 		/>
+		<PopoverFormItem
+			label="从上次的LoRA继续训练"
+			prop="adapter_init_from_existing"
+			popover-content="adapter_init_from_existing"
+		>
+			<FileSelector
+				v-model="ruleForm.adapter_init_from_existing"
+				placeholder="请选择需要继续训练的LoRA"
+			/>
+		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>
 

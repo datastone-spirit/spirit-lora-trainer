@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-07 10:00:01
- * @LastEditTime: 2025-01-07 10:29:44
+ * @LastEditTime: 2025-01-08 11:13:58
  * @LastEditors: mulingyuer
  * @Description: 换源视频训练帮助
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.helper.ts
@@ -49,7 +49,8 @@ function formatConfig(form: RuleForm): Config {
 		adapter: {
 			type: "",
 			rank: 0,
-			dtype: ""
+			dtype: "",
+			init_from_existing: ""
 		},
 		optimizer: {
 			type: "",
@@ -76,6 +77,7 @@ function formatConfig(form: RuleForm): Config {
 	configAdapter.type = form.adapter_type;
 	configAdapter.rank = form.adapter_rank;
 	configAdapter.dtype = form.adapter_dtype;
+	configAdapter.init_from_existing = form.adapter_init_from_existing;
 
 	// optimizer
 	const configOptimizer = config.optimizer;

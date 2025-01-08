@@ -32,6 +32,7 @@ coverage
 __pycache__/
 upload/
 .vscode/
+.coverage
 
 # frontend
 /frontend/.env.development

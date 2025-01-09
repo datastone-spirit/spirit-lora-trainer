@@ -23,6 +23,11 @@ class HunyuanTraining(Resource):
         parameter = None
         try:
             parameter = HunyuanTrainingParameter.from_dict(data)
+            
+            valid, reson = HunyuanTrainingParameter.validate(parameter)
+            if not valid:
+                return res(success=False, message=reson, code=400), 400
+
             task = HunyuanTrainingService().start_train(parameter)
             return res(
                 data={"task_id": task.id}, 

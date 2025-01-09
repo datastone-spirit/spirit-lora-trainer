@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Union, Tuple
 from utils.util import getmodelpath
+from app.api.common.utils import validate_training_data
 import dacite
 import os
 
@@ -74,9 +75,13 @@ class DataSetConfig:
             return False, "directories in data can't be None"
         
         for directory in config.directories:
-            if not directory.path:
-                logger.warning("directory.path is None, set to default")
-                return False, "path in data can't be None"
+            if not directory.path or not os.path.exists(directory.path):
+                logger.warning(f"directory.path is None, or path: {directory.path} doesn't exist")
+                return False, f"path in data can't be None, or path: {directory.path} doesn't exist"
+
+            valid, reason = validate_training_data(directory.path) 
+            if not valid:
+                return valid, reason
             
             if not directory.num_repeats or directory.num_repeats < 1:
                 logger.warning("directory.num_repeats is None or less then 1, set to 10")
@@ -261,6 +266,7 @@ eps = 1e-8
 class TrainingConfig:
     output_dir: str
     dataset: str
+    log_dir: str
     epochs: int = 1000
     micro_batch_size_per_gpu: int = 1
     pipeline_stages: int = 1
@@ -305,6 +311,12 @@ class HunyuanTrainingParameter:
         if not config.config.output_dir:
             return False, "output_dir is None"
         
+        if os.path.exists(config.config.output_dir) and not os.path.isdir(config.config.output_dir):
+            return False, f"output_dir {config.config.output_dir} is not a directory"
+        
+        if not os.path.exists(config.config.output_dir):
+            os.makedirs(config.config.output_dir, exist_ok=True)
+        
         valid, reason = ModelConfig.validate(config.config.model)
         if not valid:
             return False, reason
@@ -316,5 +328,7 @@ class HunyuanTrainingParameter:
         valid, reason = OptimizerConfig.validate(config.config.optimizer)
         if not valid:
             return False, reason
-        return True, ""
+
+        valid, reason = DataSetConfig.validate(config.dataset)
+        return valid, reason
         

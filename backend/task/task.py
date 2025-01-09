@@ -35,6 +35,7 @@ def get_logdir(log_dir, log_prefix):
         if file.startswith(log_prefix):
             return os.path.join(log_dir, file)
     return None
+
 @dataclass
 class Task:
     status = TaskStatus.CREATED
@@ -66,6 +67,21 @@ class Task:
         return task
 
     @staticmethod
+    def wrap_hunyuan_training(proc : Popen, training_paramter: TrainingParameter, task_id: str) -> 'Task':
+        task = HunyuanTrainingTask()
+        task.status = TaskStatus.CREATED
+        task.proc = proc 
+        task.hunyuan_parameters = training_paramter
+        task.detail = {}
+        if not task_id:
+            task.id = uuid.uuid4().hex
+        else:
+            task.id = task_id
+        task.task_type = TaskType.HUNYUAN_TRAINING
+        task.start_time = time.time()
+        return task
+
+    @staticmethod
     def wrap_captioning_task(image_paths: List[str], output_dir: str, class_token: str, cap_model: CaptioningModelInfo, prompt_type) -> 'Task':
         task = CaptioningTask()
         task.status = TaskStatus.CREATED
@@ -83,6 +99,7 @@ class Task:
         task.task_type = TaskType.CAPTIONING
         task.captioning = cap_model.captioning
         return task    
+
 
     def run(self):
         self.status = TaskStatus.RUNNING
@@ -317,4 +334,36 @@ class CaptioningTask(Task):
 class HunyuanTrainingTask(Task):
     proc: Popen = None
     hunyuan_parameters: HunyuanTrainingParameter = None 
-    
+
+    def _run(self):
+        try:
+            logger.info("beginning to run proc communication with hunyuan training process")
+            stdout_lines = []
+            linestr = ''
+            line = bytearray()
+            while True:
+                ch = self.proc.stdout.read(1)
+                if ch == b'' and self.proc.poll() is not None:
+                    break
+                line.extend(ch)
+                if ch == b'\n':
+                    linestr = line.decode('utf-8', errors='ignore')
+                    print(linestr, end='')
+                    stdout_lines.append(linestr)
+                    line = bytearray()  #
+            stdout, stderr = self.proc.communicate()
+        except TimeoutExpired as exc:
+            self.proc.kill()
+            self.proc.wait()
+            raise
+        except:
+            self.proc.kill()
+            raise
+
+        retcode = self.proc.poll()
+        if retcode != 0:
+            logger.error(f"training subprocess run failed, retcode is {retcode}")
+            raise Exception(f"training subprocess run failed, retcode is {retcode}")
+
+        logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
+        return     

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:14:16
- * @LastEditTime: 2024-12-12 16:10:38
+ * @LastEditTime: 2025-01-09 15:28:22
  * @LastEditors: mulingyuer
  * @Description: 设置数据仓库
  * @FilePath: \frontend\src\stores\modules\settings\index.ts
@@ -10,6 +10,8 @@
 import { defineStore } from "pinia";
 import { ComplexityEnum } from "@/enums/complexity.enum";
 import { SplitRightEnum } from "@/enums/split-right.enum";
+import type { TrainerSettings } from "./types";
+export type * from "./types";
 
 export const useSettingsStore = defineStore(
 	"settings",
@@ -36,6 +38,12 @@ export const useSettingsStore = defineStore(
 		/** 是否显示toml预览 */
 		const showTomlPreview = computed(() => splitRightType.value === SplitRightEnum.TOML_PREVIEW);
 
+		/** 训练器设置 */
+		const trainerSettings = ref<TrainerSettings>({
+			openAnimatedFavicon: false,
+			openFooterBarProgress: true
+		});
+
 		return {
 			complexity,
 			setComplexity,
@@ -44,7 +52,8 @@ export const useSettingsStore = defineStore(
 			splitRightType,
 			setSplitRightType,
 			showAIDataset,
-			showTomlPreview
+			showTomlPreview,
+			trainerSettings
 		};
 	},
 	{

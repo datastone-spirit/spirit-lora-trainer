@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-01-06 14:56:43
+ * @LastEditTime: 2025-01-09 09:54:51
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -129,7 +129,7 @@ const props = withDefaults(defineProps<AiDatasetProps>(), {
 	showTeleportBtn: true
 });
 const { previewImages } = useImageViewer();
-const { addTagEventListener, removeTagEventListener } = useTag();
+const { tagEvents } = useTag();
 
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
 const list = ref<FileList>([]);
@@ -371,9 +371,9 @@ watch(
 );
 
 getList();
-addTagEventListener("complete", getList);
+tagEvents.on("complete", getList);
 onUnmounted(() => {
-	removeTagEventListener("complete", getList);
+	tagEvents.off("complete", getList);
 });
 
 defineExpose({

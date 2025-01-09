@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-01-07 17:33:01
+ * @LastEditTime: 2025-01-09 10:40:05
  * @LastEditors: mulingyuer
  * @Description: 页脚按钮组
  * @FilePath: \frontend\src\components\FooterButtonGroup\FooterButtonGroup.vue
@@ -36,6 +36,22 @@
 			</el-space>
 		</div>
 	</Teleport>
+	<Teleport :to="rightTo" :defer="rightDefer">
+		<el-space class="footer-button-group-right" :size="40">
+			<GPUMonitor v-if="trainingStore.useGPU" />
+			<LoRATrainingMonitor v-if="monitorFluxLoraData.isListen" />
+			<TagMonitor v-if="monitorTagData.isListen" />
+			<el-button
+				v-if="!trainingStore.useGPU"
+				type="primary"
+				size="large"
+				:loading="submitLoading || trainingStore.useGPU"
+				@click="emits('submit')"
+			>
+				开始训练
+			</el-button>
+		</el-space>
+	</Teleport>
 </template>
 
 <script setup lang="ts">
@@ -43,6 +59,10 @@ import { genFileId } from "element-plus";
 import type { UploadInstance, UploadProps, UploadRawFile, UploadUserFile } from "element-plus";
 import type { TeleportProps } from "vue";
 import { downloadTomlFile, readTomlFile, tomlParse, tomlStringify } from "@/utils/toml";
+import { useGPU } from "@/hooks/useGPU";
+import { useTrainingStore } from "@/stores";
+import { useTag } from "@/hooks/useTag";
+import { useFluxLora } from "@/hooks/useFluxLora";
 
 type ExportConfig = Record<string, any>;
 
@@ -51,24 +71,35 @@ export interface ConfigProps {
 	leftTo: TeleportProps["to"];
 	leftDefer?: TeleportProps["defer"];
 	/** 右按钮组teleport节点 */
-	rightTo?: TeleportProps["to"];
+	rightTo: TeleportProps["to"];
 	rightDefer?: TeleportProps["defer"];
 	/** 获取导出的配置对象 */
 	getExportConfig: (() => Promise<ExportConfig> | ExportConfig) | ExportConfig;
 	/** 导出的配置对象文件名前缀 */
 	exportConfigPrefix?: string;
+	/** 提交表单loading */
+	submitLoading?: boolean;
 }
 
 const props = withDefaults(defineProps<ConfigProps>(), {
 	leftDefer: true,
-	rightDefer: true
+	rightDefer: true,
+	submitLoading: false
 });
 const emits = defineEmits<{
 	/** 配置导入 */
 	loadConfig: [config: any];
 	/** 重置数据 */
 	resetData: [];
+	/** 提交表单 */
+	submit: [];
 }>();
+
+const trainingStore = useTrainingStore();
+const { startGPUListen, stopGPUListen } = useGPU();
+const { monitorTagData, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
+const { monitorFluxLoraData, startFluxLoraListen, stopFluxLoraListen, isFluxLoraTaskEnd } =
+	useFluxLora();
 
 // 配置导入
 const uploadRef = ref<UploadInstance>();
@@ -106,6 +137,34 @@ async function onExportConfig() {
 		console.error(error);
 	}
 }
+
+// 如果GPU被占用就开始监听
+watch(
+	() => trainingStore.useGPU,
+	(newVal) => {
+		if (newVal) {
+			startGPUListen();
+		} else {
+			stopGPUListen();
+		}
+	},
+	{ immediate: true }
+);
+
+// 组件生命周期
+onMounted(() => {
+	if (!isTagTaskEnd()) {
+		startTagListen();
+	}
+	if (!isFluxLoraTaskEnd()) {
+		startFluxLoraListen();
+	}
+});
+onUnmounted(() => {
+	stopGPUListen();
+	stopTagListen();
+	stopFluxLoraListen();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -114,5 +173,10 @@ async function onExportConfig() {
 }
 .footer-button-group-left-content {
 	height: 100%;
+}
+.footer-button-group-right {
+	width: 100%;
+	height: 100%;
+	justify-content: flex-end;
 }
 </style>

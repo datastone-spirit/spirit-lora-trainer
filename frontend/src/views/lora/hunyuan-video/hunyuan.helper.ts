@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-07 10:00:01
- * @LastEditTime: 2025-01-08 11:56:52
+ * @LastEditTime: 2025-01-09 15:43:49
  * @LastEditors: mulingyuer
  * @Description: 换源视频训练帮助
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.helper.ts
@@ -17,7 +17,6 @@ type Dataset = StartHyVideoTrainingData["dataset"];
 function formatConfig(form: RuleForm): Config {
 	const config: Config = {
 		output_dir: "",
-		dataset: "",
 		epochs: 0,
 		micro_batch_size_per_gpu: 0,
 		pipeline_stages: 0,

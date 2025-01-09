@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-08 10:53:00
- * @LastEditTime: 2025-01-08 15:26:08
+ * @LastEditTime: 2025-01-09 15:21:40
  * @LastEditors: mulingyuer
  * @Description: 动态favicon
- * @FilePath: \frontend\src\utils\animated-favicon.ts
+ * @FilePath: \frontend\src\init-lora-trainer\animated-favicon.ts
  * 怎么可能会有bug！！！
  */
 import favicon0 from "@/assets/images/favicon/0.png";
@@ -37,6 +37,7 @@ import favicon26 from "@/assets/images/favicon/26.png";
 import favicon27 from "@/assets/images/favicon/27.png";
 import favicon28 from "@/assets/images/favicon/28.png";
 import favicon29 from "@/assets/images/favicon/29.png";
+import { useSettingsStore, useTrainingStore } from "@/stores";
 
 class AnimatedFavicon {
 	private readonly linkEle: HTMLLinkElement;
@@ -73,6 +74,8 @@ class AnimatedFavicon {
 		favicon29
 	];
 	private resetIconPath = `${import.meta.env.BASE_URL}/favicon.ico`;
+	private readonly settings = storeToRefs(useSettingsStore()).trainerSettings;
+	private readonly trainingStore = useTrainingStore();
 
 	private currentIndex = 0;
 	private lastUpdate = 0; // 用于跟踪动画的时间
@@ -100,6 +103,7 @@ class AnimatedFavicon {
 
 	/** 预加载图标 */
 	private preloadIcons() {
+		if (!this.settings.value.openAnimatedFavicon) return;
 		this.iconList.forEach((icon) => {
 			const img = new Image();
 			img.src = icon; // 预加载图标
@@ -108,6 +112,7 @@ class AnimatedFavicon {
 
 	/** 启动动画 */
 	public startAnimation() {
+		if (!this.settings.value.openAnimatedFavicon) return;
 		if (this.isAnimating) return; // 如果已在播放动画则不执行
 
 		this.isAnimating = true;
@@ -138,6 +143,27 @@ class AnimatedFavicon {
 		this.linkEle.href = icon; // 更新图标地址
 		this.currentIndex = (this.currentIndex + 1) % this.iconList.length; // 更新索引
 	}
+
+	/** 初始化 */
+	public init() {
+		const show = computed(() => {
+			return this.trainingStore.useGPU && this.settings.value.openAnimatedFavicon;
+		});
+		watch(
+			show,
+			(val) => {
+				if (val) {
+					this.startAnimation();
+				} else {
+					this.stopAnimation();
+				}
+			},
+			{ immediate: true }
+		);
+	}
 }
 
-export const animatedFavicon = new AnimatedFavicon();
+export function initAnimatedFavicon() {
+	const animatedFavicon = new AnimatedFavicon();
+	animatedFavicon.init();
+}

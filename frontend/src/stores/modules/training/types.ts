@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2024-12-25 15:57:29
+ * @LastEditTime: 2025-01-09 10:26:20
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -10,7 +10,7 @@
 import type { TaskStatus } from "@/api/types";
 import type { LoRATrainingInfoResult } from "@/api/monitor";
 
-/** gpu监控信息 */
+/** GPU数据 */
 export interface GPUData {
 	/** gpu功率百分比，例：20 */
 	gpuPower: number;
@@ -18,7 +18,22 @@ export interface GPUData {
 	gpuMemory: number;
 }
 
-/** 打标监听信息 */
+/** 监听GPU信息数据 */
+export interface MonitorGPUData {
+	/** 是否监听 */
+	isListen: boolean;
+	/** 监听间隔 */
+	sleepTime: number;
+	/** 是否在轮询 */
+	isPolling: boolean;
+	/** gpu数据 */
+	data: GPUData;
+}
+
+/** 打标任务状态 */
+export type TagTaskStatus = TaskStatus | "none";
+
+/** 打标数据 */
 export interface TagData {
 	/** 当前第几个 */
 	current: number;
@@ -28,11 +43,24 @@ export interface TagData {
 	percentage: number;
 }
 
-/** 打标任务状态 */
-export type TagTaskStatus = TaskStatus | "none";
+/** 监听打标数据 */
+export interface MonitorTagData {
+	/** 是否监听 */
+	isListen: boolean;
+	/** 任务id */
+	taskId: string;
+	/** 任务状态 */
+	taskStatus: TagTaskStatus;
+	/** 监听间隔 */
+	sleepTime: number;
+	/** 是否在轮询 */
+	isPolling: boolean;
+	/** 打标数据 */
+	data: TagData;
+}
 
 /** lora训练监听信息 */
-export interface LoraData {
+export interface FluxLoraData {
 	/** 当前进度 */
 	current: number;
 	/** 已经耗时 */
@@ -54,4 +82,20 @@ export interface LoraData {
 }
 
 /** lora训练的任务状态 */
-export type LoraTaskStatus = TaskStatus | "none";
+export type FluxLoraTaskStatus = TaskStatus | "none";
+
+/** 监听flux lora训练数据 */
+export interface MonitorFluxLoraData {
+	/** 是否监听 */
+	isListen: boolean;
+	/** 任务id */
+	taskId: string;
+	/** 任务状态 */
+	taskStatus: FluxLoraTaskStatus;
+	/** 监听间隔 */
+	sleepTime: number;
+	/** 是否在轮询 */
+	isPolling: boolean;
+	/** lora数据 */
+	data: FluxLoraData;
+}

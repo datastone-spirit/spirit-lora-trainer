@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:22:30
- * @LastEditTime: 2024-12-26 11:29:18
+ * @LastEditTime: 2025-01-09 11:27:00
  * @LastEditors: mulingyuer
  * @Description: 任务列表
  * @FilePath: \frontend\src\router\route-modules\task.ts
@@ -17,6 +17,6 @@ export default {
 		auth: "public",
 		title: "任务列表",
 		icon: "ri-list-check-3",
-		sort: 5
+		sort: 40
 	}
 } as RouteRecordRaw;

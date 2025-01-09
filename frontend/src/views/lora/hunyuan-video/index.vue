@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-01-08 11:16:00
+ * @LastEditTime: 2025-01-09 15:52:22
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -43,49 +43,33 @@
 			export-config-prefix="hunyuan-video"
 			@load-config="onLoadConfig"
 			@reset-data="onResetData"
+			right-to="#footer-bar-center"
+			:submit-loading="submitLoading"
+			@submit="onSubmit"
 		></FooterButtonGroup>
-		<Teleport to="#footer-bar-center" defer>
-			<el-space class="hunyuan-footer-bar" :size="40">
-				<GPUMonitor v-if="isListenGPU" />
-				<LoRATrainingMonitor v-if="isListenLora" />
-				<TagMonitor v-if="isListenTag" />
-				<el-button
-					v-if="showSubmitBtn"
-					type="primary"
-					size="large"
-					:loading="submitLoading || isListenLora"
-					@click="onSubmit"
-				>
-					开始训练
-				</el-button>
-			</el-space>
-		</Teleport>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
+import { batchTag } from "@/api/tag";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import { useTag } from "@/hooks/useTag";
+import { useSettingsStore, useTrainingStore } from "@/stores";
+import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
-import type { RuleForm } from "./types";
-import BasicInfo from "./components/BasicInfo/index.vue";
-import TrainingData from "./components/TrainingData/index.vue";
-import ModelParameters from "./components/ModelParameters/index.vue";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
-import { useSettingsStore } from "@/stores";
-import { checkData, checkDirectory } from "@/utils/lora.helper";
-import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import BasicInfo from "./components/BasicInfo/index.vue";
+import ModelParameters from "./components/ModelParameters/index.vue";
+import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
-import { useGPU } from "@/hooks/useGPU";
-import { useTraining } from "@/hooks/useTraining";
-import { useTag } from "@/hooks/useTag";
-import { batchTag } from "@/api/tag";
-import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
+import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
+const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
-const { isListenLora, startLoraListen, stopLoraListen, isLoraTaskEnd } = useTraining();
-const { isListenTag, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
+const { startTagListen, stopTagListen } = useTag();
 
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_hunyuan_video_form`;
@@ -225,10 +209,10 @@ async function onTagSubmit() {
 		const { directory_path, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
 		// 校验
 		const validations = [
-			// {
-			// 	condition: () => !isLoraTaskEnd(),
-			// 	message: "训练任务未结束，请等待训练完成再执行打标"
-			// },
+			{
+				condition: () => trainingStore.useGPU,
+				message: "GPU已经被占用，请等待对应任务完成再执行打标"
+			},
 			{
 				condition: () => typeof directory_path !== "string" || directory_path.trim() === "",
 				message: "请先选择训练用的数据集目录"
@@ -264,7 +248,6 @@ async function onTagSubmit() {
 			class_token: output_trigger_words ? class_tokens : undefined,
 			prompt_type: ruleForm.value.prompt_type
 		});
-		startGPUListen();
 		startTagListen(result.task_id);
 
 		ElMessage({
@@ -272,20 +255,14 @@ async function onTagSubmit() {
 			type: "success"
 		});
 	} catch (error) {
-		stopGPUListen();
-		stopTagListen();
+		stopTagListen(true);
 
-		console.log("打标任务创建失败", error);
+		console.error("打标任务创建失败", error);
 	}
 }
 
 /** 提交表单 */
 const submitLoading = ref(false);
-// 如果任何一个监视器为真，则不显示提交按钮
-const showSubmitBtn = computed(() => {
-	const monitors = [isListenGPU.value, isListenLora.value, isListenTag.value];
-	return !monitors.some((monitor) => monitor);
-});
 function validateForm() {
 	return new Promise((resolve) => {
 		if (!ruleFormRef.value) return resolve(false);
@@ -295,9 +272,9 @@ function validateForm() {
 				return resolve(false);
 			}
 
-			// 是否在打标
-			if (!isTagTaskEnd()) {
-				ElMessage.warning("打标任务未结束，请等待打标完成再执行训练");
+			// gpu被占用
+			if (trainingStore.useGPU) {
+				ElMessage.warning("GPU已经被占用，请等待对应任务完成再执行训练");
 				return resolve(false);
 			}
 
@@ -326,8 +303,6 @@ async function onSubmit() {
 		const data: StartHyVideoTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startHyVideoTraining(data);
 		console.log("🚀 ~ onSubmit ~ task_id:", task_id);
-		// // 监听GPU数据
-		// startGPUListen();
 		// // 监听训练数据
 		// startLoraListen(task_id);
 
@@ -336,51 +311,27 @@ async function onSubmit() {
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
-		stopLoraListen();
+		// stopLoraListen();
 
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
 }
 
-// 监听是否在打标和训练
-watch(
-	[isListenTag, isListenLora],
-	(newList) => {
-		const isNotListen = newList.every((item) => !item);
-		if (isNotListen) {
-			stopGPUListen();
-		}
-	},
-	{ immediate: true }
-);
-
 onMounted(() => {
 	// 组件挂载时，开始监听
-	if (!isTagTaskEnd()) {
-		startTagListen();
-		startGPUListen();
-	}
-	if (!isLoraTaskEnd()) {
-		startLoraListen();
-		startGPUListen();
-	}
+	// if (!isLoraTaskEnd()) {
+	// 	startLoraListen();
+	// }
 });
 onUnmounted(() => {
 	// 组件销毁时，停止监听
-	stopGPUListen();
-	stopTagListen();
-	stopLoraListen();
+	// stopLoraListen();
 });
 </script>
 
 <style lang="scss" scoped>
 .hunyuan-video {
-	height: calc(100vh - $zl-padding * 2 - $zl-footer-bar-height);
-}
-.hunyuan-footer-bar {
-	width: 100%;
-	height: 100%;
-	justify-content: flex-end;
+	height: $zl-view-footer-bar-height;
 }
 </style>

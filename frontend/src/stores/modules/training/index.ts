@@ -1,118 +1,131 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-01-07 16:44:56
+ * @LastEditTime: 2025-01-09 11:09:32
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
  * 怎么可能会有bug！！！
  */
 import { defineStore } from "pinia";
-import type { GPUData, LoraData, LoraTaskStatus, TagData, TagTaskStatus } from "./types";
+import type {
+	FluxLoraData,
+	FluxLoraTaskStatus,
+	GPUData,
+	MonitorFluxLoraData,
+	MonitorGPUData,
+	MonitorTagData,
+	TagData,
+	TagTaskStatus
+} from "./types";
 export type * from "./types";
 
 export const useTrainingStore = defineStore("training", () => {
-	/** gpu是否在使用中 */
-	// const isUseGPU = ref(false);
-	// function setIsUseGPU(value: boolean) {
-	// 	isUseGPU.value = value;
-	// }
-
-	/** 当前进行的任务数据 */
-	// const trainingTaskData = ref<>({});
-
-	/** 是否监听gpu */
-	const isListenGPU = ref(false);
-	function setIsListenGPU(value: boolean) {
-		isListenGPU.value = value;
-	}
-	/** gpu监听信息 */
-	const gpuData = ref<GPUData>({
-		gpuPower: 0,
-		gpuMemory: 0
+	/** 监听GPU相关数据 */
+	const monitorGPUData = ref<MonitorGPUData>({
+		isListen: false,
+		sleepTime: 3000,
+		isPolling: false,
+		data: {
+			gpuPower: 0,
+			gpuMemory: 0
+		}
 	});
-	function setGpuData(data: GPUData) {
-		gpuData.value = data;
+	function setGPUIsListen(val: boolean) {
+		monitorGPUData.value.isListen = val;
 	}
-	function resetGpuData() {
-		gpuData.value = {
+	function setGPUIsPolling(val: boolean) {
+		monitorGPUData.value.isPolling = val;
+	}
+	function setGPUData(data: GPUData) {
+		monitorGPUData.value.data = data;
+	}
+	function resetGPUData() {
+		monitorGPUData.value.data = {
 			gpuPower: 0,
 			gpuMemory: 0
 		};
 	}
-	/** gpu监听间隔时间 */
-	const gpuSleepTime = ref(3000);
-	/** 是否开启了gpu轮询 */
-	const isGpuPolling = ref(false);
-	function setIsGpuPolling(value: boolean) {
-		isGpuPolling.value = value;
-	}
 
-	/** 是否监听打标 */
-	const isListenTag = ref(false);
-	function setIsListenTag(value: boolean) {
-		isListenTag.value = value;
-	}
-	/** 打标的任务id */
-	const tagTaskId = ref<string>("");
-	function setTagTaskId(taskId: string) {
-		tagTaskId.value = taskId;
-	}
-	/** 打标监听信息 */
-	const tagData = ref<TagData>({
-		current: 0,
-		total: 0,
-		percentage: 0
+	/** 监听打标数据 */
+	const monitorTagData = ref<MonitorTagData>({
+		isListen: false,
+		taskId: "",
+		taskStatus: "none",
+		sleepTime: 3000,
+		isPolling: false,
+		data: {
+			current: 0,
+			total: 0,
+			percentage: 0
+		}
 	});
+	function setTagIsListen(val: boolean) {
+		monitorTagData.value.isListen = val;
+	}
+	function setTagTaskId(taskId: string) {
+		monitorTagData.value.taskId = taskId;
+	}
+	function setTagTaskStatus(status: TagTaskStatus) {
+		monitorTagData.value.taskStatus = status;
+	}
+	function isTagTaskEnd(status?: TagTaskStatus) {
+		status = status ?? monitorTagData.value.taskStatus;
+		return ["complete", "failed", "none"].includes(status);
+	}
+	function setTagIsPolling(val: boolean) {
+		monitorTagData.value.isPolling = val;
+	}
 	function setTagData(data: TagData) {
-		tagData.value = data;
+		monitorTagData.value.data = data;
 	}
 	function resetTagData() {
-		tagData.value = {
+		monitorTagData.value.data = {
 			current: 0,
 			total: 0,
 			percentage: 0
 		};
 	}
-	/** 当前打标的任务状态 */
-	const tagTaskStatus = ref<TagTaskStatus>("none");
-	function setTagTaskStatus(status: TagTaskStatus) {
-		tagTaskStatus.value = status;
-	}
-	/** 打标监听间隔时间 */
-	const tagSleepTime = ref(3000);
-	/** 是否开启了打标轮询 */
-	const isTagPolling = ref(false);
-	function setIsTagPolling(value: boolean) {
-		isTagPolling.value = value;
-	}
 
-	/** 是否监听lora训练 */
-	const isListenLora = ref(false);
-	function setIsListenLora(value: boolean) {
-		isListenLora.value = value;
-	}
-	/** lora训练的任务id */
-	const loraTaskId = ref<string>("");
-	function setLoraTaskId(taskId: string) {
-		loraTaskId.value = taskId;
-	}
-	/** lora训练监听信息 */
-	const loraData = ref<LoraData>({
-		current: 0,
-		elapsed: "",
-		loss: 0,
-		loss_avr: 0,
-		remaining: "",
-		speed: 0,
-		total: 0,
-		progress: 0
+	/** 监听flux lora训练 */
+	const monitorFluxLoraData = ref<MonitorFluxLoraData>({
+		isListen: false,
+		taskId: "",
+		taskStatus: "none",
+		sleepTime: 3000,
+		isPolling: false,
+		data: {
+			current: 0,
+			elapsed: "",
+			loss: 0,
+			loss_avr: 0,
+			remaining: "",
+			speed: 0,
+			total: 0,
+			progress: 0
+		}
 	});
-	function setLoraData(data: LoraData) {
-		loraData.value = data;
+	function setFluxLoraIsListen(val: boolean) {
+		monitorFluxLoraData.value.isListen = val;
 	}
-	function resetLoraData() {
-		loraData.value = {
+	function setFluxLoraTaskId(taskId: string) {
+		monitorFluxLoraData.value.taskId = taskId;
+	}
+	function setFluxLoraTaskStatus(status: FluxLoraTaskStatus) {
+		monitorFluxLoraData.value.taskStatus = status;
+	}
+	function isFluxLoraTaskEnd(status?: FluxLoraTaskStatus) {
+		status = status ?? monitorFluxLoraData.value.taskStatus;
+		return ["complete", "failed", "none"].includes(status);
+	}
+	function setFluxLoraIsPolling(val: boolean) {
+		monitorFluxLoraData.value.isPolling = val;
+	}
+	function setFluxLoraData(data: FluxLoraData) {
+		monitorFluxLoraData.value.data = data;
+	}
+	function resetFluxLoraData() {
+		monitorFluxLoraData.value.data = {
 			current: 0,
 			elapsed: "",
 			loss: 0,
@@ -123,51 +136,34 @@ export const useTrainingStore = defineStore("training", () => {
 			progress: 0
 		};
 	}
-	/** lora训练的任务状态 */
-	const loraTaskStatus = ref<LoraTaskStatus>("none");
-	function setLoraTaskStatus(status: LoraTaskStatus) {
-		loraTaskStatus.value = status;
-	}
-	/** lora训练监听间隔时间 */
-	const loraSleepTime = ref(3000);
-	/** 是否开启了lora训练轮询 */
-	const isLoraPolling = ref(false);
-	function setIsLoraPolling(value: boolean) {
-		isLoraPolling.value = value;
-	}
+
+	/** gpu是否在使用中 */
+	const useGPU = computed(() => {
+		return !isTagTaskEnd() || !isFluxLoraTaskEnd();
+	});
 
 	return {
-		isListenGPU,
-		setIsListenGPU,
-		gpuData,
-		setGpuData,
-		resetGpuData,
-		gpuSleepTime,
-		isGpuPolling,
-		setIsGpuPolling,
-		isListenTag,
-		setIsListenTag,
-		tagTaskId,
+		monitorGPUData,
+		setGPUIsListen,
+		setGPUData,
+		resetGPUData,
+		setGPUIsPolling,
+		monitorTagData,
+		setTagIsListen,
 		setTagTaskId,
-		tagData,
+		setTagTaskStatus,
+		isTagTaskEnd,
+		setTagIsPolling,
 		setTagData,
 		resetTagData,
-		tagTaskStatus,
-		setTagTaskStatus,
-		tagSleepTime,
-		isTagPolling,
-		setIsTagPolling,
-		isListenLora,
-		setIsListenLora,
-		loraTaskId,
-		setLoraTaskId,
-		loraData,
-		setLoraData,
-		resetLoraData,
-		loraTaskStatus,
-		setLoraTaskStatus,
-		loraSleepTime,
-		isLoraPolling,
-		setIsLoraPolling
+		monitorFluxLoraData,
+		setFluxLoraIsListen,
+		setFluxLoraTaskId,
+		setFluxLoraTaskStatus,
+		isFluxLoraTaskEnd,
+		setFluxLoraIsPolling,
+		setFluxLoraData,
+		resetFluxLoraData,
+		useGPU
 	};
 });

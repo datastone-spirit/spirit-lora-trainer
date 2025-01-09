@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-07 17:36:12
+ * @LastEditTime: 2025-01-09 11:22:01
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -53,23 +53,10 @@
 			export-config-prefix="flux"
 			@load-config="onLoadConfig"
 			@reset-data="onResetData"
+			right-to="#footer-bar-center"
+			:submit-loading="submitLoading"
+			@submit="onSubmit"
 		></FooterButtonGroup>
-		<Teleport to="#footer-bar-center" defer>
-			<el-space class="flux-footer-bar" :size="40">
-				<GPUMonitor v-if="isListenGPU" />
-				<LoRATrainingMonitor v-if="isListenLora" />
-				<TagMonitor v-if="isListenTag" />
-				<el-button
-					v-if="showSubmitBtn"
-					type="primary"
-					size="large"
-					:loading="submitLoading || isListenLora"
-					@click="onSubmit"
-				>
-					开始训练
-				</el-button>
-			</el-space>
-		</Teleport>
 	</div>
 </template>
 
@@ -77,13 +64,10 @@
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import { batchTag } from "@/api/tag";
-import GPUMonitor from "@/components/Monitor/GPUMonitor/index.vue";
-import LoRATrainingMonitor from "@/components/Monitor/LoRATrainingMonitor/index.vue";
-import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
-import { useGPU } from "@/hooks/useGPU";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import { useFluxLora } from "@/hooks/useFluxLora";
 import { useTag } from "@/hooks/useTag";
-import { useTraining } from "@/hooks/useTraining";
-import { useSettingsStore } from "@/stores";
+import { useSettingsStore, useTrainingStore } from "@/stores";
 import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
 import { generateKeyMapFromInterface } from "@/utils/tools";
@@ -94,12 +78,11 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
 import type { RuleForm, RuleFormProps } from "./types";
-import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 
 const settingsStore = useSettingsStore();
-const { isListenTag, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
-const { isListenLora, startLoraListen, stopLoraListen, isLoraTaskEnd } = useTraining();
-const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
+const trainingStore = useTrainingStore();
+const { startTagListen, stopTagListen } = useTag();
+const { startFluxLoraListen, stopFluxLoraListen } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const ruleFormRef = ref<FormInstance>();
@@ -296,8 +279,8 @@ async function onTagSubmit() {
 		// 校验
 		const validations = [
 			{
-				condition: () => !isLoraTaskEnd(),
-				message: "训练任务未结束，请等待训练完成再执行打标"
+				condition: () => trainingStore.useGPU,
+				message: "GPU已经被占用，请等待对应任务完成再执行打标"
 			},
 			{
 				condition: () => typeof image_dir !== "string" || image_dir.trim() === "",
@@ -334,7 +317,6 @@ async function onTagSubmit() {
 			class_token: output_trigger_words ? class_tokens : undefined,
 			prompt_type: ruleForm.value.prompt_type
 		});
-		startGPUListen();
 		startTagListen(result.task_id);
 
 		ElMessage({
@@ -342,8 +324,7 @@ async function onTagSubmit() {
 			type: "success"
 		});
 	} catch (error) {
-		stopGPUListen();
-		stopTagListen();
+		stopTagListen(true);
 
 		console.log("打标任务创建失败", error);
 	}
@@ -351,11 +332,6 @@ async function onTagSubmit() {
 
 /** 提交表单 */
 const submitLoading = ref(false);
-// 如果任何一个监视器为真，则不显示提交按钮
-const showSubmitBtn = computed(() => {
-	const monitors = [isListenGPU.value, isListenLora.value, isListenTag.value];
-	return !monitors.some((monitor) => monitor);
-});
 function validateForm() {
 	return new Promise((resolve) => {
 		if (!ruleFormRef.value) return resolve(false);
@@ -365,9 +341,9 @@ function validateForm() {
 				return resolve(false);
 			}
 
-			// 是否在打标
-			if (!isTagTaskEnd()) {
-				ElMessage.warning("打标任务未结束，请等待打标完成再执行训练");
+			// gpu被占用
+			if (trainingStore.useGPU) {
+				ElMessage.warning("GPU已经被占用，请等待对应任务完成再执行训练");
 				return resolve(false);
 			}
 
@@ -395,57 +371,25 @@ async function onSubmit() {
 		// 开始训练
 		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startFluxTraining(data);
-		// 监听GPU数据
-		startGPUListen();
 		// 监听训练数据
-		startLoraListen(task_id);
+		startFluxLoraListen(task_id);
 
 		submitLoading.value = false;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
-		stopLoraListen();
+		stopFluxLoraListen(true);
 
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
 }
-
-// 监听是否在打标和训练
-watch(
-	[isListenTag, isListenLora],
-	(newList) => {
-		const isNotListen = newList.every((item) => !item);
-		if (isNotListen) {
-			stopGPUListen();
-		}
-	},
-	{ immediate: true }
-);
-
-onMounted(() => {
-	// 组件挂载时，开始监听
-	if (!isTagTaskEnd()) {
-		startTagListen();
-		startGPUListen();
-	}
-	if (!isLoraTaskEnd()) {
-		startLoraListen();
-		startGPUListen();
-	}
-});
-onUnmounted(() => {
-	// 组件销毁时，停止监听
-	stopGPUListen();
-	stopTagListen();
-	stopLoraListen();
-});
 </script>
 
 <style lang="scss" scoped>
 .lora-flux-page {
-	height: calc(100vh - $zl-padding * 2 - $zl-footer-bar-height);
+	height: $zl-view-footer-bar-height;
 }
 .flux-footer-bar {
 	width: 100%;

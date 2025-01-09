@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-01-08 11:13:44
+ * @LastEditTime: 2025-01-09 15:50:24
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -231,7 +231,6 @@ export interface StartFluxTrainingResult {
 export interface StartHyVideoTrainingData {
 	config: {
 		output_dir: string;
-		dataset: string;
 		epochs: number;
 		micro_batch_size_per_gpu: number;
 		pipeline_stages: number;
@@ -252,13 +251,13 @@ export interface StartHyVideoTrainingData {
 		video_clip_mode: string;
 		model: {
 			type: string;
-			transformer_path?: string;
-			vae_path?: string;
-			llm_path?: string;
-			clip_path?: string;
+			transformer_path: string;
+			vae_path: string;
+			llm_path: string;
+			clip_path: string;
 			dtype: string;
-			transformer_dtype?: string;
-			timestep_sample_method?: string;
+			transformer_dtype: string;
+			timestep_sample_method: string;
 		};
 		adapter: {
 			type: string;
@@ -280,13 +279,13 @@ export interface StartHyVideoTrainingData {
 		min_ar: number;
 		max_ar: number;
 		num_ar_buckets: number;
-		ar_buckets?: number[];
+		// ar_buckets?: number[];
 		frame_buckets: number[];
 		directories: Array<{
 			path: string;
 			num_repeats: number;
 			resolutions: number[];
-			ar_buckets?: number;
+			// ar_buckets?: number;
 			frame_buckets: number[];
 		}>;
 	};

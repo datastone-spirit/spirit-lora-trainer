@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2025-01-06 09:24:57
+ * @LastEditTime: 2025-01-09 11:27:19
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
@@ -16,7 +16,7 @@ export default {
 		auth: "public",
 		title: "LoRA 训练",
 		icon: "ri-quill-pen-ai-line",
-		sort: 2,
+		sort: 20,
 		showFooter: true
 	},
 	children: [

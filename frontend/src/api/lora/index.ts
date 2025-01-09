@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 09:32:40
- * @LastEditTime: 2025-01-06 14:42:13
+ * @LastEditTime: 2025-01-09 15:39:37
  * @LastEditors: mulingyuer
  * @Description: lora api
  * @FilePath: \frontend\src\api\lora\index.ts
@@ -29,7 +29,7 @@ export function startFluxTraining(data: StartFluxTrainingData) {
 /** 启动混元视频训练 */
 export function startHyVideoTraining(data: StartHyVideoTrainingData) {
 	return request<StartHyVideoTrainingResult>({
-		url: "/training/start_hy_video",
+		url: "/training/hunyuan/start",
 		method: "POST",
 		data
 	});

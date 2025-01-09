@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:21:01
- * @LastEditTime: 2024-12-27 17:22:00
+ * @LastEditTime: 2025-01-09 11:36:54
  * @LastEditors: mulingyuer
  * @Description: 任务列表页
  * @FilePath: \frontend\src\views\task\index.vue
@@ -75,7 +75,6 @@ onMounted(() => {
 	height: calc(100vh - $zl-padding * 2);
 	display: flex;
 	gap: $zl-padding;
-	padding-right: $zl-padding;
 }
 .task-page-left,
 .task-page-right {

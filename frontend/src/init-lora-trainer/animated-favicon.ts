@@ -1,42 +1,42 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-08 10:53:00
- * @LastEditTime: 2025-01-09 15:21:40
+ * @LastEditTime: 2025-01-09 18:15:38
  * @LastEditors: mulingyuer
  * @Description: 动态favicon
  * @FilePath: \frontend\src\init-lora-trainer\animated-favicon.ts
  * 怎么可能会有bug！！！
  */
-import favicon0 from "@/assets/images/favicon/0.png";
-import favicon1 from "@/assets/images/favicon/1.png";
-import favicon2 from "@/assets/images/favicon/2.png";
-import favicon3 from "@/assets/images/favicon/3.png";
-import favicon4 from "@/assets/images/favicon/4.png";
-import favicon5 from "@/assets/images/favicon/5.png";
-import favicon6 from "@/assets/images/favicon/6.png";
-import favicon7 from "@/assets/images/favicon/7.png";
-import favicon8 from "@/assets/images/favicon/8.png";
-import favicon9 from "@/assets/images/favicon/9.png";
-import favicon10 from "@/assets/images/favicon/10.png";
-import favicon11 from "@/assets/images/favicon/11.png";
-import favicon12 from "@/assets/images/favicon/12.png";
-import favicon13 from "@/assets/images/favicon/13.png";
-import favicon14 from "@/assets/images/favicon/14.png";
-import favicon15 from "@/assets/images/favicon/15.png";
-import favicon16 from "@/assets/images/favicon/16.png";
-import favicon17 from "@/assets/images/favicon/17.png";
-import favicon18 from "@/assets/images/favicon/18.png";
-import favicon19 from "@/assets/images/favicon/19.png";
-import favicon20 from "@/assets/images/favicon/20.png";
-import favicon21 from "@/assets/images/favicon/21.png";
-import favicon22 from "@/assets/images/favicon/22.png";
-import favicon23 from "@/assets/images/favicon/23.png";
-import favicon24 from "@/assets/images/favicon/24.png";
-import favicon25 from "@/assets/images/favicon/25.png";
-import favicon26 from "@/assets/images/favicon/26.png";
-import favicon27 from "@/assets/images/favicon/27.png";
-import favicon28 from "@/assets/images/favicon/28.png";
-import favicon29 from "@/assets/images/favicon/29.png";
+import favicon0 from "@/assets/images/favicon/0.png?inline";
+import favicon1 from "@/assets/images/favicon/1.png?inline";
+import favicon2 from "@/assets/images/favicon/2.png?inline";
+import favicon3 from "@/assets/images/favicon/3.png?inline";
+import favicon4 from "@/assets/images/favicon/4.png?inline";
+import favicon5 from "@/assets/images/favicon/5.png?inline";
+import favicon6 from "@/assets/images/favicon/6.png?inline";
+import favicon7 from "@/assets/images/favicon/7.png?inline";
+import favicon8 from "@/assets/images/favicon/8.png?inline";
+import favicon9 from "@/assets/images/favicon/9.png?inline";
+import favicon10 from "@/assets/images/favicon/10.png?inline";
+import favicon11 from "@/assets/images/favicon/11.png?inline";
+import favicon12 from "@/assets/images/favicon/12.png?inline";
+import favicon13 from "@/assets/images/favicon/13.png?inline";
+import favicon14 from "@/assets/images/favicon/14.png?inline";
+import favicon15 from "@/assets/images/favicon/15.png?inline";
+import favicon16 from "@/assets/images/favicon/16.png?inline";
+import favicon17 from "@/assets/images/favicon/17.png?inline";
+import favicon18 from "@/assets/images/favicon/18.png?inline";
+import favicon19 from "@/assets/images/favicon/19.png?inline";
+import favicon20 from "@/assets/images/favicon/20.png?inline";
+import favicon21 from "@/assets/images/favicon/21.png?inline";
+import favicon22 from "@/assets/images/favicon/22.png?inline";
+import favicon23 from "@/assets/images/favicon/23.png?inline";
+import favicon24 from "@/assets/images/favicon/24.png?inline";
+import favicon25 from "@/assets/images/favicon/25.png?inline";
+import favicon26 from "@/assets/images/favicon/26.png?inline";
+import favicon27 from "@/assets/images/favicon/27.png?inline";
+import favicon28 from "@/assets/images/favicon/28.png?inline";
+import favicon29 from "@/assets/images/favicon/29.png?inline";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 
 class AnimatedFavicon {
@@ -152,11 +152,7 @@ class AnimatedFavicon {
 		watch(
 			show,
 			(val) => {
-				if (val) {
-					this.startAnimation();
-				} else {
-					this.stopAnimation();
-				}
+				val ? this.startAnimation() : this.stopAnimation();
 			},
 			{ immediate: true }
 		);

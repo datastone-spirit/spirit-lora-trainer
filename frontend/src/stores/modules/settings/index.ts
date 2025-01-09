@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:14:16
- * @LastEditTime: 2025-01-09 15:28:22
+ * @LastEditTime: 2025-01-09 18:17:38
  * @LastEditors: mulingyuer
  * @Description: 设置数据仓库
  * @FilePath: \frontend\src\stores\modules\settings\index.ts
@@ -40,7 +40,7 @@ export const useSettingsStore = defineStore(
 
 		/** 训练器设置 */
 		const trainerSettings = ref<TrainerSettings>({
-			openAnimatedFavicon: false,
+			openAnimatedFavicon: true,
 			openFooterBarProgress: true
 		});
 

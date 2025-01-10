@@ -1,53 +1,24 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 15:29:03
- * @LastEditTime: 2025-01-07 16:44:15
+ * @LastEditTime: 2025-01-10 10:25:29
  * @LastEditors: mulingyuer
  * @Description: 训练数据
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\TrainingData\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<DatasetDirSelector
-		v-model:dir="ruleForm.directory_path"
-		dir-label="数据集目录"
-		dir-prop="directory_path"
-		dir-popover-content="directory_path"
-		v-model:tagger-model="ruleForm.tagger_model"
-		tagger-label="打标模型"
-		tagger-prop="tagger_model"
-		tagger-popover-content="tagger_model"
-		:tag-submit="tagSubmit"
-	/>
+	<PopoverFormItem
+		label="数据集重复训练次数"
+		prop="directory_num_repeats"
+		popover-content="directory_num_repeats"
+	>
+		<el-input-number v-model.number="ruleForm.directory_num_repeats" :step="1" step-strictly />
+	</PopoverFormItem>
+	<PopoverFormItem label="训练轮次" prop="epochs" popover-content="epochs">
+		<el-input-number v-model.number="ruleForm.epochs" :step="1" step-strictly />
+	</PopoverFormItem>
 	<el-row :gutter="16">
-		<el-col v-if="ruleForm.tagger_model === 'joy-caption-alpha-two'" :span="24">
-			<JoyCaptionPromptTypeSelect
-				v-model="ruleForm.prompt_type"
-				label="Joy Caption 提示词类型"
-				prop="prompt_type"
-				popover-content="prompt_type"
-				placeholder="请选择Joy Caption 提示词类型"
-			/>
-		</el-col>
-		<el-col :span="24">
-			<PopoverFormItem
-				label="是否把触发词输出到打标文件中 "
-				prop="output_trigger_words"
-				popover-content="output_trigger_words"
-			>
-				<el-switch v-model="ruleForm.output_trigger_words" />
-			</PopoverFormItem>
-		</el-col>
-		<el-col :span="24">
-			<PopoverFormItem
-				label="数据集重复训练次数"
-				prop="directory_num_repeats"
-				popover-content="directory_num_repeats"
-			>
-				<el-input-number v-model.number="ruleForm.directory_num_repeats" :step="1" step-strictly />
-			</PopoverFormItem>
-		</el-col>
-
 		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-宽度px"
@@ -117,22 +88,11 @@
 			</PopoverFormItem>
 		</el-col>
 	</el-row>
-	<PopoverFormItem label="训练轮次" prop="epochs" popover-content="epochs">
-		<el-input-number v-model.number="ruleForm.epochs" :step="1" step-strictly />
-	</PopoverFormItem>
 </template>
 
 <script setup lang="ts">
 import { useSettingsStore } from "@/stores";
 import type { RuleForm } from "../../types";
-import type { DatasetDirSelectorProps } from "@/components/Form/DatasetDirSelector.vue";
-
-export interface TrainingDataProps {
-	/** 打标submit函数 */
-	tagSubmit: DatasetDirSelectorProps["tagSubmit"];
-}
-
-defineProps<TrainingDataProps>();
 
 const settingsStore = useSettingsStore();
 

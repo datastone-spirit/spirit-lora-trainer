@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:19:14
- * @LastEditTime: 2024-12-30 14:18:18
+ * @LastEditTime: 2025-01-10 10:31:38
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\sdxl\components\TrainingData\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<DatasetDirSelector
+	<!-- <DatasetDirSelector
 		v-model:dir="ruleForm.image_dir"
 		v-model:tagger-model="ruleForm.tagger_model"
 		dir-label="数据集目录"
@@ -18,7 +18,7 @@
 		:tagger-prop="formProps.tagger_model"
 		tagger-popover-content="tagger_model"
 		:tag-submit="tagSubmit"
-	/>
+	/> -->
 	<el-row :gutter="16">
 		<el-col :span="10">
 			<PopoverFormItem

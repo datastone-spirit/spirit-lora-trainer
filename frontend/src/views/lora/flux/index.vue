@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-09 11:22:01
+ * @LastEditTime: 2025-01-10 10:30:08
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -24,11 +24,23 @@
 							<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
 						<Collapse v-model="openStep2" title="第2步：训练用的数据">
-							<TrainingData
-								v-model:form="ruleForm"
-								:form-props="ruleFormProps"
-								:tag-submit="onTagSubmit"
+							<Dataset
+								v-model:dataset-path="ruleForm.image_dir"
+								dataset-path-prop="image_dir"
+								dataset-path-popover-content="image_dir"
+								v-model:tagger-model="ruleForm.tagger_model"
+								tagger-model-prop="tagger_model"
+								tagger-model-popover-content="tagger_model"
+								v-model:joy-caption-prompt-type="ruleForm.prompt_type"
+								joy-caption-prop="prompt_type"
+								joy-caption-popover-content="prompt_type"
+								v-model:output-trigger-words="ruleForm.output_trigger_words"
+								output-trigger-words-prop="output_trigger_words"
+								output-trigger-words-popover-content="output_trigger_words"
+								:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
+								@tagger-click="onTaggerClick"
 							/>
+							<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
 						</Collapse>
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
 							<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
@@ -81,7 +93,7 @@ import type { RuleForm, RuleFormProps } from "./types";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
-const { startTagListen, stopTagListen } = useTag();
+const { startTagListen, stopTagListen, monitorTagData } = useTag();
 const { startFluxLoraListen, stopFluxLoraListen } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
@@ -273,8 +285,10 @@ function onResetData() {
 }
 
 /** 打标 */
-async function onTagSubmit() {
+const taggerBtnLoading = ref(false);
+async function onTaggerClick() {
 	try {
+		taggerBtnLoading.value = true;
 		const { image_dir, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
 		// 校验
 		const validations = [
@@ -302,6 +316,7 @@ async function onTagSubmit() {
 
 		for (const validation of validations) {
 			if (await validation.condition()) {
+				taggerBtnLoading.value = false;
 				ElMessage({
 					message: validation.message,
 					type: "error"
@@ -318,12 +333,14 @@ async function onTagSubmit() {
 			prompt_type: ruleForm.value.prompt_type
 		});
 		startTagListen(result.task_id);
+		taggerBtnLoading.value = false;
 
 		ElMessage({
 			message: "正在打标...",
 			type: "success"
 		});
 	} catch (error) {
+		taggerBtnLoading.value = false;
 		stopTagListen(true);
 
 		console.log("打标任务创建失败", error);

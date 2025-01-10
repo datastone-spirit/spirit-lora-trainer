@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2025-01-09 10:55:48
+ * @LastEditTime: 2025-01-10 10:33:52
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -79,6 +79,10 @@ async function onBtnClick() {
 		console.log("打标任务创建失败", error);
 	}
 }
+
+onMounted(() => {
+	console.warn("该组件已废弃，请使用Dataset.vue");
+});
 </script>
 
 <style lang="scss" scoped>

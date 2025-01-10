@@ -1,43 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:28:31
- * @LastEditTime: 2025-01-06 08:50:22
+ * @LastEditTime: 2025-01-10 10:31:04
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingData\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<DatasetDirSelector
-		v-model:dir="ruleForm.image_dir"
-		v-model:tagger-model="ruleForm.tagger_model"
-		dir-label="数据集目录"
-		:dir-prop="formProps.image_dir"
-		dir-popover-content="image_dir"
-		tagger-label="打标模型"
-		:tagger-prop="formProps.tagger_model"
-		tagger-popover-content="tagger_model"
-		:tag-submit="tagSubmit"
-	/>
 	<el-row :gutter="16">
-		<el-col v-if="ruleForm.tagger_model === 'joy-caption-alpha-two'" :span="24">
-			<JoyCaptionPromptTypeSelect
-				v-model="ruleForm.prompt_type"
-				label="Joy Caption 提示词类型"
-				:prop="formProps.prompt_type"
-				popover-content="prompt_type"
-				placeholder="请选择Joy Caption 提示词类型"
-			/>
-		</el-col>
-		<el-col :span="24">
-			<PopoverFormItem
-				label="是否把触发词输出到打标文件中 "
-				:prop="formProps.output_trigger_words"
-				popover-content="output_trigger_words"
-			>
-				<el-switch v-model="ruleForm.output_trigger_words" />
-			</PopoverFormItem>
-		</el-col>
 		<el-col :span="12">
 			<PopoverFormItem
 				label="每个图像重复训练次数"
@@ -148,13 +119,10 @@
 <script setup lang="ts">
 import { useSettingsStore } from "@/stores";
 import type { RuleForm, RuleFormProps } from "../../types";
-import type { DatasetDirSelectorProps } from "@/components/Form/DatasetDirSelector.vue";
 
 export interface TrainingDataProps {
 	/** 表单props */
 	formProps: RuleFormProps;
-	/** 打标submit函数 */
-	tagSubmit: DatasetDirSelectorProps["tagSubmit"];
 }
 
 defineProps<TrainingDataProps>();

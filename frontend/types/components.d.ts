@@ -11,6 +11,7 @@ declare module 'vue' {
     Card: typeof import('./../src/components/Card/Card.vue')['default']
     Collapse: typeof import('./../src/components/Collapse/Collapse.vue')['default']
     ContextMenu: typeof import('./../src/components/AiDataset/ContextMenu.vue')['default']
+    Dataset: typeof import('./../src/components/Form/Dataset.vue')['default']
     DatasetDirSelector: typeof import('./../src/components/Form/DatasetDirSelector.vue')['default']
     DatasetPagination: typeof import('./../src/components/AiDataset/DatasetPagination.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']

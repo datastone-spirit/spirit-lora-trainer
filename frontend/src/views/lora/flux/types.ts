@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2025-01-03 16:39:20
+ * @LastEditTime: 2025-01-10 11:11:24
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -213,8 +213,3 @@ export interface RuleForm {
 	/** 为 DDP 启用 gradient_as_bucket_view  */
 	ddp_gradient_as_bucket_view: boolean;
 }
-
-/** 表单props */
-export type RuleFormProps = {
-	[K in keyof RuleForm]: K;
-};

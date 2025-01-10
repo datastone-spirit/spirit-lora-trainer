@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-10 10:30:08
+ * @LastEditTime: 2025-01-10 11:10:21
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -21,7 +21,7 @@
 						size="large"
 					>
 						<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
-							<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
+							<BasicInfo v-model:form="ruleForm" />
 						</Collapse>
 						<Collapse v-model="openStep2" title="第2步：训练用的数据">
 							<Dataset
@@ -40,18 +40,14 @@
 								:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
 								@tagger-click="onTaggerClick"
 							/>
-							<TrainingData v-model:form="ruleForm" :form-props="ruleFormProps" />
+							<TrainingData v-model:form="ruleForm" />
 						</Collapse>
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
-							<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
+							<ModelParameters v-model:form="ruleForm" />
 						</Collapse>
-						<AdvancedSettingsCollapse
-							v-show="isExpert"
-							v-model="openStep4"
-							title="其它：高级设置"
-							:form="ruleForm"
-							:form-props="ruleFormProps"
-						/>
+						<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
+							<AdvancedSettings v-model:form="ruleForm" />
+						</SimpleCollapse>
 					</el-form>
 				</div>
 			</template>
@@ -82,14 +78,13 @@ import { useTag } from "@/hooks/useTag";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
-import { generateKeyMapFromInterface } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
-import AdvancedSettingsCollapse from "./components/AdvancedSettingsCollapse/index.vue";
+import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
-import type { RuleForm, RuleFormProps } from "./types";
+import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -240,7 +235,6 @@ const rules = reactive<FormRules<RuleForm>>({
 		}
 	]
 });
-const ruleFormProps = generateKeyMapFromInterface<RuleForm, RuleFormProps>(ruleForm.value);
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 

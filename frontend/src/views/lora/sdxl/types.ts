@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-06 14:57:11
- * @LastEditTime: 2024-12-24 10:25:01
+ * @LastEditTime: 2025-01-10 11:28:19
  * @LastEditors: mulingyuer
  * @Description: sdxl类型定义
  * @FilePath: \frontend\src\views\lora\sdxl\types.ts
@@ -199,8 +199,3 @@ export interface RuleForm {
 	/** 启动梯度作为bucket视图进行同步 */
 	ddp_gradient_as_bucket_view: boolean;
 }
-
-/** 表单props */
-export type RuleFormProps = {
-	[K in keyof RuleForm]: K;
-};

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:10:54
- * @LastEditTime: 2024-12-27 08:57:11
+ * @LastEditTime: 2025-01-10 11:41:45
  * @LastEditors: mulingyuer
  * @Description: 打标任务
  * @FilePath: \frontend\src\views\task\components\TaskItem.vue
@@ -112,6 +112,17 @@ withDefaults(defineProps<TaskItemProps>(), {
 	&.active,
 	&:active {
 		background-color: rgba(32, 189, 160, 0.2);
+	}
+}
+.task-item.hunyuan_training {
+	.task-item-tag {
+		color: #2188c8;
+		background-color: rgba(26, 164, 250, 0.2);
+		border-color: #1aa4fa;
+	}
+	&.active,
+	&:active {
+		background-color: rgba(26, 164, 250, 0.2);
 	}
 }
 .task-item-status.running::before {

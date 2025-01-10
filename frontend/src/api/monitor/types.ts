@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2024-12-27 09:17:39
+ * @LastEditTime: 2025-01-10 15:49:01
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -120,5 +120,27 @@ export interface ManualTagInfoResult {
 		total: number;
 		/** 当前进度??? */
 		current: number;
+	};
+}
+
+/** 监听混元视频训练信息响应 */
+export interface HyVideoTrainingInfoResult {
+	/** 任务 ID */
+	id: string;
+	/** 任务状态 */
+	status: TaskStatus;
+	/** 任务类型 */
+	task_type: "hunyuan_training";
+	/** 打标输出目录 */
+	output_dir: string;
+	/** 开始时间 */
+	start_time: number;
+	/** 结束时间 */
+	end_time: number | null;
+	/** 图片素材数组 */
+	image_paths: string[];
+	/** 详情 */
+	detail: {
+		test: number;
 	};
 }

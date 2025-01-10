@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:32:42
- * @LastEditTime: 2024-12-27 09:01:20
+ * @LastEditTime: 2025-01-10 11:39:49
  * @LastEditors: mulingyuer
  * @Description: task帮助
  * @FilePath: \frontend\src\views\task\task.helper.ts
@@ -17,7 +17,9 @@ export function taskTypeToName(taskType: TaskType) {
 		case "captioning":
 			return "打标任务";
 		case "training":
-			return "训练任务";
+			return "Flux 训练";
+		case "hunyuan_training":
+			return "混元视频训练";
 		default:
 			return "未知任务";
 	}

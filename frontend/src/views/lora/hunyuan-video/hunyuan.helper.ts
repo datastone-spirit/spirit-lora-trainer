@@ -47,7 +47,7 @@ function formatConfig(form: RuleForm): Config {
 		},
 		adapter: {
 			type: "",
-			rank: 0,
+			rank: 32,
 			dtype: "",
 			init_from_existing: ""
 		},
@@ -118,7 +118,7 @@ function formatDataset(form: RuleForm): Dataset {
 		max_ar: form.max_ar,
 		num_ar_buckets: form.num_ar_buckets,
 		frame_buckets: frame_buckets,
-		directories: [
+		directory: [
 			{
 				path: form.directory_path,
 				num_repeats: form.directory_num_repeats,

@@ -367,3 +367,15 @@ class HunyuanTrainingTask(Task):
 
         logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
         return     
+
+    def to_dict(self, verbose: bool = False):
+        """Override to_dict to enum """
+        logger.info(f"let the task: {self.id} to dict")
+        # Create shallow copy of self.__dict__
+        d = dict(self.__dict__)
+        # Convert status enum
+        d['status'] = self.status.value
+        # Convert task_type enum 
+        d['task_type'] = self.task_type.value
+        logger.info(f"task dict result: {d}")
+        return d

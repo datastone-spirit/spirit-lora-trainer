@@ -281,7 +281,7 @@ export interface StartHyVideoTrainingData {
 		num_ar_buckets: number;
 		// ar_buckets?: number[];
 		frame_buckets: number[];
-		directories: Array<{
+		directory: Array<{
 			path: string;
 			num_repeats: number;
 			resolutions: number[];

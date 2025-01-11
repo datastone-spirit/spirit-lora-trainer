@@ -66,7 +66,7 @@ json_payload="""
             33,
             65
         ],
-        "directories": [
+        "directory": [
             {
                 "path": "/root",
                 "num_repeats": 10,
@@ -89,7 +89,7 @@ def test_hunyuan_parameter_from_dict():
     payload = json.loads(json_payload)
     training_parameter = HunyuanTrainingParameter.from_dict(payload)
     assert training_parameter.config.output_dir == "/root"
-    assert training_parameter.dataset.directories[0].path == "/root"
+    assert training_parameter.dataset.directory[0].path == "/root"
 
 def test_validate_hunyuan_parameter():
     payload = json.loads(json_payload)

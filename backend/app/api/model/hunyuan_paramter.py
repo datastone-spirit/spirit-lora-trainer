@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DirectoryConfig:
     # Path to directory of images/videos, and corresponding caption files.
-    path: str
+    path: str = None
     # The dataset will act like it is duplicated this many times.
-    num_repeats: int
+    num_repeats: int = None
     # Optional resolutions for this directory, given as (width, height) pairs.
     resolutions: Optional[List[int]] = None
     # Optional aspect ratio buckets for this directory, specified as width/height ratios or (width, height) pairs.
@@ -39,7 +39,7 @@ class DataSetConfig:
     # Frame buckets for video training.
     frame_buckets: List[int] = field(default_factory=lambda: [1, 33, 65])
     # Directory-specific configurations.
-    directories: List[DirectoryConfig] = field(default_factory=list)
+    directory: List[DirectoryConfig] = field(default_factory=list)
 
     @staticmethod
     def validate(config: 'DataSetConfig') -> 'Tuple[bool, str]':
@@ -70,11 +70,11 @@ class DataSetConfig:
             logger.warning("config.frame_buckets is None, set to default")
             config.frame_buckets = [1, 33, 65]
         
-        if not config.directories:
-            logger.warning("config.directories is None, set to default")
-            return False, "directories in data can't be None"
+        if not config.directory:
+            logger.warning("config.directory is None, set to default")
+            return False, "directory in data can't be None"
         
-        for directory in config.directories:
+        for directory in config.directory:
             if not directory.path or not os.path.exists(directory.path):
                 logger.warning(f"directory.path is None, or path: {directory.path} doesn't exist")
                 return False, f"path in data can't be None, or path: {directory.path} doesn't exist"
@@ -92,7 +92,7 @@ class DataSetConfig:
 @dataclass
 class ModelConfig:
     # flux, ltx-video, or hunyuan-video
-    type: str
+    type: str = "hunyuan-video"
     # Can load Hunyuan Video entirely from the ckpt path set up for the official inference script
     # Or you can load it by pointing to all the ComfyUI files
     transformer_path: Optional[str] = None
@@ -186,9 +186,9 @@ dtype = 'bfloat16'
     Returns:
         _type_: _description_
     """
-    type: str
-    rank: int
-    dtype: str
+    type: str = None
+    rank: int = None
+    dtype: str = None
     init_from_existing: Optional[str] = None
 
     @staticmethod
@@ -229,11 +229,11 @@ betas = [0.9, 0.99]
 weight_decay = 0.01
 eps = 1e-8
     """
-    type: str
-    lr: float
-    betas: List[float]
-    weight_decay: float
-    eps: float
+    type: str = ""
+    lr: float = None
+    weight_decay: float = None
+    eps: float = None
+    betas: Optional[List[float]] = None
 
     @staticmethod
     def validate(config: 'OptimizerConfig') -> 'Tuple[bool, str]':
@@ -264,9 +264,9 @@ eps = 1e-8
 
 @dataclass
 class TrainingConfig:
-    output_dir: str
-    dataset: str
-    log_dir: str
+    output_dir: str = None
+    dataset: str = None
+    log_dir: str = None
     epochs: int = 1000
     micro_batch_size_per_gpu: int = 1
     pipeline_stages: int = 1
@@ -292,8 +292,8 @@ class TrainingConfig:
 
 @dataclass
 class HunyuanTrainingParameter:
-    config : Optional[TrainingConfig]
-    dataset : Optional[DataSetConfig]
+    config : TrainingConfig = field(default_factory=TrainingConfig)
+    dataset : DataSetConfig = field(default_factory=DataSetConfig)
 
     @classmethod
     def from_dict(cls, dikt) -> 'HunyuanTrainingParameter':

@@ -1,6 +1,6 @@
 from flask import request
 from flask_restful import Resource
-from backend.app.service.hunyuan_train import HunyuanTrainingService
+from app.service.hunyuan_train import HunyuanTrainingService
 from task.task import Task
 from ..common.utils import use_swagger_config, res
 from ..swagger.swagger_config import huanyuan_training

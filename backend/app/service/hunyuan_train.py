@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 class HunyuanTrainingService():
 
     def __init__(self) -> 'HunyuanTrainingService':
-        self.script = os.path.join("{getprojectpath()", "diffusion-pipe", "train.py")
+        self.module_path = os.path.join(getprojectpath(), "diffusion-pipe")
+        self.script = os.path.join(self.module_path, "train.py")
         if not os.path.exists(self.script):
             raise FileNotFoundError(f"Training script not found at {self.script}")
     
@@ -58,5 +59,6 @@ class HunyuanTrainingService():
         customize_env["PYTHONWARNINGS"] = "ignore::FutureWarning,ignore::UserWarning"
         customize_env["NCCL_P2P_DISABLE"]="1" # For flux training, we disable NCCL P2P and IB
         customize_env["NCCL_IB_DISABLE"]="1"
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env)
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env, 
+                                cwd=self.module_path)  
         return Task.wrap_hunyuan_training(proc, training_paramters, task_id)

@@ -1091,7 +1091,7 @@ huanyuan_training = {
             "items": {"type": "integer"},
             "default": [1, 33, 65]
           },
-          "directories": {
+          "directory": {
             "type": "array",
             "items": {
               "type": "object",

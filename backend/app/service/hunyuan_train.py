@@ -1,11 +1,10 @@
 import os
 import subprocess
-import sys
-from typing import Optional
 import uuid
 from task.task import Task
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.common.utils import dataset2toml
+from datetime import datetime
 
 from utils.util import getprojectpath, setup_logging
 
@@ -24,7 +23,8 @@ class HunyuanTrainingService():
     
     def start_train(self, parameter: HunyuanTrainingParameter) -> Task:
         taskid = uuid.uuid4().hex
-        parameter.config.log_dir = os.path.join(getprojectpath(), "logs", f"{taskid}")
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        parameter.config.log_dir = os.path.join(getprojectpath(), "logs", f"hunyuan-{taskid}-{timestamp}")
         os.makedirs(parameter.config.log_dir, exist_ok=True)
 
         datasetpath = dataset2toml(parameter.dataset)

@@ -377,5 +377,7 @@ class HunyuanTrainingTask(Task):
         d['status'] = self.status.value
         # Convert task_type enum 
         d['task_type'] = self.task_type.value
+        d.pop('hunyuan_parameters') 
+        d.pop('proc') 
         logger.info(f"task dict result: {d}")
         return d

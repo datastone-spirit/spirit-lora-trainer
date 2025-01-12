@@ -267,7 +267,7 @@ class TrainingConfig:
     output_dir: str = None
     dataset: str = None
     log_dir: str = None
-    epochs: int = 1000
+    epochs: int = 128
     micro_batch_size_per_gpu: int = 1
     pipeline_stages: int = 1
     gradient_accumulation_steps: int = 4
@@ -277,7 +277,7 @@ class TrainingConfig:
     eval_before_first_step: bool = True
     eval_micro_batch_size_per_gpu: int = 1
     eval_gradient_accumulation_steps: int = 1
-    save_every_n_epochs: int = 2
+    save_every_n_epochs: int = 16
     checkpoint_every_n_minutes: int = 120
     activation_checkpointing: bool = True
     partition_method: str = "parameters"

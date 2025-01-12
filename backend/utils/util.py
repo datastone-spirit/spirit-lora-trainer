@@ -2,6 +2,7 @@ import pathlib
 import logging
 import os
 import sys
+from typing import Tuple
 
 
 def getmodelpath() -> str:
@@ -51,3 +52,17 @@ def resolveProjectPath(input_path: str) -> str:
      # 拼接项目路径与相对路径
      project_path = getprojectpath()
      return os.path.abspath(os.path.join(project_path, input_path))
+
+
+def caculate_image_steps(images :Tuple[(str, int)]) -> int:
+     total_steps = 0;
+     extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
+     for item in images:
+          if not os.path.exists(item[0]):
+               continue
+          for file in os.listdir(item[0]):
+              file_path = os.path.join(item[0], file)
+              if os.path.isfile(file_path) and os.path.splitext(file)[1].lower() in extensions:
+                    total_steps +=1
+          total_steps *= item[1]
+     return total_steps

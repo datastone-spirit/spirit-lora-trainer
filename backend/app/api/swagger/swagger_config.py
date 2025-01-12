@@ -1012,7 +1012,7 @@ huanyuan_training = {
             "properties": {
                 "output_dir": {"type": "string", "description": "Output directory for training results"},
                 "dataset": {"type": "string"},
-                "epochs": {"type": "integer", "default": 1000},
+                "epochs": {"type": "integer", "default": 128},
                 "micro_batch_size_per_gpu": {"type": "integer", "default": 1},
                 "pipeline_stages": {"type": "integer", "default": 1},
                 "gradient_accumulation_steps": {"type": "integer", "default": 4},
@@ -1022,7 +1022,7 @@ huanyuan_training = {
                 "eval_before_first_step": {"type": "boolean", "default": True},
                 "eval_micro_batch_size_per_gpu": {"type": "integer", "default": 1},
                 "eval_gradient_accumulation_steps": {"type": "integer", "default": 1},
-                "save_every_n_epochs": {"type": "integer", "default": 2},
+                "save_every_n_epochs": {"type": "integer", "default": 16},
                 "checkpoint_every_n_minutes": {"type": "integer", "default": 120},
                 "activation_checkpointing": {"type": "boolean", "default": True},
                 "partition_method": {"type": "string", "default": "parameters"},

@@ -11,7 +11,7 @@ dataset = 'examples/dataset.toml'
 # 训练设置
 
 # 我通常将这个值设置得很高，因为我不知道想训练多久。
-epochs = 1000
+epochs = 128
 # 单个 GPU 的一次前向/后向传递的批大小。
 micro_batch_size_per_gpu = 1
 # 流水线并行度。模型的一个实例被划分到这么多 GPU 上。
@@ -37,7 +37,7 @@ eval_gradient_accumulation_steps = 1
 # 杂项设置
 
 # 如果数据集较小，可能希望将此设置得更高，以免最终保存大量模型。
-save_every_n_epochs = 2
+save_every_n_epochs = 16
 # 可以每 n 个纪元或分钟检查一次训练状态。只设置其中一个。您可以使用 --resume_from_checkpoint 参数从检查点恢复。
 #checkpoint_every_n_epochs = 1
 checkpoint_every_n_minutes = 120

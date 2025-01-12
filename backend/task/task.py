@@ -1,11 +1,12 @@
 from enum import Enum
-from typing import Optional, Callable, List, Dict
+from typing import Optional, Callable, List
 from subprocess import Popen
 from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
 from subprocess import Popen, TimeoutExpired
+from utils.util import caculate_image_steps
 import uuid
 import re
 from tbparse import SummaryReader
@@ -67,16 +68,19 @@ class Task:
         return task
 
     @staticmethod
-    def wrap_hunyuan_training(proc : Popen, training_paramter: TrainingParameter, task_id: str) -> 'Task':
+    def wrap_hunyuan_training(proc : Popen, training_paramter: HunyuanTrainingParameter, task_id: str) -> 'Task':
         task = HunyuanTrainingTask()
         task.status = TaskStatus.CREATED
         task.proc = proc 
         task.hunyuan_parameters = training_paramter
-        task.detail = {}
         if not task_id:
             task.id = uuid.uuid4().hex
         else:
             task.id = task_id
+        task.detail = {
+            'total': caculate_image_steps([(dir.path, dir.num_repeats) for dir in training_paramter.dataset.directory]) * training_paramter.config.epochs,
+            'current': 0
+        }
         task.task_type = TaskType.HUNYUAN_TRAINING
         task.start_time = time.time()
         return task
@@ -330,6 +334,10 @@ class CaptioningTask(Task):
         logger.info(f"task dict result: {d}")
         return d
 
+    def update_detail_with_tb(self):
+        # do nothing
+        pass
+
 @dataclass
 class HunyuanTrainingTask(Task):
     proc: Popen = None
@@ -381,3 +389,30 @@ class HunyuanTrainingTask(Task):
         d.pop('proc') 
         logger.info(f"task dict result: {d}")
         return d
+
+    def update_detail_with_tb(self):
+        logdir = self.hunyuan_parameters.config.log_dir
+        reader = SummaryReader(logdir)
+        df=reader.scalars
+        current_step = max(df.get('step', [0]))
+        if current_step == 0:
+            return 
+
+        def get_value(step=None, tag=None):
+            try:
+                return df.query('step==@step and tag==@tag')['value'].iloc[0]
+            except Exception as e:
+                logger.warning(f"get value failed with step {step} and tag {tag}, error: {e}")
+                return 0
+
+        self.detail['current'] = current_step
+        self.detail['loss'] = get_value(step=current_step, tag="train/loss")
+        self.detail['elapsed'] = time.time() - self.start_time
+
+        epoch_seq = df.query('tag=="train/epoch_loss"').get('step', None)
+        if epoch_seq is None or len(epoch_seq) == 0:
+            return
+        current_epoch = max(epoch_seq.values)
+        self.detail['current_epoch'] = int(current_epoch)
+        self.detail['epoch_loss']=get_value(step=current_epoch, tag="train/epoch_loss")
+        

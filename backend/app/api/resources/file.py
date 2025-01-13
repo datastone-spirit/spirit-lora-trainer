@@ -191,7 +191,8 @@ class TagDirFile(Resource):
                         "txt_content": ""
                     })
 
-            return image_txt_pairs
+            return sorted(image_txt_pairs, key=lambda x: x["image_name"])
+
         except Exception as e:
             return {"error": str(e)}
         

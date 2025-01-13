@@ -78,7 +78,7 @@ class Task:
         else:
             task.id = task_id
         task.detail = {
-            'total': caculate_image_steps([(dir.path, dir.num_repeats) for dir in training_paramter.dataset.directory]) * training_paramter.config.epochs,
+            #total': caculate_image_steps([(dir.path, dir.num_repeats) for dir in training_paramter.dataset.directory]) * training_paramter.config.epochs,
             'current': 0
         }
         task.task_type = TaskType.HUNYUAN_TRAINING
@@ -408,11 +408,14 @@ class HunyuanTrainingTask(Task):
         self.detail['current'] = current_step
         self.detail['loss'] = get_value(step=current_step, tag="train/loss")
         self.detail['elapsed'] = time.time() - self.start_time
+        self.detail['total_epoch'] = self.hunyuan_parameters.config.epochs
 
         epoch_seq = df.query('tag=="train/epoch_loss"').get('step', None)
         if epoch_seq is None or len(epoch_seq) == 0:
             return
         current_epoch = max(epoch_seq.values)
         self.detail['current_epoch'] = int(current_epoch)
+        if current_epoch == 1:
+            self.detail['estimate_steps_per_epoch'] = current_step
         self.detail['epoch_loss']=get_value(step=current_epoch, tag="train/epoch_loss")
         

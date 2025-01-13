@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 15:29:03
- * @LastEditTime: 2025-01-10 10:25:29
+ * @LastEditTime: 2025-01-10 16:41:00
  * @LastEditors: mulingyuer
  * @Description: 训练数据
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\TrainingData\index.vue
@@ -69,7 +69,7 @@
 				<el-input-number v-model.number="ruleForm.max_ar" :step="0.1" :min="0" />
 			</PopoverFormItem>
 		</el-col>
-		<el-col :span="12">
+		<el-col :span="24">
 			<PopoverFormItem
 				label="长宽比桶的总数"
 				prop="num_ar_buckets"

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-01-14 15:01:02
+ * @LastEditTime: 2025-01-14 17:59:08
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -61,7 +61,7 @@ export const useHYLora = (() => {
 		// 只有第一轮结束后才有预估每轮步数 estimate_steps_per_epoch
 		// 第一轮是用轮数算百分比
 		// 第二轮有预估每轮步数后用步数来算百分比
-		const isPerEpoch = "estimate_steps_per_epoch" in detail;
+		const isPerEpoch = "current_epoch" in detail;
 		let current = 0;
 		let total = 0;
 		if (!isPerEpoch) {
@@ -70,8 +70,13 @@ export const useHYLora = (() => {
 			total = detail.total_epoch ?? 0;
 			loraData.current_epoch = 1;
 		} else {
+			// current = detail.current ?? 0;
+			// const steps = detail.estimate_steps_per_epoch ?? 0;
+			// const total_epoch = detail.total_epoch ?? 0;
+			// total = steps * total_epoch;
 			current = detail.current ?? 0;
-			const steps = detail.estimate_steps_per_epoch ?? 0;
+			const current_epoch = detail.current_epoch ?? 0;
+			const steps = Math.ceil(current / current_epoch); //每轮的步数
 			const total_epoch = detail.total_epoch ?? 0;
 			total = steps * total_epoch;
 

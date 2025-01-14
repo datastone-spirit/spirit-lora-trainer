@@ -1,14 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2024-12-27 09:17:39
+ * @LastEditTime: 2025-01-13 17:28:25
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
  * 怎么可能会有bug！！！
  */
 
-import type { TaskStatus } from "../types";
+import type { TaskStatus, TaskType } from "../types";
 
 /** 监控系统：GPU 响应 */
 export type GPUMonitorInfoResult = Array<{
@@ -35,7 +35,7 @@ export interface LoRATrainingInfoResult {
 	/** 任务状态 */
 	status: TaskStatus;
 	/** 任务类型 */
-	task_type: "training";
+	task_type: TaskType.TRAINING;
 	/** 开始时间 */
 	start_time: number;
 	/** 结束时间 */
@@ -98,7 +98,7 @@ export interface ManualTagInfoResult {
 	/** 任务状态 */
 	status: TaskStatus;
 	/** 任务类型 */
-	task_type: "captioning";
+	task_type: TaskType.CAPTIONING;
 	/** 打标输出目录 */
 	output_dir: string;
 	/** 开始时间 */
@@ -121,4 +121,47 @@ export interface ManualTagInfoResult {
 		/** 当前进度??? */
 		current: number;
 	};
+}
+
+/** 监听混元视频训练信息参数 */
+export interface HyVideoTrainingInfoParams {
+	/** 任务id */
+	task_id: string;
+}
+
+/** 监听混元视频训练信息响应 */
+export interface HyVideoTrainingInfoResult {
+	/** 任务 ID */
+	id: string;
+	/** 任务状态 */
+	status: TaskStatus;
+	/** 任务类型 */
+	task_type: TaskType.HUNYUAN_TRAINING;
+	/** 打标输出目录 */
+	output_dir: string;
+	/** 开始时间 */
+	start_time: number;
+	/** 结束时间 */
+	end_time: number | null;
+	/** 图片素材数组 */
+	image_paths: string[];
+	/** 详情 */
+	detail:
+		| {
+				/** 当前第几步 */
+				current?: number;
+				/** 当前loss */
+				loss?: number;
+				/** 已经耗时(s) */
+				elapsed?: number;
+				/** 当前轮 */
+				current_epoch?: number;
+				/** 总轮数 */
+				total_epoch?: number;
+				/** 第一轮结束后返回预估每轮步数 */
+				estimate_steps_per_epoch?: number;
+				/** 每轮的平均 loss */
+				epoch_loss?: number;
+		  }
+		| string;
 }

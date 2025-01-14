@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 14:52:03
- * @LastEditTime: 2024-12-25 10:12:03
+ * @LastEditTime: 2025-01-08 17:30:42
  * @LastEditors: mulingyuer
  * @Description: 系统监控：gpu、训练轮数
  * @FilePath: \frontend\src\components\Monitor\GPUMonitor\index.vue
@@ -23,7 +23,8 @@
 <script setup lang="ts">
 import { useGPU } from "@/hooks/useGPU";
 
-const { gpuData } = useGPU();
+const { monitorGPUData } = useGPU();
+const gpuData = computed(() => monitorGPUData.value.data);
 </script>
 
 <style lang="scss" scoped>

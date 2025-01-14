@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-01-03 16:46:19
+ * @LastEditTime: 2025-01-09 11:21:35
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -48,15 +48,16 @@
 					<el-button
 						class="ai-dataset-page-left-btn"
 						type="primary"
-						:loading="isListenTag"
+						:loading="submitLoading || monitorTagData.isListen"
+						:disabled="trainingStore.useGPU"
 						@click="onSubmit"
 					>
 						一键打标
 					</el-button>
 				</el-form-item>
 			</el-form>
-			<TagMonitor v-if="isListenTag" />
-			<GPUMonitor v-if="isListenGPU" class="ai-dataset-page-left-gpu-monitor" />
+			<TagMonitor v-if="monitorTagData.isListen" />
+			<GPUMonitor v-if="trainingStore.useGPU" class="ai-dataset-page-left-gpu-monitor" />
 		</div>
 		<div class="ai-dataset-page-right">
 			<div id="ai-dataset-header" class="ai-dataset-header"></div>
@@ -80,7 +81,7 @@ import { checkDirectory } from "@/utils/lora.helper";
 import type { FormInstance, FormRules } from "element-plus";
 import { validateForm } from "@/utils/tools";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useTraining } from "@/hooks/useTraining";
+import { useTrainingStore } from "@/stores";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -95,9 +96,9 @@ interface RuleForm {
 	class_tokens: string;
 }
 
-const { isListenTag, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
-const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
-const { isLoraTaskEnd } = useTraining();
+const trainingStore = useTrainingStore();
+const { monitorTagData, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
+const { startGPUListen, stopGPUListen } = useGPU();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
@@ -157,10 +158,10 @@ async function onSubmit() {
 			submitLoading.value = false;
 			return;
 		}
-		if (!isLoraTaskEnd()) {
+		if (trainingStore.useGPU) {
 			submitLoading.value = false;
 			ElMessage({
-				message: "训练任务未结束，请等待训练完成再执行打标",
+				message: "GPU已经被占用，请等待对应任务完成再执行打标",
 				type: "error"
 			});
 			return;
@@ -173,26 +174,28 @@ async function onSubmit() {
 			class_token: ruleForm.value.output_trigger_words ? ruleForm.value.class_tokens : undefined,
 			prompt_type: ruleForm.value.prompt_type
 		});
-		startGPUListen();
+
 		startTagListen(result.task_id);
 		submitLoading.value = false;
+
 		ElMessage({
 			message: "正在打标...",
 			type: "success"
 		});
 	} catch (error) {
 		submitLoading.value = false;
-		stopGPUListen();
-		stopTagListen();
+		stopTagListen(true);
 		console.log("打标任务创建失败", error);
 	}
 }
 
-// 监听是否在打标和训练
+// 如果GPU被占用就开始监听
 watch(
-	isListenTag,
+	() => trainingStore.useGPU,
 	(newVal) => {
-		if (!newVal) {
+		if (newVal) {
+			startGPUListen();
+		} else {
 			stopGPUListen();
 		}
 	},
@@ -203,13 +206,12 @@ onMounted(() => {
 	// 组件挂载时，开始监听
 	if (!isTagTaskEnd()) {
 		startTagListen();
-		startGPUListen();
 	}
 });
 onUnmounted(() => {
 	// 组件销毁时，停止监听
-	stopGPUListen();
 	stopTagListen();
+	stopGPUListen();
 });
 </script>
 

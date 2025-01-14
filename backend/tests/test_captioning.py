@@ -1,4 +1,4 @@
-from app.api.model.captioning_model import cap_model_mgr
+from app.api.model.captioning_model_mgr import cap_model_mgr
 from utils.util import getmodelpath
 import os
 

@@ -1,10 +1,12 @@
 from enum import Enum
-from typing import Optional, Callable, List, Dict
+from typing import Optional, Callable, List
 from subprocess import Popen
 from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
+from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
 from subprocess import Popen, TimeoutExpired
+from utils.util import caculate_image_steps
 import uuid
 import re
 from tbparse import SummaryReader
@@ -19,6 +21,7 @@ logger = logging.getLogger(__name__)
 class TaskType(Enum):
     NONE = "none"
     TRAINING = "training"
+    HUNYUAN_TRAINING = "hunyuan_training"
     CAPTIONING = "captioning"
 
 class TaskStatus(Enum):
@@ -33,6 +36,7 @@ def get_logdir(log_dir, log_prefix):
         if file.startswith(log_prefix):
             return os.path.join(log_dir, file)
     return None
+
 @dataclass
 class Task:
     status = TaskStatus.CREATED
@@ -64,6 +68,24 @@ class Task:
         return task
 
     @staticmethod
+    def wrap_hunyuan_training(proc : Popen, training_paramter: HunyuanTrainingParameter, task_id: str) -> 'Task':
+        task = HunyuanTrainingTask()
+        task.status = TaskStatus.CREATED
+        task.proc = proc 
+        task.hunyuan_parameters = training_paramter
+        if not task_id:
+            task.id = uuid.uuid4().hex
+        else:
+            task.id = task_id
+        task.detail = {
+            #total': caculate_image_steps([(dir.path, dir.num_repeats) for dir in training_paramter.dataset.directory]) * training_paramter.config.epochs,
+            'current': 0
+        }
+        task.task_type = TaskType.HUNYUAN_TRAINING
+        task.start_time = time.time()
+        return task
+
+    @staticmethod
     def wrap_captioning_task(image_paths: List[str], output_dir: str, class_token: str, cap_model: CaptioningModelInfo, prompt_type) -> 'Task':
         task = CaptioningTask()
         task.status = TaskStatus.CREATED
@@ -81,6 +103,7 @@ class Task:
         task.task_type = TaskType.CAPTIONING
         task.captioning = cap_model.captioning
         return task    
+
 
     def run(self):
         self.status = TaskStatus.RUNNING
@@ -311,3 +334,88 @@ class CaptioningTask(Task):
         logger.info(f"task dict result: {d}")
         return d
 
+    def update_detail_with_tb(self):
+        # do nothing
+        pass
+
+@dataclass
+class HunyuanTrainingTask(Task):
+    proc: Popen = None
+    hunyuan_parameters: HunyuanTrainingParameter = None 
+
+    def _run(self):
+        try:
+            logger.info("beginning to run proc communication with hunyuan training process")
+            stdout_lines = []
+            linestr = ''
+            line = bytearray()
+            while True:
+                ch = self.proc.stdout.read(1)
+                if ch == b'' and self.proc.poll() is not None:
+                    break
+                line.extend(ch)
+                if ch == b'\n':
+                    linestr = line.decode('utf-8', errors='ignore')
+                    print(linestr, end='')
+                    stdout_lines.append(linestr)
+                    line = bytearray()  #
+            stdout, stderr = self.proc.communicate()
+        except TimeoutExpired as exc:
+            self.proc.kill()
+            self.proc.wait()
+            raise
+        except:
+            self.proc.kill()
+            raise
+
+        retcode = self.proc.poll()
+        if retcode != 0:
+            logger.error(f"training subprocess run failed, retcode is {retcode}")
+            raise Exception(f"training subprocess run failed, retcode is {retcode}")
+
+        logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
+        return     
+
+    def to_dict(self, verbose: bool = False):
+        """Override to_dict to enum """
+        logger.info(f"let the task: {self.id} to dict")
+        # Create shallow copy of self.__dict__
+        d = dict(self.__dict__)
+        # Convert status enum
+        d['status'] = self.status.value
+        # Convert task_type enum 
+        d['task_type'] = self.task_type.value
+        d.pop('hunyuan_parameters') 
+        d.pop('proc') 
+        logger.info(f"task dict result: {d}")
+        return d
+
+    def update_detail_with_tb(self):
+        logdir = self.hunyuan_parameters.config.log_dir
+        reader = SummaryReader(logdir)
+        df=reader.scalars
+        current_step = max(df.get('step', [0]))
+        if current_step == 0:
+            return 
+
+        def get_value(step=None, tag=None):
+            try:
+                return df.query('step==@step and tag==@tag')['value'].iloc[0]
+            except Exception as e:
+                logger.warning(f"get value failed with step {step} and tag {tag}, error: {e}")
+                return 0
+
+        self.detail['current'] = current_step
+        self.detail['loss'] = get_value(step=current_step, tag="train/loss")
+        self.detail['elapsed'] = time.time() - self.start_time
+        self.detail['total_epoch'] = self.hunyuan_parameters.config.epochs
+
+        epoch_seq = df.query('tag=="train/epoch_loss"').get('step', None)
+        if epoch_seq is None or len(epoch_seq) == 0:
+            return
+        current_epoch = max(epoch_seq.values)
+        self.detail['current_epoch'] = int(current_epoch)
+        if current_epoch == 1:
+            self.detail['estimate_steps_per_epoch'] = current_step
+        self.detail['epoch_loss']=get_value(step=current_epoch, tag="train/epoch_loss")
+        

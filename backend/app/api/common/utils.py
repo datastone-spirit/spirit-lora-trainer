@@ -2,7 +2,7 @@ import os
 from flasgger import swag_from
 from dataclasses import asdict
 from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset, TrainingDataset
-from typing import List, Tuple
+from typing import List, Tuple, Any
 from utils.util import getmodelpath, getprojectpath
 import tempfile
 import toml
@@ -317,7 +317,7 @@ def config2toml(config: TrainingConfig, dataset_path: str) -> str:
     return temp_file_path
 
 
-def dataset2toml(dataset :TrainingDataset) -> str:
+def dataset2toml(dataset :Any) -> str:
     # accroding to the value of feild to generate a toml format file 
     # in the temporary directory and return the path
     # Convert the TrainingDataset instance to a dictionary

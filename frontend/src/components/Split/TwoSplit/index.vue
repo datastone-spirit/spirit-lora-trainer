@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 10:13:40
- * @LastEditTime: 2025-01-03 18:34:40
+ * @LastEditTime: 2025-01-09 11:36:27
  * @LastEditors: mulingyuer
  * @Description: 2分割组件
  * @FilePath: \frontend\src\components\Split\TwoSplit\index.vue
@@ -111,13 +111,17 @@ watch([() => props.direction, () => props.sizes], () => {
 		height: 100%;
 	}
 }
+.two-split-left {
+	.two-split-card {
+		padding-right: 6px;
+	}
+}
 .two-split-right {
 	margin-left: 6px;
 }
 .two-split-card {
 	height: 100%;
 	overflow: auto;
-	padding-right: 6px;
 }
 .two-split :deep(.gutter) {
 	background-color: var(--zl-two-split-gutter-bg);

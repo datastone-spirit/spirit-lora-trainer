@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 10:40:26
- * @LastEditTime: 2024-12-30 10:13:31
+ * @LastEditTime: 2025-01-10 10:33:52
  * @LastEditors: mulingyuer
  * @Description: 数据集目录选择器
  * @FilePath: \frontend\src\components\Form\DatasetDirSelector.vue
@@ -25,7 +25,8 @@
 			<el-button
 				class="train-data-dir-selector-btn"
 				type="primary"
-				:loading="loading || isListenTag"
+				:loading="loading || monitorTagData.isListen"
+				:disabled="trainingStore.useGPU"
 				@click="onBtnClick"
 			>
 				{{ btnText }}
@@ -38,6 +39,7 @@
 import { useTag } from "@/hooks/useTag";
 import type { TaggerModelSelectProps } from "./TaggerModelSelect.vue";
 import TaggerModelSelect from "./TaggerModelSelect.vue";
+import { useTrainingStore } from "@/stores";
 
 export interface DatasetDirSelectorProps {
 	dirLabel?: string;
@@ -62,7 +64,8 @@ const props = withDefaults(defineProps<DatasetDirSelectorProps>(), {
 const dir = defineModel("dir", { type: String, required: true });
 const taggerModel = defineModel("taggerModel", { type: String, required: true });
 
-const { isListenTag } = useTag();
+const trainingStore = useTrainingStore();
+const { monitorTagData } = useTag();
 const loading = ref(false);
 async function onBtnClick() {
 	try {
@@ -76,6 +79,10 @@ async function onBtnClick() {
 		console.log("打标任务创建失败", error);
 	}
 }
+
+onMounted(() => {
+	console.warn("该组件已废弃，请使用Dataset.vue");
+});
 </script>
 
 <style lang="scss" scoped>

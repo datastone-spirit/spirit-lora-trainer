@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-01-03 09:42:19
+ * @LastEditTime: 2025-01-14 10:54:40
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -79,7 +79,7 @@
 				<el-upload
 					ref="uploadRef"
 					v-model:file-list="uploadFileList"
-					accept="image/jpeg,image/png"
+					accept="image/jpeg,image/png,text/plain"
 					multiple
 					:show-file-list="false"
 					:auto-upload="false"
@@ -129,7 +129,7 @@ const props = withDefaults(defineProps<AiDatasetProps>(), {
 	showTeleportBtn: true
 });
 const { previewImages } = useImageViewer();
-const { addTagEventListener, removeTagEventListener } = useTag();
+const { tagEvents } = useTag();
 
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
 const list = ref<FileList>([]);
@@ -139,6 +139,7 @@ const activeItemIndex = ref<number | null>(null);
 // 请求数据
 async function getList() {
 	try {
+		if (typeof props.dir !== "string" || props.dir.trim() === "") return;
 		loading.value = true;
 		onQuitEdit();
 
@@ -370,9 +371,9 @@ watch(
 );
 
 getList();
-addTagEventListener("complete", getList);
+tagEvents.on("complete", getList);
 onUnmounted(() => {
-	removeTagEventListener("complete", getList);
+	tagEvents.off("complete", getList);
 });
 
 defineExpose({

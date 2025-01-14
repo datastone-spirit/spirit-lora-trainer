@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2024-12-27 10:01:02
+ * @LastEditTime: 2025-01-10 11:27:58
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
@@ -20,20 +20,16 @@
 					size="large"
 				>
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
-						<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
+						<BasicInfo v-model:form="ruleForm" />
 					</Collapse>
 					<Collapse v-model="openStep2" title="第2步：训练用的数据">
-						<TrainingData
-							v-model:form="ruleForm"
-							:form-props="ruleFormProps"
-							:tag-submit="onTagSubmit"
-						/>
+						<TrainingData v-model:form="ruleForm" />
 					</Collapse>
 					<Collapse v-model="openStep3" title="第3步：模型参数调教">
-						<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
+						<ModelParameters v-model:form="ruleForm" />
 					</Collapse>
 					<Collapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
-						<AdvancedSettings v-model:form="ruleForm" :form-props="ruleFormProps" />
+						<AdvancedSettings v-model:form="ruleForm" />
 					</Collapse>
 				</el-form>
 			</div>
@@ -51,8 +47,7 @@ import TrainingData from "./components/TrainingData/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import { useSettingsStore } from "@/stores";
-import type { RuleForm, RuleFormProps } from "./types";
-import { generateKeyMapFromInterface, sleep } from "@/utils/tools";
+import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 
@@ -172,7 +167,6 @@ const rules = reactive<FormRules<RuleForm>>({
 	resolution_width: [{ required: true, message: "请输入图片尺寸-宽度", trigger: "blur" }],
 	resolution_height: [{ required: true, message: "请输入图片尺寸-高度", trigger: "blur" }]
 });
-const ruleFormProps = generateKeyMapFromInterface<RuleForm, RuleFormProps>(ruleForm.value);
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 
@@ -182,9 +176,9 @@ const openStep3 = ref(true);
 const openStep4 = ref(true);
 
 /** 打标 */
-function onTagSubmit() {
-	return sleep(3000);
-}
+// function onTagSubmit() {
+// 	return sleep(3000);
+// }
 </script>
 
 <style lang="scss" scoped>

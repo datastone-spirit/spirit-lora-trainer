@@ -1,9 +1,10 @@
+import "default-passive-events"; //去除touchstart谷歌警告
 import { createApp } from "vue";
 import { piniaStore } from "@/stores";
 import App from "./App.vue";
 import { setupRouter } from "./router";
 import VueFinder from "vuefinder/dist/vuefinder";
-import { init } from "./init";
+import { initLoraTrainer } from "./init-lora-trainer";
 
 // style
 import "@/styles/index.scss";
@@ -25,7 +26,7 @@ async function setupApp() {
 	await setupRouter(app);
 
 	// 初始化
-	await init();
+	await initLoraTrainer();
 
 	app.mount("#app");
 }

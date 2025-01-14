@@ -70,7 +70,7 @@ class TaskManager:
             try:
                 if self.current_task is not None:
                     task = self.current_task
-                    if task is not None and task.status == TaskStatus.RUNNING and task.task_type == TaskType.TRAINING:
+                    if task is not None and task.status == TaskStatus.RUNNING:
                         #logger.info(f"task id {task.id} is running, update stats with tensorboard log")
                         task.update_detail_with_tb()
             except Exception as e:

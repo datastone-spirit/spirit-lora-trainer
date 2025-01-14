@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2024-12-26 14:18:02
+ * @LastEditTime: 2025-01-09 15:50:24
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -221,6 +221,78 @@ export interface StartFluxTrainingData extends Record<string, any> {
 
 /** 启动flux训练结果 */
 export interface StartFluxTrainingResult {
+	msg: string;
+	success: boolean;
+	/** 任务id */
+	task_id: string;
+}
+
+/** 启动混元视频训练参数 */
+export interface StartHyVideoTrainingData {
+	config: {
+		output_dir: string;
+		epochs: number;
+		micro_batch_size_per_gpu: number;
+		pipeline_stages: number;
+		gradient_accumulation_steps: number;
+		gradient_clipping: number;
+		warmup_steps: number;
+		eval_every_n_epochs: number;
+		eval_before_first_step: boolean;
+		eval_micro_batch_size_per_gpu: number;
+		eval_gradient_accumulation_steps: number;
+		save_every_n_epochs: number;
+		checkpoint_every_n_minutes: number;
+		activation_checkpointing: boolean;
+		partition_method: string;
+		save_dtype: string;
+		caching_batch_size: number;
+		steps_per_print: number;
+		video_clip_mode: string;
+		model: {
+			type: string;
+			transformer_path: string;
+			vae_path: string;
+			llm_path: string;
+			clip_path: string;
+			dtype: string;
+			transformer_dtype: string;
+			timestep_sample_method: string;
+		};
+		adapter: {
+			type: string;
+			rank: number;
+			dtype: string;
+			init_from_existing: string;
+		};
+		optimizer: {
+			type: string;
+			lr: number;
+			betas: number[];
+			weight_decay: number;
+			eps: number;
+		};
+	};
+	dataset: {
+		resolutions: number[];
+		enable_ar_bucket: boolean;
+		min_ar: number;
+		max_ar: number;
+		num_ar_buckets: number;
+		// ar_buckets?: number[];
+		frame_buckets: number[];
+		directory: Array<{
+			path: string;
+			num_repeats: number;
+			resolutions: number[];
+			// ar_buckets?: number;
+			frame_buckets: number[];
+		}>;
+	};
+}
+
+/** 启动混元视频训练结果 */
+export interface StartHyVideoTrainingResult {
 	msg: string;
 	success: boolean;
 	/** 任务id */

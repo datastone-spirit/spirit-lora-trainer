@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 10:02:58
- * @LastEditTime: 2025-01-03 15:05:22
+ * @LastEditTime: 2025-01-09 11:34:44
  * @LastEditors: mulingyuer
  * @Description: about页面
  * @FilePath: \frontend\src\views\about\index.vue
@@ -144,7 +144,6 @@ const commitId = __GIT_COMMIT_ID__;
 .about-page {
 	display: flex;
 	gap: $zl-padding;
-	padding-right: $zl-padding;
 	min-height: 100%;
 }
 .about-page-left,

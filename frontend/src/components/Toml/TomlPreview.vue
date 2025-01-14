@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 14:46:06
- * @LastEditTime: 2024-12-26 12:22:24
+ * @LastEditTime: 2025-01-08 10:03:43
  * @LastEditors: mulingyuer
  * @Description: toml预览组件
  * @FilePath: \frontend\src\components\Toml\TomlPreview.vue
@@ -21,36 +21,63 @@ import { useAppStore } from "@/stores";
 export interface TomlPreviewProps {
 	toml: string;
 }
-
+const instance = getCurrentInstance();
 const props = defineProps<TomlPreviewProps>();
 const appStore = useAppStore();
 
 const isDark = storeToRefs(appStore).isDark;
 const highlighter = ref<Highlighter>();
 const tomlHtml = ref("");
+const isInitializing = ref(false);
 
+/** 初始化 */
 async function init() {
-	highlighter.value = await createHighlighter({
-		themes: ["github-light", "github-dark"],
-		langs: ["toml"]
+	try {
+		isInitializing.value = true;
+		highlighter.value = await createHighlighter({
+			themes: ["github-light", "github-dark"],
+			langs: ["toml"]
+		});
+		isInitializing.value = false;
+		if (instance?.isUnmounted) highlighterDispose();
+
+		highlighterToml();
+	} catch (error) {
+		isInitializing.value = false;
+		console.error("初始化Toml预览失败:", error);
+	}
+}
+
+/** 销毁 */
+function highlighterDispose() {
+	highlighter.value?.dispose();
+	highlighter.value = void 0;
+}
+
+/** 生成高亮html */
+function highlighterToml() {
+	if (!highlighter.value) return;
+	tomlHtml.value = highlighter.value.codeToHtml(props.toml, {
+		lang: "toml",
+		theme: isDark.value ? "github-dark" : "github-light"
 	});
 }
 
-watch(
-	[() => props.toml, isDark],
-	async () => {
-		if (!highlighter.value) {
-			await init();
-		}
-		tomlHtml.value = highlighter.value!.codeToHtml(props.toml, {
-			lang: "toml",
-			theme: isDark.value ? "github-dark" : "github-light"
-		});
-	},
-	{
-		immediate: true
+/** watch防抖 */
+const watchFn = useDebounceFn(async () => {
+	if (isInitializing.value) return;
+	if (!highlighter.value) {
+		await init();
+		if (!highlighter.value) return; // Still no highlighter available
 	}
-);
+	highlighterToml();
+}, 300);
+watch([() => props.toml, isDark], watchFn);
+
+init();
+onUnmounted(() => {
+	highlighterDispose();
+});
 </script>
 
 <style lang="scss" scoped>

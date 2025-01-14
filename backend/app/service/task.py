@@ -15,7 +15,7 @@ class TaskService:
         result = []
         for task in tm.history:
             result.append(task.to_dict())
-        return 
+        return result 
 
     def get(self, task_id=None):
         if task_id == None or task_id == "":

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-01-06 09:00:11
+ * @LastEditTime: 2025-01-07 10:29:58
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -205,7 +205,7 @@ export function formatFormData(form: RuleForm): StartFluxTrainingData {
 }
 
 /** 将我们定义的toml数据对象数据合并到表单上 */
-export function mergeDataToForm(toml: StartFluxTrainingData, form: RuleForm) {
+export function mergeDataToForm(toml: RuleForm, form: RuleForm) {
 	const formKeys = Object.keys(form) as (keyof RuleForm)[];
 	formKeys
 		.filter((key) => Object.hasOwn(toml, key))

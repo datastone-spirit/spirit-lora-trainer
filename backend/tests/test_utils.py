@@ -4,4 +4,4 @@ import pathlib
 
 
 def test_model_path():
-    assert getmodelpath() == str(pathlib.Path("./models").absolute())
+    assert getmodelpath() == str(pathlib.Path("backend/models").absolute())

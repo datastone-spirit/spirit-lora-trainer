@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2024-12-25 16:09:21
+ * @LastEditTime: 2025-01-09 10:49:02
  * @LastEditors: mulingyuer
  * @Description: lora训练监控
  * @FilePath: \frontend\src\components\Monitor\LoRATrainingMonitor\index.vue
@@ -52,10 +52,11 @@
 </template>
 
 <script setup lang="ts">
-import { useTraining } from "@/hooks/useTraining";
 import { isEmptyObject, objectHasKeys } from "@/utils/tools";
+import { useFluxLora } from "@/hooks/useFluxLora";
 
-const { loraData } = useTraining();
+const { monitorFluxLoraData } = useFluxLora();
+const loraData = computed(() => monitorFluxLoraData.value.data);
 /** 是否还在加载中 */
 const isLoad = computed(() => {
 	const rawData = loraData.value.raw;

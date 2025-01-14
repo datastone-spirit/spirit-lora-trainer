@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2024-12-27 17:11:01
+ * @LastEditTime: 2025-01-14 11:04:42
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
@@ -38,12 +38,14 @@ import { useAppStore } from "@/stores";
 import { useSettingsStore } from "@/stores";
 import { ComplexityEnum } from "@/enums/complexity.enum";
 import { useTag } from "@/hooks/useTag";
-import { useTraining } from "@/hooks/useTraining";
+import { useFluxLora } from "@/hooks/useFluxLora";
+import { useHYLora } from "@/hooks/useHYLora";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
-const { isListenTag, tagData } = useTag();
-const { isListenLora, loraData } = useTraining();
+const { monitorTagData } = useTag();
+const { monitorFluxLoraData } = useFluxLora();
+const { monitorHYLoraData } = useHYLora();
 
 const openComplexity = ref(settingsStore.complexity === ComplexityEnum.EXPERT);
 function onComplexityChange(val: boolean) {
@@ -52,13 +54,24 @@ function onComplexityChange(val: boolean) {
 }
 
 /** 进度条 */
-const showProgress = computed(() => isListenTag.value || isListenLora.value);
+const showProgress = computed(() => {
+	const open = settingsStore.trainerSettings.openFooterBarProgress;
+	if (!open) return false;
+	return (
+		monitorTagData.value.isListen ||
+		monitorFluxLoraData.value.isListen ||
+		monitorHYLoraData.value.isListen
+	);
+});
 const progress = computed(() => {
-	if (isListenTag.value) {
-		return tagData.value.percentage;
+	if (monitorTagData.value.isListen) {
+		return monitorTagData.value.data.percentage;
 	}
-	if (isListenLora.value) {
-		return loraData.value.progress;
+	if (monitorFluxLoraData.value.isListen) {
+		return monitorFluxLoraData.value.data.progress;
+	}
+	if (monitorHYLoraData.value.isListen) {
+		return monitorHYLoraData.value.data.progress;
 	}
 	return 0;
 });

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-06 08:52:21
+ * @LastEditTime: 2025-01-14 10:53:23
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -21,25 +21,33 @@
 						size="large"
 					>
 						<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
-							<BasicInfo v-model:form="ruleForm" :form-props="ruleFormProps" />
+							<BasicInfo v-model:form="ruleForm" />
 						</Collapse>
 						<Collapse v-model="openStep2" title="第2步：训练用的数据">
-							<TrainingData
-								v-model:form="ruleForm"
-								:form-props="ruleFormProps"
-								:tag-submit="onTagSubmit"
+							<Dataset
+								v-model:dataset-path="ruleForm.image_dir"
+								dataset-path-prop="image_dir"
+								dataset-path-popover-content="image_dir"
+								v-model:tagger-model="ruleForm.tagger_model"
+								tagger-model-prop="tagger_model"
+								tagger-model-popover-content="tagger_model"
+								v-model:joy-caption-prompt-type="ruleForm.prompt_type"
+								joy-caption-prop="prompt_type"
+								joy-caption-popover-content="prompt_type"
+								v-model:output-trigger-words="ruleForm.output_trigger_words"
+								output-trigger-words-prop="output_trigger_words"
+								output-trigger-words-popover-content="output_trigger_words"
+								:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
+								@tagger-click="onTaggerClick"
 							/>
+							<TrainingData v-model:form="ruleForm" />
 						</Collapse>
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
-							<ModelParameters v-model:form="ruleForm" :form-props="ruleFormProps" />
+							<ModelParameters v-model:form="ruleForm" />
 						</Collapse>
-						<AdvancedSettingsCollapse
-							v-show="isExpert"
-							v-model="openStep4"
-							title="其它：高级设置"
-							:form="ruleForm"
-							:form-props="ruleFormProps"
-						/>
+						<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
+							<AdvancedSettings v-model:form="ruleForm" />
+						</SimpleCollapse>
 					</el-form>
 				</div>
 			</template>
@@ -47,27 +55,16 @@
 				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
 			</template>
 		</TwoSplit>
-		<ConfigBtns
+		<FooterButtonGroup
+			left-to="#footer-bar-left"
+			:getExportConfig="onExportConfig"
+			export-config-prefix="flux"
 			@load-config="onLoadConfig"
-			:export-config="onExportConfig"
 			@reset-data="onResetData"
-		/>
-		<Teleport to="#footer-bar-center" defer>
-			<el-space class="flux-footer-bar" :size="40">
-				<GPUMonitor v-if="isListenGPU" />
-				<LoRATrainingMonitor v-if="isListenLora" />
-				<TagMonitor v-if="isListenTag" />
-				<el-button
-					v-if="showSubmitBtn"
-					type="primary"
-					size="large"
-					:loading="submitLoading || isListenLora"
-					@click="onSubmit"
-				>
-					开始训练
-				</el-button>
-			</el-space>
-		</Teleport>
+			right-to="#footer-bar-center"
+			:submit-loading="submitLoading"
+			@submit="onSubmit"
+		></FooterButtonGroup>
 	</div>
 </template>
 
@@ -75,30 +72,24 @@
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import { batchTag } from "@/api/tag";
-import GPUMonitor from "@/components/Monitor/GPUMonitor/index.vue";
-import LoRATrainingMonitor from "@/components/Monitor/LoRATrainingMonitor/index.vue";
-import TagMonitor from "@/components/Monitor/TagMonitor/index.vue";
-import { useGPU } from "@/hooks/useGPU";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import { useFluxLora } from "@/hooks/useFluxLora";
 import { useTag } from "@/hooks/useTag";
-import { useTraining } from "@/hooks/useTraining";
-import { useSettingsStore } from "@/stores";
+import { useSettingsStore, useTrainingStore } from "@/stores";
 import { checkData, checkDirectory } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
-import { generateKeyMapFromInterface } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
-import AdvancedSettingsCollapse from "./components/AdvancedSettingsCollapse/index.vue";
+import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
-import ConfigBtns from "./components/Footer/ConfigBtns.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
-import type { RuleForm, RuleFormProps } from "./types";
-import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
-const { isListenTag, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
-const { isListenLora, startLoraListen, stopLoraListen, isLoraTaskEnd } = useTraining();
-const { isListenGPU, startGPUListen, stopGPUListen } = useGPU();
+const trainingStore = useTrainingStore();
+const { startTagListen, stopTagListen, monitorTagData } = useTag();
+const { startFluxLoraListen, stopFluxLoraListen } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const ruleFormRef = ref<FormInstance>();
@@ -244,7 +235,6 @@ const rules = reactive<FormRules<RuleForm>>({
 		}
 	]
 });
-const ruleFormProps = generateKeyMapFromInterface<RuleForm, RuleFormProps>(ruleForm.value);
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 
@@ -262,7 +252,7 @@ const generateToml = useDebounceFn(() => {
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 /** 导入配置 */
-function onLoadConfig(toml: StartFluxTrainingData) {
+function onLoadConfig(toml: RuleForm) {
 	try {
 		mergeDataToForm(toml, ruleForm.value);
 		ElMessage.success("配置导入成功");
@@ -289,14 +279,16 @@ function onResetData() {
 }
 
 /** 打标 */
-async function onTagSubmit() {
+const taggerBtnLoading = ref(false);
+async function onTaggerClick() {
 	try {
+		taggerBtnLoading.value = true;
 		const { image_dir, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
 		// 校验
 		const validations = [
 			{
-				condition: () => !isLoraTaskEnd(),
-				message: "训练任务未结束，请等待训练完成再执行打标"
+				condition: () => trainingStore.useGPU,
+				message: "GPU已经被占用，请等待对应任务完成再执行打标"
 			},
 			{
 				condition: () => typeof image_dir !== "string" || image_dir.trim() === "",
@@ -318,6 +310,7 @@ async function onTagSubmit() {
 
 		for (const validation of validations) {
 			if (await validation.condition()) {
+				taggerBtnLoading.value = false;
 				ElMessage({
 					message: validation.message,
 					type: "error"
@@ -333,16 +326,16 @@ async function onTagSubmit() {
 			class_token: output_trigger_words ? class_tokens : undefined,
 			prompt_type: ruleForm.value.prompt_type
 		});
-		startGPUListen();
 		startTagListen(result.task_id);
+		taggerBtnLoading.value = false;
 
 		ElMessage({
 			message: "正在打标...",
 			type: "success"
 		});
 	} catch (error) {
-		stopGPUListen();
-		stopTagListen();
+		taggerBtnLoading.value = false;
+		stopTagListen(true);
 
 		console.log("打标任务创建失败", error);
 	}
@@ -350,11 +343,6 @@ async function onTagSubmit() {
 
 /** 提交表单 */
 const submitLoading = ref(false);
-// 如果任何一个监视器为真，则不显示提交按钮
-const showSubmitBtn = computed(() => {
-	const monitors = [isListenGPU.value, isListenLora.value, isListenTag.value];
-	return !monitors.some((monitor) => monitor);
-});
 function validateForm() {
 	return new Promise((resolve) => {
 		if (!ruleFormRef.value) return resolve(false);
@@ -364,16 +352,16 @@ function validateForm() {
 				return resolve(false);
 			}
 
-			// 是否在打标
-			if (!isTagTaskEnd()) {
-				ElMessage.warning("打标任务未结束，请等待打标完成再执行训练");
+			// gpu被占用
+			if (trainingStore.useGPU) {
+				ElMessage.warning("GPU已经被占用，请等待对应任务完成再执行训练");
 				return resolve(false);
 			}
 
 			// 校验数据集是否有数据
 			const isHasData = await checkData(ruleForm.value.image_dir);
 			if (!isHasData) {
-				ElMessage.error("数据集目录下没有数据");
+				ElMessage.error("数据集目录下没有数据，请上传训练用的素材");
 				return resolve(false);
 			}
 
@@ -394,57 +382,25 @@ async function onSubmit() {
 		// 开始训练
 		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startFluxTraining(data);
-		// 监听GPU数据
-		startGPUListen();
 		// 监听训练数据
-		startLoraListen(task_id);
+		startFluxLoraListen(task_id);
 
 		submitLoading.value = false;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
-		stopLoraListen();
+		stopFluxLoraListen(true);
 
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
 }
-
-// 监听是否在打标和训练
-watch(
-	[isListenTag, isListenLora],
-	(newList) => {
-		const isNotListen = newList.every((item) => !item);
-		if (isNotListen) {
-			stopGPUListen();
-		}
-	},
-	{ immediate: true }
-);
-
-onMounted(() => {
-	// 组件挂载时，开始监听
-	if (!isTagTaskEnd()) {
-		startTagListen();
-		startGPUListen();
-	}
-	if (!isLoraTaskEnd()) {
-		startLoraListen();
-		startGPUListen();
-	}
-});
-onUnmounted(() => {
-	// 组件销毁时，停止监听
-	stopGPUListen();
-	stopTagListen();
-	stopLoraListen();
-});
 </script>
 
 <style lang="scss" scoped>
 .lora-flux-page {
-	height: calc(100vh - $zl-padding * 2 - $zl-footer-bar-height);
+	height: $zl-view-footer-bar-height;
 }
 .flux-footer-bar {
 	width: 100%;

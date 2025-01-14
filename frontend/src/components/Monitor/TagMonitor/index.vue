@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2025-01-06 09:59:47
+ * @LastEditTime: 2025-01-08 17:40:18
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
@@ -36,7 +36,8 @@ export interface TagMonitorData {
 	total: number;
 }
 
-const { tagData } = useTag();
+const { monitorTagData } = useTag();
+const tagData = computed(() => monitorTagData.value.data);
 
 /** 是否在加载中 */
 const isLoad = computed(() => {

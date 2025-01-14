@@ -15,6 +15,7 @@
 		"Axios",
 		"dotdotdot",
 		"friframeder",
+		"hunyuan",
 		"mulingyuer",
 		"oxlint",
 		"pinia",
@@ -22,5 +23,6 @@
 		"sdxl",
 		"shiki",
 		"VITE"
-	]
+	],
+	"editor.wordWrap": "on"
 }

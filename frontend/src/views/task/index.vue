@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:21:01
- * @LastEditTime: 2024-12-27 17:22:00
+ * @LastEditTime: 2025-01-10 16:26:03
  * @LastEditors: mulingyuer
  * @Description: 任务列表页
  * @FilePath: \frontend\src\views\task\index.vue
@@ -26,8 +26,7 @@
 				-点击左侧任务卡片查看任务详情-
 			</div>
 			<template v-else>
-				<TagTaskDetail v-if="activeItemData.task_type === 'captioning'" :data="activeItemData" />
-				<LoraTaskDetail v-else :data="activeItemData" />
+				<component :is="DetailMap[activeItemData.task_type]" :data="getItemData()" />
 			</template>
 		</div>
 	</div>
@@ -40,10 +39,20 @@ import TaskEmpty from "./components/TaskEmpty.vue";
 import TaskItem from "./components/TaskItem.vue";
 import TagTaskDetail from "./components/TagTaskDetail.vue";
 import LoraTaskDetail from "./components/LoraTaskDetail.vue";
+import HYDetail from "./components/HYDetail.vue";
 
 const loading = ref(true);
 const list = ref<TaskListResult>([]);
 const activeItemData = ref<TaskListResult[number]>();
+const DetailMap = {
+	captioning: TagTaskDetail,
+	training: LoraTaskDetail,
+	hunyuan_training: HYDetail
+};
+// HACK: QTMD 类型校验
+function getItemData() {
+	return activeItemData.value as any;
+}
 
 function onItemClick(item: TaskListResult[number]) {
 	if (activeItemData.value && activeItemData.value.id === item.id) {
@@ -75,7 +84,6 @@ onMounted(() => {
 	height: calc(100vh - $zl-padding * 2);
 	display: flex;
 	gap: $zl-padding;
-	padding-right: $zl-padding;
 }
 .task-page-left,
 .task-page-right {

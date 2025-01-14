@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 15:26:11
- * @LastEditTime: 2025-01-03 17:38:02
+ * @LastEditTime: 2025-01-14 08:41:54
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag.ts
@@ -102,20 +102,26 @@ export const useTag = (() => {
 
 			manualTagInfo({
 				task_id: tagTaskId.value
-			}).then((res) => {
-				if (!res.detail) return;
-				trainingStore.setTagData(formatData(res));
-				trainingStore.setTagTaskStatus(res.status);
+			})
+				.then((res) => {
+					if (!res.detail) return;
+					trainingStore.setTagData(formatData(res));
+					trainingStore.setTagTaskStatus(res.status);
 
-				switch (res.status) {
-					case "complete": // 完成
-						tagComplete();
-						break;
-					case "failed": // 出错
-						tagFailed();
-						break;
-				}
-			});
+					switch (res.status) {
+						case "complete": // 完成
+							tagComplete();
+							break;
+						case "failed": // 出错
+							tagFailed();
+							break;
+						default:
+							tagFailed();
+					}
+				})
+				.catch(() => {
+					tagFailed();
+				});
 		}
 
 		/** 打标完成 */

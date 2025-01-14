@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:06:24
- * @LastEditTime: 2025-01-03 17:48:41
+ * @LastEditTime: 2025-01-14 08:41:14
  * @LastEditors: mulingyuer
  * @Description: 训练lora hooks
  * @FilePath: \frontend\src\hooks\useTraining.ts
@@ -112,21 +112,28 @@ export const useTraining = (() => {
 
 			loRATrainingInfo({
 				task_id: loraTaskId.value
-			}).then((res) => {
-				if (!res.detail) return;
-				if (isEmptyObject(res.detail)) return;
-				trainingStore.setLoraData(formatData(res));
-				trainingStore.setLoraTaskStatus(res.status);
+			})
+				.then((res) => {
+					if (!res.detail) return;
+					if (isEmptyObject(res.detail)) return;
+					trainingStore.setLoraData(formatData(res));
+					trainingStore.setLoraTaskStatus(res.status);
 
-				switch (res.status) {
-					case "complete": // 完成
-						loraComplete();
-						break;
-					case "failed": // 出错
-						loraFailed();
-						break;
-				}
-			});
+					switch (res.status) {
+						case "complete": // 完成
+							loraComplete();
+							break;
+						case "failed": // 出错
+							loraFailed();
+							break;
+						default:
+							loraFailed();
+							break;
+					}
+				})
+				.catch(() => {
+					loraFailed();
+				});
 		}
 
 		/** LoRA训练完成 */

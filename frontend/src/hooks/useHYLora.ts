@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-01-14 11:08:24
+ * @LastEditTime: 2025-01-14 15:01:02
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -53,6 +53,8 @@ export const useHYLora = (() => {
 			loss: detail.loss ?? 0,
 			epoch_loss: detail.epoch_loss ?? 0,
 			progress: 0,
+			current_epoch: detail.current_epoch ?? "??",
+			total_epoch: detail.total_epoch ?? "??",
 			raw: data
 		};
 
@@ -66,6 +68,7 @@ export const useHYLora = (() => {
 			// 第一轮
 			current = 1;
 			total = detail.total_epoch ?? 0;
+			loraData.current_epoch = 1;
 		} else {
 			current = detail.current ?? 0;
 			const steps = detail.estimate_steps_per_epoch ?? 0;

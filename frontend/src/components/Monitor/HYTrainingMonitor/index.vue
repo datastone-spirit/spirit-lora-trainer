@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2025-01-14 10:22:34
+ * @LastEditTime: 2025-01-14 15:03:22
  * @LastEditors: mulingyuer
  * @Description: 混元训练监控
  * @FilePath: \frontend\src\components\Monitor\HYTrainingMonitor\index.vue
@@ -52,6 +52,14 @@
 					<div class="lo-ra-training-monitor-item-label">每轮平均loss</div>
 					<div class="lo-ra-training-monitor-item-value">{{ toFixed(loraData.epoch_loss) }}</div>
 				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">当前轮</div>
+					<div class="lo-ra-training-monitor-item-value">{{ loraData.current_epoch }}</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">总轮数</div>
+					<div class="lo-ra-training-monitor-item-value">{{ loraData.total_epoch }}</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -86,7 +94,7 @@ function toFixed(num: number, precision = 5) {
 	display: flex;
 }
 .lo-ra-training-monitor-content {
-	min-width: 380px;
+	min-width: 420px;
 }
 .lo-ra-training-monitor-head {
 	display: flex;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 14:43:24
- * @LastEditTime: 2025-01-14 11:00:47
+ * @LastEditTime: 2025-01-14 14:50:16
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\BasicInfo\index.vue
@@ -13,7 +13,7 @@
 			v-model="ruleForm.class_tokens"
 			placeholder="请输入触发词，多个词用英文逗号分隔"
 			type="textarea"
-			:rows="4"
+			:rows="8"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem

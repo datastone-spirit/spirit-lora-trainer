@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-01-14 10:07:51
+ * @LastEditTime: 2025-01-14 15:00:17
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -150,7 +150,9 @@ export const useTrainingStore = defineStore("training", () => {
 			epoch_elapsed: 0,
 			epoch_loss: 0,
 			estimate_elapsed: 0,
-			loss: 0
+			loss: 0,
+			current_epoch: "??",
+			total_epoch: "??"
 		}
 	});
 	function setHYLoraIsListen(val: boolean) {
@@ -181,7 +183,9 @@ export const useTrainingStore = defineStore("training", () => {
 			epoch_elapsed: 0,
 			epoch_loss: 0,
 			estimate_elapsed: 0,
-			loss: 0
+			loss: 0,
+			current_epoch: "??",
+			total_epoch: "??"
 		};
 	}
 

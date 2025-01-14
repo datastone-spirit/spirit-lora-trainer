@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-01-13 17:40:09
+ * @LastEditTime: 2025-01-14 15:00:04
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -121,6 +121,10 @@ export interface MonitorHYLoraData {
 		estimate_elapsed: number;
 		/** 训练进度百分比,例：20 */
 		progress: number;
+		/** 当前轮 */
+		current_epoch: number | string;
+		/** 总轮数 */
+		total_epoch: number | string;
 		/** 源数据，可能为空对象 */
 		raw?: HyVideoTrainingInfoResult;
 	};

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-01-09 11:09:32
+ * @LastEditTime: 2025-01-14 10:07:51
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -9,14 +9,12 @@
  */
 import { defineStore } from "pinia";
 import type {
-	FluxLoraData,
-	FluxLoraTaskStatus,
 	GPUData,
 	MonitorFluxLoraData,
 	MonitorGPUData,
+	MonitorHYLoraData,
 	MonitorTagData,
-	TagData,
-	TagTaskStatus
+	TagData
 } from "./types";
 export type * from "./types";
 
@@ -66,10 +64,10 @@ export const useTrainingStore = defineStore("training", () => {
 	function setTagTaskId(taskId: string) {
 		monitorTagData.value.taskId = taskId;
 	}
-	function setTagTaskStatus(status: TagTaskStatus) {
+	function setTagTaskStatus(status: MonitorTagData["taskStatus"]) {
 		monitorTagData.value.taskStatus = status;
 	}
-	function isTagTaskEnd(status?: TagTaskStatus) {
+	function isTagTaskEnd(status?: MonitorTagData["taskStatus"]) {
 		status = status ?? monitorTagData.value.taskStatus;
 		return ["complete", "failed", "none"].includes(status);
 	}
@@ -111,17 +109,17 @@ export const useTrainingStore = defineStore("training", () => {
 	function setFluxLoraTaskId(taskId: string) {
 		monitorFluxLoraData.value.taskId = taskId;
 	}
-	function setFluxLoraTaskStatus(status: FluxLoraTaskStatus) {
+	function setFluxLoraTaskStatus(status: MonitorFluxLoraData["taskStatus"]) {
 		monitorFluxLoraData.value.taskStatus = status;
 	}
-	function isFluxLoraTaskEnd(status?: FluxLoraTaskStatus) {
+	function isFluxLoraTaskEnd(status?: MonitorFluxLoraData["taskStatus"]) {
 		status = status ?? monitorFluxLoraData.value.taskStatus;
 		return ["complete", "failed", "none"].includes(status);
 	}
 	function setFluxLoraIsPolling(val: boolean) {
 		monitorFluxLoraData.value.isPolling = val;
 	}
-	function setFluxLoraData(data: FluxLoraData) {
+	function setFluxLoraData(data: MonitorFluxLoraData["data"]) {
 		monitorFluxLoraData.value.data = data;
 	}
 	function resetFluxLoraData() {
@@ -137,9 +135,59 @@ export const useTrainingStore = defineStore("training", () => {
 		};
 	}
 
+	/** 监听混元视频 lora训练 */
+	const monitorHYLoraData = ref<MonitorHYLoraData>({
+		isListen: false,
+		taskId: "",
+		taskStatus: "none",
+		sleepTime: 3000,
+		isPolling: false,
+		data: {
+			current: 0,
+			total: 0,
+			progress: 0,
+			elapsed: 0,
+			epoch_elapsed: 0,
+			epoch_loss: 0,
+			estimate_elapsed: 0,
+			loss: 0
+		}
+	});
+	function setHYLoraIsListen(val: boolean) {
+		monitorHYLoraData.value.isListen = val;
+	}
+	function setHYLoraTaskId(taskId: string) {
+		monitorHYLoraData.value.taskId = taskId;
+	}
+	function setHYLoraTaskStatus(status: MonitorHYLoraData["taskStatus"]) {
+		monitorHYLoraData.value.taskStatus = status;
+	}
+	function isHYLoraTaskEnd(status?: MonitorHYLoraData["taskStatus"]) {
+		status = status ?? monitorHYLoraData.value.taskStatus;
+		return ["complete", "failed", "none"].includes(status);
+	}
+	function setHYLoraIsPolling(val: boolean) {
+		monitorHYLoraData.value.isPolling = val;
+	}
+	function setHYLoraData(data: MonitorHYLoraData["data"]) {
+		monitorHYLoraData.value.data = data;
+	}
+	function resetHYLoraData() {
+		monitorHYLoraData.value.data = {
+			current: 0,
+			total: 0,
+			progress: 0,
+			elapsed: 0,
+			epoch_elapsed: 0,
+			epoch_loss: 0,
+			estimate_elapsed: 0,
+			loss: 0
+		};
+	}
+
 	/** gpu是否在使用中 */
 	const useGPU = computed(() => {
-		return !isTagTaskEnd() || !isFluxLoraTaskEnd();
+		return !isTagTaskEnd() || !isFluxLoraTaskEnd() || !isHYLoraTaskEnd();
 	});
 
 	return {
@@ -164,6 +212,14 @@ export const useTrainingStore = defineStore("training", () => {
 		setFluxLoraIsPolling,
 		setFluxLoraData,
 		resetFluxLoraData,
+		monitorHYLoraData,
+		setHYLoraIsListen,
+		setHYLoraTaskId,
+		setHYLoraTaskStatus,
+		isHYLoraTaskEnd,
+		setHYLoraIsPolling,
+		setHYLoraData,
+		resetHYLoraData,
 		useGPU
 	};
 });

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-01-10 10:29:23
+ * @LastEditTime: 2025-01-14 11:00:39
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -81,16 +81,17 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
 import type { RuleForm } from "./types";
+import { useHYLora } from "@/hooks/useHYLora";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { startTagListen, stopTagListen, monitorTagData } = useTag();
+const { startHYLoraListen, stopHYLoraListen } = useHYLora();
 
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_hunyuan_video_form`;
 const defaultForm = readonly<RuleForm>({
-	output_name: "",
 	class_tokens: "",
 	model_transformer_path: "",
 	model_vae_path: "",
@@ -145,8 +146,8 @@ const ruleForm = useEnhancedLocalStorage<RuleForm>(
 	structuredClone(toRaw(defaultForm) as RuleForm)
 );
 const rules = reactive<FormRules<RuleForm>>({
-	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
+	// model_transformer_path: [{ required: true, message: "请选择训练用的底模", trigger: "change" }],
 	output_dir: [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
@@ -301,7 +302,7 @@ function validateForm() {
 			// 校验数据集是否有数据
 			const isHasData = await checkData(ruleForm.value.directory_path);
 			if (!isHasData) {
-				ElMessage.error("数据集目录下没有数据");
+				ElMessage.error("数据集目录下没有数据，请上传训练用的素材");
 				return resolve(false);
 			}
 
@@ -322,32 +323,20 @@ async function onSubmit() {
 		// // 开始训练
 		const data: StartHyVideoTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startHyVideoTraining(data);
-		console.log("🚀 ~ onSubmit ~ task_id:", task_id);
-		// // 监听训练数据
-		// startLoraListen(task_id);
+		// 监听训练数据
+		startHYLoraListen(task_id);
 
 		submitLoading.value = false;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
-		// 停止监控LoRA训练数据
-		// stopLoraListen();
+		// 停止监控训练数据
+		stopHYLoraListen(true);
 
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
 }
-
-onMounted(() => {
-	// 组件挂载时，开始监听
-	// if (!isLoraTaskEnd()) {
-	// 	startLoraListen();
-	// }
-});
-onUnmounted(() => {
-	// 组件销毁时，停止监听
-	// stopLoraListen();
-});
 </script>
 
 <style lang="scss" scoped>

@@ -1,24 +1,25 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:32:42
- * @LastEditTime: 2025-01-10 11:39:49
+ * @LastEditTime: 2025-01-13 09:38:50
  * @LastEditors: mulingyuer
  * @Description: task帮助
  * @FilePath: \frontend\src\views\task\task.helper.ts
  * 怎么可能会有bug！！！
  */
 
-import type { TaskStatus, TaskType } from "@/api/types";
+import type { TaskStatus } from "@/api/types";
+import { TaskType } from "@/api/types";
 import { formatDate } from "@/utils/dayjs";
 
 /** 根据任务类型返回中文名称 */
 export function taskTypeToName(taskType: TaskType) {
 	switch (taskType) {
-		case "captioning":
+		case TaskType.CAPTIONING:
 			return "打标任务";
-		case "training":
+		case TaskType.TRAINING:
 			return "Flux 训练";
-		case "hunyuan_training":
+		case TaskType.HUNYUAN_TRAINING:
 			return "混元视频训练";
 		default:
 			return "未知任务";

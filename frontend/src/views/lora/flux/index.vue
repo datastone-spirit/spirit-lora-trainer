@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-10 11:10:21
+ * @LastEditTime: 2025-01-14 10:53:23
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -361,7 +361,7 @@ function validateForm() {
 			// 校验数据集是否有数据
 			const isHasData = await checkData(ruleForm.value.image_dir);
 			if (!isHasData) {
-				ElMessage.error("数据集目录下没有数据");
+				ElMessage.error("数据集目录下没有数据，请上传训练用的素材");
 				return resolve(false);
 			}
 

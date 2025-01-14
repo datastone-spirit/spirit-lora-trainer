@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-06 10:37:35
- * @LastEditTime: 2025-01-08 11:15:15
+ * @LastEditTime: 2025-01-14 11:00:31
  * @LastEditors: mulingyuer
  * @Description: 混元视频类型定义
  * @FilePath: \frontend\src\views\lora\hunyuan-video\types.ts
@@ -11,8 +11,6 @@
 /** 表单 */
 export interface RuleForm {
 	// --------- LoRA 基本信息 ---------
-	/** lora名称 */
-	output_name: string;
 	/** 触发词 */
 	class_tokens: string;
 	// --------- 模型配置 ---------

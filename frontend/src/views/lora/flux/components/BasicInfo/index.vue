@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2025-01-10 10:41:39
+ * @LastEditTime: 2025-01-14 10:41:24
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -42,6 +42,7 @@
 	<PopoverFormItem label="LoRA 保存路径" prop="output_dir" popover-content="output_dir">
 		<FolderSelector v-model="ruleForm.output_dir" placeholder="请选择LoRA保存路径" />
 	</PopoverFormItem>
+
 	<ModelSaveFormatSelector
 		v-show="isExpert"
 		v-model="ruleForm.save_model_as"

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-01-09 10:40:05
+ * @LastEditTime: 2025-01-13 16:48:36
  * @LastEditors: mulingyuer
  * @Description: 页脚按钮组
  * @FilePath: \frontend\src\components\FooterButtonGroup\FooterButtonGroup.vue
@@ -40,6 +40,7 @@
 		<el-space class="footer-button-group-right" :size="40">
 			<GPUMonitor v-if="trainingStore.useGPU" />
 			<LoRATrainingMonitor v-if="monitorFluxLoraData.isListen" />
+			<HYTrainingMonitor v-if="monitorHYLoraData.isListen" />
 			<TagMonitor v-if="monitorTagData.isListen" />
 			<el-button
 				v-if="!trainingStore.useGPU"
@@ -63,6 +64,7 @@ import { useGPU } from "@/hooks/useGPU";
 import { useTrainingStore } from "@/stores";
 import { useTag } from "@/hooks/useTag";
 import { useFluxLora } from "@/hooks/useFluxLora";
+import { useHYLora } from "@/hooks/useHYLora";
 
 type ExportConfig = Record<string, any>;
 
@@ -100,6 +102,7 @@ const { startGPUListen, stopGPUListen } = useGPU();
 const { monitorTagData, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
 const { monitorFluxLoraData, startFluxLoraListen, stopFluxLoraListen, isFluxLoraTaskEnd } =
 	useFluxLora();
+const { monitorHYLoraData, startHYLoraListen, stopHYLoraListen, isHYLoraTaskEnd } = useHYLora();
 
 // 配置导入
 const uploadRef = ref<UploadInstance>();
@@ -159,11 +162,15 @@ onMounted(() => {
 	if (!isFluxLoraTaskEnd()) {
 		startFluxLoraListen();
 	}
+	if (!isHYLoraTaskEnd()) {
+		startHYLoraListen();
+	}
 });
 onUnmounted(() => {
 	stopGPUListen();
 	stopTagListen();
 	stopFluxLoraListen();
+	stopHYLoraListen();
 });
 </script>
 

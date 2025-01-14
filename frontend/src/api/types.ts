@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 10:20:37
- * @LastEditTime: 2025-01-09 15:54:59
+ * @LastEditTime: 2025-01-13 09:38:10
  * @LastEditors: mulingyuer
  * @Description: 通用类型
  * @FilePath: \frontend\src\api\types.ts
@@ -20,4 +20,11 @@ export type TaskStatus = "complete" | "created" | "running" | "failed";
  *  - captioning: 打标
  *  - training: flux 训练
  */
-export type TaskType = "captioning" | "training" | "hunyuan_training";
+export enum TaskType {
+	/** 打标 */
+	CAPTIONING = "captioning",
+	/** flux训练 */
+	TRAINING = "training",
+	/** 混元视频训练 */
+	HUNYUAN_TRAINING = "hunyuan_training"
+}

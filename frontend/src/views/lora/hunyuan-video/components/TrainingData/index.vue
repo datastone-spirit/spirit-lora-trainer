@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 15:29:03
- * @LastEditTime: 2025-01-10 16:41:00
+ * @LastEditTime: 2025-01-14 10:50:41
  * @LastEditors: mulingyuer
  * @Description: 训练数据
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\TrainingData\index.vue
@@ -43,9 +43,10 @@
 			<el-alert
 				class="training-data-alert"
 				title="24g显存最大只能跑 512*512 分辨率的图片"
-				type="info"
+				type="warning"
 				:closable="false"
 				show-icon
+				effect="dark"
 			/>
 		</el-col>
 	</el-row>
@@ -109,7 +110,5 @@ const isExpert = computed(() => settingsStore.isExpert);
 }
 .training-data-alert {
 	margin-bottom: 22px;
-	--el-alert-bg-color: var(--el-color-error-light-9);
-	color: var(--el-color-error);
 }
 </style>

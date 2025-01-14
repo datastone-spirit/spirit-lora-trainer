@@ -1,16 +1,13 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 14:43:24
- * @LastEditTime: 2025-01-07 16:43:57
+ * @LastEditTime: 2025-01-14 11:00:47
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\BasicInfo\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem label="LoRA 名称" prop="output_name" popover-content="output_name">
-		<el-input v-model="ruleForm.output_name" placeholder="请输入LoRA名称" />
-	</PopoverFormItem>
 	<PopoverFormItem label="LoRA 触发词" prop="class_tokens" popover-content="class_tokens">
 		<el-input
 			v-model="ruleForm.class_tokens"
@@ -78,6 +75,14 @@
 	<PopoverFormItem label="LoRA 保存路径" prop="output_dir" popover-content="output_dir">
 		<FolderSelector v-model="ruleForm.output_dir" placeholder="请选择LoRA保存路径" />
 	</PopoverFormItem>
+	<el-alert
+		class="training-data-alert"
+		title="请确保保存路径下的目录内容为空，并且提供足够的存储空间，因为Hunyuan模型训练需要较多的轮数，会产生过多的中间文件，所以需要较大的存储空间。"
+		type="warning"
+		:closable="false"
+		show-icon
+		effect="dark"
+	/>
 </template>
 
 <script setup lang="ts">

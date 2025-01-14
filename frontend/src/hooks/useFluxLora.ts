@@ -1,19 +1,19 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-01-09 15:52:51
+ * @LastEditTime: 2025-01-14 11:07:46
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
  * 怎么可能会有bug！！！
  */
 import { loRATrainingInfo, type LoRATrainingInfoResult } from "@/api/monitor";
-import type { FluxLoraData, FluxLoraTaskStatus } from "@/stores";
+import type { MonitorFluxLoraData } from "@/stores";
 import { useTrainingStore } from "@/stores";
 import { isEmptyObject } from "@/utils/tools";
 import mitt from "mitt";
 
-type EventType = Extract<FluxLoraTaskStatus, "complete" | "failed">;
+type EventType = Extract<MonitorFluxLoraData["taskStatus"], "complete" | "failed">;
 export type Events = Record<EventType, void>;
 
 export const useFluxLora = (() => {
@@ -39,10 +39,10 @@ export const useFluxLora = (() => {
 	}
 
 	/** 格式化数据 */
-	function formatData(data: LoRATrainingInfoResult): FluxLoraData {
+	function formatData(data: LoRATrainingInfoResult): MonitorFluxLoraData["data"] {
 		let detail = data.detail ?? {};
 		if (typeof detail === "string") detail = {};
-		const loraData: FluxLoraData = {
+		const loraData: MonitorFluxLoraData["data"] = {
 			current: detail.current ?? 0,
 			elapsed: detail.elapsed ?? "00:00",
 			loss: detail.loss ?? 0,
@@ -62,28 +62,40 @@ export const useFluxLora = (() => {
 		const { monitorFluxLoraData } = storeToRefs(trainingStore);
 
 		/** 获取lora训练信息 */
-		function updateFluxLoraData() {
+		function getFluxLoraData() {
 			const taskId = monitorFluxLoraData.value.taskId;
 			if (taskId.trim() === "") return;
 
 			loRATrainingInfo({
 				task_id: taskId
-			}).then((res) => {
-				if (!res.detail) return;
-				if (isEmptyObject(res.detail)) return;
+			})
+				.then(updateFluxLoraData)
+				.catch(() => {
+					fluxLoraFailed();
+				});
+		}
 
-				trainingStore.setFluxLoraData(formatData(res));
-				trainingStore.setFluxLoraTaskStatus(res.status);
+		/** 更新训练信息 */
+		function updateFluxLoraData(res: LoRATrainingInfoResult) {
+			if (!res.detail) return;
+			if (isEmptyObject(res.detail)) return;
 
-				switch (res.status) {
-					case "complete": // 完成
-						fluxLoraComplete();
-						break;
-					case "failed": // 出错
-						fluxLoraFailed();
-						break;
-				}
-			});
+			trainingStore.setFluxLoraData(formatData(res));
+			trainingStore.setFluxLoraTaskStatus(res.status);
+
+			switch (res.status) {
+				case "created":
+				case "running":
+					break;
+				case "complete": // 完成
+					fluxLoraComplete();
+					break;
+				case "failed": // 出错
+					fluxLoraFailed();
+					break;
+				default:
+					fluxLoraFailed();
+			}
 		}
 
 		/** LoRA训练完成 */
@@ -149,7 +161,7 @@ export const useFluxLora = (() => {
 			trainingStore.setFluxLoraIsListen(true);
 			trainingStore.setFluxLoraIsPolling(true);
 
-			timer = setInterval(updateFluxLoraData, monitorFluxLoraData.value.sleepTime);
+			timer = setInterval(getFluxLoraData, monitorFluxLoraData.value.sleepTime);
 		}
 
 		/** 停止监听 */
@@ -175,7 +187,8 @@ export const useFluxLora = (() => {
 			stopFluxLoraListen,
 			isFluxLoraTaskEnd: trainingStore.isFluxLoraTaskEnd,
 			setFluxTaskId: trainingStore.setFluxLoraTaskId,
-			setFluxStatus: trainingStore.setFluxLoraTaskStatus
+			setFluxStatus: trainingStore.setFluxLoraTaskStatus,
+			updateFluxLoraData
 		};
 	};
 })();

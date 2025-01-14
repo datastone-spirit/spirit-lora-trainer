@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:03
- * @LastEditTime: 2024-12-27 17:13:32
+ * @LastEditTime: 2025-01-13 09:02:21
  * @LastEditors: mulingyuer
  * @Description: 监控api
  * @FilePath: \frontend\src\api\monitor\index.ts
@@ -10,6 +10,8 @@
 import { request } from "@/request";
 import type {
 	GPUMonitorInfoResult,
+	HyVideoTrainingInfoParams,
+	HyVideoTrainingInfoResult,
 	LoRATrainingInfoParams,
 	LoRATrainingInfoResult,
 	ManualTagInfoParams,
@@ -27,7 +29,7 @@ export function gpuMonitorInfo() {
 }
 
 /** 监听训练信息
- *  * 任务只能一次运行一个，所以查询的是当前任务，但是反的值不同，所以分不同的api函数表示
+ *  * gpu任务只能一次运行一个，所以查询的api url是同一个，但是返回的值不同，所以分不同的api函数表示
  */
 export function loRATrainingInfo(params: LoRATrainingInfoParams) {
 	return request<LoRATrainingInfoResult>({
@@ -41,6 +43,16 @@ export function loRATrainingInfo(params: LoRATrainingInfoParams) {
 /** 监听打标信息 */
 export function manualTagInfo(params: ManualTagInfoParams) {
 	return request<ManualTagInfoResult>({
+		url: "/tasks/history",
+		method: "GET",
+		params,
+		showErrorMessage: false
+	});
+}
+
+/** 监听混元视频训练信息 */
+export function hyVideoTrainingInfo(params: HyVideoTrainingInfoParams) {
+	return request<HyVideoTrainingInfoResult>({
 		url: "/tasks/history",
 		method: "GET",
 		params,

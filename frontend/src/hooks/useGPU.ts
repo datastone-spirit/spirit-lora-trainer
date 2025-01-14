@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 17:37:15
- * @LastEditTime: 2025-01-08 17:30:33
+ * @LastEditTime: 2025-01-13 17:02:37
  * @LastEditors: mulingyuer
  * @Description: gpu hooks
  * @FilePath: \frontend\src\hooks\useGPU.ts
@@ -58,6 +58,7 @@ export function useGPU() {
 		trainingStore.setGPUIsListen(true);
 		trainingStore.setGPUIsPolling(true);
 
+		if (!timer) updateGPUData(); // 第一次更新
 		timer = setInterval(updateGPUData, monitorGPUData.value.sleepTime);
 	}
 

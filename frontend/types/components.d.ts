@@ -55,6 +55,7 @@ declare module 'vue' {
     FolderSelector: typeof import('./../src/components/Form/FolderSelector.vue')['default']
     FooterButtonGroup: typeof import('./../src/components/FooterButtonGroup/FooterButtonGroup.vue')['default']
     GPUMonitor: typeof import('./../src/components/Monitor/GPUMonitor/index.vue')['default']
+    HYTrainingMonitor: typeof import('./../src/components/Monitor/HYTrainingMonitor/index.vue')['default']
     Icon: typeof import('./../src/components/Icon/Icon.vue')['default']
     ImageFile: typeof import('./../src/components/AiDataset/ImageFile.vue')['default']
     InputTreeSelector: typeof import('./../src/components/Form/InputTreeSelector.vue')['default']

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 15:26:11
- * @LastEditTime: 2025-01-09 14:48:29
+ * @LastEditTime: 2025-01-14 11:05:20
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag.ts
@@ -53,27 +53,39 @@ export const useTag = (() => {
 		const { monitorTagData } = storeToRefs(trainingStore);
 
 		/** 获取打标信息 */
-		function updateTagData() {
+		function getTagData() {
 			const taskId = monitorTagData.value.taskId;
 			if (taskId.trim() === "") return;
 
 			manualTagInfo({
 				task_id: taskId
-			}).then((res) => {
-				if (!res.detail) return;
+			})
+				.then(updateTagData)
+				.catch(() => {
+					tagFailed();
+				});
+		}
 
-				trainingStore.setTagData(formatData(res));
-				trainingStore.setTagTaskStatus(res.status);
+		/** 更新打标信息 */
+		function updateTagData(res: ManualTagInfoResult) {
+			if (!res.detail) return;
 
-				switch (res.status) {
-					case "complete": // 完成
-						tagComplete();
-						break;
-					case "failed": // 出错
-						tagFailed();
-						break;
-				}
-			});
+			trainingStore.setTagData(formatData(res));
+			trainingStore.setTagTaskStatus(res.status);
+
+			switch (res.status) {
+				case "running":
+				case "created":
+					break;
+				case "complete": // 完成
+					tagComplete();
+					break;
+				case "failed": // 出错
+					tagFailed();
+					break;
+				default:
+					tagFailed();
+			}
 		}
 
 		/** 打标完成 */
@@ -139,7 +151,7 @@ export const useTag = (() => {
 			trainingStore.setTagIsListen(true);
 			trainingStore.setTagIsPolling(true);
 
-			timer = setInterval(updateTagData, monitorTagData.value.sleepTime);
+			timer = setInterval(getTagData, monitorTagData.value.sleepTime);
 		}
 
 		/** 停止监听 */
@@ -165,7 +177,8 @@ export const useTag = (() => {
 			stopTagListen,
 			isTagTaskEnd: trainingStore.isTagTaskEnd,
 			setTagTaskId: trainingStore.setTagTaskId,
-			setTagStatus: trainingStore.setTagTaskStatus
+			setTagStatus: trainingStore.setTagTaskStatus,
+			updateTagData
 		};
 	};
 })();

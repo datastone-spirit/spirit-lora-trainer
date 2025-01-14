@@ -16,6 +16,10 @@ class UploadService:
         counter = 1
         unique_filename = filename
 
+        # 如果是txt文件，直接返回
+        if ext == "txt":
+            return unique_filename
+
         # 检查文件是否已存在，若已存在则加后缀
         while os.path.exists(os.path.join(upload_path, unique_filename)):
             unique_filename = f"{filename_without_ext}_{counter}{ext}"

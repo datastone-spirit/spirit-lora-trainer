@@ -3,7 +3,7 @@ import io
 import mimetypes
 from flask import request, send_file
 from flask_restful import Resource
-from ..common.utils import res, get_directory_structure, use_swagger_config
+from ..common.utils import res, get_directory_structure, use_swagger_config, validate_training_data
 from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config,delete_file_config, preview_file_config
 from utils.util import pathFormat, setup_logging
 from PIL import Image as PILImage
@@ -94,19 +94,25 @@ class PathCheck(Resource):
                 data={"exists": False, "has_data": False}
             )
 
-        # 检查目录是否有数据
-        has_data = False
-        if check_data and os.path.isdir(full_path):
-            has_data = len(os.listdir(full_path)) > 0
+        if not check_data:
+            return res(
+                success=True,
+                message="目录存在",
+                data={"exists": True, "has_data": False}
+            )
+        
+        valid, reason = validate_training_data(full_path)
+        if not valid:
+            return res(
+                success=False,
+                message=f"目录存在，但数据不合法: {reason}",
+                data={"exists": True, "has_data": valid}
+            )
 
-        # 返回结果
-        message = "目录存在"
-        if check_data:
-            message += f"且{'有' if has_data else '无'}数据"
         return res(
             success=True,
-            message=message,
-            data={"exists": exists, "has_data": has_data}
+            message=f"目录存在，且:{reason}",
+            data={"exists": exists, "has_data": valid}
         )
     
 class TagDirFile(Resource):

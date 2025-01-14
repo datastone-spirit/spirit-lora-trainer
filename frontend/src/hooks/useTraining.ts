@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:06:24
- * @LastEditTime: 2025-01-14 08:41:14
+ * @LastEditTime: 2025-01-14 08:46:10
  * @LastEditors: mulingyuer
  * @Description: 训练lora hooks
  * @FilePath: \frontend\src\hooks\useTraining.ts
@@ -120,6 +120,9 @@ export const useTraining = (() => {
 					trainingStore.setLoraTaskStatus(res.status);
 
 					switch (res.status) {
+						case "running":
+						case "created":
+							break;
 						case "complete": // 完成
 							loraComplete();
 							break;

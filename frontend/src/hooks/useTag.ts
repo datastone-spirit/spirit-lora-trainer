@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 15:26:11
- * @LastEditTime: 2025-01-14 08:41:54
+ * @LastEditTime: 2025-01-14 08:46:17
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag.ts
@@ -109,6 +109,9 @@ export const useTag = (() => {
 					trainingStore.setTagTaskStatus(res.status);
 
 					switch (res.status) {
+						case "running":
+						case "created":
+							break;
 						case "complete": // 完成
 							tagComplete();
 							break;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-10 11:47:24
- * @LastEditTime: 2025-01-14 10:22:49
+ * @LastEditTime: 2025-01-14 16:34:16
  * @LastEditors: mulingyuer
  * @Description: 混元视频任务详情
  * @FilePath: \frontend\src\views\task\components\HYDetail.vue
@@ -42,7 +42,7 @@
 					{{ data.detail.total_epoch }}
 				</el-descriptions-item>
 				<el-descriptions-item label="已经耗时（s）">
-					{{ formatSeconds(data.detail.elapsed ?? 0) }}
+					{{ secondsToHHMMSS(data.detail.elapsed ?? 0) }}
 				</el-descriptions-item>
 				<el-descriptions-item label="当前loss">
 					{{ data.detail.loss }}
@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import type { HyVideoTrainingInfoResult } from "@/api/monitor";
 import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
-import { formatSeconds } from "@/utils/tools";
+import { secondsToHHMMSS } from "@/utils/tools";
 
 export interface HYDetailProps {
 	data: HyVideoTrainingInfoResult;

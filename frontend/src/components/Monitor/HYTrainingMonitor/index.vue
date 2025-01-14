@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2025-01-14 15:03:22
+ * @LastEditTime: 2025-01-14 16:39:18
  * @LastEditors: mulingyuer
  * @Description: 混元训练监控
  * @FilePath: \frontend\src\components\Monitor\HYTrainingMonitor\index.vue
@@ -29,19 +29,19 @@
 				<div class="lo-ra-training-monitor-item">
 					<div class="lo-ra-training-monitor-item-label">已用时长</div>
 					<div class="lo-ra-training-monitor-item-value">
-						{{ formatSeconds(loraData.elapsed) }}
+						{{ secondsToHHMMSS(loraData.elapsed) }}
 					</div>
 				</div>
 				<div class="lo-ra-training-monitor-item">
 					<div class="lo-ra-training-monitor-item-label">预估每轮用时</div>
 					<div class="lo-ra-training-monitor-item-value">
-						{{ formatSeconds(loraData.epoch_elapsed) }}
+						{{ secondsToHHMMSS(loraData.epoch_elapsed) }}
 					</div>
 				</div>
 				<div class="lo-ra-training-monitor-item">
 					<div class="lo-ra-training-monitor-item-label">预估总用时</div>
 					<div class="lo-ra-training-monitor-item-value">
-						{{ formatSeconds(loraData.estimate_elapsed) }}
+						{{ secondsToHHMMSS(loraData.estimate_elapsed) }}
 					</div>
 				</div>
 				<div class="lo-ra-training-monitor-item">
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { isEmptyObject, objectHasKeys, formatSeconds } from "@/utils/tools";
+import { isEmptyObject, objectHasKeys, secondsToHHMMSS } from "@/utils/tools";
 import { useHYLora } from "@/hooks/useHYLora";
 
 const { monitorHYLoraData } = useHYLora();
@@ -94,7 +94,7 @@ function toFixed(num: number, precision = 5) {
 	display: flex;
 }
 .lo-ra-training-monitor-content {
-	min-width: 420px;
+	min-width: 430px;
 }
 .lo-ra-training-monitor-head {
 	display: flex;

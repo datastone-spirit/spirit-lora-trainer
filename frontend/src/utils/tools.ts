@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-01-14 10:22:05
+ * @LastEditTime: 2025-01-14 16:38:25
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -82,30 +82,16 @@ export function downloadFile(url: string, filename?: string) {
 	link.remove();
 }
 
-/** 秒转换成时分秒 */
-export function formatSeconds(seconds: number) {
-	const days = Math.floor(seconds / 86400); // 1天 = 86400秒
-	seconds %= 86400;
+/** 秒转HH:MM:SS */
+export function secondsToHHMMSS(totalSeconds: number): string {
+	totalSeconds = Math.ceil(totalSeconds);
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
+	const seconds = totalSeconds % 60;
 
-	const hours = Math.floor(seconds / 3600); // 1小时 = 3600秒
-	seconds %= 3600;
+	const hoursStr = String(hours).padStart(2, "0");
+	const minutesStr = String(minutes).padStart(2, "0");
+	const secondsStr = String(seconds).padStart(2, "0");
 
-	const minutes = Math.floor(seconds / 60); // 1分钟 = 60秒
-	seconds %= 60;
-
-	let result = "";
-	if (days > 0) {
-		result += `${days}天`;
-	}
-	if (hours > 0) {
-		result += `${hours}小时`;
-	}
-	if (minutes > 0) {
-		result += `${minutes}分钟`;
-	}
-	if (seconds > 0) {
-		result += `${Math.ceil(seconds)}秒`;
-	}
-
-	return result.trim();
+	return `${hoursStr}:${minutesStr}:${secondsStr}`;
 }

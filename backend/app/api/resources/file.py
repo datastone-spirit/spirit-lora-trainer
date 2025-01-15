@@ -114,7 +114,45 @@ class PathCheck(Resource):
             message=f"目录存在，且:{reason}",
             data={"exists": exists, "has_data": valid}
         )
-    
+
+class HunyuanLoRAPathCheck(Resource):
+    @use_swagger_config(file_check_config)
+    def get(self):
+        path = request.args.get("path", "")
+        check_data = request.args.get("has_data", "false").lower() == "true"
+        full_path = pathFormat(path)
+
+        # 检查目录是否存在
+        exists = os.path.exists(full_path)        
+        if not exists:
+            return res(
+                success=False,
+                message=f"路径不存在: {full_path}",
+                data={"exists": False, "has_data": False}
+            )
+        
+        if not os.path.isdir(full_path):
+            return res(
+                success=False,
+                message=f"路径不是目录: {full_path}",
+                data={"exists": True, "has_data": False}
+            )
+        # Check if directory is empty
+        if len(os.listdir(full_path)) > 0:
+            return res(
+                success=False,
+                message=f"目录不为空: {full_path}",
+                data={"exists": True, "has_data": True}
+            )
+
+        return res(
+            success=True,
+            message="目录存在且为空",
+            data={"exists": True, "has_data": False}
+        )
+                    
+        
+            
 class TagDirFile(Resource):
     @use_swagger_config(tag_dir_config)
     def get(self):

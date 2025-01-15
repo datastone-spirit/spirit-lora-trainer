@@ -314,6 +314,15 @@ class HunyuanTrainingParameter:
         if os.path.exists(config.config.output_dir) and not os.path.isdir(config.config.output_dir):
             return False, f"output_dir {config.config.output_dir} is not a directory"
         
+        if len(os.listdir(config.config.output_dir)) > 0:
+            return False, f"output_dir {config.config.output_dir} must be an empty directory"
+        
+        if config.config.epochs < config.config.save_every_n_epochs:
+            return False, "epochs must be greater than save_every_n_epochs"
+        
+        if config.config.epochs <= 0 or config.config.save_every_n_epochs <= 0:
+            return False, "epochs and save_every_n_epochs must be greater than 0" 
+        
         if not os.path.exists(config.config.output_dir):
             os.makedirs(config.config.output_dir, exist_ok=True)
         

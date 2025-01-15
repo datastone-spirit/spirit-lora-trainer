@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-01-14 11:00:39
+ * @LastEditTime: 2025-01-15 14:30:37
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -72,7 +72,7 @@ import { batchTag } from "@/api/tag";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useTag } from "@/hooks/useTag";
 import { useSettingsStore, useTrainingStore } from "@/stores";
-import { checkData, checkDirectory } from "@/utils/lora.helper";
+import { checkData, checkDirectory, checkHYData } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
@@ -151,14 +151,26 @@ const rules = reactive<FormRules<RuleForm>>({
 	output_dir: [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
+			asyncValidator: async (
+				_rule: any,
+				value: string,
+				callback: (error?: string | Error) => void
+			) => {
+				try {
+					const isExists = await checkDirectory(value);
+					if (!isExists) {
 						callback(new Error("目录不存在"));
 						return;
 					}
-					callback();
-				});
+					const isDataExists = await checkHYData(value);
+					if (isDataExists) {
+						callback(new Error("目录已存在数据，请提供空目录"));
+						return;
+					}
+					return callback();
+				} catch (error) {
+					return callback(new Error((error as Error).message));
+				}
 			}
 		}
 	],
@@ -174,6 +186,24 @@ const rules = reactive<FormRules<RuleForm>>({
 					callback();
 				});
 			}
+		}
+	],
+	epochs: [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				// 轮数必须大于或等于保存轮数
+				const { save_every_n_epochs } = ruleForm.value;
+
+				if (value <= 0) {
+					return callback(new Error("epochs轮数必须是一个正整数"));
+				}
+				if (value < save_every_n_epochs) {
+					return callback(new Error("epochs轮数必须大于或等于save_every_n_epochs"));
+				}
+
+				callback();
+			},
+			trigger: "change"
 		}
 	]
 });
@@ -310,17 +340,45 @@ function validateForm() {
 		});
 	});
 }
+// 训练轮数epochs二次确认弹窗
+function onEpochsConfirm() {
+	return new Promise((resolve) => {
+		const { epochs, save_every_n_epochs } = ruleForm.value;
+		if (epochs % save_every_n_epochs !== 0) {
+			ElMessageBox.confirm(
+				"当前epochs训练轮数不是save_every_n_epochs的整数倍，会有训练轮次不会保存训练结果！是否继续训练?",
+				"提示",
+				{
+					confirmButtonText: "继续训练",
+					cancelButtonText: "取消",
+					type: "warning"
+				}
+			)
+				.then(() => {
+					return resolve(true);
+				})
+				.catch(() => {
+					return resolve(false);
+				});
+		} else {
+			return resolve(true);
+		}
+	});
+}
+
 async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
 		const valid = await validateForm();
-		if (!valid) {
+		const isConfirm = await onEpochsConfirm();
+
+		if (!valid || !isConfirm) {
 			submitLoading.value = false;
 			return;
 		}
 
-		// // 开始训练
+		// 开始训练
 		const data: StartHyVideoTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startHyVideoTraining(data);
 		// 监听训练数据

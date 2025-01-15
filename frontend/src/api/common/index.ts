@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-18 15:35:55
- * @LastEditTime: 2024-12-19 17:33:50
+ * @LastEditTime: 2025-01-15 11:23:53
  * @LastEditors: mulingyuer
  * @Description: 公共api
  * @FilePath: \frontend\src\api\common\index.ts
@@ -16,6 +16,8 @@ import type {
 	DirectoryFilesResult,
 	GetDirectoryStructureParams,
 	GetDirectoryStructureResult,
+	HYCheckDirectoryExistsParams,
+	HYCheckDirectoryExistsResult,
 	UploadFilesParams,
 	UploadFilesResult
 } from "./types";
@@ -62,5 +64,15 @@ export function directoryFiles(params: DirectoryFilesParams) {
 		url: "/tag_dir_file",
 		method: "GET",
 		params
+	});
+}
+
+/** 混元视频：检测目录是否存 */
+export function hyCheckDirectoryExists(params: HYCheckDirectoryExistsParams) {
+	return request<HYCheckDirectoryExistsResult>({
+		url: "/hunyuan/path_check",
+		method: "GET",
+		params,
+		showErrorMessage: false
 	});
 }

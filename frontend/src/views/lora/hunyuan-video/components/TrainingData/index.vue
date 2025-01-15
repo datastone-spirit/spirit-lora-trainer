@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 15:29:03
- * @LastEditTime: 2025-01-14 10:50:41
+ * @LastEditTime: 2025-01-15 14:15:18
  * @LastEditors: mulingyuer
  * @Description: 训练数据
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\TrainingData\index.vue
@@ -16,7 +16,7 @@
 		<el-input-number v-model.number="ruleForm.directory_num_repeats" :step="1" step-strictly />
 	</PopoverFormItem>
 	<PopoverFormItem label="训练轮次" prop="epochs" popover-content="epochs">
-		<el-input-number v-model.number="ruleForm.epochs" :step="1" step-strictly />
+		<el-input-number v-model.number="ruleForm.epochs" :step="1" step-strictly :min="1" />
 	</PopoverFormItem>
 	<el-row :gutter="16">
 		<el-col :span="12">

@@ -316,7 +316,6 @@ class CaptioningTask(Task):
 
     def to_dict(self, verbose: bool = False):
         """Override to_dict to enum """
-        logger.info(f"let the task: {self.id} to dict")
         # Create shallow copy of self.__dict__
         d = dict(self.__dict__)
         # Convert status enum
@@ -331,7 +330,6 @@ class CaptioningTask(Task):
             d['model_info'] = asdict(self.model_info)
             d['captioning'] = self.captioning.__name__
         
-        logger.info(f"task dict result: {d}")
         return d
 
     def update_detail_with_tb(self):
@@ -378,7 +376,6 @@ class HunyuanTrainingTask(Task):
 
     def to_dict(self, verbose: bool = False):
         """Override to_dict to enum """
-        logger.info(f"let the task: {self.id} to dict")
         # Create shallow copy of self.__dict__
         d = dict(self.__dict__)
         # Convert status enum
@@ -387,7 +384,6 @@ class HunyuanTrainingTask(Task):
         d['task_type'] = self.task_type.value
         d.pop('hunyuan_parameters') 
         d.pop('proc') 
-        logger.info(f"task dict result: {d}")
         return d
 
     def update_detail_with_tb(self):

@@ -8,11 +8,11 @@
  * 怎么可能会有bug！！！
  */
 import type { Router } from "vue-router";
-import { routerAuthMap, RouterAuthContext } from "../router-auth";
+import { routerAuthMap, RouterAuthContext } from "./router-auth";
 import { NProgress } from "@/utils/nprogress";
 import { useAppStore } from "@/stores";
-import { initRoutes } from "../helpers";
-import { modulesRoutes } from "../route-modules";
+import { initRoutes } from "./helpers";
+import { modulesRoutes } from "./route-modules";
 
 export async function createRouterGuard(router: Router) {
 	const appStore = useAppStore();

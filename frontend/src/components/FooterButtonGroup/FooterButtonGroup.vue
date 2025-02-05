@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-01-13 16:48:36
+ * @LastEditTime: 2025-02-05 09:13:46
  * @LastEditors: mulingyuer
  * @Description: 页脚按钮组
  * @FilePath: \frontend\src\components\FooterButtonGroup\FooterButtonGroup.vue
@@ -42,15 +42,18 @@
 			<LoRATrainingMonitor v-if="monitorFluxLoraData.isListen" />
 			<HYTrainingMonitor v-if="monitorHYLoraData.isListen" />
 			<TagMonitor v-if="monitorTagData.isListen" />
-			<el-button
-				v-if="!trainingStore.useGPU"
-				type="primary"
-				size="large"
-				:loading="submitLoading || trainingStore.useGPU"
-				@click="emits('submit')"
-			>
-				开始训练
-			</el-button>
+			<el-space>
+				<el-button
+					v-if="!trainingStore.useGPU"
+					type="primary"
+					size="large"
+					:loading="submitLoading || trainingStore.useGPU"
+					@click="emits('submit')"
+				>
+					开始训练
+				</el-button>
+				<el-button v-else type="danger" size="large" @click="onStopTraining">停止训练</el-button>
+			</el-space>
 		</el-space>
 	</Teleport>
 </template>
@@ -95,6 +98,8 @@ const emits = defineEmits<{
 	resetData: [];
 	/** 提交表单 */
 	submit: [];
+	/** 停止训练 */
+	stop: [];
 }>();
 
 const trainingStore = useTrainingStore();
@@ -141,6 +146,21 @@ async function onExportConfig() {
 	}
 }
 
+// 停止训练
+function onStopTraining() {
+	ElMessageBox({
+		title: "提示",
+		message:
+			"本页面无法直接停止训练任务。若要中止训练，需进入GPU详情页面手动关闭GPU服务来停止训练进程",
+		confirmButtonText: "知道了",
+		customClass: "stop-training-dialog"
+	})
+		.then(() => {
+			emits("stop");
+		})
+		.catch(() => {});
+}
+
 // 如果GPU被占用就开始监听
 watch(
 	() => trainingStore.useGPU,
@@ -185,5 +205,14 @@ onUnmounted(() => {
 	width: 100%;
 	height: 100%;
 	justify-content: flex-end;
+}
+</style>
+<style lang="scss">
+.stop-training-dialog {
+	.el-message-box__title,
+	.el-message-box__message {
+		color: var(--zl-stop-training-dialog-color);
+		font-weight: bold;
+	}
 }
 </style>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-02-05 09:13:46
+ * @LastEditTime: 2025-02-05 16:30:40
  * @LastEditors: mulingyuer
  * @Description: 页脚按钮组
  * @FilePath: \frontend\src\components\FooterButtonGroup\FooterButtonGroup.vue
@@ -28,7 +28,12 @@
 						<el-button text> 重置数据 </el-button>
 					</template>
 				</el-popconfirm>
-				<el-popover placement="bottom" trigger="click" width="200" content="请前往智灵后台查看日志">
+				<el-popover
+					placement="bottom"
+					trigger="click"
+					width="200"
+					content="请前往智灵后台GPU详情页查看日志"
+				>
 					<template #reference>
 						<el-button text> 日志 </el-button>
 					</template>

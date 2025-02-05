@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 15:26:11
- * @LastEditTime: 2025-01-14 14:17:48
+ * @LastEditTime: 2025-02-05 09:24:24
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag.ts
@@ -68,10 +68,10 @@ export const useTag = (() => {
 
 		/** 更新打标信息 */
 		function updateTagData(res: ManualTagInfoResult) {
-			if (!res.detail) return;
-
 			trainingStore.setTagData(formatData(res));
 			trainingStore.setTagTaskStatus(res.status);
+
+			if (!res.detail) return;
 
 			switch (res.status) {
 				case "running":

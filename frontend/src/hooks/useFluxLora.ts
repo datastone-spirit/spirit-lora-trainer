@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-01-14 11:07:46
+ * @LastEditTime: 2025-02-05 09:23:06
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -77,11 +77,11 @@ export const useFluxLora = (() => {
 
 		/** 更新训练信息 */
 		function updateFluxLoraData(res: LoRATrainingInfoResult) {
-			if (!res.detail) return;
-			if (isEmptyObject(res.detail)) return;
-
 			trainingStore.setFluxLoraData(formatData(res));
 			trainingStore.setFluxLoraTaskStatus(res.status);
+
+			if (!res.detail) return;
+			if (isEmptyObject(res.detail)) return;
 
 			switch (res.status) {
 				case "created":

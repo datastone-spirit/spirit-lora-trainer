@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-01-14 17:59:08
+ * @LastEditTime: 2025-02-05 09:24:49
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -114,10 +114,11 @@ export const useHYLora = (() => {
 
 		/** 更新训练信息 */
 		function updateHYLoraData(res: HyVideoTrainingInfoResult) {
-			if (!res.detail) return;
-			if (isEmptyObject(res.detail)) return;
 			trainingStore.setHYLoraData(formatData(res));
 			trainingStore.setHYLoraTaskStatus(res.status);
+
+			if (!res.detail) return;
+			if (isEmptyObject(res.detail)) return;
 
 			switch (res.status) {
 				case "created":

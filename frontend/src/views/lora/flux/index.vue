@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-01-14 10:53:23
+ * @LastEditTime: 2025-02-06 15:53:16
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -232,6 +232,71 @@ const rules = reactive<FormRules<RuleForm>>({
 					callback();
 				});
 			}
+		}
+	],
+	resolution_width: [
+		{
+			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				if (value < 256) {
+					callback(new Error("图片宽度不能小于256"));
+					return;
+				}
+				if (value % 256 !== 0) {
+					callback(new Error("图片宽度必须是256的整数倍"));
+					return;
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	resolution_height: [
+		{
+			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				if (value < 256) {
+					callback(new Error("图片高度不能小于256"));
+					return;
+				}
+				if (value % 256 !== 0) {
+					callback(new Error("图片高度必须是256的整数倍"));
+					return;
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	lr_scheduler: [
+		{
+			asyncValidator: (_rule: any, _value: string, callback: (error?: string | Error) => void) => {
+				// 联动校验
+				ruleFormRef.value?.validateField("lr_warmup_steps");
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	lr_warmup_steps: [
+		{
+			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				switch (ruleForm.value.lr_scheduler) {
+					case "constant_with_warmup": // 学习调度器为该值时lr_warmup_steps预热步数必须大于0
+						if (value <= 0) {
+							callback(new Error("学习率预热步数必须大于0"));
+							return;
+						}
+						callback();
+						break;
+					default: // 其他情况lr_warmup_steps预热步数必须等于0
+						if (value !== 0) {
+							callback(new Error("学习率预热步数必须等于0"));
+							return;
+						}
+						callback();
+						break;
+				}
+			},
+			trigger: "change"
 		}
 	]
 });

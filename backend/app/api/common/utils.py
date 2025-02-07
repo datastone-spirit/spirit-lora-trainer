@@ -28,6 +28,9 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def is_flux_sampling(config: TrainingConfig) -> bool:
+    if config.sample_every_n_epochs is None:
+        return False
+
     if config.sample_every_n_epochs > 0 and config.sample_prompts is not None and config.sample_prompts != "":
         return True
     return False

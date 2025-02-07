@@ -67,7 +67,7 @@ class Task:
         task.task_type = TaskType.TRAINING
         task.start_time = time.time()
         task.is_sampling = is_flux_sampling(training_paramter.config)
-        if task.is_ampling:
+        if task.is_sampling:
             task.sampling_path = os.path.join(training_paramter.config.output_dir, "sample")
         return task
 

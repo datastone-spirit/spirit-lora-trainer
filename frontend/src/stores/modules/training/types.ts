@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-01-14 15:00:04
+ * @LastEditTime: 2025-02-07 16:19:36
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -86,6 +86,10 @@ export interface MonitorFluxLoraData {
 		total: number;
 		/** 训练进度百分比,例：20 */
 		progress: number;
+		/** 是否显示查看采样 */
+		showSampling: boolean;
+		/** 采样文件路径，开启采样时才有值，否则是空字符串 */
+		samplingPath: string;
 		/** 源数据，可能为空对象 */
 		raw?: LoRATrainingInfoResult;
 	};

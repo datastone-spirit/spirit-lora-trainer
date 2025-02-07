@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 08:41:44
- * @LastEditTime: 2025-01-03 16:36:39
+ * @LastEditTime: 2025-02-07 15:54:55
  * @LastEditors: mulingyuer
  * @Description: 表单项组件
  * @FilePath: \frontend\src\components\Form\PopoverFormItem.vue
@@ -12,7 +12,11 @@
 		<template #label>
 			<span class="popover-form-item-label">
 				{{ label }}
-				<span v-if="popoverContent" class="popover-form-item-tips" @click.stop.prevent>
+				<span
+					v-show="isExpert && popoverContent"
+					class="popover-form-item-tips"
+					@click.stop.prevent
+				>
 					&lt;{{ popoverContent }}&gt;
 				</span>
 			</span>
@@ -23,6 +27,7 @@
 
 <script setup lang="ts">
 import type { FormItemProps, PopoverProps } from "element-plus";
+import { useSettingsStore } from "@/stores";
 
 export interface PopoverFormItemProps {
 	label?: FormItemProps["label"];
@@ -31,6 +36,11 @@ export interface PopoverFormItemProps {
 }
 
 withDefaults(defineProps<PopoverFormItemProps>(), {});
+
+const settingsStore = useSettingsStore();
+
+/** 是否专家模式 */
+const isExpert = computed(() => settingsStore.isExpert);
 </script>
 
 <style lang="scss" scoped>

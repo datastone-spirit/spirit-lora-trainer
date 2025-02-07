@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-01-13 17:28:25
+ * @LastEditTime: 2025-02-07 17:15:24
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -77,6 +77,10 @@ export interface LoRATrainingInfoResult {
 				speed?: number;
 		  }
 		| string;
+	/** 是否显示查看采样 */
+	is_sampling?: boolean;
+	/** 采样文件路径，只有开启了采样才会有 */
+	sampling_path?: string;
 }
 
 /** 监听训练信息参数 */

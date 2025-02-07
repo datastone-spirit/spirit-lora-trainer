@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 09:35:29
- * @LastEditTime: 2025-01-10 11:05:59
+ * @LastEditTime: 2025-02-07 10:38:51
  * @LastEditors: mulingyuer
  * @Description: 高级设置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\index.vue
@@ -19,6 +19,7 @@
 	<AdvancedOptions v-model:form="ruleForm" />
 	<SpeedOptimizationOptions v-model:form="ruleForm" />
 	<DistributedTrainingOptions v-model:form="ruleForm" />
+	<SampleOptions v-model:form="ruleForm" />
 </template>
 
 <script setup lang="ts">
@@ -34,6 +35,7 @@ import DataEnhancerOptions from "./DataEnhancerOptions.vue";
 import AdvancedOptions from "./AdvancedOptions.vue";
 import SpeedOptimizationOptions from "./SpeedOptimizationOptions.vue";
 import DistributedTrainingOptions from "./DistributedTrainingOptions.vue";
+import SampleOptions from "./SampleOptions.vue";
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 </script>

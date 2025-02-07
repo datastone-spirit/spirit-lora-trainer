@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-02-05 16:30:40
+ * @LastEditTime: 2025-02-07 08:32:54
  * @LastEditors: mulingyuer
  * @Description: 页脚按钮组
  * @FilePath: \frontend\src\components\FooterButtonGroup\FooterButtonGroup.vue
@@ -57,7 +57,10 @@
 				>
 					开始训练
 				</el-button>
-				<el-button v-else type="danger" size="large" @click="onStopTraining">停止训练</el-button>
+				<slot name="right-btn-group"></slot>
+				<el-button v-if="trainingStore.useGPU" type="danger" size="large" @click="onStopTraining">
+					停止训练
+				</el-button>
 			</el-space>
 		</el-space>
 	</Teleport>

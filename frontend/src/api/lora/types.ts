@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-01-09 15:50:24
+ * @LastEditTime: 2025-02-07 16:58:44
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -186,6 +186,10 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		resolution: string;
 		/** 输出训练配置 */
 		output_config: boolean;
+		/** 每隔几步进行采样 */
+		sample_every_n_steps: number | undefined;
+		/**  采样提示词 */
+		sample_prompts: string | undefined;
 	};
 	dataset: {
 		datasets: [

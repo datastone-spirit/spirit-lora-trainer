@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-02-05 09:23:06
+ * @LastEditTime: 2025-02-07 17:15:35
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -51,6 +51,8 @@ export const useFluxLora = (() => {
 			speed: detail.speed ?? 0,
 			total: detail.total ?? 0,
 			progress: 0,
+			showSampling: data.is_sampling ?? false,
+			samplingPath: data.sampling_path ?? "",
 			raw: data
 		};
 		loraData.progress = calculatePercentage(loraData.current, loraData.total);

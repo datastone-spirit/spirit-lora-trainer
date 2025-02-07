@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-01-07 10:29:58
+ * @LastEditTime: 2025-02-07 17:00:59
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -141,7 +141,9 @@ function formatConfig(form: RuleForm): Config {
 		vae_batch_size: undefined,
 		ddp_timeout: undefined,
 		resolution: "",
-		output_config: true
+		output_config: true,
+		sample_every_n_steps: 0,
+		sample_prompts: ""
 	};
 
 	convertScientificToNumber(form, config);

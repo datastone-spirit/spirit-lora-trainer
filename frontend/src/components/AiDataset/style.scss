@@ -3,6 +3,7 @@
 
 // 统一样式
 .file-list-item {
+	width: $zl-ai-dataset-file-width;
 	height: $zl-ai-dataset-file-height;
 	text-align: center;
 	transition:

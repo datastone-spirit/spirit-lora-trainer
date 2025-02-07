@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2025-01-10 11:11:24
+ * @LastEditTime: 2025-02-07 15:59:50
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -43,6 +43,12 @@ export interface RuleForm {
 	prompt_type: string;
 	/** 是否把触发词输出到打标文件中 */
 	output_trigger_words: boolean;
+	/** 打标高级设置 */
+	tagger_advanced_settings: boolean;
+	/** 打标提示词 */
+	tagger_prompt: string;
+	/** 是否追加到已有打标文件中 */
+	tagger_append_file: boolean;
 	/** 每个图像重复训练次数 */
 	num_repeats: number;
 	/** 最大训练 epoch（轮数） */
@@ -212,4 +218,9 @@ export interface RuleForm {
 	ddp_timeout: number | undefined;
 	/** 为 DDP 启用 gradient_as_bucket_view  */
 	ddp_gradient_as_bucket_view: boolean;
+	// ---------
+	/** 每隔几步进行采样 */
+	sample_every_n_steps: number | undefined;
+	/**  采样提示词 */
+	sample_prompts: string | undefined;
 }

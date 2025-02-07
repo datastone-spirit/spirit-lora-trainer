@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-02-06 15:53:16
+ * @LastEditTime: 2025-02-07 17:36:16
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -40,6 +40,13 @@
 								:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
 								@tagger-click="onTaggerClick"
 							/>
+							<DatasetAdvanced
+								v-model:advanced="ruleForm.tagger_advanced_settings"
+								v-model:tagger-prompt="ruleForm.tagger_prompt"
+								tagger-prompt-popover-content="tagger_prompt"
+								v-model:tagger-append-file="ruleForm.tagger_append_file"
+								tagger-append-file-popover-content="tagger_append_file"
+							/>
 							<TrainingData v-model:form="ruleForm" />
 						</Collapse>
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
@@ -64,7 +71,18 @@
 			right-to="#footer-bar-center"
 			:submit-loading="submitLoading"
 			@submit="onSubmit"
-		></FooterButtonGroup>
+		>
+			<template #right-btn-group>
+				<el-button
+					v-if="monitorFluxLoraData.data.showSampling"
+					size="large"
+					@click="onViewSampling"
+				>
+					查看采样
+				</el-button>
+			</template>
+		</FooterButtonGroup>
+		<ViewSampling v-model:open="openViewSampling" />
 	</div>
 </template>
 
@@ -85,11 +103,12 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
 import type { RuleForm } from "./types";
+import ViewSampling from "./components/ViewSampling/index.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { startTagListen, stopTagListen, monitorTagData } = useTag();
-const { startFluxLoraListen, stopFluxLoraListen } = useFluxLora();
+const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const ruleFormRef = ref<FormInstance>();
@@ -112,6 +131,9 @@ const defaultForm = readonly<RuleForm>({
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
 	output_trigger_words: true,
+	tagger_advanced_settings: false,
+	tagger_prompt: "",
+	tagger_append_file: false,
 	num_repeats: 16,
 	max_train_epochs: 24,
 	train_batch_size: 1,
@@ -197,7 +219,10 @@ const defaultForm = readonly<RuleForm>({
 	vae_batch_size: undefined,
 	// -----
 	ddp_timeout: undefined,
-	ddp_gradient_as_bucket_view: false
+	ddp_gradient_as_bucket_view: false,
+	// -----
+	sample_every_n_steps: undefined,
+	sample_prompts: undefined
 });
 const ruleForm = useEnhancedLocalStorage<RuleForm>(
 	localStorageKey,
@@ -279,21 +304,56 @@ const rules = reactive<FormRules<RuleForm>>({
 	lr_warmup_steps: [
 		{
 			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				switch (ruleForm.value.lr_scheduler) {
-					case "constant_with_warmup": // 学习调度器为该值时lr_warmup_steps预热步数必须大于0
-						if (value <= 0) {
-							callback(new Error("学习率预热步数必须大于0"));
-							return;
-						}
-						callback();
-						break;
-					default: // 其他情况lr_warmup_steps预热步数必须等于0
-						if (value !== 0) {
-							callback(new Error("学习率预热步数必须等于0"));
-							return;
-						}
-						callback();
-						break;
+				if (ruleForm.value.lr_scheduler === "constant_with_warmup") {
+					// 学习调度器为该值时lr_warmup_steps预热步数必须大于0
+					if (value <= 0) {
+						callback(new Error("学习率预热步数必须大于0"));
+						return;
+					}
+					callback();
+				} else {
+					// 其他情况lr_warmup_steps预热步数必须等于0
+					if (value !== 0) {
+						callback(new Error("学习率预热步数必须等于0"));
+						return;
+					}
+					callback();
+				}
+			},
+			trigger: "change"
+		}
+	],
+	sample_every_n_steps: [
+		{
+			asyncValidator: (
+				_rule: any,
+				value: number | undefined,
+				callback: (error?: string | Error) => void
+			) => {
+				value = value ?? 0;
+				if (value < 10) {
+					callback(new Error("采样步数必须大于等于10"));
+					return;
+				}
+				// 联动校验
+				ruleFormRef.value?.validateField("sample_prompts");
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	sample_prompts: [
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				const sampleSteps = ruleForm.value.sample_every_n_steps ?? 0;
+				const hasPrompt = value.trim().length > 0;
+
+				if (sampleSteps >= 10 && !hasPrompt) {
+					callback(new Error("请填写采样提示词"));
+				} else if (sampleSteps < 10 && hasPrompt) {
+					callback(new Error("未配置采样步数或采样步数小于10，请清空采样提示词"));
+				} else {
+					callback();
 				}
 			},
 			trigger: "change"
@@ -416,20 +476,17 @@ function validateForm() {
 				ElMessage.warning("请填写必填项");
 				return resolve(false);
 			}
-
 			// gpu被占用
 			if (trainingStore.useGPU) {
 				ElMessage.warning("GPU已经被占用，请等待对应任务完成再执行训练");
 				return resolve(false);
 			}
-
 			// 校验数据集是否有数据
 			const isHasData = await checkData(ruleForm.value.image_dir);
 			if (!isHasData) {
 				ElMessage.error("数据集目录下没有数据，请上传训练用的素材");
 				return resolve(false);
 			}
-
 			return resolve(true);
 		});
 	});
@@ -460,6 +517,12 @@ async function onSubmit() {
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
+}
+
+/** 查看采样 */
+const openViewSampling = ref(true);
+function onViewSampling() {
+	openViewSampling.value = true;
 }
 </script>
 

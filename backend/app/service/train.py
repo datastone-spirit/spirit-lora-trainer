@@ -4,7 +4,7 @@ import yaml
 from typing import Optional
 import sys
 from ..api.model.training_paramter import TrainingParameter
-from ..api.common.utils import validate_parameter, dataset2toml, config2toml
+from ..api.common.utils import validate_parameter, dataset2toml, config2toml, is_flux_sampling
 from utils.util import getprojectpath 
 import uuid
 import logging
@@ -31,7 +31,9 @@ class TrainingService:
         if not valid:
             logger.warning(f"valid parameters error: {parameters}")
             raise ValueError(f"valid reqest failed, reason: {reason}")
-        
+
+        if is_flux_sampling(parameters.config):
+            os.makedirs(f"{parameters.config.output_dir}/sample", exist_ok=True)
         #
         # FIXME: we pre-create the taskid here, and set it to the log_prefix
         # for tensorborad log parsing, so the user log_preifix configuration will

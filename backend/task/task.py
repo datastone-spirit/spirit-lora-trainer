@@ -5,12 +5,13 @@ from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
+from app.api.common.utils import is_flux_sampling
 from subprocess import Popen, TimeoutExpired
-from utils.util import caculate_image_steps
 import uuid
 import re
 from tbparse import SummaryReader
 import time
+import os
 
 
 from utils.util import setup_logging
@@ -65,6 +66,9 @@ class Task:
 
         task.task_type = TaskType.TRAINING
         task.start_time = time.time()
+        task.is_sampling = is_flux_sampling(training_paramter.config)
+        if task.is_ampling:
+            task.sampling_path = os.path.join(training_paramter.config.output_dir, "sample")
         return task
 
     @staticmethod
@@ -131,6 +135,7 @@ class Task:
 class TrainingTask(Task):
     proc: Popen = None
     training_parameters: TrainingParameter = None 
+    is_sampling :bool =  True
 
     def _get_proc_info(self):
         """Extract relevant info from Popen object"""

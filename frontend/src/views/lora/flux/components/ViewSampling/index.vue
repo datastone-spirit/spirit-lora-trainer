@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-07 08:53:05
- * @LastEditTime: 2025-02-07 17:29:01
+ * @LastEditTime: 2025-02-07 17:46:13
  * @LastEditors: mulingyuer
  * @Description: 查看采样
  * @FilePath: \frontend\src\views\lora\flux\components\ViewSampling\index.vue
@@ -36,42 +36,44 @@
 				@click="onClose"
 			/>
 		</div>
-		<el-scrollbar height="100%" v-loading="loading">
-			<el-empty v-if="list.length === 0" :image-size="100" />
-			<div v-else class="view-sampling-list">
-				<div
-					v-for="(item, index) in list"
-					:key="index"
-					class="view-sampling-list-item"
-					@click="onItemClick(item, index)"
-				>
-					<el-image
-						class="view-sampling-list-item-img"
-						:src="item.image_path + '?compress=true'"
-						fit="cover"
-						title="双击查看图片细节"
+		<div class="view-sampling-content">
+			<el-scrollbar height="100%" v-loading="loading">
+				<el-empty v-if="list.length === 0" :image-size="100" />
+				<div v-else class="view-sampling-list">
+					<div
+						v-for="(item, index) in list"
+						:key="index"
+						class="view-sampling-list-item"
+						@click="onItemClick(item, index)"
 					>
-						<template #placeholder>
-							<img
-								class="view-sampling-list-item-default-img"
-								:src="DefaultImageIcon"
-								:alt="item.image_name"
-							/>
-						</template>
-						<template #error>
-							<img
-								class="view-sampling-list-item-default-img"
-								:src="DefaultImageIcon"
-								:alt="item.image_name"
-							/>
-						</template>
-					</el-image>
-					<div class="view-sampling-list-item-name" :title="item.image_name">
-						{{ item.image_name }}
+						<el-image
+							class="view-sampling-list-item-img"
+							:src="item.image_path + '?compress=true'"
+							fit="cover"
+							title="双击查看图片细节"
+						>
+							<template #placeholder>
+								<img
+									class="view-sampling-list-item-default-img"
+									:src="DefaultImageIcon"
+									:alt="item.image_name"
+								/>
+							</template>
+							<template #error>
+								<img
+									class="view-sampling-list-item-default-img"
+									:src="DefaultImageIcon"
+									:alt="item.image_name"
+								/>
+							</template>
+						</el-image>
+						<div class="view-sampling-list-item-name" :title="item.image_name">
+							{{ item.image_name }}
+						</div>
 					</div>
 				</div>
-			</div>
-		</el-scrollbar>
+			</el-scrollbar>
+		</div>
 	</el-drawer>
 </template>
 
@@ -163,6 +165,10 @@ function onRefresh() {
 .view-sampling-header {
 	margin-bottom: $zl-padding;
 	height: 32px;
+}
+.view-sampling-content {
+	height: calc(100% - 32px);
+	padding-bottom: $zl-padding;
 }
 .view-sampling-close {
 	position: absolute;

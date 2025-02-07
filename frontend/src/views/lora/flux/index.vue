@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-02-07 17:36:16
+ * @LastEditTime: 2025-02-07 17:48:37
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -520,7 +520,7 @@ async function onSubmit() {
 }
 
 /** 查看采样 */
-const openViewSampling = ref(true);
+const openViewSampling = ref(false);
 function onViewSampling() {
 	openViewSampling.value = true;
 }

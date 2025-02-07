@@ -28,10 +28,10 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def is_flux_sampling(config: TrainingConfig) -> bool:
-    if config.sample_every_n_epochs is None:
+    if config.sample_every_n_steps is None:
         return False
 
-    if config.sample_every_n_epochs > 0 and config.sample_prompts is not None and config.sample_prompts != "":
+    if config.sample_every_n_steps >= 10 and config.sample_prompts is not None and config.sample_prompts != "":
         return True
     return False
 
@@ -270,9 +270,6 @@ def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
     # so overwrite the log_with value to tensorboard
     config.log_with = "tensorboard"
 
-    if is_flux_sampling(config) and (config.save_every_n_epochs >= config.max_train_epochs):
-            return f"save_every_n_epochs {config.save_every_n_epochs} is greater than max_train_epochs {config.max_train_epochs}", False
-
     # Set the logging directory
     if config.logging_dir is None or config.logging_dir == "":
         config.logging_dir = os.path.join(getprojectpath(), "logs")
@@ -298,9 +295,6 @@ def validate_sampling(config: TrainingConfig) -> 'Tuple[bool, str]':
 
     if not is_flux_sampling(config):
         return True, "Ok"
-   
-    if config.save_every_n_epochs >= config.max_train_epochs:
-        return False, f"save_every_n_epochs {config.save_every_n_epochs} is greater than max_train_epochs {config.max_train_epochs}"
     
     sample_prompts_path = os.path.join(config.output_dir, "sample_prompts.txt")
     with open(sample_prompts_path, 'w', encoding='utf-8') as file:
@@ -324,7 +318,7 @@ def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
     if not validated:
         return validated, reason
 
-    validate, reason = validate_sampling(parameter.config)
+    validated, reason = validate_sampling(parameter.config)
     if not validated:
         return validated, reason
     

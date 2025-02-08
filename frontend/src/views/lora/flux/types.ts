@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2025-02-07 15:59:50
+ * @LastEditTime: 2025-02-08 10:06:30
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -46,9 +46,9 @@ export interface RuleForm {
 	/** 打标高级设置 */
 	tagger_advanced_settings: boolean;
 	/** 打标提示词 */
-	tagger_prompt: string;
+	tagger_global_prompt: string;
 	/** 是否追加到已有打标文件中 */
-	tagger_append_file: boolean;
+	tagger_is_append: boolean;
 	/** 每个图像重复训练次数 */
 	num_repeats: number;
 	/** 最大训练 epoch（轮数） */

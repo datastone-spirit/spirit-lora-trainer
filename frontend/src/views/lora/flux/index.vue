@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-02-07 17:48:37
+ * @LastEditTime: 2025-02-08 10:52:01
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -41,11 +41,14 @@
 								@tagger-click="onTaggerClick"
 							/>
 							<DatasetAdvanced
+								:tagger-model="ruleForm.tagger_model"
 								v-model:advanced="ruleForm.tagger_advanced_settings"
-								v-model:tagger-prompt="ruleForm.tagger_prompt"
-								tagger-prompt-popover-content="tagger_prompt"
-								v-model:tagger-append-file="ruleForm.tagger_append_file"
-								tagger-append-file-popover-content="tagger_append_file"
+								v-model:tagger-prompt="ruleForm.tagger_global_prompt"
+								tagger-prompt-prop="tagger_global_prompt"
+								tagger-prompt-popover-content="tagger_global_prompt"
+								v-model:tagger-append-file="ruleForm.tagger_is_append"
+								tagger-append-file-prop="tagger_is_append"
+								tagger-append-file-popover-content="tagger_is_append"
 							/>
 							<TrainingData v-model:form="ruleForm" />
 						</Collapse>
@@ -132,8 +135,8 @@ const defaultForm = readonly<RuleForm>({
 	prompt_type: "Training Prompt",
 	output_trigger_words: true,
 	tagger_advanced_settings: false,
-	tagger_prompt: "",
-	tagger_append_file: false,
+	tagger_global_prompt: "",
+	tagger_is_append: false,
 	num_repeats: 16,
 	max_train_epochs: 24,
 	train_batch_size: 1,
@@ -449,7 +452,12 @@ async function onTaggerClick() {
 			image_path: image_dir,
 			model_name: tagger_model,
 			class_token: output_trigger_words ? class_tokens : undefined,
-			prompt_type: ruleForm.value.prompt_type
+			prompt_type: ruleForm.value.prompt_type,
+			global_prompt:
+				ruleForm.value.tagger_model === "joy-caption-alpha-two"
+					? ruleForm.value.tagger_global_prompt
+					: "",
+			is_append: ruleForm.value.tagger_is_append
 		});
 		startTagListen(result.task_id);
 		taggerBtnLoading.value = false;

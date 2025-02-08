@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-06 10:37:35
- * @LastEditTime: 2025-01-14 11:00:31
+ * @LastEditTime: 2025-02-08 10:17:24
  * @LastEditors: mulingyuer
  * @Description: 混元视频类型定义
  * @FilePath: \frontend\src\views\lora\hunyuan-video\types.ts
@@ -41,6 +41,12 @@ export interface RuleForm {
 	prompt_type: string;
 	/** 是否把触发词输出到打标文件中 */
 	output_trigger_words: boolean;
+	/** 打标高级设置 */
+	tagger_advanced_settings: boolean;
+	/** 打标提示词 */
+	tagger_global_prompt: string;
+	/** 是否追加到已有打标文件中 */
+	tagger_is_append: boolean;
 	/** 图片尺寸-宽度 */
 	resolution_width: number; //resolution = [512, 512]
 	/** 图片尺寸-高度 */

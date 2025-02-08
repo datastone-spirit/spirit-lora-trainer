@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-01-15 14:30:37
+ * @LastEditTime: 2025-02-08 10:49:07
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -38,6 +38,16 @@
 							output-trigger-words-popover-content="output_trigger_words"
 							:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
 							@tagger-click="onTaggerClick"
+						/>
+						<DatasetAdvanced
+							:tagger-model="ruleForm.tagger_model"
+							v-model:advanced="ruleForm.tagger_advanced_settings"
+							v-model:tagger-prompt="ruleForm.tagger_global_prompt"
+							tagger-prompt-prop="tagger_global_prompt"
+							tagger-prompt-popover-content="tagger_global_prompt"
+							v-model:tagger-append-file="ruleForm.tagger_is_append"
+							tagger-append-file-prop="tagger_is_append"
+							tagger-append-file-popover-content="tagger_is_append"
 						/>
 						<TrainingData :form="ruleForm" />
 					</Collapse>
@@ -106,6 +116,9 @@ const defaultForm = readonly<RuleForm>({
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
 	output_trigger_words: true,
+	tagger_advanced_settings: false,
+	tagger_global_prompt: "",
+	tagger_is_append: false,
 	resolution_width: 512,
 	resolution_height: 512,
 	enable_ar_bucket: true,
@@ -296,7 +309,12 @@ async function onTaggerClick() {
 			image_path: directory_path,
 			model_name: tagger_model,
 			class_token: output_trigger_words ? class_tokens : undefined,
-			prompt_type: ruleForm.value.prompt_type
+			prompt_type: ruleForm.value.prompt_type,
+			global_prompt:
+				ruleForm.value.tagger_model === "joy-caption-alpha-two"
+					? ruleForm.value.tagger_global_prompt
+					: "",
+			is_append: ruleForm.value.tagger_is_append
 		});
 		startTagListen(result.task_id);
 		taggerBtnLoading.value = false;

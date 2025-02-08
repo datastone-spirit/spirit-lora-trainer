@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-07 14:45:09
- * @LastEditTime: 2025-02-07 15:56:33
+ * @LastEditTime: 2025-02-08 10:45:05
  * @LastEditors: mulingyuer
  * @Description: 数据集高级设置
  * @FilePath: \frontend\src\components\Form\DatasetAdvanced.vue
@@ -14,6 +14,7 @@
 		</PopoverFormItem>
 		<template v-if="advancedValue">
 			<PopoverFormItem
+				v-show="taggerModel === 'joy-caption-alpha-two'"
 				:label="taggerPromptLabel"
 				:prop="taggerPromptProp"
 				:popover-content="taggerPromptPopoverContent"
@@ -40,6 +41,8 @@
 export interface DatasetAdvancedProps {
 	/** 是否开启高级设置 */
 	advanced: boolean;
+	/** 当前的打标模型 */
+	taggerModel: string;
 	/** 打标提示词 */
 	taggerPromptLabel?: string;
 	taggerPromptProp?: string;
@@ -52,8 +55,8 @@ export interface DatasetAdvancedProps {
 }
 
 withDefaults(defineProps<DatasetAdvancedProps>(), {
-	taggerPromptLabel: "打标提示词",
-	taggerPromptPlaceholder: "请输入打标提示词",
+	taggerPromptLabel: "自定义打标提示词",
+	taggerPromptPlaceholder: "请输入自定义打标提示词",
 	taggerAppendFileLabel: "是否追加到已有打标文件中"
 });
 

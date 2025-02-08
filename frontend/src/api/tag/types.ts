@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 17:33:00
- * @LastEditTime: 2025-01-03 16:18:50
+ * @LastEditTime: 2025-02-08 10:10:59
  * @LastEditors: mulingyuer
  * @Description: 打标api类型
  * @FilePath: \frontend\src\api\tag\types.ts
@@ -18,6 +18,10 @@ export interface BatchTagData {
 	prompt_type?: string;
 	/** 是否把触发词输出到打标文件中  */
 	class_token?: string;
+	/** 打标提示词 */
+	global_prompt: string;
+	/** 是否追加到已有打标文件中 */
+	is_append: boolean;
 }
 
 /** 一键打标参数响应 */

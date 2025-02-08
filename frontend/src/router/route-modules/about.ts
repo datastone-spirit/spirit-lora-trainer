@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 10:03:14
- * @LastEditTime: 2025-01-09 11:28:18
+ * @LastEditTime: 2025-02-08 15:36:53
  * @LastEditors: mulingyuer
  * @Description: 关于路由模块
  * @FilePath: \frontend\src\router\route-modules\about.ts
@@ -17,6 +17,6 @@ export default {
 		title: "关于",
 		auth: "public",
 		icon: "ri-question-line",
-		sort: 70
+		sort: 150
 	}
 } as RouteRecordRaw;

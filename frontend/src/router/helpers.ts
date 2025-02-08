@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 17:54:10
- * @LastEditTime: 2024-12-13 10:07:49
+ * @LastEditTime: 2025-02-08 15:34:44
  * @LastEditors: mulingyuer
  * @Description: 路由辅助函数
- * @FilePath: \frontend\src\router\helpers\index.ts
+ * @FilePath: \frontend\src\router\helpers.ts
  * 怎么可能会有bug！！！
  */
 import type { Router, RouteRecordRaw } from "vue-router";
@@ -15,7 +15,12 @@ export function getModulesRoutes(globData: Record<string, any>): RouteRecordRaw[
 	const modulesRoutes: RouteRecordRaw[] = [];
 
 	Object.keys(globData).forEach((key: string) => {
-		modulesRoutes.push(globData[key].default);
+		const value = globData[key].default;
+		if (Array.isArray(value)) {
+			modulesRoutes.push(...value);
+		} else {
+			modulesRoutes.push(value);
+		}
 	});
 
 	// 排序路由

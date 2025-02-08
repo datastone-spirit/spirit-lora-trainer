@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 14:55:57
- * @LastEditTime: 2024-12-13 09:00:08
+ * @LastEditTime: 2025-02-08 15:13:16
  * @LastEditors: mulingyuer
  * @Description: 路由类型
- * @FilePath: \spirit-lora-trainer\frontend\types\router.d.ts
+ * @FilePath: \frontend\types\router.d.ts
  * 怎么可能会有bug！！！
  */
 import type { AuthType } from "@/router/router-auth";
@@ -28,6 +28,8 @@ declare module "vue-router" {
 		affix?: boolean;
 		/** 是否显示footer-bar */
 		showFooter?: boolean;
+		/** 外链地址 */
+		iframeLink?: string;
 	}
 }
 

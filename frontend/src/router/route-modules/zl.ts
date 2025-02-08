@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-30 14:08:23
- * @LastEditTime: 2025-01-09 11:27:57
+ * @LastEditTime: 2025-02-08 15:38:06
  * @LastEditors: mulingyuer
  * @Description: 智灵外链
  * @FilePath: \frontend\src\router\route-modules\zl.ts
@@ -17,6 +17,6 @@ export default {
 		auth: "public",
 		title: "智灵GPU服务",
 		icon: "ri-link-m",
-		sort: 50
+		sort: 60
 	}
 } as RouteRecordRaw;

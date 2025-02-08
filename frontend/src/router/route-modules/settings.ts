@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 10:01:30
- * @LastEditTime: 2025-01-09 11:28:09
+ * @LastEditTime: 2025-02-08 15:38:02
  * @LastEditors: mulingyuer
  * @Description: 设置页面路由
  * @FilePath: \frontend\src\router\route-modules\settings.ts
@@ -17,6 +17,6 @@ export default {
 		title: "设置",
 		auth: "public",
 		icon: "ri-settings-4-line",
-		sort: 60
+		sort: 50
 	}
 } as RouteRecordRaw;

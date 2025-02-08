@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-01-14 10:54:40
+ * @LastEditTime: 2025-02-08 09:17:20
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -170,7 +170,11 @@ function onPreview(data: FileItem) {
 	const imgList = list.value.filter((item) => item.type === FileType.IMAGE);
 	let initialIndex = imgList.findIndex((item) => item === data);
 	if (initialIndex === -1) initialIndex = 0;
-	return previewImages({ urlList: imgList.map((item) => item.value), initialIndex });
+	return previewImages({
+		urlList: imgList.map((item) => item.value),
+		initialIndex,
+		filenameList: imgList.map((item) => item.name)
+	});
 }
 
 // 双击

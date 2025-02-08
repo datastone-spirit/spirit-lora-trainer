@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-07 08:53:05
- * @LastEditTime: 2025-02-07 17:46:13
+ * @LastEditTime: 2025-02-08 09:17:42
  * @LastEditors: mulingyuer
  * @Description: 查看采样
  * @FilePath: \frontend\src\views\lora\flux\components\ViewSampling\index.vue
@@ -105,7 +105,11 @@ function onClose() {
 
 /** 点击列表项 */
 function onItemClick(_item: List[0], index: number) {
-	previewImages({ urlList: list.value.map((item) => item.image_path), initialIndex: index });
+	previewImages({
+		urlList: list.value.map((item) => item.image_path),
+		initialIndex: index,
+		filenameList: list.value.map((item) => item.image_name)
+	});
 }
 
 /** 拼接图片url */

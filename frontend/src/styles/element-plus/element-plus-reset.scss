@@ -152,3 +152,15 @@
 .el-alert.el-alert--warning.is-dark {
 	background-color: #edbb20;
 }
+
+// el-image-viewer
+.el-image-viewer__file_name {
+	position: absolute;
+	left: 50%;
+	bottom: 5px;
+	transform: translateX(-50%);
+	z-index: 1;
+	opacity: 0.8;
+	font-size: 14px;
+	color: #fff;
+}

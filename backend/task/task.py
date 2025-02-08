@@ -90,7 +90,7 @@ class Task:
         return task
 
     @staticmethod
-    def wrap_captioning_task(image_paths: List[str], output_dir: str, class_token: str, cap_model: CaptioningModelInfo, prompt_type) -> 'Task':
+    def wrap_captioning_task(image_paths: List[str], output_dir: str, class_token: str, cap_model: CaptioningModelInfo, prompt_type, global_prompt, is_append) -> 'Task':
         task = CaptioningTask()
         task.status = TaskStatus.CREATED
         task.image_paths = image_paths
@@ -106,6 +106,8 @@ class Task:
         task.id = uuid.uuid4().hex
         task.task_type = TaskType.CAPTIONING
         task.captioning = cap_model.captioning
+        task.global_prompt = global_prompt
+        task.is_append = is_append
         return task    
 
 
@@ -304,10 +306,14 @@ class CaptioningTask(Task):
     captioning: Optional[Callable] = None
     model_info: Optional[CaptioningModelInfo] = None
     prompt_type: str = None
+    global_prompt: str = None
+    is_append: bool = False
 
     def _run(self):
         self.captioning(self.image_paths, self.output_dir, self.model_info, self.update_captioning_status, 
-                        class_token=self.class_token, prompt_type=self.prompt_type)
+                        class_token=self.class_token, prompt_type=self.prompt_type,
+                        global_prompt=self.global_prompt,
+                        is_append=self.is_append)
 
     def update_captioning_status(self, current_step: int, image_name: str, caption: str, cap_file_path: str, success: bool = False):
         self.detail['current'] = current_step

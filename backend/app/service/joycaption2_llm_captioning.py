@@ -271,7 +271,9 @@ class JoyCaptioner:
 
 @torch.no_grad()
 def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_info :CaptioningModelInfo, 
-                               update_status :Callable, class_token=None, prompt_type: str = "Descriptive") -> List[dict]:
+                               update_status :Callable, class_token=None, prompt_type: str = "Descriptive",
+                               global_prompt :str = None,
+                               is_append :bool = False) -> List[dict]:
     joy_captioner = None
     try:
         joy_captioner = JoyCaptioner(model_info) 
@@ -283,7 +285,9 @@ def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_in
                 logger.info(f"Processing image: {image_path}")
                 image = Image.open(image_path).convert("RGB")
                 caption_text = joy_captioner.generate(image, prompt_type)[0]
-                success, cap_file_path = write_caption_file(image_path, output_dir, caption_text, class_token=class_token)
+                if global_prompt is not None:
+                    caption_text = f"{global_prompt}, {caption_text}"
+                success, cap_file_path = write_caption_file(image_path, output_dir, caption_text, class_token=class_token, is_append=is_append)
             except Exception as e:
                 logger.warning(f"Error processing image: {image_path}", exc_info=e)
             finally:

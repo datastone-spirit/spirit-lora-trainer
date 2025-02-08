@@ -28,8 +28,15 @@ class Tagging(Resource):
             image_path = json["image_path"]
             class_token = json.get("class_token", None)
             prompt_type = json.get("prompt_type", None)
+            global_prompt = json.get("global_prompt", None)
+            is_append = json.get("is_append", False)
             images = CaptioningService().load_images_from_directory(image_path)
-            result = CaptioningService().run_captioning(images,image_path, model_name=model_name, class_token=class_token, prompt_type=prompt_type)
+            result = CaptioningService().run_captioning(images,image_path, 
+                                                        model_name=model_name, 
+                                                        class_token=class_token, 
+                                                        prompt_type=prompt_type,
+                                                        global_prompt=global_prompt,
+                                                        is_append=is_append)
             if isinstance(result, Task):
                 return res(data={"task_id": result.id}, message=f"task {result.id} started successfully.")
                 

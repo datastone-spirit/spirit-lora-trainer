@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-01-09 11:21:35
+ * @LastEditTime: 2025-02-08 16:58:21
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -44,6 +44,14 @@
 						:rows="4"
 					/>
 				</el-form-item>
+				<DatasetAdvanced
+					:tagger-model="ruleForm.tagger_model"
+					v-model:advanced="ruleForm.tagger_advanced_settings"
+					v-model:tagger-prompt="ruleForm.tagger_global_prompt"
+					tagger-prompt-prop="tagger_global_prompt"
+					v-model:tagger-append-file="ruleForm.tagger_is_append"
+					tagger-append-file-prop="tagger_is_append"
+				/>
 				<el-form-item>
 					<el-button
 						class="ai-dataset-page-left-btn"
@@ -94,6 +102,12 @@ interface RuleForm {
 	output_trigger_words: boolean;
 	/** LoRA 触发词 */
 	class_tokens: string;
+	/** 打标高级设置 */
+	tagger_advanced_settings: boolean;
+	/** 打标提示词 */
+	tagger_global_prompt: string;
+	/** 是否追加到已有打标文件中 */
+	tagger_is_append: boolean;
 }
 
 const trainingStore = useTrainingStore();
@@ -109,7 +123,10 @@ const defaultForm = readonly<RuleForm>({
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
 	output_trigger_words: true,
-	class_tokens: ""
+	class_tokens: "",
+	tagger_advanced_settings: false,
+	tagger_global_prompt: "",
+	tagger_is_append: false
 });
 const ruleForm = useEnhancedLocalStorage<RuleForm>(
 	localStorageKey,
@@ -172,7 +189,12 @@ async function onSubmit() {
 			image_path: ruleForm.value.image_dir,
 			model_name: ruleForm.value.tagger_model,
 			class_token: ruleForm.value.output_trigger_words ? ruleForm.value.class_tokens : undefined,
-			prompt_type: ruleForm.value.prompt_type
+			prompt_type: ruleForm.value.prompt_type,
+			global_prompt:
+				ruleForm.value.tagger_model === "joy-caption-alpha-two"
+					? ruleForm.value.tagger_global_prompt
+					: "",
+			is_append: ruleForm.value.tagger_is_append
 		});
 
 		startTagListen(result.task_id);
@@ -226,6 +248,7 @@ onUnmounted(() => {
 	padding: $zl-padding;
 	border-radius: $zl-border-radius;
 	margin-right: $zl-padding;
+	overflow-y: auto;
 }
 .ai-dataset-page-left-btn {
 	width: 100%;

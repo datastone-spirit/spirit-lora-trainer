@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-01-14 15:00:17
+ * @LastEditTime: 2025-02-08 16:49:39
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -100,7 +100,9 @@ export const useTrainingStore = defineStore("training", () => {
 			remaining: "",
 			speed: 0,
 			total: 0,
-			progress: 0
+			progress: 0,
+			samplingPath: "",
+			showSampling: false
 		}
 	});
 	function setFluxLoraIsListen(val: boolean) {
@@ -131,7 +133,9 @@ export const useTrainingStore = defineStore("training", () => {
 			remaining: "",
 			speed: 0,
 			total: 0,
-			progress: 0
+			progress: 0,
+			samplingPath: "",
+			showSampling: false
 		};
 	}
 

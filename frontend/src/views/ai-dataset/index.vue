@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-02-08 16:58:21
+ * @LastEditTime: 2025-02-08 17:08:58
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -240,10 +240,12 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .ai-dataset-page {
 	display: flex;
-	height: 100%;
+	align-items: flex-start;
+	height: calc(100vh - 24px);
 }
 .ai-dataset-page-left {
 	width: 320px;
+	height: 100%;
 	background-color: var(--zl-ai-dataset-bg);
 	padding: $zl-padding;
 	border-radius: $zl-border-radius;
@@ -260,6 +262,7 @@ onUnmounted(() => {
 .ai-dataset-page-right {
 	flex-grow: 1;
 	min-width: 0;
+	height: 100%;
 	display: flex;
 	flex-direction: column;
 }

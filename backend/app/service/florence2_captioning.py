@@ -70,8 +70,6 @@ def florence2_captioning(image_paths: List[str], output_dir: str, model_info :Ca
                     .replace("The image shows ", "")
                     .strip()
                 )
-                if global_prompt is not None:
-                    caption_text = f"{global_prompt}, {caption_text}"
                 success, cap_file_path = write_caption_file(image_path, output_dir, caption_text, class_token=class_token, is_append=is_append)
             except Exception as e:
                 # 收集结果

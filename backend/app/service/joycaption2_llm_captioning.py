@@ -169,7 +169,8 @@ class JoyCaptioner:
     @torch.no_grad()
     def generate(self, item, type="Descriptive", 
                  tone="casual", length="medium-length", 
-                 system_prompt="You are a helpful image captioner, never reject the prompt."):
+                 system_prompt="You are a helpful image captioner, never reject the prompt.", 
+                 custom_prompt: str = None):
 
         input_image = item
         image = input_image.resize((384, 384), Image.LANCZOS)
@@ -182,7 +183,10 @@ class JoyCaptioner:
             vision_outputs = self.clip_model(pixel_values=pixel_values, output_hidden_states=True)
             embedded_images = self.image_adapter(vision_outputs.hidden_states).to(self.device)
 
-        prompt_str = (get_prompt(type, tone, length))
+        if custom_prompt is not None and len(custom_prompt) > 0:
+            prompt_str = custom_prompt
+        else:
+            prompt_str = (get_prompt(type, tone, length))
         convo = [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt_str},
@@ -284,9 +288,7 @@ def joycaption2_llm_captioning(image_paths: List[str], output_dir: str, model_in
             try:
                 logger.info(f"Processing image: {image_path}")
                 image = Image.open(image_path).convert("RGB")
-                caption_text = joy_captioner.generate(image, prompt_type)[0]
-                if global_prompt is not None:
-                    caption_text = f"{global_prompt}, {caption_text}"
+                caption_text = joy_captioner.generate(image, prompt_type, custom_prompt=global_prompt)[0]
                 success, cap_file_path = write_caption_file(image_path, output_dir, caption_text, class_token=class_token, is_append=is_append)
             except Exception as e:
                 logger.warning(f"Error processing image: {image_path}", exc_info=e)

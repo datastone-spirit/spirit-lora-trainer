@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-02-08 10:49:07
+ * @LastEditTime: 2025-02-10 15:10:14
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -92,6 +92,7 @@ import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
 import type { RuleForm } from "./types";
 import { useHYLora } from "@/hooks/useHYLora";
+import { formatFormValidateMessage } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -172,12 +173,12 @@ const rules = reactive<FormRules<RuleForm>>({
 				try {
 					const isExists = await checkDirectory(value);
 					if (!isExists) {
-						callback(new Error("目录不存在"));
+						callback(new Error("LoRA保存目录不存在"));
 						return;
 					}
 					const isDataExists = await checkHYData(value);
 					if (isDataExists) {
-						callback(new Error("目录已存在数据，请提供空目录"));
+						callback(new Error("LoRA保存目录已存在数据，请提供空目录"));
 						return;
 					}
 					return callback();
@@ -193,7 +194,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				checkDirectory(value).then((exists) => {
 					if (!exists) {
-						callback(new Error("目录不存在"));
+						callback(new Error("数据集目录不存在"));
 						return;
 					}
 					callback();
@@ -335,9 +336,17 @@ const submitLoading = ref(false);
 function validateForm() {
 	return new Promise((resolve) => {
 		if (!ruleFormRef.value) return resolve(false);
-		ruleFormRef.value.validate(async (valid) => {
+		ruleFormRef.value.validate(async (valid, invalidFields) => {
 			if (!valid) {
-				ElMessage.warning("请填写必填项");
+				let message = "请填写必填项";
+				if (invalidFields) {
+					message = formatFormValidateMessage(invalidFields);
+				}
+				ElMessage({
+					type: "warning",
+					customClass: "break-line-message",
+					message
+				});
 				return resolve(false);
 			}
 

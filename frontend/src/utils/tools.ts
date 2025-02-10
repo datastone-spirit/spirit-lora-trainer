@@ -1,13 +1,13 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-01-14 16:38:25
+ * @LastEditTime: 2025-02-10 15:03:13
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
  * 怎么可能会有bug！！！
  */
-import type { FormInstance } from "element-plus";
+import type { FormInstance, FormValidateFailure } from "element-plus";
 import { v4 as uuidV4 } from "uuid";
 
 /** 生成一个键值对对象，键为接口的键，值为键名 */
@@ -94,4 +94,16 @@ export function secondsToHHMMSS(totalSeconds: number): string {
 	const secondsStr = String(seconds).padStart(2, "0");
 
 	return `${hoursStr}:${minutesStr}:${secondsStr}`;
+}
+
+/** 将element-plus的表单校验结果转换成提示信息 */
+export function formatFormValidateMessage(invalidFields: FormValidateFailure["fields"]): string {
+	let message = "";
+
+	Object.keys(invalidFields).forEach((field) => {
+		const errors = invalidFields[field];
+		message += `${errors.map((error) => error.message).join("、")}\n`;
+	});
+
+	return message;
 }

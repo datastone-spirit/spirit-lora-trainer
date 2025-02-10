@@ -164,3 +164,15 @@
 	font-size: 14px;
 	color: #fff;
 }
+
+// el-message
+.el-message.break-line-message {
+	align-items: flex-start;
+	.el-icon {
+		padding-top: 6px;
+	}
+	.el-message__content {
+		white-space: pre-line;
+		line-height: 20px;
+	}
+}

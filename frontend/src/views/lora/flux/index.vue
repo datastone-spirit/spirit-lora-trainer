@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-02-10 10:06:41
+ * @LastEditTime: 2025-02-10 15:10:39
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -111,6 +111,7 @@ import { formatFormData, mergeDataToForm } from "./flux.helper";
 import type { RuleForm } from "./types";
 import ViewSampling from "@/components/ViewSampling/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
+import { formatFormValidateMessage } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -244,7 +245,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				checkDirectory(value).then((exists) => {
 					if (!exists) {
-						callback(new Error("目录不存在"));
+						callback(new Error("LoRA保存目录不存在"));
 						return;
 					}
 					callback();
@@ -258,7 +259,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				checkDirectory(value).then((exists) => {
 					if (!exists) {
-						callback(new Error("目录不存在"));
+						callback(new Error("数据集目录不存在"));
 						return;
 					}
 					callback();
@@ -337,13 +338,17 @@ const rules = reactive<FormRules<RuleForm>>({
 				value: number | undefined,
 				callback: (error?: string | Error) => void
 			) => {
-				value = value ?? 0;
-				if (value < 10) {
+				// 联动校验
+				ruleFormRef.value?.validateField("sample_prompts");
+				if (typeof value !== "number") {
+					callback();
+					return;
+				}
+				// 采样步数必须大于等于10
+				if ((value ?? 0) < 10) {
 					callback(new Error("采样步数必须大于等于10"));
 					return;
 				}
-				// 联动校验
-				ruleFormRef.value?.validateField("sample_prompts");
 				callback();
 			},
 			trigger: "change"
@@ -483,9 +488,17 @@ const submitLoading = ref(false);
 function validateForm() {
 	return new Promise((resolve) => {
 		if (!ruleFormRef.value) return resolve(false);
-		ruleFormRef.value.validate(async (valid) => {
+		ruleFormRef.value.validate(async (valid, invalidFields) => {
 			if (!valid) {
-				ElMessage.warning("请填写必填项");
+				let message = "请填写必填项";
+				if (invalidFields) {
+					message = formatFormValidateMessage(invalidFields);
+				}
+				ElMessage({
+					type: "warning",
+					customClass: "break-line-message",
+					message
+				});
 				return resolve(false);
 			}
 			// gpu被占用

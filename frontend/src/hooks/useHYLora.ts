@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-02-05 09:24:49
+ * @LastEditTime: 2025-02-10 08:33:30
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -144,6 +144,7 @@ export const useHYLora = (() => {
 			trainingStore.setHYLoraIsListen(false);
 			trainingStore.setHYLoraIsPolling(false);
 			trainingStore.setHYLoraTaskStatus("none");
+			trainingStore.resetHYLoraData();
 
 			// 触发回调
 			hyLoraEvents.emit("complete");
@@ -166,6 +167,7 @@ export const useHYLora = (() => {
 			trainingStore.setHYLoraIsListen(false);
 			trainingStore.setHYLoraIsPolling(false);
 			trainingStore.setHYLoraTaskStatus("none");
+			trainingStore.resetHYLoraData();
 
 			// 触发回调
 			hyLoraEvents.emit("failed");

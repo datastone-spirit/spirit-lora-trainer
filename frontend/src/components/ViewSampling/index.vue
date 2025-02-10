@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-07 08:53:05
- * @LastEditTime: 2025-02-08 09:17:42
+ * @LastEditTime: 2025-02-10 10:08:15
  * @LastEditors: mulingyuer
  * @Description: 查看采样
- * @FilePath: \frontend\src\views\lora\flux\components\ViewSampling\index.vue
+ * @FilePath: \frontend\src\components\ViewSampling\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -82,15 +82,16 @@ import DefaultImageIcon from "@/assets/images/ai-dataset/image_icon.svg";
 import { useIcon } from "@/hooks/useIcon";
 import { useImageViewer } from "@/hooks/useImageViewer";
 import { directoryFiles } from "@/api/common";
-import { useFluxLora } from "@/hooks/useFluxLora";
 
 export interface ViewSamplingProps {
-	title: string;
+	/** 采样图片存放路径 */
+	samplingPath: string;
 }
 export type List = Array<{ image_name: string; image_path: string }>;
 
+const props = defineProps<ViewSamplingProps>();
+
 const { previewImages } = useImageViewer();
-const { monitorFluxLoraData } = useFluxLora();
 
 const CloseIcon = useIcon({ name: "ri-close-line", size: 28 });
 const RefreshIcon = useIcon({ name: "ri-refresh-line", size: 24 });
@@ -119,12 +120,12 @@ function joinImageUrl(imagePath: string): string {
 
 /** 获取采样数据 */
 function getSamplingData() {
-	if (monitorFluxLoraData.value.data.samplingPath.trim() === "") {
+	if (typeof props.samplingPath !== "string" || props.samplingPath.trim() === "") {
 		ElMessage.warning("暂时还未获取到采样路径，请确认是否已开启采样功能");
 		return;
 	}
 	loading.value = true;
-	directoryFiles({ path: monitorFluxLoraData.value.data.samplingPath })
+	directoryFiles({ path: props.samplingPath })
 		.then((res) => {
 			list.value = res.map((item) => {
 				return {

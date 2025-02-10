@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:31:23
- * @LastEditTime: 2024-12-27 09:35:53
+ * @LastEditTime: 2025-02-10 10:03:59
  * @LastEditors: mulingyuer
  * @Description: LoRA任务详情
  * @FilePath: \frontend\src\views\task\components\LoraTaskDetail.vue
@@ -75,20 +75,37 @@
 				<el-descriptions-item label="每秒速度">
 					{{ data.detail.speed }}
 				</el-descriptions-item>
+				<el-descriptions-item v-if="showSampling" label="训练采样">
+					<el-button size="small" @click="onViewSampling"> 查看采样 </el-button>
+				</el-descriptions-item>
 			</template>
 		</el-descriptions>
+		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { LoRATrainingInfoResult } from "@/api/monitor/types";
 import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
+import ViewSampling from "@/components/ViewSampling/index.vue";
 
 export interface TaskDetailProps {
 	data: LoRATrainingInfoResult;
 }
 
-defineProps<TaskDetailProps>();
+const props = defineProps<TaskDetailProps>();
+
+/** 查看采样 */
+const showSampling = computed(() => {
+	return props.data.is_sampling ?? false;
+});
+const openViewSampling = ref(false);
+const samplingPath = computed(() => {
+	return props.data.sampling_path ?? "";
+});
+function onViewSampling() {
+	openViewSampling.value = true;
+}
 </script>
 
 <style lang="scss" scoped>

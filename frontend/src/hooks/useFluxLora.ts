@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-02-07 17:15:35
+ * @LastEditTime: 2025-02-10 08:32:49
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -109,6 +109,7 @@ export const useFluxLora = (() => {
 			trainingStore.setFluxLoraIsListen(false);
 			trainingStore.setFluxLoraIsPolling(false);
 			trainingStore.setFluxLoraTaskStatus("none");
+			trainingStore.resetFluxLoraData();
 
 			// 触发回调
 			fluxLoraEvents.emit("complete");
@@ -131,6 +132,7 @@ export const useFluxLora = (() => {
 			trainingStore.setFluxLoraIsListen(false);
 			trainingStore.setFluxLoraIsPolling(false);
 			trainingStore.setFluxLoraTaskStatus("none");
+			trainingStore.resetFluxLoraData();
 
 			// 触发回调
 			fluxLoraEvents.emit("failed");

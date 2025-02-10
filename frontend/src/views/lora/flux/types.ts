@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2025-02-08 10:06:30
+ * @LastEditTime: 2025-02-10 09:59:44
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -219,8 +219,8 @@ export interface RuleForm {
 	/** 为 DDP 启用 gradient_as_bucket_view  */
 	ddp_gradient_as_bucket_view: boolean;
 	// ---------
-	/** 每隔几步进行采样 */
+	/** 采样间隔步数 */
 	sample_every_n_steps: number | undefined;
 	/**  采样提示词 */
-	sample_prompts: string | undefined;
+	sample_prompts: string;
 }

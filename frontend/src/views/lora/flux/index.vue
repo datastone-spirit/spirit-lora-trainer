@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-02-08 10:52:01
+ * @LastEditTime: 2025-02-10 10:06:41
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -55,6 +55,9 @@
 						<Collapse v-model="openStep3" title="第3步：模型参数调教">
 							<ModelParameters v-model:form="ruleForm" />
 						</Collapse>
+						<Collapse v-model="openStep3" title="第4步：训练采样">
+							<TrainingSamples v-model:form="ruleForm" />
+						</Collapse>
 						<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
 							<AdvancedSettings v-model:form="ruleForm" />
 						</SimpleCollapse>
@@ -85,7 +88,7 @@
 				</el-button>
 			</template>
 		</FooterButtonGroup>
-		<ViewSampling v-model:open="openViewSampling" />
+		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
 	</div>
 </template>
 
@@ -106,7 +109,8 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
 import type { RuleForm } from "./types";
-import ViewSampling from "./components/ViewSampling/index.vue";
+import ViewSampling from "@/components/ViewSampling/index.vue";
+import TrainingSamples from "./components/TrainingSamples/index.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -225,7 +229,7 @@ const defaultForm = readonly<RuleForm>({
 	ddp_gradient_as_bucket_view: false,
 	// -----
 	sample_every_n_steps: undefined,
-	sample_prompts: undefined
+	sample_prompts: ""
 });
 const ruleForm = useEnhancedLocalStorage<RuleForm>(
 	localStorageKey,
@@ -529,6 +533,9 @@ async function onSubmit() {
 
 /** 查看采样 */
 const openViewSampling = ref(false);
+const samplingPath = computed(() => {
+	return monitorFluxLoraData.value.data.samplingPath ?? "";
+});
 function onViewSampling() {
 	openViewSampling.value = true;
 }

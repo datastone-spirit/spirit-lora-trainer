@@ -34,6 +34,10 @@ class TrainingService:
 
         if is_flux_sampling(parameters.config):
             os.makedirs(f"{parameters.config.output_dir}/sample", exist_ok=True)
+        elif parameters.config.sample_prompts is not None and not os.path.exists(parameters.config.sample_prompts):
+            # if sample_prompts is not none , must be a valid path
+            logger.info(f"sample_prompts is not none, but not a valid path: {parameters.config.sample_prompts}, set it to None")
+            parameters.config.sample_prompts = None
         #
         # FIXME: we pre-create the taskid here, and set it to the log_prefix
         # for tensorborad log parsing, so the user log_preifix configuration will

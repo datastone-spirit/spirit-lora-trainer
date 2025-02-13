@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-02-10 15:10:39
+ * @LastEditTime: 2025-02-13 10:16:23
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -270,12 +270,12 @@ const rules = reactive<FormRules<RuleForm>>({
 	resolution_width: [
 		{
 			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (value < 256) {
-					callback(new Error("图片宽度不能小于256"));
+				if (value < 64) {
+					callback(new Error("图片宽度不能小于64"));
 					return;
 				}
-				if (value % 256 !== 0) {
-					callback(new Error("图片宽度必须是256的整数倍"));
+				if (value % 64 !== 0) {
+					callback(new Error("图片宽度必须是64的整数倍"));
 					return;
 				}
 				callback();
@@ -286,12 +286,12 @@ const rules = reactive<FormRules<RuleForm>>({
 	resolution_height: [
 		{
 			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (value < 256) {
-					callback(new Error("图片高度不能小于256"));
+				if (value < 64) {
+					callback(new Error("图片高度不能小于64"));
 					return;
 				}
-				if (value % 256 !== 0) {
-					callback(new Error("图片高度必须是256的整数倍"));
+				if (value % 64 !== 0) {
+					callback(new Error("图片高度必须是64的整数倍"));
 					return;
 				}
 				callback();

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:31:23
- * @LastEditTime: 2025-02-10 10:03:59
+ * @LastEditTime: 2025-02-17 16:34:27
  * @LastEditors: mulingyuer
  * @Description: LoRA任务详情
  * @FilePath: \frontend\src\views\task\components\LoraTaskDetail.vue
@@ -76,7 +76,7 @@
 					{{ data.detail.speed }}
 				</el-descriptions-item>
 				<el-descriptions-item v-if="showSampling" label="训练采样">
-					<el-button size="small" @click="onViewSampling"> 查看采样 </el-button>
+					<el-button type="info" @click="onViewSampling"> 查看采样 </el-button>
 				</el-descriptions-item>
 			</template>
 		</el-descriptions>

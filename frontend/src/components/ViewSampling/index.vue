@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-07 08:53:05
- * @LastEditTime: 2025-02-10 10:08:15
+ * @LastEditTime: 2025-02-17 16:26:42
  * @LastEditors: mulingyuer
  * @Description: 查看采样
  * @FilePath: \frontend\src\components\ViewSampling\index.vue
@@ -13,7 +13,7 @@
 		class="view-sampling"
 		:show-close="false"
 		direction="rtl"
-		size="522"
+		size="572"
 		@open="onDrawerOpen"
 	>
 		<div class="view-sampling-header">
@@ -49,7 +49,8 @@
 						<el-image
 							class="view-sampling-list-item-img"
 							:src="item.image_path + '?compress=true'"
-							fit="cover"
+							:fit="fit"
+							:lazy="lazy"
 							title="双击查看图片细节"
 						>
 							<template #placeholder>
@@ -82,14 +83,20 @@ import DefaultImageIcon from "@/assets/images/ai-dataset/image_icon.svg";
 import { useIcon } from "@/hooks/useIcon";
 import { useImageViewer } from "@/hooks/useImageViewer";
 import { directoryFiles } from "@/api/common";
+import type { ImageProps } from "element-plus";
 
 export interface ViewSamplingProps {
 	/** 采样图片存放路径 */
 	samplingPath: string;
+	fit?: ImageProps["fit"];
+	lazy?: ImageProps["lazy"];
 }
 export type List = Array<{ image_name: string; image_path: string }>;
 
-const props = defineProps<ViewSamplingProps>();
+const props = withDefaults(defineProps<ViewSamplingProps>(), {
+	fit: "cover",
+	lazy: true
+});
 
 const { previewImages } = useImageViewer();
 
@@ -155,6 +162,11 @@ function onRefresh() {
 
 <style lang="scss">
 .view-sampling {
+	--view-sampling-gap: 12px;
+	--view-sampling-item-width: 100px;
+	--view-sampling-item-height: 100px;
+	--view-sampling-item-padding: 4px;
+	--view-sampling-item-title-height: 20px;
 	border-top-left-radius: $zl-border-radius;
 	border-bottom-left-radius: $zl-border-radius;
 	.el-drawer__header {
@@ -182,21 +194,21 @@ function onRefresh() {
 }
 .view-sampling-list {
 	display: grid;
-	gap: $zl-padding;
-	grid-template-columns: repeat(auto-fill, $zl-ai-dataset-file-width);
-	grid-auto-rows: $zl-ai-dataset-file-height;
+	gap: var(--view-sampling-gap);
+	grid-template-columns: repeat(auto-fill, var(--view-sampling-item-width));
+	grid-auto-rows: var(--view-sampling-item-height);
 	justify-content: center;
 	align-items: start;
 }
 .view-sampling-list-item {
-	width: $zl-ai-dataset-file-width;
-	height: $zl-ai-dataset-file-height;
+	width: var(--view-sampling-item-width);
+	height: var(--view-sampling-item-height);
 	text-align: center;
 	transition:
 		background-color 0.3s ease,
 		opacity 0.3s ease;
 	border-radius: 4px;
-	padding: 4px;
+	padding: var(--view-sampling-item-padding);
 	cursor: pointer;
 	@include no-select();
 	&.selected {
@@ -210,8 +222,12 @@ function onRefresh() {
 	}
 }
 .view-sampling-list-item-img {
-	width: 50px;
-	height: 50px;
+	--view-sampling-item-img-size: calc(
+		var(--view-sampling-item-height) - var(--view-sampling-item-padding) *
+			3 - var(--view-sampling-item-title-height)
+	);
+	width: var(--view-sampling-item-img-size);
+	height: var(--view-sampling-item-img-size);
 	border-radius: 4px;
 }
 .view-sampling-list-item-default-img {
@@ -220,9 +236,9 @@ function onRefresh() {
 	object-fit: contain;
 }
 .view-sampling-list-item-name {
-	margin-top: 4px;
+	margin-top: var(--view-sampling-item-padding);
 	font-size: 12px;
-	line-height: 20px;
+	line-height: var(--view-sampling-item-title-height);
 	color: var(--el-text-color-primary);
 	@include text-ellipsis();
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2025-01-21 09:28:11
+ * @LastEditTime: 2025-02-17 14:43:48
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -10,11 +10,17 @@
 import { useUserStore } from "@/stores";
 import axios from "axios";
 import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
-import { showMaxRetryErrorMessage, showRequestErrorMessage, showErrorMessage } from "./helper";
+import {
+	showMaxRetryErrorMessage,
+	showRequestErrorMessage,
+	showResponseErrorMessage
+} from "./helper";
 import type { RequestResult } from "./types";
 
+const isDev = import.meta.env.MODE === "development";
+
 const instance = axios.create({
-	baseURL: import.meta.env.VITE_APP_API_BASE_URL,
+	baseURL: isDev ? "/api" : import.meta.env.VITE_APP_API_BASE_URL,
 	enableRetry: true,
 	showErrorMessage: true,
 	// showCancelErrorMessage: true, // 这里配置无效，索性注释了
@@ -58,11 +64,11 @@ instance.interceptors.response.use(
 
 		const { success, data, message } = response.data as RequestResult;
 
+		// 响应错误弹窗
+		showResponseErrorMessage(response);
+
 		// 是否报错
-		if (success === false) {
-			showErrorMessage(message);
-			throw new Error(message);
-		}
+		if (success === false) throw new Error(message);
 
 		return data;
 	},

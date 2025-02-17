@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-02-10 10:59:46
+ * @LastEditTime: 2025-02-17 14:45:02
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -110,7 +110,8 @@ export const useHYLora = (() => {
 				task_id: taskId
 			})
 				.then(updateHYLoraData)
-				.catch(() => {
+				.catch((error) => {
+					if (error?.response?.status === 401) return;
 					hyLoraFailed();
 				});
 		}

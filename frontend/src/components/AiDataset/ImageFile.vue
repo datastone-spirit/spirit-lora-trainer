@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 15:15:16
- * @LastEditTime: 2024-12-27 16:36:46
+ * @LastEditTime: 2025-02-17 16:01:55
  * @LastEditors: mulingyuer
  * @Description: 图片文件
  * @FilePath: \frontend\src\components\AiDataset\ImageFile.vue
@@ -13,6 +13,7 @@
 			class="file-list-item-img"
 			:src="data.value + '?compress=true'"
 			:fit="fit"
+			:lazy="lazy"
 			title="双击查看图片细节"
 		>
 			<template #placeholder>
@@ -34,10 +35,12 @@ import DefaultImageIcon from "@/assets/images/ai-dataset/image_icon.svg";
 export interface ImageFileProps extends BaseFileItemProps {
 	data: FileItem;
 	fit?: ImageProps["fit"];
+	lazy?: ImageProps["lazy"];
 }
 
 withDefaults(defineProps<ImageFileProps>(), {
-	fit: "cover"
+	fit: "cover",
+	lazy: true
 });
 </script>
 

@@ -91,8 +91,16 @@ export default defineConfig(({ mode }) => {
 			}
 		},
 		server: {
-			host: true
-			// port: 5173
+			host: true,
+			// port: 5173,
+			proxy: {
+				"/api": {
+					target: viteEnv.VITE_APP_API_BASE_URL,
+					changeOrigin: true,
+					rewrite: (path) => path.replace(/^\/api/, ""),
+					ws: true
+				}
+			}
 		}
 	};
 });

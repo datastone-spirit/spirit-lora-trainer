@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-18 15:35:55
- * @LastEditTime: 2025-01-15 11:23:53
+ * @LastEditTime: 2025-02-17 14:59:50
  * @LastEditors: mulingyuer
  * @Description: 公共api
  * @FilePath: \frontend\src\api\common\index.ts
@@ -54,7 +54,8 @@ export function uploadFiles(
 		method: "POST",
 		params,
 		data,
-		onUploadProgress
+		onUploadProgress,
+		timeout: 1000 * 60 * 10 // 10分钟超时
 	});
 }
 

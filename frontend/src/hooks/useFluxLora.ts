@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-02-10 10:57:23
+ * @LastEditTime: 2025-02-17 14:44:42
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -75,7 +75,8 @@ export const useFluxLora = (() => {
 				task_id: taskId
 			})
 				.then(updateFluxLoraData)
-				.catch(() => {
+				.catch((error) => {
+					if (error?.response?.status === 401) return;
 					fluxLoraFailed();
 				});
 		}

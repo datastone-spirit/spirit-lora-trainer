@@ -294,6 +294,7 @@ class TrainingConfig:
 class HunyuanTrainingParameter:
     config : TrainingConfig = field(default_factory=TrainingConfig)
     dataset : DataSetConfig = field(default_factory=DataSetConfig)
+    frontend_config: Optional[str] = "" # Dedicated to saving the configuratio that frontend restore session configuration from backend
 
     @classmethod
     def from_dict(cls, dikt) -> 'HunyuanTrainingParameter':

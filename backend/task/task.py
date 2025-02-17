@@ -127,7 +127,7 @@ class Task:
         self.end_time = time.time()
         return
     
-    def to_dict(self, verbose: bool = False):
+    def to_dict(self, verbose: bool = False, show_config: bool = False):
         raise NotImplementedError 
     
     def __str__(self):
@@ -185,7 +185,7 @@ class TrainingTask(Task):
         logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
         return 
 
-    def to_dict(self, verbose: bool = False):
+    def to_dict(self, verbose: bool = False, show_config: bool = False):
         """Override to_dict to handle Popen serialization"""
         # Create shallow copy of self.__dict__
         d = dict(self.__dict__)
@@ -201,6 +201,9 @@ class TrainingTask(Task):
         # Convert training parameters
         if verbose is True and self.training_parameters:
             d['training_parameters'] = asdict(self.training_parameters)
+        
+        if show_config is True and self.training_parameters:
+            d['frontend_config'] = self.training_parameters.frontend_config
         return d
 
     def parse_stdout(self, stdout):
@@ -325,7 +328,7 @@ class CaptioningTask(Task):
         })
         return 
 
-    def to_dict(self, verbose: bool = False):
+    def to_dict(self, verbose: bool = False, show_config: bool = False):
         """Override to_dict to enum """
         # Create shallow copy of self.__dict__
         d = dict(self.__dict__)
@@ -385,7 +388,7 @@ class HunyuanTrainingTask(Task):
         logger.info(f"training subprocess run complete successfully, retcode is {retcode}")
         return     
 
-    def to_dict(self, verbose: bool = False):
+    def to_dict(self, verbose: bool = False, show_config: bool = False):
         """Override to_dict to enum """
         # Create shallow copy of self.__dict__
         d = dict(self.__dict__)
@@ -395,6 +398,8 @@ class HunyuanTrainingTask(Task):
         d['task_type'] = self.task_type.value
         d.pop('hunyuan_parameters') 
         d.pop('proc') 
+        if show_config is True and self.hunyuan_parameters:
+            d['frontend_config'] = self.hunyuan_parameters.frontend_config
         return d
 
     def update_detail_with_tb(self):

@@ -275,6 +275,7 @@ class TrainingConfig:
 class TrainingParameter:
     config: Optional[TrainingConfig]  
     dataset: Optional[TrainingDataset]
+    frontend_config: Optional[str] = "" # Dedicated to saving the configuratio that frontend restore session configuration from backend
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingParameter':

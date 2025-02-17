@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-02-17 14:44:42
+ * @LastEditTime: 2025-02-17 16:53:30
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -76,8 +76,7 @@ export const useFluxLora = (() => {
 			})
 				.then(updateFluxLoraData)
 				.catch((error) => {
-					if (error?.response?.status === 401) return;
-					fluxLoraFailed();
+					fluxLoraFailed({ showMessage: error?.response?.status !== 401 });
 				});
 		}
 
@@ -105,7 +104,7 @@ export const useFluxLora = (() => {
 		}
 
 		/** LoRA训练完成 */
-		function fluxLoraComplete() {
+		function fluxLoraComplete(options: { showMessage: boolean } = { showMessage: true }) {
 			// 关闭轮询
 			if (timer) clearTimer();
 			if (monitorFluxLoraData.value.taskStatus === "none") return;
@@ -120,7 +119,7 @@ export const useFluxLora = (() => {
 			fluxLoraEvents.emit("complete");
 
 			// 防止重复弹窗
-			if (showCompleteMessage) return;
+			if (showCompleteMessage || !options.showMessage) return;
 			showCompleteMessage = true;
 			ElMessageBox({
 				title: "训练完成",
@@ -134,7 +133,7 @@ export const useFluxLora = (() => {
 		}
 
 		/** LoRA训练失败 */
-		function fluxLoraFailed() {
+		function fluxLoraFailed(options: { showMessage: boolean } = { showMessage: true }) {
 			// 关闭轮询
 			if (timer) clearTimer();
 			if (monitorFluxLoraData.value.taskStatus === "none") return;
@@ -149,7 +148,7 @@ export const useFluxLora = (() => {
 			fluxLoraEvents.emit("failed");
 
 			// 防止重复弹窗
-			if (showErrorMessage) return;
+			if (showErrorMessage || !options.showMessage) return;
 			showErrorMessage = true;
 			ElMessageBox({
 				title: "训练失败",

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-18 15:35:55
- * @LastEditTime: 2025-02-17 14:59:50
+ * @LastEditTime: 2025-02-17 16:48:38
  * @LastEditors: mulingyuer
  * @Description: 公共api
  * @FilePath: \frontend\src\api\common\index.ts
@@ -64,7 +64,8 @@ export function directoryFiles(params: DirectoryFilesParams) {
 	return request<DirectoryFilesResult>({
 		url: "/tag_dir_file",
 		method: "GET",
-		params
+		params,
+		showErrorMessage: false
 	});
 }
 

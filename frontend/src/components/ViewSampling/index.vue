@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-07 08:53:05
- * @LastEditTime: 2025-02-17 16:26:42
+ * @LastEditTime: 2025-02-17 16:49:47
  * @LastEditors: mulingyuer
  * @Description: 查看采样
  * @FilePath: \frontend\src\components\ViewSampling\index.vue
@@ -141,8 +141,9 @@ function getSamplingData() {
 				};
 			});
 		})
-		.catch((err) => {
-			ElMessage.error(err.message);
+		.catch((error) => {
+			if (error?.response?.status === 401) return;
+			ElMessage.error(error.message);
 		})
 		.finally(() => {
 			loading.value = false;

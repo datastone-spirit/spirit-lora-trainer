@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-02-17 14:45:02
+ * @LastEditTime: 2025-02-17 16:53:56
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -111,8 +111,7 @@ export const useHYLora = (() => {
 			})
 				.then(updateHYLoraData)
 				.catch((error) => {
-					if (error?.response?.status === 401) return;
-					hyLoraFailed();
+					hyLoraFailed({ showMessage: error?.response?.status !== 401 });
 				});
 		}
 
@@ -140,7 +139,7 @@ export const useHYLora = (() => {
 		}
 
 		/** LoRA训练完成 */
-		function hyLoraComplete() {
+		function hyLoraComplete(options: { showMessage: boolean } = { showMessage: true }) {
 			// 关闭轮询
 			if (timer) clearTimer();
 			if (monitorHYLoraData.value.taskStatus === "none") return;
@@ -155,7 +154,7 @@ export const useHYLora = (() => {
 			hyLoraEvents.emit("complete");
 
 			// 防止重复弹窗
-			if (showCompleteMessage) return;
+			if (showCompleteMessage || !options.showMessage) return;
 			showCompleteMessage = true;
 			ElMessageBox({
 				title: "训练完成",
@@ -169,7 +168,7 @@ export const useHYLora = (() => {
 		}
 
 		/** LoRA训练失败 */
-		function hyLoraFailed() {
+		function hyLoraFailed(options: { showMessage: boolean } = { showMessage: true }) {
 			// 关闭轮询
 			if (timer) clearTimer();
 
@@ -183,7 +182,7 @@ export const useHYLora = (() => {
 			hyLoraEvents.emit("failed");
 
 			// 防止重复弹窗
-			if (showErrorMessage) return;
+			if (showErrorMessage || !options.showMessage) return;
 			showErrorMessage = true;
 			ElMessageBox({
 				title: "训练失败",

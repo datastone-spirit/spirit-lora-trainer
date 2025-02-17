@@ -277,26 +277,26 @@ class Image(Resource):
             return {"success": False, "message": f"文件不是图片类型: {full_path}"}, 400
 
          # 检查是否需要压缩
-        compress = request.args.get("compress", "false").lower() == "true"
-        if compress:
+        compress = request.args.get("compress", "true").lower() == "true"
+        if not compress:
             try:
-                # 生成缩略图
-                thumbnail_size = (150, 150)  # 缩略图尺寸，可自定义
-                with PILImage.open(full_path) as img:
-                    img_format = img.format  # 保留原始格式
-                    img.thumbnail(thumbnail_size)  # 创建缩略图
-
-                    # 缓存缩略图到临时文件
-                    temp_dir = tempfile.gettempdir()
-                    thumbnail_path = os.path.join(temp_dir, f"thumb_{os.path.basename(full_path)}")
-                    img.save(thumbnail_path, format=img_format)
-
-                    # 返回缩略图
-                    return send_file(thumbnail_path, mimetype=mime_type)
+                return send_file(full_path, mimetype=mime_type)  # 根据实际类型修改 mimetype
             except Exception as e:
+                return {"success": False, "message": f"无法返回图片: {str(e)}"}, 500
+
+
+        thumbnail_size = (64, 64)  # 缩略图尺寸，可自定义
+        # 生成缩略图
+        try:
+            with PILImage.open(full_path) as img:
+                img_format = img.format  # 保留原始格式
+                img.thumbnail(thumbnail_size)  # 创建缩略图
+                    # 缓存缩略图到临时文件
+                buf = io.BytesIO()
+                img.save(buf, format=img_format)
+                buf.seek(0)
+                return send_file(buf, mimetype=mime_type)
+        except Exception as e:
                 return {"success": False, "message": f"图片压缩失败: {str(e)}"}, 500
 
-        try:
-            return send_file(full_path, mimetype=mime_type)  # 根据实际类型修改 mimetype
-        except Exception as e:
-            return {"success": False, "message": f"无法返回图片: {str(e)}"}, 500
+

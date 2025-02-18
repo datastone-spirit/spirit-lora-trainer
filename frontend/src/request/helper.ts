@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-21 09:12:05
- * @LastEditTime: 2025-02-17 14:43:02
+ * @LastEditTime: 2025-02-18 15:40:42
  * @LastEditors: mulingyuer
  * @Description: 请求辅助函数
  * @FilePath: \frontend\src\request\helper.ts
@@ -33,11 +33,12 @@ export function showRequestErrorMessage(error: any) {
 		if (messageStatus.showUnauthorizedErrorMessage) return;
 		messageStatus.showUnauthorizedErrorMessage = true;
 		ElMessageBox({
-			title: "会话过期",
-			type: "error",
+			title: "登录会话过期",
+			type: "warning",
 			showCancelButton: false,
 			confirmButtonText: "知道了",
-			message: "当前会话已过期，请从智灵平台GPU详情页面重新打开智灵训练器页面"
+			message:
+				"当前登录会话已过期，页面可能无法正常显示训练状态，但训练应在继续。若要继续查看训练进度，请重新登录智灵平台，选择所用的GPU实例，并重新打开智灵训练器"
 		}).finally(() => {
 			messageStatus.showUnauthorizedErrorMessage = false;
 		});

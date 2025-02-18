@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-02-07 16:58:44
+ * @LastEditTime: 2025-02-17 17:02:05
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -221,6 +221,8 @@ export interface StartFluxTrainingData extends Record<string, any> {
 			shuffle_caption: boolean;
 		};
 	};
+	/** 训练器的训练配置 */
+	frontend_config: string;
 }
 
 /** 启动flux训练结果 */
@@ -293,6 +295,8 @@ export interface StartHyVideoTrainingData {
 			frame_buckets: number[];
 		}>;
 	};
+	/** 训练器的训练配置 */
+	frontend_config: string;
 }
 
 /** 启动混元视频训练结果 */

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-02-17 16:53:30
+ * @LastEditTime: 2025-02-18 10:35:04
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -13,8 +13,22 @@ import { useTrainingStore } from "@/stores";
 import { isEmptyObject } from "@/utils/tools";
 import mitt from "mitt";
 
-type EventType = Extract<MonitorFluxLoraData["taskStatus"], "complete" | "failed">;
-export type Events = Record<EventType, void>;
+export type Events = {
+	complete: void;
+	failed: void;
+};
+
+interface FirstGetConfig {
+	open: boolean;
+	callbackList: Array<(res: LoRATrainingInfoResult) => void>;
+}
+
+export interface FluxLoraOptions {
+	/** 是否首次获取训练配置 */
+	isFirstGetConfig?: FirstGetConfig["open"];
+	/** 首次获取训练配置的回调 */
+	firstGetConfigCallback?: FirstGetConfig["callbackList"][number];
+}
 
 export const useFluxLora = (() => {
 	/** 事件订阅 */
@@ -22,6 +36,11 @@ export const useFluxLora = (() => {
 	// 弹窗状态
 	let showCompleteMessage = false;
 	let showErrorMessage = false;
+	// 首次获取配置
+	const firstGetConfig: FirstGetConfig = {
+		open: false,
+		callbackList: []
+	};
 
 	/** 定时器 */
 	let timer: number | null = null;
@@ -62,9 +81,13 @@ export const useFluxLora = (() => {
 		return loraData;
 	}
 
-	return function useFluxLora() {
+	return function useFluxLora(options: FluxLoraOptions = {}) {
 		const trainingStore = useTrainingStore();
 		const { monitorFluxLoraData } = storeToRefs(trainingStore);
+		firstGetConfig.open = options.isFirstGetConfig ?? firstGetConfig.open;
+		if (typeof options.firstGetConfigCallback === "function") {
+			firstGetConfig.callbackList.push(options.firstGetConfigCallback);
+		}
 
 		/** 获取lora训练信息 */
 		function getFluxLoraData() {
@@ -72,9 +95,18 @@ export const useFluxLora = (() => {
 			if (taskId.trim() === "") return;
 
 			loRATrainingInfo({
-				task_id: taskId
+				task_id: taskId,
+				show_config: firstGetConfig.open ? true : false
 			})
-				.then(updateFluxLoraData)
+				.then((res) => {
+					// 首次获取配置
+					if (firstGetConfig.open) {
+						firstGetConfig.open = false;
+						firstGetConfig.callbackList.forEach((callback) => callback(res));
+						firstGetConfig.callbackList = [];
+					}
+					return updateFluxLoraData(res);
+				})
 				.catch((error) => {
 					fluxLoraFailed({ showMessage: error?.response?.status !== 401 });
 				});

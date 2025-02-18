@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-02-13 10:16:23
+ * @LastEditTime: 2025-02-18 10:30:02
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -112,11 +112,16 @@ import type { RuleForm } from "./types";
 import ViewSampling from "@/components/ViewSampling/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormValidateMessage } from "@/utils/tools";
+import type { LoRATrainingInfoResult } from "@/api/monitor";
+import { tomlParse } from "@/utils/toml";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { startTagListen, stopTagListen, monitorTagData } = useTag();
-const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFluxLora();
+const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFluxLora({
+	isFirstGetConfig: true,
+	firstGetConfigCallback: firstResetFormConfig
+});
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const ruleFormRef = ref<FormInstance>();
@@ -374,6 +379,8 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
+/** 是否已经恢复训练配置 */
+const isRestored = ref(false);
 
 // 折叠
 const openStep1 = ref(true);
@@ -533,12 +540,12 @@ async function onSubmit() {
 		startFluxLoraListen(task_id);
 
 		submitLoading.value = false;
+		isRestored.value = true;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
 		stopFluxLoraListen(true);
-
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
@@ -551,6 +558,15 @@ const samplingPath = computed(() => {
 });
 function onViewSampling() {
 	openViewSampling.value = true;
+}
+
+/** 如果存在运行的任务，则在每次第一次更新任务时恢复表单配置为训练时的配置 */
+function firstResetFormConfig(taskData: LoRATrainingInfoResult) {
+	if (!taskData.frontend_config || isRestored.value) return;
+	isRestored.value = true;
+	const tomlData = tomlParse(taskData.frontend_config);
+	mergeDataToForm(tomlData, ruleForm.value);
+	ElMessage.success("训练配置已恢复");
 }
 </script>
 

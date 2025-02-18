@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-02-07 17:00:59
+ * @LastEditTime: 2025-02-18 08:54:35
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -9,6 +9,7 @@
  */
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import type { RuleForm } from "./types";
+import { tomlStringify } from "@/utils/toml";
 
 type Config = StartFluxTrainingData["config"];
 type Dataset = StartFluxTrainingData["dataset"];
@@ -202,7 +203,8 @@ export function formatFormData(form: RuleForm): StartFluxTrainingData {
 
 	return {
 		config: formatConfig(deepCloneForm),
-		dataset: formatDataset(deepCloneForm)
+		dataset: formatDataset(deepCloneForm),
+		frontend_config: tomlStringify(deepCloneForm)
 	};
 }
 

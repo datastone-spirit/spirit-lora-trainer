@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-02-07 17:15:24
+ * @LastEditTime: 2025-02-18 10:41:04
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -81,12 +81,16 @@ export interface LoRATrainingInfoResult {
 	is_sampling?: boolean;
 	/** 采样文件路径，只有开启了采样才会有 */
 	sampling_path?: string;
+	/** 训练器的训练配置 */
+	frontend_config: string;
 }
 
 /** 监听训练信息参数 */
 export interface LoRATrainingInfoParams {
 	/** 任务id */
 	task_id: string;
+	/** 是否获取训练配置 */
+	show_config?: boolean;
 }
 
 /** 监听打标信息参数 */
@@ -131,6 +135,8 @@ export interface ManualTagInfoResult {
 export interface HyVideoTrainingInfoParams {
 	/** 任务id */
 	task_id: string;
+	/** 是否获取训练配置 */
+	show_config?: boolean;
 }
 
 /** 监听混元视频训练信息响应 */
@@ -168,4 +174,6 @@ export interface HyVideoTrainingInfoResult {
 				epoch_loss?: number;
 		  }
 		| string;
+	/** 训练器的训练配置 */
+	frontend_config: string;
 }

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-07 08:53:05
- * @LastEditTime: 2025-02-17 16:49:47
+ * @LastEditTime: 2025-02-18 11:04:04
  * @LastEditors: mulingyuer
  * @Description: 查看采样
  * @FilePath: \frontend\src\components\ViewSampling\index.vue
@@ -114,7 +114,7 @@ function onClose() {
 /** 点击列表项 */
 function onItemClick(_item: List[0], index: number) {
 	previewImages({
-		urlList: list.value.map((item) => item.image_path),
+		urlList: list.value.map((item) => `${item.image_path}?compress=false`),
 		initialIndex: index,
 		filenameList: list.value.map((item) => item.image_name)
 	});

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-07 10:00:01
- * @LastEditTime: 2025-01-09 15:43:49
+ * @LastEditTime: 2025-02-18 10:32:41
  * @LastEditors: mulingyuer
  * @Description: 换源视频训练帮助
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.helper.ts
@@ -9,6 +9,7 @@
  */
 import type { StartHyVideoTrainingData } from "@/api/lora";
 import type { RuleForm } from "./types";
+import { tomlStringify } from "@/utils/toml";
 
 type Config = StartHyVideoTrainingData["config"];
 type Dataset = StartHyVideoTrainingData["dataset"];
@@ -135,7 +136,8 @@ export function formatFormData(form: RuleForm): StartHyVideoTrainingData {
 
 	return {
 		config: formatConfig(deepCloneForm),
-		dataset: formatDataset(deepCloneForm)
+		dataset: formatDataset(deepCloneForm),
+		frontend_config: tomlStringify(deepCloneForm)
 	};
 }
 

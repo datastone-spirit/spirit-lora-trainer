@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:17:12
- * @LastEditTime: 2025-01-07 17:32:20
+ * @LastEditTime: 2025-02-18 08:54:25
  * @LastEditors: mulingyuer
  * @Description: toml相关工具
  * @FilePath: \frontend\src\utils\toml\index.ts
@@ -14,7 +14,6 @@ import type { DownloadTomlFileOptions } from "./types";
 
 /** 生成toml字符串 */
 export function tomlStringify(obj: any): string {
-	// 用easyDeepClone进行深度克隆，JSON会对对象的key进行排序
 	return stringify(obj);
 }
 

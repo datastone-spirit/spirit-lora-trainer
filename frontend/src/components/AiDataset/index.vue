@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-02-08 09:17:20
+ * @LastEditTime: 2025-02-18 11:00:55
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -171,7 +171,7 @@ function onPreview(data: FileItem) {
 	let initialIndex = imgList.findIndex((item) => item === data);
 	if (initialIndex === -1) initialIndex = 0;
 	return previewImages({
-		urlList: imgList.map((item) => item.value),
+		urlList: imgList.map((item) => `${item.value}?compress=false`),
 		initialIndex,
 		filenameList: imgList.map((item) => item.name)
 	});

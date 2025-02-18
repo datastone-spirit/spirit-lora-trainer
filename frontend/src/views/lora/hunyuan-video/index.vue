@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-02-10 15:10:14
+ * @LastEditTime: 2025-02-18 10:38:44
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -83,7 +83,7 @@ import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useTag } from "@/hooks/useTag";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 import { checkData, checkDirectory, checkHYData } from "@/utils/lora.helper";
-import { tomlStringify } from "@/utils/toml";
+import { tomlParse, tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
@@ -93,12 +93,16 @@ import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
 import type { RuleForm } from "./types";
 import { useHYLora } from "@/hooks/useHYLora";
 import { formatFormValidateMessage } from "@/utils/tools";
+import type { HyVideoTrainingInfoResult } from "@/api/monitor";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { startTagListen, stopTagListen, monitorTagData } = useTag();
-const { startHYLoraListen, stopHYLoraListen } = useHYLora();
+const { startHYLoraListen, stopHYLoraListen } = useHYLora({
+	isFirstGetConfig: true,
+	firstGetConfigCallback: firstResetFormConfig
+});
 
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_hunyuan_video_form`;
@@ -223,6 +227,8 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
+/** 是否已经恢复训练配置 */
+const isRestored = ref(false);
 
 /** toml */
 const toml = ref("");
@@ -421,6 +427,15 @@ async function onSubmit() {
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
+}
+
+/** 如果存在运行的任务，则在每次第一次更新任务时恢复表单配置为训练时的配置 */
+function firstResetFormConfig(taskData: HyVideoTrainingInfoResult) {
+	if (!taskData.frontend_config || isRestored.value) return;
+	isRestored.value = true;
+	const tomlData = tomlParse(taskData.frontend_config);
+	mergeDataToForm(tomlData, ruleForm.value);
+	ElMessage.success("训练配置已恢复");
 }
 </script>
 

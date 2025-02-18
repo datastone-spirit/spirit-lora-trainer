@@ -176,3 +176,15 @@
 		line-height: 20px;
 	}
 }
+
+.el-message-box.login-401-message {
+	width: 500px;
+	.el-message-box__container {
+		align-items: flex-start;
+	}
+	.el-message-box__message ol {
+		padding-inline-start: 40px;
+		margin-block-start: 14px;
+		margin-block-end: 14px;
+	}
+}

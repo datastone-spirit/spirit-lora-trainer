@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-21 09:12:05
- * @LastEditTime: 2025-02-18 15:40:42
+ * @LastEditTime: 2025-02-18 16:07:12
  * @LastEditors: mulingyuer
  * @Description: 请求辅助函数
  * @FilePath: \frontend\src\request\helper.ts
@@ -37,8 +37,10 @@ export function showRequestErrorMessage(error: any) {
 			type: "warning",
 			showCancelButton: false,
 			confirmButtonText: "知道了",
+			dangerouslyUseHTMLString: true,
+			customClass: "login-401-message",
 			message:
-				"当前登录会话已过期，页面可能无法正常显示训练状态，但训练应在继续。若要继续查看训练进度，请重新登录智灵平台，选择所用的GPU实例，并重新打开智灵训练器"
+				"<p>尊敬的用户，您好！</p><p>当前登录会话已失效，虽然页面可能无法正常显示训练状态，但训练过程仍将继续正常运行。</p><p>如需继续观察训练情况，请按照以下步骤操作：</p><ol><li>重新登录智灵平台</li><li>选择用于训练的GPU实例</li><li>重新打开智灵训练器</li></ol><p>感谢您的理解与配合。</p>"
 		}).finally(() => {
 			messageStatus.showUnauthorizedErrorMessage = false;
 		});

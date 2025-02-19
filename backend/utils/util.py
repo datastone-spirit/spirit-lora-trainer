@@ -1,9 +1,18 @@
 import pathlib
 import logging
 import os
+import mimetypes
 import sys
 from typing import Tuple
 
+# Register common image MIME types
+mimetypes.add_type("image/webp", ".webp")
+mimetypes.add_type("image/jpeg", ".jpeg")
+mimetypes.add_type("image/jpeg", ".jpg")
+mimetypes.add_type("image/png", ".png")
+mimetypes.add_type("image/gif", ".gif")
+mimetypes.add_type("image/bmp", ".bmp")
+mimetypes.add_type("image/tiff", ".tiff")
 
 def getmodelpath() -> str:
      return  os.path.join(getprojectpath() , "models")
@@ -66,3 +75,27 @@ def caculate_image_steps(images :Tuple[(str, int)]) -> int:
                     total_steps +=1
           total_steps *= item[1]
      return total_steps
+
+def get_image_mime_type(file_path: str) -> str:
+    """
+    Returns the MIME type for an image file.
+    Falls back to a common type based on file extension if mimetypes.guess_type returns None.
+    """
+    mime_type, _ = mimetypes.guess_type(file_path)
+    if not mime_type:
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext == ".webp":
+            mime_type = "image/webp"
+        elif ext in [".jpg", ".jpeg"]:
+            mime_type = "image/jpeg"
+        elif ext == ".png":
+            mime_type = "image/png"
+        elif ext == ".gif":
+            mime_type = "image/gif"
+        elif ext == ".bmp":
+            mime_type = "image/bmp"
+        elif ext in [".tiff", ".tif"]:
+            mime_type = "image/tiff"
+        else:
+            mime_type = "application/octet-stream"
+    return mime_type

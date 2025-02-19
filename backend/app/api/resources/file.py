@@ -5,7 +5,7 @@ from flask import request, send_file
 from flask_restful import Resource
 from ..common.utils import res, get_directory_structure, use_swagger_config, validate_training_data
 from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config,delete_file_config, preview_file_config
-from utils.util import pathFormat, setup_logging
+from utils.util import pathFormat, setup_logging, get_image_mime_type
 from PIL import Image as PILImage
 import tempfile
 
@@ -192,7 +192,7 @@ class TagDirFile(Resource):
                 
                 if os.path.isfile(item_path):
                     # 查找图片文件，支持多种格式
-                    if item.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    if item.lower().endswith(('.png', '.jpg', '.jpeg', ".bmp", ".tiff", ".webp")):
                         # 去掉文件扩展名后保存
                         base_name = os.path.splitext(item)[0]
                         images[base_name] = item_path
@@ -272,7 +272,7 @@ class Image(Resource):
         if not os.path.isfile('/' + full_path):
             return {"success": False, "message": f"文件不存在: {full_path}"}, 400
         
-        mime_type, _ = mimetypes.guess_type(full_path)
+        mime_type = get_image_mime_type(full_path)
         if not mime_type or not mime_type.startswith("image/"):
             return {"success": False, "message": f"文件不是图片类型: {full_path}"}, 400
 

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-02-18 11:00:55
+ * @LastEditTime: 2025-02-19 10:45:13
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -79,7 +79,7 @@
 				<el-upload
 					ref="uploadRef"
 					v-model:file-list="uploadFileList"
-					accept="image/jpeg,image/png,text/plain"
+					accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,text/plain"
 					multiple
 					:show-file-list="false"
 					:auto-upload="false"

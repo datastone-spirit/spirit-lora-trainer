@@ -192,7 +192,7 @@ class TagDirFile(Resource):
                 
                 if os.path.isfile(item_path):
                     # 查找图片文件，支持多种格式
-                    if item.lower().endswith(('.png', '.jpg', '.jpeg', ".bmp", ".tiff", ".webp")):
+                    if item.lower().endswith(('.png', '.jpg', '.jpeg', ".bmp", ".tiff", ".webp", ".tif", ".gif")):
                         # 去掉文件扩展名后保存
                         base_name = os.path.splitext(item)[0]
                         images[base_name] = item_path

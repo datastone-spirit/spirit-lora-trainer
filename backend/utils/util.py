@@ -13,6 +13,7 @@ mimetypes.add_type("image/png", ".png")
 mimetypes.add_type("image/gif", ".gif")
 mimetypes.add_type("image/bmp", ".bmp")
 mimetypes.add_type("image/tiff", ".tiff")
+mimetypes.add_type("image/tif", ".tif")
 
 def getmodelpath() -> str:
      return  os.path.join(getprojectpath() , "models")
@@ -65,7 +66,7 @@ def resolveProjectPath(input_path: str) -> str:
 
 def caculate_image_steps(images :Tuple[(str, int)]) -> int:
      total_steps = 0;
-     extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
+     extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".tif", ".gif"}
      for item in images:
           if not os.path.exists(item[0]):
                continue

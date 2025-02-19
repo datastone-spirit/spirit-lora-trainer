@@ -39,7 +39,7 @@ class CaptioningService:
 
         
     
-    def load_images_from_directory(self,directory: str, extensions=None):
+    def load_images_from_directory(self,directory: str, extensions={".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".tif", ".gif"}):
         """
         从目录中加载所有图片文件路径。
 
@@ -50,9 +50,6 @@ class CaptioningService:
         返回:
         - List[str]: 图片文件路径列表。
         """
-        if extensions is None:
-            extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
-
         image_paths = []
         for file in os.listdir(directory):  # 仅遍历当前目录
             file_path = os.path.join(directory, file)

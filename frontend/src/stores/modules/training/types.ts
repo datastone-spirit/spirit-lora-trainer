@@ -1,14 +1,18 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-02-07 16:19:36
+ * @LastEditTime: 2025-02-20 10:07:01
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
  * 怎么可能会有bug！！！
  */
 import type { TaskStatus } from "@/api/types";
-import type { HyVideoTrainingInfoResult, LoRATrainingInfoResult } from "@/api/monitor";
+import type {
+	GPUMonitorInfoResult,
+	HyVideoTrainingInfoResult,
+	LoRATrainingInfoResult
+} from "@/api/monitor";
 
 /** GPU数据 */
 export interface GPUData {
@@ -16,6 +20,8 @@ export interface GPUData {
 	gpuPower: number;
 	/** gpu显存百分比，例：20 */
 	gpuMemory: number;
+	/** gpu列表信息 */
+	gpuList: GPUMonitorInfoResult;
 }
 
 /** 监听GPU信息数据 */

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 17:37:15
- * @LastEditTime: 2025-01-13 17:02:37
+ * @LastEditTime: 2025-02-20 10:04:23
  * @LastEditors: mulingyuer
  * @Description: gpu hooks
  * @FilePath: \frontend\src\hooks\useGPU.ts
@@ -24,10 +24,12 @@ export function useGPU() {
 	}
 
 	/** 格式化数据 */
-	function formatData(data: GPUMonitorInfoResult[number]): GPUData {
+	function formatData(data: GPUMonitorInfoResult): GPUData {
+		const firstData = data[0];
 		return {
-			gpuMemory: calculatePercentage(data.memory_used_mb, data.memory_total_mb),
-			gpuPower: calculatePercentage(data.power_draw_watts, data.power_total_watts)
+			gpuMemory: calculatePercentage(firstData.memory_used_mb, firstData.memory_total_mb),
+			gpuPower: calculatePercentage(firstData.power_draw_watts, firstData.power_total_watts),
+			gpuList: data
 		};
 	}
 
@@ -45,7 +47,7 @@ export function useGPU() {
 			const result = res[0];
 			if (!result) return;
 
-			trainingStore.setGPUData(formatData(result));
+			trainingStore.setGPUData(formatData(res));
 		});
 	}
 

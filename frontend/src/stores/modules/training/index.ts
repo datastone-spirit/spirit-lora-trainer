@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-02-10 08:32:15
+ * @LastEditTime: 2025-02-20 10:03:44
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -26,7 +26,8 @@ export const useTrainingStore = defineStore("training", () => {
 		isPolling: false,
 		data: {
 			gpuPower: 0,
-			gpuMemory: 0
+			gpuMemory: 0,
+			gpuList: []
 		}
 	});
 	function setGPUIsListen(val: boolean) {
@@ -41,7 +42,8 @@ export const useTrainingStore = defineStore("training", () => {
 	function resetGPUData() {
 		monitorGPUData.value.data = {
 			gpuPower: 0,
-			gpuMemory: 0
+			gpuMemory: 0,
+			gpuList: []
 		};
 	}
 

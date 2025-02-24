@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-10 11:47:24
- * @LastEditTime: 2025-01-14 16:34:16
+ * @LastEditTime: 2025-02-24 17:04:32
  * @LastEditors: mulingyuer
  * @Description: 混元视频任务详情
  * @FilePath: \frontend\src\views\task\components\HYDetail.vue
@@ -27,7 +27,7 @@
 			</el-descriptions-item>
 			<template v-else>
 				<el-descriptions-item label="当前第几步">
-					{{ data.detail.current }}
+					{{ data.status === "complete" ? total : data.detail.current }}
 				</el-descriptions-item>
 				<el-descriptions-item label="预估总步数">
 					{{ total }}
@@ -42,7 +42,7 @@
 					{{ data.detail.total_epoch }}
 				</el-descriptions-item>
 				<el-descriptions-item label="已经耗时（s）">
-					{{ secondsToHHMMSS(data.detail.elapsed ?? 0) }}
+					{{ elapsed }}
 				</el-descriptions-item>
 				<el-descriptions-item label="当前loss">
 					{{ data.detail.loss }}
@@ -57,8 +57,8 @@
 
 <script setup lang="ts">
 import type { HyVideoTrainingInfoResult } from "@/api/monitor";
+import dayjs from "@/utils/dayjs";
 import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
-import { secondsToHHMMSS } from "@/utils/tools";
 
 export interface HYDetailProps {
 	data: HyVideoTrainingInfoResult;
@@ -74,6 +74,41 @@ const total = computed(() => {
 	if (isFailed.value) return "??";
 	const { estimate_steps_per_epoch = 0, total_epoch = 0 } = detail.value as Detail;
 	return estimate_steps_per_epoch * total_epoch;
+});
+
+/** 计算耗时 */
+const elapsed = computed(() => {
+	if (typeof props.data.detail === "string") return "";
+	if (props.data.status !== "complete") return props.data.detail.elapsed;
+	const start = dayjs.unix(props.data.start_time);
+	const end = dayjs.unix(props.data.end_time ?? 0);
+	// 计算总的秒差
+	let totalSecondsDiff = end.diff(start, "second");
+
+	// 计算小时、分钟、秒
+	const hours = Math.floor(totalSecondsDiff / 3600);
+	totalSecondsDiff %= 3600;
+	const minutes = Math.floor(totalSecondsDiff / 60);
+	const seconds = totalSecondsDiff % 60;
+
+	// 构造时间差字符串
+	let timeDiffString = "";
+
+	if (hours > 0) {
+		timeDiffString += `${hours}:`;
+	}
+
+	if (minutes > 0 || hours > 0) {
+		// 如果有小时部分，则分钟部分必须显示两位
+		timeDiffString += `${minutes.toString().padStart(2, "0")}:`;
+	} else if (seconds > 0) {
+		// 如果没有小时和分钟部分，且有秒数，则直接显示秒数前不需要分钟的零
+		timeDiffString += `0:`;
+	}
+
+	timeDiffString += seconds.toString().padStart(2, "0");
+
+	return timeDiffString;
 });
 </script>
 

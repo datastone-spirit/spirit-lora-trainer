@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:31:23
- * @LastEditTime: 2025-02-17 16:34:27
+ * @LastEditTime: 2025-02-24 16:42:47
  * @LastEditors: mulingyuer
  * @Description: LoRA任务详情
  * @FilePath: \frontend\src\views\task\components\LoraTaskDetail.vue
@@ -26,20 +26,20 @@
 				{{ data.detail }}
 			</el-descriptions-item>
 			<template v-else>
-				<el-descriptions-item label="当前第几个">
+				<el-descriptions-item label="当前第几步">
 					{{ data.detail.current }}
 				</el-descriptions-item>
-				<el-descriptions-item label="总图片数量">
+				<el-descriptions-item label="总步数">
 					{{ data.detail.total }}
 				</el-descriptions-item>
 				<el-descriptions-item label="进度百分比">
-					{{ data.detail.progress }}
+					{{ progress }}
 				</el-descriptions-item>
-				<el-descriptions-item label="已经耗时">
-					{{ data.detail.elapsed }}
+				<el-descriptions-item label="已经耗时（s）">
+					{{ elapsed }}
 				</el-descriptions-item>
 				<el-descriptions-item label="剩余时间">
-					{{ data.detail.remaining }}
+					{{ data.status === "complete" ? "0" : data.detail.remaining }}
 				</el-descriptions-item>
 				<el-descriptions-item label="损失平均值">
 					{{ data.detail.loss_avr }}
@@ -68,7 +68,6 @@
 				<el-descriptions-item label="总共优化步数">
 					{{ data.detail.total_optimization_steps }}
 				</el-descriptions-item>
-
 				<el-descriptions-item label="unet学习率">
 					{{ data.detail.lr_unet }}
 				</el-descriptions-item>
@@ -88,12 +87,56 @@
 import type { LoRATrainingInfoResult } from "@/api/monitor/types";
 import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
 import ViewSampling from "@/components/ViewSampling/index.vue";
+import dayjs from "@/utils/dayjs";
 
 export interface TaskDetailProps {
 	data: LoRATrainingInfoResult;
 }
 
 const props = defineProps<TaskDetailProps>();
+
+/** 计算耗时 */
+const elapsed = computed(() => {
+	if (typeof props.data.detail === "string") return "";
+	if (props.data.status !== "complete") return props.data.detail.elapsed;
+	const start = dayjs.unix(props.data.start_time);
+	const end = dayjs.unix(props.data.end_time ?? 0);
+	// 计算总的秒差
+	let totalSecondsDiff = end.diff(start, "second");
+
+	// 计算小时、分钟、秒
+	const hours = Math.floor(totalSecondsDiff / 3600);
+	totalSecondsDiff %= 3600;
+	const minutes = Math.floor(totalSecondsDiff / 60);
+	const seconds = totalSecondsDiff % 60;
+
+	// 构造时间差字符串
+	let timeDiffString = "";
+
+	if (hours > 0) {
+		timeDiffString += `${hours}:`;
+	}
+
+	if (minutes > 0 || hours > 0) {
+		// 如果有小时部分，则分钟部分必须显示两位
+		timeDiffString += `${minutes.toString().padStart(2, "0")}:`;
+	} else if (seconds > 0) {
+		// 如果没有小时和分钟部分，且有秒数，则直接显示秒数前不需要分钟的零
+		timeDiffString += `0:`;
+	}
+
+	timeDiffString += seconds.toString().padStart(2, "0");
+
+	return timeDiffString;
+});
+
+/** 进度百分比 */
+const progress = computed(() => {
+	if (props.data.status === "complete") return "100%";
+	if (typeof props.data.detail === "string") return "";
+	if (!props.data.detail.progress) return "";
+	return `${props.data.detail.progress}%`;
+});
 
 /** 查看采样 */
 const showSampling = computed(() => {

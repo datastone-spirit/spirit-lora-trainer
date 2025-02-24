@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-10-11 17:10:47
- * @LastEditTime: 2024-12-26 16:57:06
+ * @LastEditTime: 2025-02-24 16:03:07
  * @LastEditors: mulingyuer
  * @Description: dayjs封装
  * @FilePath: \frontend\src\utils\dayjs.ts
@@ -15,3 +15,5 @@ dayjs.locale("zh-cn");
 export function formatDate(date: Date | string | number, format: string): string {
 	return dayjs(date).format(format);
 }
+
+export default dayjs;

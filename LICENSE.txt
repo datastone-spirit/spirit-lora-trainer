@@ -1,0 +1,88 @@
+【智灵】训练器许可协议
+您通过点击同意或使用、复制、修改、发布【智灵】训练器的任何部分，即视为您认可并接受本协议的内容，本协议立即生效。
+一、定义：
+1.1.【智灵】训练器系湖南磐云数据有限公司开发的拥有完整知识产权的软件和算法。
+1.2.“协议”系指本协议中关于【智灵】训练器或其任何部分或要素的使用、复制、发行、修改、和展示的条款和条件。
+1.3.“文档”指磐云数据向公众提供的有关该训练器的规格、手册和文档。
+1.4.“托管服务”系指通过应用程序编程接口(API)、web 访问或任何其他电子或远程手段提供的托管服务。
+1.5.“被许可方”、“您”或“您的”系指行使本协议授予的权利和/或出于任何目的、在任何使用领域使用【智灵】训练器的自然人或法人。
+1.6.“输出”系指因运营或以其他方式使用【智灵】训练器系而产生的信息和/或内容输出，包括通过托管服务的输出。
+1.7.“磐云”“智灵”“我们”系指“湖南磐云数据有限公司”。
+二、授予权利。
+2.1.我方仅就本协议项下【智灵】训练器授予您一项非排他性、不可转让的有限许可，根据材料中包含或使用的磐云知识产权或我方拥有的其他权利使用、复制、分发、创作材料的衍生作品(包括模型衍生品)，并仅根据本协议条款和可接受使用政策对其进行修改。您不得违反本协议使用政策的任何条款。
+三、使用规则
+在您遵守本协议的前提下，您可以使用【智灵】训练器，但您必须满足以下所有条件:
+3.1.您对【智灵】训练器作品的使用必须遵守相关法律法规。您必须在管理【智灵】训练器作品的使用和/或分发的任何协议(例如许可协议、使用条款等)中纳入本协议所述的条款和条件，作为可执行条款。
+3.2.您不得使用【智灵】训练器作品或【智灵】训练器作品的任何输出或结果来改进任何其他 AI 模型。
+3.3.本协议项下未授予任何知识产权许可，您不得随意或更改使用我们的任何名称或标志。
+3.4.我们对您生成的任何输出不主张任何权利。您和您的用户对输出及其后续使用全权负责。
+3.5.您在使用【智灵】训练器时不得修改涉及我们产品的任何信息，包括但不限于Logo、启动时候的Banner页面以及关于页面的联系方式等。
+3.6.您在使用【智灵】训练器进一步输出内容时应完整展示我们的产品信息。
+四、免责保证和责任限制。
+4.1.我们没有义务支持、更新、提供培训或开发【智灵】训练器作品的任何进一步版本，也没有义务授予任何许可。
+4.2.在任何情况下，我们不承担您对外输出或使用【智灵】训练器生成的任何结果的法律后果。
+五、协议生效与终止
+5.1.本协议的期限自您接受本协议或获得材料之日起开始，并将继续完全有效，直至根据本协议的条款和条件终止。
+5.2.如果您违反本协议的任何条款或条件，我方可单方终止本协议。本协议终止后，您必须及时删除并停止使用【智灵】训练器作品。
+六、适用法律及争议解决
+6.1.本协议适用中国法律（为本合同之目的，不包括中国香港特别行政区、澳门特别行政区、台湾地区法律）。
+6.2.履行本协议所发生的或与本协议有关的任何争议，双方可协商解决。协商不成的，任何一方可提交长沙仲裁委员会，仲裁委员会按照申请仲裁时该委员会现行有效的仲裁规则进行仲裁，在长沙进行仲裁。仲裁裁决是终局的，对各方均有约束力。
+七、 协议修改
+湖南磐云数据有限公司保留自行修改本协议的权利。继续使用【智灵】训练器即视为接受修订后的条款。
+
+
+
+[Zhiling] Trainer License Agreement
+
+By clicking "Agree" or by accessing, using, copying, modifying, or distributing any portion of the [Zhiling] Trainer (the "Software"), you ("Licensee" or "You") agree to be bound by the terms of this License Agreement (the "Agreement"). If you do not accept these terms, you may not use the Software.
+
+1. Definitions
+1.1 "[Zhiling] Trainer" means the proprietary software, algorithms, and associated documentation developed and owned by Hunan Panyun Data Co., Ltd. ("Licensor" or "Panyun"), including all intellectual property rights therein.
+
+1.2 "Documentation" refers to technical specifications, user manuals, and other materials provided by Panyun to facilitate the use of the Software.
+
+1.3 "Hosted Services" means services accessible via API, web interface, or other electronic means, including cloud-based functionalities of the Software.
+
+1.4 "Output" means any data, content, or results generated through the operation or use of the Software, including via Hosted Services.
+
+1.5 "Derivative Works" includes modifications, adaptations, or model derivatives created using the Software.
+
+
+
+2. License Grant
+2.1 Scope: 
+Subject to compliance with this Agreement, Panyun grants You a limited, non-exclusive, non-transferable, revocable license to:
+(1).Use the Software and Documentation for internal purposes;(2).Reproduce and distribute the Software solely for lawful purposes;(3).Create Derivative Works, provided such works comply with Section 3.
+
+2.2 Restrictions: You may not:
+(1)Reverse-engineer, decompile, or disassemble the Software;(2)Use the Software or Output to train, improve, or develop competing AI models;(3)Remove, alter, or obscure Panyun’s trademarks, logos, or proprietary notices;(4)Sublicense, lease, or commercially exploit the Software without prior written consent.
+
+3. Usage Terms
+3.1 Legal Compliance: You warrant that Your use of the Software complies with all applicable laws, regulations, and third-party rights.
+
+3.2 Attribution: All Output must prominently display Panyun’s branding (e.g., "Powered by [Zhiling] Trainer").
+
+3.3 Ownership of Output: Panyun claims no ownership over Output. You assume full liability for Output and its downstream applications.
+
+4. Intellectual Property
+4.1 Reservation of Rights: All rights not expressly granted herein are reserved by Panyun. The Software is protected under copyright, patent, and trade secret laws.
+
+4.2 Trademarks: You may not use "Panyun," "Zhiling," or associated logos without prior written authorization.
+
+5. Disclaimers
+5.1 As-Is Basis: The Software is provided "AS IS." Panyun disclaims all warranties, including fitness for a particular purpose, non-infringement, or uninterrupted operation.
+
+5.2 Limitation of Liability: In no event shall Panyun be liable for indirect, incidental, or consequential damages arising from Your use of the Software.
+
+6. Term and Termination
+6.1 Term: This Agreement remains effective until terminated.
+
+6.2 Termination for Breach: Panyun may terminate this Agreement immediately if You breach any term. Upon termination, You must cease all use and destroy all copies of the Software.
+
+7. Governing Law and Dispute Resolution
+7.1 Governing Law: This Agreement is governed by the laws of the People’s Republic of China (excluding Hong Kong SAR, Macau SAR, and Taiwan).
+
+7.2 Arbitration: Any disputes shall be resolved by binding arbitration administered by the Changsha Arbitration Commission in accordance with its rules. The arbitration shall be conducted in Changsha, China.
+
+8. Amendments
+Panyun reserves the right to modify this Agreement at its discretion. Continued use of the Software constitutes acceptance of revised terms.

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2025-01-14 10:41:24
+ * @LastEditTime: 2025-03-05 16:31:33
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -71,7 +71,7 @@
 		prop="resume"
 		popover-content="resume"
 	>
-		<FileSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
+		<FolderSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
 	</PopoverFormItem>
 </template>
 

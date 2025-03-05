@@ -11,6 +11,8 @@ interface ImportMetaEnv {
 	VITE_APP_LOCAL_KEY_PREFIX: string;
 	/** api请求地址 */
 	VITE_APP_API_BASE_URL: string;
+	/** 是否开启LoRA保存路径校验 */
+	VITE_APP_LORA_PATH_CHECK: string;
 }
 
 interface ImportMeta {

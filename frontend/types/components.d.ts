@@ -70,6 +70,7 @@ declare module 'vue' {
     PopoverFormItem: typeof import('./../src/components/Form/PopoverFormItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SavePathWarningDialog: typeof import('./../src/components/Dialog/SavePathWarningDialog.vue')['default']
     SDXLNetworkModuleSelect: typeof import('./../src/components/Form/SDXLNetworkModuleSelect.vue')['default']
     SimpleCollapse: typeof import('./../src/components/Collapse/SimpleCollapse.vue')['default']
     SplitRightPanel: typeof import('./../src/components/Split/SplitRightPanel/index.vue')['default']

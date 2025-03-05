@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-02-18 10:30:02
+ * @LastEditTime: 2025-03-05 16:17:08
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -89,6 +89,7 @@
 			</template>
 		</FooterButtonGroup>
 		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
+		<SavePathWarningDialog ref="savePathWarningDialogRef" />
 	</div>
 </template>
 
@@ -114,6 +115,7 @@ import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormValidateMessage } from "@/utils/tools";
 import type { LoRATrainingInfoResult } from "@/api/monitor";
 import { tomlParse } from "@/utils/toml";
+import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -256,6 +258,14 @@ const rules = reactive<FormRules<RuleForm>>({
 					callback();
 				});
 			}
+		},
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (import.meta.env.VITE_APP_LORA_PATH_CHECK === "false") return callback();
+				if (value.startsWith("/root")) return callback();
+				confirmLoRASaveDir(); // 主要是加弹窗
+				callback(new Error("LoRA保存目录必须以/root开头"));
+			}
 		}
 	],
 	image_dir: [
@@ -381,6 +391,8 @@ const rules = reactive<FormRules<RuleForm>>({
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
+/** lora保存警告弹窗 */
+const savePathWarningDialogRef = ref<InstanceType<typeof SavePathWarningDialog>>();
 
 // 折叠
 const openStep1 = ref(true);
@@ -519,6 +531,12 @@ function validateForm() {
 				ElMessage.error("数据集目录下没有数据，请上传训练用的素材");
 				return resolve(false);
 			}
+			// 检测lora保存目录是否是/root下的
+			if (import.meta.env.VITE_APP_LORA_PATH_CHECK !== "false") {
+				const isCheckLoRASaveDir = await confirmLoRASaveDir();
+				if (!isCheckLoRASaveDir) return resolve(false);
+			}
+
 			return resolve(true);
 		});
 	});
@@ -549,6 +567,16 @@ async function onSubmit() {
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
+}
+
+/** lora保存目录非/root确认弹窗 */
+function confirmLoRASaveDir() {
+	return new Promise((resolve) => {
+		const outputDir = ruleForm.value.output_dir;
+		if (outputDir.startsWith("/root")) return resolve(true);
+
+		savePathWarningDialogRef.value?.show(resolve);
+	});
 }
 
 /** 查看采样 */

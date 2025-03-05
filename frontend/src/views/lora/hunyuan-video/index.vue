@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-02-18 10:38:44
+ * @LastEditTime: 2025-03-05 16:28:15
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -73,6 +73,7 @@
 			:submit-loading="submitLoading"
 			@submit="onSubmit"
 		></FooterButtonGroup>
+		<SavePathWarningDialog ref="savePathWarningDialogRef" />
 	</div>
 </template>
 
@@ -94,6 +95,7 @@ import type { RuleForm } from "./types";
 import { useHYLora } from "@/hooks/useHYLora";
 import { formatFormValidateMessage } from "@/utils/tools";
 import type { HyVideoTrainingInfoResult } from "@/api/monitor";
+import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -104,6 +106,8 @@ const { startHYLoraListen, stopHYLoraListen } = useHYLora({
 	firstGetConfigCallback: firstResetFormConfig
 });
 
+/** lora保存警告弹窗 */
+const savePathWarningDialogRef = ref<InstanceType<typeof SavePathWarningDialog>>();
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_hunyuan_video_form`;
 const defaultForm = readonly<RuleForm>({
@@ -189,6 +193,14 @@ const rules = reactive<FormRules<RuleForm>>({
 				} catch (error) {
 					return callback(new Error((error as Error).message));
 				}
+			}
+		},
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (import.meta.env.VITE_APP_LORA_PATH_CHECK === "false") return callback();
+				if (value.startsWith("/root")) return callback();
+				confirmLoRASaveDir(); // 主要是加弹窗
+				callback(new Error("LoRA保存目录必须以/root开头"));
 			}
 		}
 	],
@@ -369,6 +381,12 @@ function validateForm() {
 				return resolve(false);
 			}
 
+			// 检测lora保存目录是否是/root下的
+			if (import.meta.env.VITE_APP_LORA_PATH_CHECK !== "false") {
+				const isCheckLoRASaveDir = await confirmLoRASaveDir();
+				if (!isCheckLoRASaveDir) return resolve(false);
+			}
+
 			return resolve(true);
 		});
 	});
@@ -436,6 +454,16 @@ function firstResetFormConfig(taskData: HyVideoTrainingInfoResult) {
 	const tomlData = tomlParse(taskData.frontend_config);
 	mergeDataToForm(tomlData, ruleForm.value);
 	ElMessage.success("训练配置已恢复");
+}
+
+/** lora保存目录非/root确认弹窗 */
+function confirmLoRASaveDir() {
+	return new Promise((resolve) => {
+		const outputDir = ruleForm.value.output_dir;
+		if (outputDir.startsWith("/root")) return resolve(true);
+
+		savePathWarningDialogRef.value?.show(resolve);
+	});
 }
 </script>
 

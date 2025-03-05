@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-05 16:17:08
+ * @LastEditTime: 2025-03-05 16:27:06
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -126,6 +126,8 @@ const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFlux
 });
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
+/** lora保存警告弹窗 */
+const savePathWarningDialogRef = ref<InstanceType<typeof SavePathWarningDialog>>();
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_flux_form`;
 const defaultForm = readonly<RuleForm>({
@@ -391,8 +393,6 @@ const rules = reactive<FormRules<RuleForm>>({
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
-/** lora保存警告弹窗 */
-const savePathWarningDialogRef = ref<InstanceType<typeof SavePathWarningDialog>>();
 
 // 折叠
 const openStep1 = ref(true);

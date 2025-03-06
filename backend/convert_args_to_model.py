@@ -1,5 +1,6 @@
 from library import flux_train_utils
-import train_network
+from library import train_util
+import flux_train_network
 from typing import List
 
 def init_advanced():
@@ -9,8 +10,9 @@ def init_advanced():
 
     # generate a UI config
     # if not in basic_args, create a simple form
-    parser = train_network.setup_parser()
-    flux_train_utils.add_flux_train_arguments(parser)
+    parser = flux_train_network.setup_parser()
+    #flux_train_utils.add_flux_train_arguments(parser)
+    #train_util.add_optimizer_arguments(parser)
     args_info = {}
     for action in parser._actions:
         if action.dest != 'help':  # Skip the default help argument

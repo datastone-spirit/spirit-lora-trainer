@@ -80,10 +80,13 @@ class TrainingConfig:
     base_weights: str  = None
     base_weights_multiplier: float = None
     bucket_no_upscale: bool = False
+    blocks_to_swap: int = None
     bucket_reso_steps: int = 64
     cache_info: bool = False
     cache_latents: bool = False
     cache_latents_to_disk: bool = False
+    cache_text_encoder_outputs : bool = False # cache_text_encoder_outputs is introduce from sdxl, for low memory usage
+    cache_text_encoder_outputs_to_disk: bool = False  # when train text encode, this option must be set to False
     caption_dropout_every_n_epochs: int = 0
     caption_dropout_rate: float = 0.0
     caption_extension: str  = ".caption"
@@ -113,6 +116,7 @@ class TrainingConfig:
     deepspeed: bool = False
     dim_from_weights: bool = False
     discrete_flow_shift: float = 3.0
+    disable_mmap_load_safetensors: bool = False
     dynamo_backend: str  = "inductor"
     enable_bucket: bool = False
     enable_wildcard: bool = False
@@ -150,6 +154,8 @@ class TrainingConfig:
     log_tracker_name: str  = None
     log_with: str  = None
     logging_dir: str  = None
+    logit_mean: float = 0.0
+    logit_std: float = 1.0
     loss_type: str  = "l2"
     lowram: bool = False
     lr_decay_steps: int = 0
@@ -169,6 +175,7 @@ class TrainingConfig:
     max_token_length: int = None
     max_train_epochs: int = None
     max_train_steps: int = None
+    max_validation_steps: int = None
     mem_eff_attn: bool = False
     metadata_author: str  = None
     metadata_description: str  = None
@@ -180,6 +187,7 @@ class TrainingConfig:
     min_timestep: int = None
     mixed_precision: str  = "no"
     model_prediction_type: str = "sigma_scaled"
+    mode_scale: float = 1.29
     multires_noise_discount: float = 0.3
     multires_noise_iterations: int = None
     network_alpha: float = 1
@@ -237,9 +245,11 @@ class TrainingConfig:
     sigmoid_scale: float = 1.0
     skip_cache_check: bool = False
     skip_until_initial_step: bool = False
+    split_mode: bool = False
     t5xxl: str  = None
     t5xxl_max_token_length: int = None
     text_encoder_lr: float = None
+    text_encoder_batch_size: int = None
     timestep_sampling: str = "sigma"
     token_warmup_min: int = 1
     token_warmup_step: float = 0
@@ -256,16 +266,19 @@ class TrainingConfig:
     v_pred_like_loss: float = None
     vae: str  = None
     vae_batch_size: int = 1
+    validate_every_n_epochs: int = None
+    validate_every_n_steps: int = None
+    validation_seed: int = None
+    validation_split: float = 0.0
     wandb_api_key: str  = None
     wandb_run_name: str  = None
     weighted_captions: bool = False
+    weighting_scheme: str  = "uniform"
     xformers: bool = False
     zero3_init_flag: bool = False
     zero3_save_16bit_model: bool = False
     zero_stage: int = 2
     zero_terminal_snr: bool = False
-    cache_text_encoder_outputs : bool = False # cache_text_encoder_outputs is introduce from sdxl, for low memory usage
-    cache_text_encoder_outputs_to_disk: bool = False  # when train text encode, this option must be set to False
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainingConfig':

@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 10:48:53
- * @LastEditTime: 2024-12-10 10:56:14
+ * @LastEditTime: 2025-03-06 15:16:52
  * @LastEditors: mulingyuer
  * @Description: 训练网络模块
  * @FilePath: \frontend\src\components\Form\SDXLNetworkModuleSelect.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem :label="label" :prop="prop" popover-content="network_module">
+	<PopoverFormItem :label="label" :prop="prop" :popover-content="popoverContent">
 		<el-select v-model="value" :placeholder="placeholder">
 			<el-option
 				v-for="item in networkModuleOptions"

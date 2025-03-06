@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 15:07:57
- * @LastEditTime: 2025-01-10 17:47:25
+ * @LastEditTime: 2025-03-06 17:28:14
  * @LastEditors: mulingyuer
  * @Description: 高级设置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\AdvancedOptions.vue
@@ -23,13 +23,39 @@
 				:show-stops="false"
 			/>
 		</PopoverFormItem>
+		<PopoverFormItem
+			v-show="isExpert"
+			label="是否启用分割模式，可能用于模型或数据的特殊处理"
+			prop="split_mode"
+			popover-content="split_mode"
+		>
+			<el-switch v-model="ruleForm.split_mode" />
+		</PopoverFormItem>
+		<PopoverFormItem
+			v-show="isExpert"
+			label="文本编码器的批次大小，影响文本处理效率"
+			prop="text_encoder_batch_size"
+			popover-content="text_encoder_batch_size"
+		>
+			<el-input-number
+				v-model.number="ruleForm.text_encoder_batch_size"
+				:step="1"
+				:min="1"
+				step-strictly
+			/>
+		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
+import { useSettingsStore } from "@/stores";
 
+const settingsStore = useSettingsStore();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
+
+/** 是否专家模式 */
+const isExpert = computed(() => settingsStore.isExpert);
 
 const marks = {
 	0: "0",
@@ -51,8 +77,12 @@ const marks = {
 <style lang="scss" scoped>
 .clip-skip {
 	padding: 0 20px;
+	margin-bottom: 48px;
 	:deep(.el-slider__marks-text) {
 		color: var(--el-text-color-primary);
+	}
+	:deep(.el-slider__stop) {
+		box-shadow: 0 0 0 2px var(--el-text-color-secondary);
 	}
 }
 </style>

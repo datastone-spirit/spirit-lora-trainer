@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2025-03-05 16:31:33
+ * @LastEditTime: 2025-03-06 16:14:51
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -65,6 +65,16 @@
 	>
 		<el-switch v-model="ruleForm.save_state" />
 	</PopoverFormItem>
+	<el-form-item v-show="ruleForm.save_state">
+		<el-alert
+			class="no-select"
+			title="注意：开启保存训练状态功能将增加存储空间的使用量，请确保您的存储空间充足。"
+			type="warning"
+			:closable="false"
+			show-icon
+			effect="dark"
+		/>
+	</el-form-item>
 	<PopoverFormItem
 		v-show="isExpert"
 		label="从某个 save_state 保存的中断状态继续训练"
@@ -73,6 +83,24 @@
 	>
 		<FolderSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
 	</PopoverFormItem>
+	<PopoverFormItem
+		v-show="isExpert"
+		label="指定要交换的网络块数量"
+		prop="blocks_to_swap"
+		popover-content="blocks_to_swap"
+	>
+		<el-input-number v-model.number="ruleForm.blocks_to_swap" :step="1" step-strictly :min="1" />
+	</PopoverFormItem>
+	<el-form-item v-show="isExpert">
+		<el-alert
+			class="no-select"
+			title="注意：指定要交换的网络块数量数值越大，训练时长增加的越长"
+			type="warning"
+			:closable="false"
+			show-icon
+			effect="dark"
+		/>
+	</el-form-item>
 </template>
 
 <script setup lang="ts">

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2025-02-10 09:59:44
+ * @LastEditTime: 2025-03-06 14:57:18
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -34,6 +34,8 @@ export interface RuleForm {
 	save_precision: string;
 	/** 保存训练状态 配合 resume 参数可以继续从某个状态训练 */
 	save_state: boolean;
+	/** 指定要交换的网络块数量，用于调整LoRA模型结构 */
+	blocks_to_swap: number | undefined;
 	// ---------
 	/** 数据集目录 */
 	image_dir: string;
@@ -84,6 +86,12 @@ export interface RuleForm {
 	timestep_sampling: string;
 	/** 网络维度，常用 4~128，不是越大越好, 低dim可以降低显存占用 */
 	network_dim: number;
+	/** 设置模型输出的logit均值，用于调整分布 */
+	logit_mean: number;
+	/** 设置模型输出的logit标准差，控制输出的离散程度 */
+	logit_std: number;
+	/** 模型模式的缩放因子，影响模型行为 */
+	mode_scale: number;
 	// ---------
 	/** sigmoid 缩放 */
 	sigmoid_scale: number;
@@ -108,6 +116,18 @@ export interface RuleForm {
 	network_train_text_encoder_only: boolean;
 	/** 输出训练配置 */
 	output_config: boolean;
+	/** 是否禁用内存映射加载Safetensors文件，默认不禁用以节省内存 */
+	disable_mmap_load_safetensors: boolean;
+	/** 验证阶段的最大步数，限制验证时间 */
+	max_validation_steps: number | undefined;
+	/** 每隔多少个epoch进行一次验证 */
+	validate_every_n_epochs: number | undefined;
+	/** 每隔多少步进行一次验证 */
+	validate_every_n_steps: number | undefined;
+	/** 验证阶段的随机种子，确保验证可重复 */
+	validation_seed: number | undefined;
+	/** 数据集中用于验证的比例 */
+	validation_split: number | undefined;
 	// ---------
 	/** U-Net 学习率 */
 	unet_lr: string | null;
@@ -128,6 +148,8 @@ export interface RuleForm {
 	 * 示例：weight_decay=0.01 betas=.9,.999
 	 */
 	optimizer_args: string | null;
+	/** 权重分配方案，控制训练中各部分的权重分布 */
+	weighting_scheme: string;
 	// ---------
 	/** 训练网络模块 */
 	network_module: string;
@@ -184,6 +206,10 @@ export interface RuleForm {
 	// ---------
 	/** CLIP 跳过层数 玄学 */
 	clip_skip: number;
+	/** 是否启用分割模式，可能用于模型或数据的特殊处理 */
+	split_mode: boolean;
+	/** 文本编码器的批次大小，影响文本处理效率 */
+	text_encoder_batch_size: number | undefined;
 	// ---------
 	/** 训练混合精度, RTX30系列以后也可以指定bf16 */
 	mixed_precision: string;

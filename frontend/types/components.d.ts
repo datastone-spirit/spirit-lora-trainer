@@ -79,6 +79,7 @@ declare module 'vue' {
     TomlPreview: typeof import('./../src/components/Toml/TomlPreview.vue')['default']
     TwoSplit: typeof import('./../src/components/Split/TwoSplit/index.vue')['default']
     ViewSampling: typeof import('./../src/components/ViewSampling/index.vue')['default']
+    WeightingSchemeSelect: typeof import('./../src/components/Form/WeightingSchemeSelect.vue')['default']
     ZLSwitch: typeof import('./../src/components/Form/ZLSwitch.vue')['default']
   }
   export interface ComponentCustomProperties {

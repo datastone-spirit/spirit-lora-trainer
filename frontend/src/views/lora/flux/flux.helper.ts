@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-02-18 08:54:35
+ * @LastEditTime: 2025-03-06 15:32:52
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -144,7 +144,20 @@ function formatConfig(form: RuleForm): Config {
 		resolution: "",
 		output_config: true,
 		sample_every_n_steps: 0,
-		sample_prompts: ""
+		sample_prompts: "",
+		blocks_to_swap: undefined,
+		logit_mean: 0,
+		logit_std: 1,
+		mode_scale: 1.29,
+		disable_mmap_load_safetensors: false,
+		max_validation_steps: undefined,
+		validate_every_n_epochs: undefined,
+		validate_every_n_steps: undefined,
+		validation_seed: undefined,
+		validation_split: undefined,
+		weighting_scheme: "uniform",
+		split_mode: false,
+		text_encoder_batch_size: undefined
 	};
 
 	convertScientificToNumber(form, config);

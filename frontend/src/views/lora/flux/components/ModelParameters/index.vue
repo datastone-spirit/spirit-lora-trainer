@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 09:10:38
- * @LastEditTime: 2025-01-10 10:45:27
+ * @LastEditTime: 2025-03-06 17:23:41
  * @LastEditors: mulingyuer
  * @Description: 模型参数
  * @FilePath: \frontend\src\views\lora\flux\components\ModelParameters\index.vue
@@ -57,11 +57,37 @@
 	>
 		<el-input-number v-model.number="ruleForm.network_dim" :step="1" step-strictly />
 	</PopoverFormItem>
+	<PopoverFormItem
+		v-show="isExpert"
+		label="设置模型输出的logit均值，用于调整分布"
+		prop="logit_mean"
+		popover-content="logit_mean"
+	>
+		<el-input-number v-model.number="ruleForm.logit_mean" :step="0.1" :min="0" />
+	</PopoverFormItem>
+	<PopoverFormItem
+		v-show="isExpert"
+		label="设置模型输出的logit标准差，控制输出的离散程度"
+		prop="logit_std"
+		popover-content="logit_std"
+	>
+		<el-input-number v-model.number="ruleForm.logit_std" :step="0.1" :min="0" />
+	</PopoverFormItem>
+	<PopoverFormItem
+		v-show="isExpert"
+		label="模型模式的缩放因子，影响模型行为"
+		prop="mode_scale"
+		popover-content="mode_scale"
+	>
+		<el-input-number v-model.number="ruleForm.mode_scale" :step="0.01" :min="0" />
+	</PopoverFormItem>
 </template>
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
+import { useSettingsStore } from "@/stores";
 
+const settingsStore = useSettingsStore();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 
 const timestepSamplingOptions = readonly([
@@ -86,6 +112,9 @@ const timestepSamplingOptions = readonly([
 		value: "flux_shift"
 	}
 ]);
+
+/** 是否专家模式 */
+const isExpert = computed(() => settingsStore.isExpert);
 </script>
 
 <style scoped></style>

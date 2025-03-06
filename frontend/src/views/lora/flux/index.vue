@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-05 16:27:06
+ * @LastEditTime: 2025-03-06 17:08:50
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -96,26 +96,25 @@
 <script setup lang="ts">
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
+import type { LoRATrainingInfoResult } from "@/api/monitor";
 import { batchTag } from "@/api/tag";
+import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
+import ViewSampling from "@/components/ViewSampling/index.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useFluxLora } from "@/hooks/useFluxLora";
 import { useTag } from "@/hooks/useTag";
 import { useSettingsStore, useTrainingStore } from "@/stores";
-import { checkData, checkDirectory } from "@/utils/lora.helper";
-import { tomlStringify } from "@/utils/toml";
+import { checkDirectory } from "@/utils/lora.helper";
+import { tomlParse, tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
-import { formatFormData, mergeDataToForm } from "./flux.helper";
-import type { RuleForm } from "./types";
-import ViewSampling from "@/components/ViewSampling/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
-import { formatFormValidateMessage } from "@/utils/tools";
-import type { LoRATrainingInfoResult } from "@/api/monitor";
-import { tomlParse } from "@/utils/toml";
-import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
+import { formatFormData, mergeDataToForm } from "./flux.helper";
+import { validateForm, validateLoRASaveDir } from "./flux.validate";
+import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -133,7 +132,6 @@ const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_flux_f
 const defaultForm = readonly<RuleForm>({
 	output_name: "",
 	class_tokens: "",
-	clip_skip: 0,
 	pretrained_model_name_or_path: "./models/unet/flux1-dev.safetensors",
 	ae: "./models/vae/ae.safetensors",
 	clip_l: "./models/clip/clip_l.safetensors",
@@ -143,6 +141,7 @@ const defaultForm = readonly<RuleForm>({
 	save_model_as: "safetensors",
 	save_precision: "bf16",
 	save_state: false,
+	blocks_to_swap: undefined,
 	// -----
 	image_dir: "/root",
 	tagger_model: "joy-caption-alpha-two",
@@ -169,6 +168,9 @@ const defaultForm = readonly<RuleForm>({
 	guidance_scale: 1,
 	timestep_sampling: "shift",
 	network_dim: 64,
+	logit_mean: 0.0,
+	logit_std: 1.0,
+	mode_scale: 1.29,
 	// -----
 	sigmoid_scale: 1,
 	model_prediction_type: "raw",
@@ -182,6 +184,12 @@ const defaultForm = readonly<RuleForm>({
 	network_train_unet_only: false,
 	network_train_text_encoder_only: false,
 	output_config: true,
+	disable_mmap_load_safetensors: false,
+	max_validation_steps: undefined,
+	validate_every_n_epochs: undefined,
+	validate_every_n_steps: undefined,
+	validation_seed: undefined,
+	validation_split: 0.0,
 	// -----
 	unet_lr: null,
 	text_encoder_lr: "1e-4",
@@ -191,6 +199,7 @@ const defaultForm = readonly<RuleForm>({
 	optimizer_type: "adamw8bit",
 	min_snr_gamma: undefined,
 	optimizer_args: null,
+	weighting_scheme: "uniform",
 	// -----
 	network_module: "networks.lora_flux",
 	network_weights: "",
@@ -219,6 +228,9 @@ const defaultForm = readonly<RuleForm>({
 	flip_aug: false,
 	random_crop: false,
 	// -----
+	clip_skip: 0,
+	split_mode: false,
+	text_encoder_batch_size: undefined,
 	// -----
 	mixed_precision: "bf16",
 	full_fp16: false,
@@ -265,7 +277,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				if (import.meta.env.VITE_APP_LORA_PATH_CHECK === "false") return callback();
 				if (value.startsWith("/root")) return callback();
-				confirmLoRASaveDir(); // 主要是加弹窗
+				validateLoRASaveDir(ruleForm, savePathWarningDialogRef); // 主要是加弹窗
 				callback(new Error("LoRA保存目录必须以/root开头"));
 			}
 		}
@@ -387,6 +399,84 @@ const rules = reactive<FormRules<RuleForm>>({
 			},
 			trigger: "change"
 		}
+	],
+	highvram: [
+		{
+			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (value && ruleForm.value.train_batch_size >= 2) {
+					return callback(new Error("批量大小（train_batch_size）大于或等于2时，请关闭高显存模式"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	blocks_to_swap: [
+		{
+			validator: (
+				_rule: any,
+				value: number | undefined,
+				callback: (error?: string | Error) => void
+			) => {
+				if (ruleForm.value.train_batch_size > 2 && value !== 32) {
+					return callback(
+						new Error("批量大小（train_batch_size）大于2时，请选择32个block进行交换")
+					);
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	fp8_base: [
+		{
+			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (ruleForm.value.train_batch_size > 2 && !value) {
+					return callback(new Error("批量大小（train_batch_size）大于2时，请开启 fp8_base"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	lowram: [
+		{
+			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (ruleForm.value.train_batch_size > 2 && !value) {
+					return callback(
+						new Error("批量大小（train_batch_size）大于2时，请开启低内存模式（lowram）")
+					);
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	optimizer_type: [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (ruleForm.value.train_batch_size > 2 && value !== "adamw8bit") {
+					return callback(
+						new Error("批量大小（train_batch_size）大于2时，优化器设置必须设置为 AdamW8bit")
+					);
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	network_train_unet_only: [
+		{
+			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (ruleForm.value.train_batch_size > 2 && !value) {
+					return callback(
+						new Error("批量大小（train_batch_size）大于2时，仅训练 U-Net 开关请开启")
+					);
+				}
+				callback();
+			},
+			trigger: "change"
+		}
 	]
 });
 /** 是否专家模式 */
@@ -504,48 +594,16 @@ async function onTaggerClick() {
 
 /** 提交表单 */
 const submitLoading = ref(false);
-function validateForm() {
-	return new Promise((resolve) => {
-		if (!ruleFormRef.value) return resolve(false);
-		ruleFormRef.value.validate(async (valid, invalidFields) => {
-			if (!valid) {
-				let message = "请填写必填项";
-				if (invalidFields) {
-					message = formatFormValidateMessage(invalidFields);
-				}
-				ElMessage({
-					type: "warning",
-					customClass: "break-line-message",
-					message
-				});
-				return resolve(false);
-			}
-			// gpu被占用
-			if (trainingStore.useGPU) {
-				ElMessage.warning("GPU已经被占用，请等待对应任务完成再执行训练");
-				return resolve(false);
-			}
-			// 校验数据集是否有数据
-			const isHasData = await checkData(ruleForm.value.image_dir);
-			if (!isHasData) {
-				ElMessage.error("数据集目录下没有数据，请上传训练用的素材");
-				return resolve(false);
-			}
-			// 检测lora保存目录是否是/root下的
-			if (import.meta.env.VITE_APP_LORA_PATH_CHECK !== "false") {
-				const isCheckLoRASaveDir = await confirmLoRASaveDir();
-				if (!isCheckLoRASaveDir) return resolve(false);
-			}
-
-			return resolve(true);
-		});
-	});
-}
 async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
-		const valid = await validateForm();
+		const valid = await validateForm({
+			formRef: ruleFormRef,
+			formData: ruleForm,
+			trainingStore: trainingStore,
+			savePathWarningDialogRef
+		});
 		if (!valid) {
 			submitLoading.value = false;
 			return;
@@ -567,16 +625,6 @@ async function onSubmit() {
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
-}
-
-/** lora保存目录非/root确认弹窗 */
-function confirmLoRASaveDir() {
-	return new Promise((resolve) => {
-		const outputDir = ruleForm.value.output_dir;
-		if (outputDir.startsWith("/root")) return resolve(true);
-
-		savePathWarningDialogRef.value?.show(resolve);
-	});
 }
 
 /** 查看采样 */

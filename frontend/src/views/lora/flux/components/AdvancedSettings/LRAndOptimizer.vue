@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 15:38:25
- * @LastEditTime: 2025-01-10 10:57:33
+ * @LastEditTime: 2025-03-06 17:27:23
  * @LastEditors: mulingyuer
  * @Description: 学习率与优化器设置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LRAndOptimizer.vue
@@ -69,13 +69,25 @@
 				placeholder="请输入自定义优化器参数"
 			/>
 		</PopoverFormItem>
+		<WeightingSchemeSelect
+			v-show="isExpert"
+			v-model="ruleForm.weighting_scheme"
+			label="权重分配方案，控制训练中各部分的权重分布"
+			prop="weighting_scheme"
+			popover-content="weighting_scheme"
+		/>
 	</FieldSetWrapper>
 </template>
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
+import { useSettingsStore } from "@/stores";
 
+const settingsStore = useSettingsStore();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
+
+/** 是否专家模式 */
+const isExpert = computed(() => settingsStore.isExpert);
 </script>
 
 <style scoped></style>

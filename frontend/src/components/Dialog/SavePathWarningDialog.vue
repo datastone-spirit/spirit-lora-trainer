@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-05 14:45:29
- * @LastEditTime: 2025-03-05 16:07:22
+ * @LastEditTime: 2025-03-06 16:39:36
  * @LastEditors: mulingyuer
  * @Description: Lora保存路径警告弹窗
  * @FilePath: \frontend\src\components\Dialog\SavePathWarningDialog.vue
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-type ResolveFunc = (value: unknown) => void;
+type ResolveFunc = (value: boolean) => void;
 
 const open = ref(false);
 const countDownDuration = 15;

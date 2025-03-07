@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-03-07 10:21:42
+ * @LastEditTime: 2025-03-07 14:56:34
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -96,6 +96,7 @@ import { useHYLora } from "@/hooks/useHYLora";
 import { formatFormValidateMessage } from "@/utils/tools";
 import type { HyVideoTrainingInfoResult } from "@/api/monitor";
 import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
+import { getEnv } from "@/utils/env";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -106,6 +107,7 @@ const { startHYLoraListen, stopHYLoraListen } = useHYLora({
 	firstGetConfigCallback: firstResetFormConfig
 });
 
+const env = getEnv();
 /** 是否开启小白校验 */
 const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
@@ -119,7 +121,7 @@ const defaultForm = readonly<RuleForm>({
 	model_dtype: "bfloat16",
 	model_transformer_dtype: "float8",
 	model_timestep_sample_method: "logit_normal",
-	output_dir: "/root",
+	output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 	directory_path: "/root",
 	directory_num_repeats: 10,
 	tagger_model: "joy-caption-alpha-two",
@@ -198,8 +200,8 @@ const rules = reactive<FormRules<RuleForm>>({
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				if (!isWhiteCheck) return callback();
-				if (value.startsWith("/root")) return callback();
-				callback(new Error("LoRA保存目录必须以/root开头"));
+				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
+				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
 			}
 		}
 	],
@@ -460,7 +462,7 @@ function firstResetFormConfig(taskData: HyVideoTrainingInfoResult) {
 /** lora保存目录非/root确认弹窗 */
 function confirmLoRASaveDir() {
 	if (!isWhiteCheck) return true;
-	if (ruleForm.value.output_dir.startsWith("/root")) return true;
+	if (ruleForm.value.output_dir.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return true;
 	openSavePathWarningDialog.value = true;
 	return false;
 }

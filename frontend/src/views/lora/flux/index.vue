@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-07 10:17:28
+ * @LastEditTime: 2025-03-07 14:49:42
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -115,6 +115,7 @@ import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
 import { validateForm } from "./flux.validate";
 import type { RuleForm } from "./types";
+import { getEnv } from "@/utils/env";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -125,6 +126,7 @@ const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFlux
 });
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
+const env = getEnv();
 /** 是否开启小白校验 */
 const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
@@ -137,7 +139,7 @@ const defaultForm = readonly<RuleForm>({
 	clip_l: "./models/clip/clip_l.safetensors",
 	t5xxl: "./models/clip/t5xxl_fp16.safetensors",
 	resume: "",
-	output_dir: "/root",
+	output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 	save_model_as: "safetensors",
 	save_precision: "bf16",
 	save_state: false,
@@ -276,8 +278,8 @@ const rules = reactive<FormRules<RuleForm>>({
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				if (!isWhiteCheck) return callback();
-				if (value.startsWith("/root")) return callback();
-				callback(new Error("LoRA保存目录必须以/root开头"));
+				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
+				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
 			}
 		}
 	],

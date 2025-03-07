@@ -21,8 +21,6 @@ function getEsbuildConfig(mode: string): ESBuildOptions | undefined {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-	console.log(111, process.argv);
-
 	const viteEnv = loadEnv(mode, process.cwd()) as ImportMetaEnv;
 	const commitInfo = getCommitInfo();
 

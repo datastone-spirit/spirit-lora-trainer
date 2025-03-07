@@ -1,7 +1,7 @@
 import os
 from flasgger import swag_from
-from dataclasses import asdict
-from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset, TrainingDataset
+from dataclasses import asdict, fields
+from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset
 from typing import List, Tuple, Any
 from utils.util import getmodelpath, getprojectpath
 import tempfile
@@ -121,7 +121,19 @@ def config2args2(parameter :TrainingConfig) -> 'List[str]':
                 args.append(f'{value}')
     return args
 
-    
+def force_float_fields(config: Any):
+    """
+    Iterates all float fields in a dataclass and converts integer values to float.
+    """
+    for f in fields(config):
+        # Check if the field type is float
+        if f.type == float:
+            val = getattr(config, f.name)
+            # If the field's value is an integer, convert it to float
+            if isinstance(val, int):
+                setattr(config, f.name, float(val)) 
+   
+
 def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[bool, str]':
     if not os.path.isdir(image_dir):
         return False, f"{image_dir} is not a valid directory"
@@ -289,6 +301,7 @@ def validate_config(config: TrainingConfig) -> 'Tuple[bool, str]':
     if (config.tokenizer_cache_dir is None or config.tokenizer_cache_dir == "") and \
         (os.path.exists(openai_tokenizer_cache_dir) and os.path.exists(google_tokenizer_cache_dir)):
         config.tokenizer_cache_dir = os.path.join(getmodelpath(), "clip")
+    
     return True, "Ok"
 
 def validate_sampling(config: TrainingConfig) -> 'Tuple[bool, str]':
@@ -328,6 +341,9 @@ def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
 
 def config2toml(config: TrainingConfig, dataset_path: str) -> str:
     config.dataset_config = dataset_path
+    # whole number write to toml file will parse as integer which could cause the sd-script thrown exception
+    # force whole number convert to float, e.g. 1 -> 1.0
+    force_float_fields(config)
     configdikt = asdict(config)
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")

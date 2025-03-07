@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-06 17:08:50
+ * @LastEditTime: 2025-03-07 10:17:28
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -89,7 +89,7 @@
 			</template>
 		</FooterButtonGroup>
 		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
-		<SavePathWarningDialog ref="savePathWarningDialogRef" />
+		<SavePathWarningDialog v-model="openSavePathWarningDialog" />
 	</div>
 </template>
 
@@ -113,7 +113,7 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormData, mergeDataToForm } from "./flux.helper";
-import { validateForm, validateLoRASaveDir } from "./flux.validate";
+import { validateForm } from "./flux.validate";
 import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
@@ -125,8 +125,8 @@ const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFlux
 });
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
-/** lora保存警告弹窗 */
-const savePathWarningDialogRef = ref<InstanceType<typeof SavePathWarningDialog>>();
+/** 是否开启小白校验 */
+const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_flux_form`;
 const defaultForm = readonly<RuleForm>({
@@ -275,9 +275,8 @@ const rules = reactive<FormRules<RuleForm>>({
 		},
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (import.meta.env.VITE_APP_LORA_PATH_CHECK === "false") return callback();
+				if (!isWhiteCheck) return callback();
 				if (value.startsWith("/root")) return callback();
-				validateLoRASaveDir(ruleForm, savePathWarningDialogRef); // 主要是加弹窗
 				callback(new Error("LoRA保存目录必须以/root开头"));
 			}
 		}
@@ -403,6 +402,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	highvram: [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (!isWhiteCheck) return callback();
 				if (value && ruleForm.value.train_batch_size >= 2) {
 					return callback(new Error("批量大小（train_batch_size）大于或等于2时，请关闭高显存模式"));
 				}
@@ -418,6 +418,7 @@ const rules = reactive<FormRules<RuleForm>>({
 				value: number | undefined,
 				callback: (error?: string | Error) => void
 			) => {
+				if (!isWhiteCheck) return callback();
 				if (ruleForm.value.train_batch_size > 2 && value !== 32) {
 					return callback(
 						new Error("批量大小（train_batch_size）大于2时，请选择32个block进行交换")
@@ -431,6 +432,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	fp8_base: [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (!isWhiteCheck) return callback();
 				if (ruleForm.value.train_batch_size > 2 && !value) {
 					return callback(new Error("批量大小（train_batch_size）大于2时，请开启 fp8_base"));
 				}
@@ -442,6 +444,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	lowram: [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (!isWhiteCheck) return callback();
 				if (ruleForm.value.train_batch_size > 2 && !value) {
 					return callback(
 						new Error("批量大小（train_batch_size）大于2时，请开启低内存模式（lowram）")
@@ -455,6 +458,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	optimizer_type: [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (!isWhiteCheck) return callback();
 				if (ruleForm.value.train_batch_size > 2 && value !== "adamw8bit") {
 					return callback(
 						new Error("批量大小（train_batch_size）大于2时，优化器设置必须设置为 AdamW8bit")
@@ -468,6 +472,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	network_train_unet_only: [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (!isWhiteCheck) return callback();
 				if (ruleForm.value.train_batch_size > 2 && !value) {
 					return callback(
 						new Error("批量大小（train_batch_size）大于2时，仅训练 U-Net 开关请开启")
@@ -483,6 +488,8 @@ const rules = reactive<FormRules<RuleForm>>({
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
+/** lora保存警告弹窗 */
+const openSavePathWarningDialog = ref(false);
 
 // 折叠
 const openStep1 = ref(true);
@@ -602,7 +609,7 @@ async function onSubmit() {
 			formRef: ruleFormRef,
 			formData: ruleForm,
 			trainingStore: trainingStore,
-			savePathWarningDialogRef
+			openSavePathWarningDialog: openSavePathWarningDialog
 		});
 		if (!valid) {
 			submitLoading.value = false;

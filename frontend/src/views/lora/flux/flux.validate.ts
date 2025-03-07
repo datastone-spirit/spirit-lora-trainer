@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-06 15:41:05
- * @LastEditTime: 2025-03-06 17:07:29
+ * @LastEditTime: 2025-03-07 10:27:51
  * @LastEditors: mulingyuer
  * @Description: flux校验相关
  * @FilePath: \frontend\src\views\lora\flux\flux.validate.ts
@@ -13,24 +13,19 @@ import type { Ref } from "vue";
 import { formatFormValidateMessage } from "@/utils/tools";
 import { checkData } from "@/utils/lora.helper";
 import { useTrainingStore } from "@/stores";
-import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
 
 export interface ValidateFormData {
 	formRef: Ref<FormInstance | undefined>;
 	formData: Ref<RuleForm>;
 	trainingStore: ReturnType<typeof useTrainingStore>;
-	savePathWarningDialogRef: Ref<InstanceType<typeof SavePathWarningDialog> | undefined>;
-}
-
-interface ValidationError {
-	message: MessageOptions["message"];
-	type?: MessageOptions["type"];
-	customClass?: MessageOptions["customClass"];
+	openSavePathWarningDialog: Ref<boolean>;
 }
 
 /** 显示错误消息 */
-function showError({ message, type = "error", customClass }: ValidationError) {
-	ElMessage({ type, message, customClass, duration: 6000 });
+function showError(options: MessageOptions) {
+	if (!options.type) options.type = "error";
+	if (!("showClose" in options)) options.showClose = true;
+	ElMessage(options);
 }
 
 /** 基础表单校验 */
@@ -41,7 +36,8 @@ function validateFormFields(formRef: Ref<FormInstance | undefined>): Promise<boo
 		formRef.value.validate((valid, invalidFields) => {
 			if (!valid) {
 				const message = invalidFields ? formatFormValidateMessage(invalidFields) : "请填写必填项";
-				showError({ message, type: "error", customClass: "break-line-message" });
+				const duration = message.split("\n").length >= 2 ? 6000 : 3000;
+				showError({ message, type: "error", customClass: "break-line-message", duration });
 				resolve(false);
 			}
 			resolve(true);
@@ -69,16 +65,11 @@ async function validateDataset(imageDir: string): Promise<boolean> {
 }
 
 /** LoRA保存路径校验 */
-export function validateLoRASaveDir(
-	formData: Ref<RuleForm>,
-	dialogRef: Ref<InstanceType<typeof SavePathWarningDialog> | undefined>
-): Promise<boolean> {
-	return new Promise((resolve) => {
-		if (import.meta.env.VITE_APP_LORA_PATH_CHECK === "false") return resolve(true);
-		const outputDir = formData.value.output_dir;
-		if (outputDir.startsWith("/root")) return resolve(true);
-		dialogRef.value?.show(resolve);
-	});
+export function validateLoRASaveDir(formData: Ref<RuleForm>, openDialog: Ref<boolean>): boolean {
+	if (import.meta.env.VITE_APP_WHITE_CHECK === "false") return true;
+	if (formData.value.output_dir.startsWith("/root")) return true;
+	openDialog.value = true;
+	return false;
 }
 
 /** 批量大小相关参数校验 */
@@ -145,13 +136,13 @@ export function validateLoRASaveDir(
 
 /** 主校验函数 */
 export async function validateForm(data: ValidateFormData): Promise<boolean> {
-	const { formRef, formData, trainingStore, savePathWarningDialogRef } = data;
+	const { formRef, formData, trainingStore, openSavePathWarningDialog } = data;
 
 	const validations = [
+		() => validateLoRASaveDir(formData, openSavePathWarningDialog),
 		() => validateFormFields(formRef),
 		() => validateGPU(trainingStore),
-		() => validateDataset(formData.value.image_dir),
-		() => validateLoRASaveDir(formData, savePathWarningDialogRef)
+		() => validateDataset(formData.value.image_dir)
 		// () => validateBatchSizeRules(formData.value)
 	];
 

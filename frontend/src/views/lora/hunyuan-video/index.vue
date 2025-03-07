@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-03-05 16:28:15
+ * @LastEditTime: 2025-03-07 10:21:42
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -73,7 +73,7 @@
 			:submit-loading="submitLoading"
 			@submit="onSubmit"
 		></FooterButtonGroup>
-		<SavePathWarningDialog ref="savePathWarningDialogRef" />
+		<SavePathWarningDialog v-model="openSavePathWarningDialog" />
 	</div>
 </template>
 
@@ -106,8 +106,8 @@ const { startHYLoraListen, stopHYLoraListen } = useHYLora({
 	firstGetConfigCallback: firstResetFormConfig
 });
 
-/** lora保存警告弹窗 */
-const savePathWarningDialogRef = ref<InstanceType<typeof SavePathWarningDialog>>();
+/** 是否开启小白校验 */
+const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_hunyuan_video_form`;
 const defaultForm = readonly<RuleForm>({
@@ -197,9 +197,8 @@ const rules = reactive<FormRules<RuleForm>>({
 		},
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (import.meta.env.VITE_APP_LORA_PATH_CHECK === "false") return callback();
+				if (!isWhiteCheck) return callback();
 				if (value.startsWith("/root")) return callback();
-				confirmLoRASaveDir(); // 主要是加弹窗
 				callback(new Error("LoRA保存目录必须以/root开头"));
 			}
 		}
@@ -241,6 +240,8 @@ const rules = reactive<FormRules<RuleForm>>({
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
+/** lora保存警告弹窗 */
+const openSavePathWarningDialog = ref(false);
 
 /** toml */
 const toml = ref("");
@@ -382,8 +383,8 @@ function validateForm() {
 			}
 
 			// 检测lora保存目录是否是/root下的
-			if (import.meta.env.VITE_APP_LORA_PATH_CHECK !== "false") {
-				const isCheckLoRASaveDir = await confirmLoRASaveDir();
+			if (isWhiteCheck) {
+				const isCheckLoRASaveDir = confirmLoRASaveDir();
 				if (!isCheckLoRASaveDir) return resolve(false);
 			}
 
@@ -458,12 +459,10 @@ function firstResetFormConfig(taskData: HyVideoTrainingInfoResult) {
 
 /** lora保存目录非/root确认弹窗 */
 function confirmLoRASaveDir() {
-	return new Promise((resolve) => {
-		const outputDir = ruleForm.value.output_dir;
-		if (outputDir.startsWith("/root")) return resolve(true);
-
-		savePathWarningDialogRef.value?.show(resolve);
-	});
+	if (!isWhiteCheck) return true;
+	if (ruleForm.value.output_dir.startsWith("/root")) return true;
+	openSavePathWarningDialog.value = true;
+	return false;
 }
 </script>
 

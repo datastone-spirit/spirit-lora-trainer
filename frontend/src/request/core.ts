@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2025-02-17 14:43:48
+ * @LastEditTime: 2025-03-07 15:26:01
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -38,6 +38,9 @@ axiosRetry(instance, {
 			return true;
 		}
 		return false;
+	},
+	retryDelay: () => {
+		return 2000;
 	},
 	onMaxRetryTimesExceeded: (error) => {
 		// 显示错误消息

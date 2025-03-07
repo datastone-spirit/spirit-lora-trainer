@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-02-18 10:35:04
+ * @LastEditTime: 2025-03-07 15:44:19
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -12,6 +12,7 @@ import type { MonitorFluxLoraData } from "@/stores";
 import { useTrainingStore } from "@/stores";
 import { isEmptyObject } from "@/utils/tools";
 import mitt from "mitt";
+import { Log, serializeError } from "@/utils/log";
 
 export type Events = {
 	complete: void;
@@ -109,6 +110,13 @@ export const useFluxLora = (() => {
 				})
 				.catch((error) => {
 					fluxLoraFailed({ showMessage: error?.response?.status !== 401 });
+					// TODO: 加一个缓存日志
+					Log.log("useFluxLora1", {
+						createTime: Date.now(),
+						source: "getFluxLoraData -> loRATrainingInfo -> catch",
+						message: error.message,
+						error: serializeError(error)
+					});
 				});
 		}
 
@@ -129,9 +137,15 @@ export const useFluxLora = (() => {
 					break;
 				case "failed": // 出错
 					fluxLoraFailed();
+					// TODO: 加一个缓存日志
+					Log.log("useFluxLora2", {
+						createTime: Date.now(),
+						source: "updateFluxLoraData -> switch -> failed",
+						message: res
+					});
 					break;
-				default:
-					fluxLoraFailed();
+				// default:
+				// 	fluxLoraFailed();
 			}
 		}
 

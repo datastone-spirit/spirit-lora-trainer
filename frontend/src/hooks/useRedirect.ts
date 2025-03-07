@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-27 15:40:01
- * @LastEditTime: 2024-09-27 15:40:01
+ * @LastEditTime: 2025-03-07 17:12:15
  * @LastEditors: mulingyuer
  * @Description: 重定向跳转hooks
- * @FilePath: \spirit-app-microservice-admin\src\hooks\useRedirect.ts
+ * @FilePath: \frontend\src\hooks\useRedirect.ts
  * 怎么可能会有bug！！！
  */
 // useRedirect.ts
@@ -39,6 +39,7 @@ export function useRedirect() {
 	function parseRedirect(redirect: string) {
 		const url = new URL(redirect, window.location.origin);
 		const redirectPath = url.pathname;
+		// @ts-expect-error 类型错误
 		const redirectQuery = Object.fromEntries(url.searchParams.entries());
 		return {
 			redirectPath,

@@ -11,7 +11,7 @@ import logging
 import subprocess
 from task.manager import task_decorator
 from task.task import Task
-import re
+from task.manager import tm
 from utils.util import pathFormat
 
 from utils.util import setup_logging
@@ -27,6 +27,11 @@ class TrainingService:
 
 
     def training(self, parameters :TrainingParameter):
+
+        if tm.current_task is not None:
+            logger.warning("current task is not none, don't commit task at same time")
+            raise Exception("There is already a task running, please wait for it to finish")
+        
         valid, reason = validate_parameter(parameters)
         if not valid:
             logger.warning(f"valid parameters error: {parameters}")

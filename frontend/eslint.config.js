@@ -60,7 +60,8 @@ export default [
 					ignoreRestSiblings: true
 				}
 			],
-			"@typescript-eslint/no-unused-expressions": "off"
+			"@typescript-eslint/no-unused-expressions": "off",
+			"prefer-const": "off"
 		}
 	}
 ];

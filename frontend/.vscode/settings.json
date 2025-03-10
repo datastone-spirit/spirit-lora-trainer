@@ -25,5 +25,8 @@
 		"shiki",
 		"VITE"
 	],
-	"editor.wordWrap": "on"
+	"editor.wordWrap": "on",
+	"[typescript]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features"
+	}
 }

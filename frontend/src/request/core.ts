@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2025-03-07 15:26:01
+ * @LastEditTime: 2025-03-10 15:33:05
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -63,7 +63,7 @@ instance.interceptors.request.use((config) => {
 /** 响应后拦截器 */
 instance.interceptors.response.use(
 	(response) => {
-		if (!response.data) return null;
+		if (!response?.data) return null;
 
 		const { success, data, message } = response.data as RequestResult;
 

@@ -64,6 +64,7 @@ declare module 'vue' {
     LrSchedulerSelect: typeof import('./../src/components/Form/LrSchedulerSelect.vue')['default']
     ModelSaveFormatSelector: typeof import('./../src/components/Form/ModelSaveFormatSelector.vue')['default']
     ModelSavePrecisionSelector: typeof import('./../src/components/Form/ModelSavePrecisionSelector.vue')['default']
+    NetworkRetryDialog: typeof import('./../src/components/Dialog/NetworkRetryDialog.vue')['default']
     OptimizerTypeSelect: typeof import('./../src/components/Form/OptimizerTypeSelect.vue')['default']
     PopoverFormItem: typeof import('./../src/components/Form/PopoverFormItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

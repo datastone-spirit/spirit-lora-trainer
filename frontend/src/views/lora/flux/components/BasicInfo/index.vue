@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2025-03-06 16:14:51
+ * @LastEditTime: 2025-03-10 17:05:19
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -81,7 +81,7 @@
 		prop="resume"
 		popover-content="resume"
 	>
-		<FolderSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型" />
+		<FolderSelector v-model="ruleForm.resume" placeholder="请选择中断状态的模型目录（state目录）" />
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"

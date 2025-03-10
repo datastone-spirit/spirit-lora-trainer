@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-07 14:49:42
+ * @LastEditTime: 2025-03-10 17:04:37
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -142,7 +142,7 @@ const defaultForm = readonly<RuleForm>({
 	output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 	save_model_as: "safetensors",
 	save_precision: "bf16",
-	save_state: false,
+	save_state: true,
 	blocks_to_swap: undefined,
 	// -----
 	image_dir: "/root",

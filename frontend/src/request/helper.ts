@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-21 09:12:05
- * @LastEditTime: 2025-02-18 16:07:12
+ * @LastEditTime: 2025-03-10 17:47:04
  * @LastEditors: mulingyuer
  * @Description: 请求辅助函数
  * @FilePath: \frontend\src\request\helper.ts
@@ -105,4 +105,26 @@ function getErrorMessage(error: any): string {
 	if (error instanceof Error) return error.message;
 
 	return "未知错误";
+}
+
+/** 网络错误code值 */
+const NETWORK_ERROR_CODES = new Set([
+	"ECONNABORTED", // 请求被中止。常与请求超时有关
+	"ECONNREFUSED", // 连接被目标服务器拒绝
+	"ECONNRESET", // 连接被重置。这通常表示远程服务器意外关闭了连接
+	"ENOTFOUND", // DNS 查询失败，域名无法找到
+	"ETIMEDOUT", // 请求超时
+	"EHOSTUNREACH", // 网络无法到达主机
+	"ERR_NETWORK", // 网络错误，一般是因为网络请求失败
+	"ERR_INTERNET_DISCONNECTED", // 网络连接已断开
+	"ERR_NETWORK_CHANGED", // 网络连接发生了变化
+	"ERR_CONNECTION_TIMED_OUT", // 连接超时
+	"ERR_NAME_NOT_RESOLVED" //DNS 解析失败
+]);
+
+/** 判断请求是不是网络不通的错误 */
+export function isNetworkError(error: any) {
+	if (!Object.hasOwn(error, "code")) return false;
+
+	return NETWORK_ERROR_CODES.has(error.code);
 }

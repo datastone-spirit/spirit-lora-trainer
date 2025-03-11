@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2025-03-10 17:42:20
+ * @LastEditTime: 2025-03-11 09:33:22
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -15,7 +15,6 @@ import {
 	showRequestErrorMessage,
 	showResponseErrorMessage
 } from "./helper";
-import type { RequestResult } from "./types";
 
 const isDev = import.meta.env.MODE === "development";
 
@@ -63,17 +62,10 @@ instance.interceptors.request.use((config) => {
 /** 响应后拦截器 */
 instance.interceptors.response.use(
 	(response) => {
-		if (!response?.data) return null;
-
-		const { success, data, message } = response.data as RequestResult;
-
 		// 响应错误弹窗
 		showResponseErrorMessage(response);
 
-		// 是否报错
-		if (success === false) throw new Error(message);
-
-		return data;
+		return response;
 	},
 	(error) => {
 		// 显示错误消息
@@ -84,3 +76,4 @@ instance.interceptors.response.use(
 );
 
 export { instance };
+

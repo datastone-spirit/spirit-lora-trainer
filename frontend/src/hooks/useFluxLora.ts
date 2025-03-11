@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-03-10 17:48:14
+ * @LastEditTime: 2025-03-11 09:30:09
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -65,7 +65,7 @@ export const useFluxLora = (() => {
 
 	/** 格式化数据 */
 	function formatData(data: LoRATrainingInfoResult): MonitorFluxLoraData["data"] {
-		let detail = data.detail ?? {};
+		let detail = data?.detail ?? {};
 		if (typeof detail === "string") detail = {};
 		const loraData: MonitorFluxLoraData["data"] = {
 			current: detail.current ?? 0,

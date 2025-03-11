@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-03-10 17:48:53
+ * @LastEditTime: 2025-03-11 09:43:52
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -65,7 +65,7 @@ export const useHYLora = (() => {
 
 	/** 格式化数据 */
 	function formatData(data: HyVideoTrainingInfoResult): MonitorHYLoraData["data"] {
-		const detail = typeof data.detail === "string" ? {} : (data.detail ?? {});
+		const detail = typeof data.detail === "string" ? {} : (data?.detail ?? {});
 
 		const loraData: MonitorHYLoraData["data"] = {
 			current: detail.current ?? 0,
@@ -161,7 +161,7 @@ export const useHYLora = (() => {
 			trainingStore.setHYLoraData(formatData(res));
 			trainingStore.setHYLoraTaskStatus(res.status);
 
-			if (!res.detail) return;
+			if (!res?.detail) return;
 			if (isEmptyObject(res.detail)) return;
 
 			switch (res.status) {

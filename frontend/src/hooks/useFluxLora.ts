@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-03-11 09:30:09
+ * @LastEditTime: 2025-03-11 10:28:43
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -113,11 +113,14 @@ export const useFluxLora = (() => {
 					return updateFluxLoraData(res);
 				})
 				.catch((error) => {
-					if (isNetworkError(error)) {
+					const status = error?.status ?? 0;
+					const is5xxError = status >= 500 && status < 600;
+					if (isNetworkError(error) || is5xxError) {
 						trainingStore.setIsOffline(true);
 						return;
 					}
-					fluxLoraFailed({ showMessage: error?.response?.status !== 401 });
+					// 错误处理
+					fluxLoraFailed({ showMessage: status === 404 });
 					// TODO: 加一个缓存日志
 					Log.log("useFluxLora1", {
 						createTime: Date.now(),

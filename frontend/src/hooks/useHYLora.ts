@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-03-11 09:43:52
+ * @LastEditTime: 2025-03-11 10:30:55
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -147,12 +147,14 @@ export const useHYLora = (() => {
 					return updateHYLoraData(res);
 				})
 				.catch((error) => {
-					if (isNetworkError(error)) {
+					const status = error?.status ?? 0;
+					const is5xxError = status >= 500 && status < 600;
+					if (isNetworkError(error) || is5xxError) {
 						trainingStore.setIsOffline(true);
 						return;
 					}
 
-					hyLoraFailed({ showMessage: error?.response?.status !== 401 });
+					hyLoraFailed({ showMessage: status === 404 });
 				});
 		}
 

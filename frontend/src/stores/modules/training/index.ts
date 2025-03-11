@@ -22,7 +22,7 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听GPU相关数据 */
 	const monitorGPUData = ref<MonitorGPUData>({
 		isListen: false,
-		sleepTime: 3000,
+		sleepTime: 15000,
 		isPolling: false,
 		data: {
 			gpuPower: 0,
@@ -92,7 +92,7 @@ export const useTrainingStore = defineStore("training", () => {
 		isListen: false,
 		taskId: "",
 		taskStatus: "none",
-		sleepTime: 3000,
+		sleepTime: 15000,
 		isPolling: false,
 		data: {
 			current: 0,
@@ -146,7 +146,7 @@ export const useTrainingStore = defineStore("training", () => {
 		isListen: false,
 		taskId: "",
 		taskStatus: "none",
-		sleepTime: 3000,
+		sleepTime: 15000,
 		isPolling: false,
 		data: {
 			current: 0,

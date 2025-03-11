@@ -12,6 +12,14 @@ from utils.util import setup_logging
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
+
+class StateError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
+
+    def __str__(self):
+        return self.message
     
 # 公共 response 方法
 def res(data=None, message="Ok", success=True, code=200):

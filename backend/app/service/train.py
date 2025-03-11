@@ -1,10 +1,8 @@
 import os
-import shutil
-import yaml
 from typing import Optional
 import sys
 from ..api.model.training_paramter import TrainingParameter
-from ..api.common.utils import validate_parameter, dataset2toml, config2toml, is_flux_sampling
+from ..api.common.utils import validate_parameter, dataset2toml, config2toml, is_flux_sampling, StateError
 from utils.util import getprojectpath 
 import uuid
 import logging
@@ -30,7 +28,7 @@ class TrainingService:
 
         if tm.current_task is not None:
             logger.warning("current task is not none, don't commit task at same time")
-            raise Exception("There is already a task running, please wait for it to finish")
+            raise StateError("There is already a task running, please wait for it to finish")
         
         valid, reason = validate_parameter(parameters)
         if not valid:

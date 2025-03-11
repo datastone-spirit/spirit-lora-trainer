@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-21 09:12:05
- * @LastEditTime: 2025-03-11 08:45:04
+ * @LastEditTime: 2025-03-11 10:11:57
  * @LastEditors: mulingyuer
  * @Description: 请求辅助函数
  * @FilePath: \frontend\src\request\helper.ts
@@ -109,7 +109,7 @@ function getErrorMessage(error: any): string {
 
 /** 网络错误code值 */
 const NETWORK_ERROR_CODES = new Set([
-	// "ECONNABORTED", // 请求被中止。常与请求超时有关
+	"ECONNABORTED", // 请求被中止。常与请求超时有关
 	"ECONNREFUSED", // 连接被目标服务器拒绝
 	"ECONNRESET", // 连接被重置。这通常表示远程服务器意外关闭了连接
 	"ENOTFOUND", // DNS 查询失败，域名无法找到

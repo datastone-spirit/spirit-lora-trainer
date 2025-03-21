@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-02-20 10:07:01
+ * @LastEditTime: 2025-03-21 08:57:41
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -51,13 +51,13 @@ export interface MonitorTagData {
 	/** 是否监听 */
 	isListen: boolean;
 	/** 任务id */
-	taskId: string;
+	// taskId: string;
 	/** 任务状态 */
-	taskStatus: TaskStatus | "none";
+	// taskStatus: TaskStatus | "none";
 	/** 监听间隔 */
-	sleepTime: number;
+	// sleepTime: number;
 	/** 是否在轮询 */
-	isPolling: boolean;
+	// isPolling: boolean;
 	/** 打标数据 */
 	data: TagData;
 }

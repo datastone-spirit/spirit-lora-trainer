@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-03-10 16:19:13
+ * @LastEditTime: 2025-03-21 09:05:19
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -50,10 +50,10 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听打标数据 */
 	const monitorTagData = ref<MonitorTagData>({
 		isListen: false,
-		taskId: "",
-		taskStatus: "none",
-		sleepTime: 3000,
-		isPolling: false,
+		// taskId: "", // 没什么作用
+		// taskStatus: "none", // 没什么作用
+		// sleepTime: 3000, // 没什么作用
+		// isPolling: false, // 没什么作用
 		data: {
 			current: 0,
 			total: 0,
@@ -63,19 +63,19 @@ export const useTrainingStore = defineStore("training", () => {
 	function setTagIsListen(val: boolean) {
 		monitorTagData.value.isListen = val;
 	}
-	function setTagTaskId(taskId: string) {
-		monitorTagData.value.taskId = taskId;
-	}
-	function setTagTaskStatus(status: MonitorTagData["taskStatus"]) {
-		monitorTagData.value.taskStatus = status;
-	}
-	function isTagTaskEnd(status?: MonitorTagData["taskStatus"]) {
-		status = status ?? monitorTagData.value.taskStatus;
-		return ["complete", "failed", "none"].includes(status);
-	}
-	function setTagIsPolling(val: boolean) {
-		monitorTagData.value.isPolling = val;
-	}
+	// function setTagTaskId(taskId: string) {
+	// 	monitorTagData.value.taskId = taskId;
+	// }
+	// function setTagTaskStatus(status: MonitorTagData["taskStatus"]) {
+	// 	monitorTagData.value.taskStatus = status;
+	// }
+	// function isTagTaskEnd(status?: MonitorTagData["taskStatus"]) {
+	// 	status = status ?? monitorTagData.value.taskStatus;
+	// 	return ["complete", "failed", "none"].includes(status);
+	// }
+	// function setTagIsPolling(val: boolean) {
+	// 	monitorTagData.value.isPolling = val;
+	// }
 	function setTagData(data: TagData) {
 		monitorTagData.value.data = data;
 	}
@@ -197,7 +197,7 @@ export const useTrainingStore = defineStore("training", () => {
 
 	/** gpu是否在使用中 */
 	const useGPU = computed(() => {
-		return !isTagTaskEnd() || !isFluxLoraTaskEnd() || !isHYLoraTaskEnd();
+		return monitorTagData.value.isListen || !isFluxLoraTaskEnd() || !isHYLoraTaskEnd();
 	});
 
 	/** 训练中是否断网了 */
@@ -214,10 +214,10 @@ export const useTrainingStore = defineStore("training", () => {
 		setGPUIsPolling,
 		monitorTagData,
 		setTagIsListen,
-		setTagTaskId,
-		setTagTaskStatus,
-		isTagTaskEnd,
-		setTagIsPolling,
+		// setTagTaskId,
+		// setTagTaskStatus,
+		// isTagTaskEnd,
+		// setTagIsPolling,
 		setTagData,
 		resetTagData,
 		monitorFluxLoraData,

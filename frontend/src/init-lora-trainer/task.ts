@@ -1,23 +1,23 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-01-13 17:01:32
+ * @LastEditTime: 2025-03-21 09:29:46
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
  * 怎么可能会有bug！！！
  */
-import { currentTask } from "@/api/task";
-import type { CurrentTaskResult } from "@/api/task";
-import { useTag } from "@/hooks/useTag";
-import { useFluxLora } from "@/hooks/useFluxLora";
-import { useHYLora } from "@/hooks/useHYLora";
-import type { AxiosError } from "axios";
 import type {
 	HyVideoTrainingInfoResult,
 	LoRATrainingInfoResult,
 	ManualTagInfoResult
 } from "@/api/monitor";
+import type { CurrentTaskResult } from "@/api/task";
+import { currentTask } from "@/api/task";
+import { useFluxLora } from "@/hooks/useFluxLora";
+import { useHYLora } from "@/hooks/useHYLora";
+import { useTag } from "@/hooks/useTag";
+import type { AxiosError } from "axios";
 
 class TaskInitializer {
 	constructor(private readonly taskData: CurrentTaskResult) {}
@@ -46,18 +46,11 @@ class TaskInitializer {
 
 	/** 打标初始化 */
 	private async initTag() {
-		const { id, status } = this.taskData;
-		const { isTagTaskEnd, setTagTaskId, updateTagData } = useTag();
+		const { initQueryTagTask } = useTag();
 
-		// 如果当前任务已经完成或者失败，不做任何操作
-		if (isTagTaskEnd(status)) return;
-		// 未完成只更新状态数据，轮询请求由页面来控制
-		setTagTaskId(id);
-		updateTagData(this.taskData as ManualTagInfoResult);
-
-		ElMessage({
-			message: "当前正在打标...",
-			type: "info"
+		return initQueryTagTask({
+			tagTaskData: this.taskData as ManualTagInfoResult,
+			showTaskStartPrompt: true
 		});
 	}
 

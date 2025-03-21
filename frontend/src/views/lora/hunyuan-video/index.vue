@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-03-07 14:56:34
+ * @LastEditTime: 2025-03-21 09:46:36
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -79,12 +79,16 @@
 
 <script setup lang="ts">
 import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
-import { batchTag } from "@/api/tag";
+import type { HyVideoTrainingInfoResult } from "@/api/monitor";
+import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import { useHYLora } from "@/hooks/useHYLora";
 import { useTag } from "@/hooks/useTag";
 import { useSettingsStore, useTrainingStore } from "@/stores";
+import { getEnv } from "@/utils/env";
 import { checkData, checkDirectory, checkHYData } from "@/utils/lora.helper";
 import { tomlParse, tomlStringify } from "@/utils/toml";
+import { formatFormValidateMessage } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
@@ -92,16 +96,11 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
 import type { RuleForm } from "./types";
-import { useHYLora } from "@/hooks/useHYLora";
-import { formatFormValidateMessage } from "@/utils/tools";
-import type { HyVideoTrainingInfoResult } from "@/api/monitor";
-import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
-import { getEnv } from "@/utils/env";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const { startTagListen, stopTagListen, monitorTagData } = useTag();
+const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
 const { startHYLoraListen, stopHYLoraListen } = useHYLora({
 	isFirstGetConfig: true,
 	firstGetConfigCallback: firstResetFormConfig
@@ -290,64 +289,25 @@ const taggerBtnLoading = ref(false);
 async function onTaggerClick() {
 	try {
 		taggerBtnLoading.value = true;
-		const { directory_path, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
-		// 校验
-		const validations = [
-			{
-				condition: () => trainingStore.useGPU,
-				message: "GPU已经被占用，请等待对应任务完成再执行打标"
-			},
-			{
-				condition: () => typeof directory_path !== "string" || directory_path.trim() === "",
-				message: "请先选择训练用的数据集目录"
-			},
-			{
-				condition: async () => !(await checkDirectory(directory_path)),
-				message: "数据集目录不存在"
-			},
-			{
-				condition: () => typeof tagger_model !== "string" || tagger_model.trim() === "",
-				message: "请先选择打标模型"
-			},
-			{
-				condition: () => output_trigger_words && class_tokens.trim() === "",
-				message: "请填写触发词"
-			}
-		];
 
-		for (const validation of validations) {
-			if (await validation.condition()) {
-				taggerBtnLoading.value = false;
-				ElMessage({
-					message: validation.message,
-					type: "error"
-				});
-				return;
-			}
-		}
-
-		// api
-		const result = await batchTag({
-			image_path: directory_path,
-			model_name: tagger_model,
-			class_token: output_trigger_words ? class_tokens : undefined,
-			prompt_type: ruleForm.value.prompt_type,
-			global_prompt:
-				ruleForm.value.tagger_model === "joy-caption-alpha-two"
-					? ruleForm.value.tagger_global_prompt
-					: "",
-			is_append: ruleForm.value.tagger_is_append
+		const tagResult = await tag({
+			tagDir: ruleForm.value.directory_path,
+			tagModel: ruleForm.value.tagger_model,
+			joyCaptionPromptType: ruleForm.value.prompt_type,
+			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
+			globalPrompt: ruleForm.value.class_tokens,
+			tagPrompt: ruleForm.value.tagger_global_prompt,
+			isAppend: ruleForm.value.tagger_is_append,
+			showTaskStartPrompt: true
 		});
-		startTagListen(result.task_id);
+
+		// 触发查询打标任务
+		startQueryTagTask(tagResult.task_id);
 		taggerBtnLoading.value = false;
-
-		ElMessage({
-			message: "正在打标...",
-			type: "success"
-		});
 	} catch (error) {
 		taggerBtnLoading.value = false;
-		stopTagListen(true);
+		stopQueryTagTask();
+
 		console.error("打标任务创建失败", error);
 	}
 }

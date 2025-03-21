@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-02-08 17:08:58
+ * @LastEditTime: 2025-03-21 09:40:30
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -81,15 +81,13 @@
 </template>
 
 <script setup lang="ts">
-import { batchTag } from "@/api/tag";
 import AiDataset from "@/components/AiDataset/index.vue";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useGPU } from "@/hooks/useGPU";
 import { useTag } from "@/hooks/useTag";
+import { useTrainingStore } from "@/stores";
 import { checkDirectory } from "@/utils/lora.helper";
 import type { FormInstance, FormRules } from "element-plus";
-import { validateForm } from "@/utils/tools";
-import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useTrainingStore } from "@/stores";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -111,7 +109,14 @@ interface RuleForm {
 }
 
 const trainingStore = useTrainingStore();
-const { monitorTagData, startTagListen, stopTagListen, isTagTaskEnd } = useTag();
+const {
+	monitorTagData,
+	tag,
+	startQueryTagTask,
+	stopQueryTagTask,
+	pauseQueryTagTask,
+	resumeQueryTagTask
+} = useTag();
 const { startGPUListen, stopGPUListen } = useGPU();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
@@ -170,43 +175,24 @@ async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
-		const valid = await validateForm(ruleFormRef.value);
-		if (!valid) {
-			submitLoading.value = false;
-			return;
-		}
-		if (trainingStore.useGPU) {
-			submitLoading.value = false;
-			ElMessage({
-				message: "GPU已经被占用，请等待对应任务完成再执行打标",
-				type: "error"
-			});
-			return;
-		}
 
-		// api
-		const result = await batchTag({
-			image_path: ruleForm.value.image_dir,
-			model_name: ruleForm.value.tagger_model,
-			class_token: ruleForm.value.output_trigger_words ? ruleForm.value.class_tokens : undefined,
-			prompt_type: ruleForm.value.prompt_type,
-			global_prompt:
-				ruleForm.value.tagger_model === "joy-caption-alpha-two"
-					? ruleForm.value.tagger_global_prompt
-					: "",
-			is_append: ruleForm.value.tagger_is_append
+		const tagResult = await tag({
+			tagDir: ruleForm.value.image_dir,
+			tagModel: ruleForm.value.tagger_model,
+			joyCaptionPromptType: ruleForm.value.prompt_type,
+			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
+			globalPrompt: ruleForm.value.class_tokens,
+			tagPrompt: ruleForm.value.tagger_global_prompt,
+			isAppend: ruleForm.value.tagger_is_append,
+			showTaskStartPrompt: true
 		});
 
-		startTagListen(result.task_id);
+		// 触发查询打标任务
+		startQueryTagTask(tagResult.task_id);
 		submitLoading.value = false;
-
-		ElMessage({
-			message: "正在打标...",
-			type: "success"
-		});
 	} catch (error) {
 		submitLoading.value = false;
-		stopTagListen(true);
+		stopQueryTagTask();
 		console.log("打标任务创建失败", error);
 	}
 }
@@ -226,13 +212,11 @@ watch(
 
 onMounted(() => {
 	// 组件挂载时，开始监听
-	if (!isTagTaskEnd()) {
-		startTagListen();
-	}
+	resumeQueryTagTask();
 });
 onUnmounted(() => {
 	// 组件销毁时，停止监听
-	stopTagListen();
+	pauseQueryTagTask();
 	stopGPUListen();
 });
 </script>

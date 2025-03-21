@@ -14,7 +14,7 @@ export { isNetworkError } from "./helper";
 
 /** 请求函数 */
 export function request<T>(config: AxiosRequestConfig): Promise<T> {
-	return instance.request(config).then(response => {
+	return instance.request(config).then((response) => {
 		if (!response?.data) return null;
 
 		const { success, data, message } = response.data as RequestResult;

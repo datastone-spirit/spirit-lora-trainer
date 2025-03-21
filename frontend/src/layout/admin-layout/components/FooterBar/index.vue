@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2025-01-14 11:04:42
+ * @LastEditTime: 2025-03-21 09:30:46
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue

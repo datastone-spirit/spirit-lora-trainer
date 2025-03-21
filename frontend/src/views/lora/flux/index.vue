@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-10 17:04:37
+ * @LastEditTime: 2025-03-21 09:42:37
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -97,7 +97,6 @@
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import type { LoRATrainingInfoResult } from "@/api/monitor";
-import { batchTag } from "@/api/tag";
 import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
 import ViewSampling from "@/components/ViewSampling/index.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
@@ -119,7 +118,7 @@ import { getEnv } from "@/utils/env";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
-const { startTagListen, stopTagListen, monitorTagData } = useTag();
+const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
 const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFluxLora({
 	isFirstGetConfig: true,
 	firstGetConfigCallback: firstResetFormConfig
@@ -538,64 +537,24 @@ const taggerBtnLoading = ref(false);
 async function onTaggerClick() {
 	try {
 		taggerBtnLoading.value = true;
-		const { image_dir, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
-		// 校验
-		const validations = [
-			{
-				condition: () => trainingStore.useGPU,
-				message: "GPU已经被占用，请等待对应任务完成再执行打标"
-			},
-			{
-				condition: () => typeof image_dir !== "string" || image_dir.trim() === "",
-				message: "请先选择训练用的数据集目录"
-			},
-			{
-				condition: async () => !(await checkDirectory(image_dir)),
-				message: "数据集目录不存在"
-			},
-			{
-				condition: () => typeof tagger_model !== "string" || tagger_model.trim() === "",
-				message: "请先选择打标模型"
-			},
-			{
-				condition: () => output_trigger_words && class_tokens.trim() === "",
-				message: "请填写触发词"
-			}
-		];
 
-		for (const validation of validations) {
-			if (await validation.condition()) {
-				taggerBtnLoading.value = false;
-				ElMessage({
-					message: validation.message,
-					type: "error"
-				});
-				return;
-			}
-		}
-
-		// api
-		const result = await batchTag({
-			image_path: image_dir,
-			model_name: tagger_model,
-			class_token: output_trigger_words ? class_tokens : undefined,
-			prompt_type: ruleForm.value.prompt_type,
-			global_prompt:
-				ruleForm.value.tagger_model === "joy-caption-alpha-two"
-					? ruleForm.value.tagger_global_prompt
-					: "",
-			is_append: ruleForm.value.tagger_is_append
+		const tagResult = await tag({
+			tagDir: ruleForm.value.image_dir,
+			tagModel: ruleForm.value.tagger_model,
+			joyCaptionPromptType: ruleForm.value.prompt_type,
+			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
+			globalPrompt: ruleForm.value.class_tokens,
+			tagPrompt: ruleForm.value.tagger_global_prompt,
+			isAppend: ruleForm.value.tagger_is_append,
+			showTaskStartPrompt: true
 		});
-		startTagListen(result.task_id);
+
+		// 触发查询打标任务
+		startQueryTagTask(tagResult.task_id);
 		taggerBtnLoading.value = false;
-
-		ElMessage({
-			message: "正在打标...",
-			type: "success"
-		});
 	} catch (error) {
 		taggerBtnLoading.value = false;
-		stopTagListen(true);
+		stopQueryTagTask();
 
 		console.log("打标任务创建失败", error);
 	}

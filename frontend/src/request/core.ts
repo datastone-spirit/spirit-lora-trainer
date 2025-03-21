@@ -76,4 +76,3 @@ instance.interceptors.response.use(
 );
 
 export { instance };
-

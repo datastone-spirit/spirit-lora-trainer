@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-02-10 15:03:13
+ * @LastEditTime: 2025-03-20 16:57:27
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -106,4 +106,12 @@ export function formatFormValidateMessage(invalidFields: FormValidateFailure["fi
 	});
 
 	return message;
+}
+
+/** 计算百分比 */
+export function calculatePercentage(num: number, total: number): number {
+	if (total <= 0) return 0;
+	if (num <= 0) return 0;
+	const value = Math.floor((num / total) * 100);
+	return value > 100 ? 100 : value;
 }

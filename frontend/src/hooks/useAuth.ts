@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-30 10:01:54
- * @LastEditTime: 2024-09-30 17:34:34
+ * @LastEditTime: 2025-03-21 08:55:47
  * @LastEditors: mulingyuer
  * @Description: 登录退出通用处理hooks
- * @FilePath: \spirit-app-microservice-admin\src\hooks\useAuth.ts
+ * @FilePath: \frontend\src\hooks\useAuth.ts
  * 怎么可能会有bug！！！
  */
 import { useUserStore } from "@/stores";

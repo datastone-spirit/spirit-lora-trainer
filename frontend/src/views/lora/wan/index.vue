@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-03-21 10:00:32
+ * @LastEditTime: 2025-03-21 17:29:21
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan\index.vue
@@ -50,6 +50,9 @@
 							tagger-append-file-popover-content="tagger_is_append"
 						/>
 					</Collapse>
+					<Collapse v-model="openStep3" title="第3步：训练参数">
+						<Demo v-model:form="ruleForm" />
+					</Collapse>
 				</el-form>
 			</template>
 			<template #right>
@@ -92,6 +95,7 @@ const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
+import Demo from "./components/Demo.vue";
 
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_wan_form`;
@@ -105,7 +109,66 @@ const defaultForm = readonly<RuleForm>({
 	output_trigger_words: true,
 	tagger_advanced_settings: false,
 	tagger_global_prompt: "",
-	tagger_is_append: false
+	tagger_is_append: false,
+	task: "i2v_14B",
+	dit: "",
+	sdpa: true,
+	mixed_precision: "bf16",
+	fp8_base: true,
+	fp8_scaled: false,
+	t5_model: "",
+	fp8_t5: false,
+	t5_checkpoint: "",
+	t5_tokenizer: "google/umt5-xxl",
+	vae: "",
+	vae_checkpoint: "",
+	vae_stride: "(4, 8, 8)",
+	optimizer_type: "adamw8bit",
+	learning_rate: 0,
+	gradient_checkpointing: false,
+	network_module: "",
+	network_dim: 0,
+	save_merged_model: "",
+	discrete_flow_shift: 0,
+	text_len: 0,
+	epoch: 0,
+	save_every_n_epochs: 0,
+	guidance_scale: 0,
+	timestep_sampling: "",
+	sigmoid_scale: 0,
+	weighting_scheme: "",
+	logit_mean: 0,
+	logit_std: 0,
+	mode_scale: 0,
+	min_timestep: 0,
+	max_timestep: 0,
+	output_dir: "",
+	resume: "",
+	num_train_timesteps: 0,
+	sample_fps: 0,
+	sample_neg_prompt: "",
+	clip: "",
+	clip_checkpoint: "",
+	clip_tokenizer: "",
+	patch_size: "",
+	dim: 0,
+	ffn_dim: 0,
+	num_heads: 0,
+	num_layers: 0,
+	window_size: "",
+	qk_norm: false,
+	cross_attn_norm: false,
+	resolution_width: 0,
+	resolution_height: 0,
+	batch_size: 0,
+	enable_bucket: false,
+	bucket_no_upscale: false,
+	cache_directory: "",
+	target_frames: "",
+	frame_extraction: "",
+	num_repeats: 0,
+	image_jsonl_file_image_path: "",
+	image_jsonl_file_caption: ""
 });
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
 const rules = reactive<FormRules<RuleForm>>({});

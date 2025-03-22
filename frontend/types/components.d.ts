@@ -8,9 +8,11 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AiDataset: typeof import('./../src/components/AiDataset/index.vue')['default']
+    BaseSelector: typeof import('./../src/components/Form/BaseSelector.vue')['default']
     Card: typeof import('./../src/components/Card/Card.vue')['default']
     Collapse: typeof import('./../src/components/Collapse/Collapse.vue')['default']
     ContextMenu: typeof import('./../src/components/AiDataset/ContextMenu.vue')['default']
+    copy: typeof import('./../src/components/Form/ModelSaveFormatSelector copy.vue')['default']
     Dataset: typeof import('./../src/components/Form/Dataset.vue')['default']
     DatasetAdvanced: typeof import('./../src/components/Form/DatasetAdvanced.vue')['default']
     DatasetDirSelector: typeof import('./../src/components/Form/DatasetDirSelector.vue')['default']
@@ -38,6 +40,8 @@ declare module 'vue' {
     ElPopconfirm: typeof import('element-plus/es')['ElPopconfirm']
     ElPopover: typeof import('element-plus/es')['ElPopover']
     ElProgress: typeof import('element-plus/es')['ElProgress']
+    ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
+    ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSelect: typeof import('element-plus/es')['ElSelect']

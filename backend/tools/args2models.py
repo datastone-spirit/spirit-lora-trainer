@@ -1,16 +1,14 @@
-from library import flux_train_utils
-from library import train_util
-import flux_train_network
-from typing import List
+from argparse  import ArgumentParser
+from typing import List, Any, Generator
 
-def init_advanced():
+def init_advanced(parser: ArgumentParser) -> List[dict]:
     # if basic_args
     basic_args = {
     }
 
     # generate a UI config
     # if not in basic_args, create a simple form
-    parser = flux_train_network.setup_parser()
+    #parser = flux_train_network.setup_parser()
     #flux_train_utils.add_flux_train_arguments(parser)
     #train_util.add_optimizer_arguments(parser)
     args_info = {}
@@ -42,12 +40,13 @@ def init_advanced():
         })
     return advanced_component
 
-def loop_advanced_component(advanced_component: List) -> str:
+def loop_advanced_component(advanced_component: List) :
     for item in advanced_component:
         key = item['key']
         action = item['action']
         action_type = item['type']
         help = item['help']
+        print(f"key is {key}")
         if action_type is str or action_type == "<class 'str'>":
             default_value = item['default'] if item['default'] is None else f'"{item["default"]}"'
             yield f'{key}: str  = {default_value}'
@@ -73,9 +72,3 @@ def loop_advanced_component(advanced_component: List) -> str:
                 yield f'{key}: float = {item["default"]}'
             else:
                 yield f'{key}: {action_type} = {item["default"]}' 
-
-def to_classe(advanced_component: List) -> str:
-    return '@dataclass\nclass TrainingConfig:\n    ' + '\n    '.join(loop_advanced_component(advanced_component))
-
-if __name__ == '__main__':
-    print(to_classe(init_advanced()))

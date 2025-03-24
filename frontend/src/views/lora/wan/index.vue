@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-03-21 17:29:21
+ * @LastEditTime: 2025-03-24 16:24:52
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan\index.vue
@@ -24,6 +24,7 @@
 					</Collapse>
 					<Collapse v-model="openStep2" title="第2步：训练用的数据">
 						<Dataset
+							v-if="!isT2V"
 							v-model:dataset-path="ruleForm.image_dir"
 							dataset-path-prop="image_dir"
 							dataset-path-popover-content="image_dir"
@@ -40,6 +41,7 @@
 							@tagger-click="onTaggerClick"
 						/>
 						<DatasetAdvanced
+							v-if="!isT2V"
 							:tagger-model="ruleForm.tagger_model"
 							v-model:advanced="ruleForm.tagger_advanced_settings"
 							v-model:tagger-prompt="ruleForm.tagger_global_prompt"
@@ -49,10 +51,15 @@
 							tagger-append-file-prop="tagger_is_append"
 							tagger-append-file-popover-content="tagger_is_append"
 						/>
+						<T2VOptions v-if="isT2V" v-model:form="ruleForm" />
+						<TrainingData v-model:form="ruleForm" />
 					</Collapse>
-					<Collapse v-model="openStep3" title="第3步：训练参数">
-						<Demo v-model:form="ruleForm" />
+					<Collapse v-show="isExpert" v-model="openStep3" title="模型参数调教">
+						<ModelParameters v-model:form="ruleForm" />
 					</Collapse>
+					<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
+						<AdvancedSettings v-model:form="ruleForm" />
+					</SimpleCollapse>
 				</el-form>
 			</template>
 			<template #right>
@@ -95,8 +102,16 @@ const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
-import Demo from "./components/Demo.vue";
+import TrainingData from "./components/TrainingData.vue";
+import T2VOptions from "./components/T2VOptions.vue";
+import ModelParameters from "./components/ModelParameters.vue";
+import AdvancedSettings from "./components/AdvancedSettings/index.vue";
+import { checkDirectory, checkHYData } from "@/utils/lora.helper";
+import { getEnv } from "@/utils/env";
 
+const env = getEnv();
+/** 是否开启小白校验 */
+const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_wan_form`;
 const defaultForm = readonly<RuleForm>({
@@ -124,60 +139,112 @@ const defaultForm = readonly<RuleForm>({
 	vae_checkpoint: "",
 	vae_stride: "(4, 8, 8)",
 	optimizer_type: "adamw8bit",
-	learning_rate: 0,
-	gradient_checkpointing: false,
-	network_module: "",
-	network_dim: 0,
+	learning_rate: "2e-4",
+	gradient_checkpointing: true,
+	network_dim: 32,
 	save_merged_model: "",
-	discrete_flow_shift: 0,
-	text_len: 0,
-	epoch: 0,
-	save_every_n_epochs: 0,
-	guidance_scale: 0,
-	timestep_sampling: "",
-	sigmoid_scale: 0,
-	weighting_scheme: "",
+	discrete_flow_shift: 3,
+	text_len: 512,
+	epoch: 1,
+	save_every_n_epochs: 16,
+	guidance_scale: 1,
+	timestep_sampling: "shift",
+	sigmoid_scale: 1,
+	weighting_scheme: "none",
 	logit_mean: 0,
-	logit_std: 0,
-	mode_scale: 0,
+	logit_std: 1,
+	mode_scale: 1.29,
 	min_timestep: 0,
-	max_timestep: 0,
+	max_timestep: 1000,
 	output_dir: "",
+	save_state: true,
 	resume: "",
-	num_train_timesteps: 0,
-	sample_fps: 0,
-	sample_neg_prompt: "",
+	num_train_timesteps: 1000,
+	sample_fps: 16,
+	sample_neg_prompt:
+		"色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
 	clip: "",
 	clip_checkpoint: "",
-	clip_tokenizer: "",
-	patch_size: "",
-	dim: 0,
-	ffn_dim: 0,
-	num_heads: 0,
-	num_layers: 0,
-	window_size: "",
-	qk_norm: false,
-	cross_attn_norm: false,
-	resolution_width: 0,
-	resolution_height: 0,
-	batch_size: 0,
-	enable_bucket: false,
+	clip_tokenizer: "xlm-roberta-large",
+	patch_size: "1, 2, 2",
+	dim: 5120,
+	ffn_dim: 13824,
+	num_heads: 40,
+	num_layers: 40,
+	window_size: "-1, -1",
+	qk_norm: true,
+	cross_attn_norm: true,
+	resolution_width: 720,
+	resolution_height: 1280,
+	batch_size: 1,
+	enable_bucket: true,
 	bucket_no_upscale: false,
 	cache_directory: "",
-	target_frames: "",
-	frame_extraction: "",
-	num_repeats: 0,
+	target_frames: "[1]",
+	frame_extraction: "head",
+	num_repeats: 2,
 	image_jsonl_file_image_path: "",
 	image_jsonl_file_caption: ""
 });
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
-const rules = reactive<FormRules<RuleForm>>({});
+const rules = reactive<FormRules<RuleForm>>({
+	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
+	output_dir: [
+		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
+		{
+			asyncValidator: async (
+				_rule: any,
+				value: string,
+				callback: (error?: string | Error) => void
+			) => {
+				try {
+					const isExists = await checkDirectory(value);
+					if (!isExists) {
+						callback(new Error("LoRA保存目录不存在"));
+						return;
+					}
+					const isDataExists = await checkHYData(value);
+					if (isDataExists) {
+						callback(new Error("LoRA保存目录已存在数据，请提供空目录"));
+						return;
+					}
+					return callback();
+				} catch (error) {
+					return callback(new Error((error as Error).message));
+				}
+			}
+		},
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (!isWhiteCheck) return callback();
+				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
+				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
+			}
+		}
+	],
+	image_dir: [
+		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("数据集目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		}
+	]
+});
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
 /** lora保存警告弹窗 */
 const openSavePathWarningDialog = ref(false);
+/** 是否是T2V训练 */
+const isT2V = computed(() => ruleForm.value.task === "t2v_14B");
 
 // 折叠
 const openStep1 = ref(true);

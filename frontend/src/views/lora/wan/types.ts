@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 09:30:27
- * @LastEditTime: 2025-03-21 16:31:32
+ * @LastEditTime: 2025-03-24 09:31:21
  * @LastEditors: mulingyuer
  * @Description: wan类型
  * @FilePath: \frontend\src\views\lora\wan\types.ts
@@ -58,15 +58,15 @@ export interface RuleForm {
 	vae_stride: string;
 	/** 优化器类型 */
 	optimizer_type: string;
-	/** 学习率 */
-	learning_rate: number;
+	/** 学习率（需转换为数字） */
+	learning_rate: string;
 	/** 显存优化开关 */
 	gradient_checkpointing: boolean;
 	/** LoRA模块地址 */
-	network_module: string;
+	// network_module: string;
 	/** LoRA维度 */
 	network_dim: number;
-	/** LoRA保存路径 */
+	/** 融合模型保存名称 */
 	save_merged_model: string;
 	/** 运动流控制参数 */
 	discrete_flow_shift: number;
@@ -96,6 +96,8 @@ export interface RuleForm {
 	max_timestep: number;
 	/** 输出目录路径 */
 	output_dir: string;
+	/** 保存训练状态 配合 resume 参数可以继续从某个状态训练 */
+	save_state: boolean;
 	/** 恢复训练状态文件目录 */
 	resume: string;
 	/** 扩散模型总时间步 */

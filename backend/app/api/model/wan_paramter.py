@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 @dataclass
-class WanI2VTrainingConfig:
+class WanVTrainingConfig:
     async_upload: bool = False
     base_weights: str  = None
     base_weights_multiplier: float = None
@@ -101,7 +101,7 @@ class WanI2VTrainingConfig:
     vae: str  = None
     vae_cache_cpu: bool = False
     vae_dtype: str  = None
-    wandb_api_key: str  = None
-    wandb_run_name: str  = None
+    wandb_api_key: str  = None # Don't display in frontend, no need send from frontend
+    wandb_run_name: str  = None # Don't display in frontend, no need send from frontend
     weighting_scheme: str  = "none"
     xformers: bool = False

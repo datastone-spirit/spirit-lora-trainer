@@ -35,7 +35,7 @@ def init_advanced(parser: ArgumentParser) -> List[dict]:
             'key': key,
             'action': action['action'],
             'type': action_type,
-            'help': action['help'],
+            'help': action['help'].split('/')[0].strip(),  # Remove the part after the first '/'
             'default': action['default'],
         })
     return advanced_component
@@ -46,29 +46,28 @@ def loop_advanced_component(advanced_component: List) :
         action = item['action']
         action_type = item['type']
         help = item['help']
-        print(f"key is {key}")
         if action_type is str or action_type == "<class 'str'>":
             default_value = item['default'] if item['default'] is None else f'"{item["default"]}"'
-            yield f'{key}: str  = {default_value}'
+            yield f'{key}: str  = "{default_value}" # {help}'
         elif action_type is int or action_type == "<class 'int'>":
             default_value = item['default'] 
-            yield f'{key}: int = {default_value}'
+            yield f'{key}: int = {default_value} # {help}'
         elif action_type is float or action_type == "<class 'float'>":
             default_value = item['default'] 
-            yield f'{key}: float = {default_value}'
+            yield f'{key}: float = {default_value} # {help}'
         elif action_type is bool or action_type == "<class 'bool'>":
             default_value = False if item['default'] is None else item['default']
-            yield f'{key}: bool = {default_value}'
+            yield f'{key}: bool = {default_value} # {help}'
         elif item['default'] is None: 
-          yield f'{key} = None'
+          yield f'{key} = None # {help}'
         else:
             if isinstance(item['default'], str):
-                yield f'{key}: str = "{item["default"]}"'
+                yield f'{key}: str = "{item["default"]}" # {help}'
             elif isinstance(item['default'], bool): 
-                yield f'{key}: bool = {item["default"]}'
+                yield f'{key}: bool = {item["default"]} # {help}'
             elif isinstance(item['default'], int):
-                yield f'{key}: int = {item["default"]}'
+                yield f'{key}: int = {item["default"]} # {help}'
             elif isinstance(item['default'], float):
-                yield f'{key}: float = {item["default"]}'
+                yield f'{key}: float = {item["default"]} # {help}'
             else:
-                yield f'{key}: {action_type} = {item["default"]}' 
+                yield f'{key}: {action_type} = {item["default"]} # {item["help"]}' 

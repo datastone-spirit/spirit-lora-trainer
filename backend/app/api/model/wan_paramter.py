@@ -1,7 +1,52 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional, Tuple, List 
+import dacite
+
+from utils.util import setup_logging
+setup_logging()
+import logging
+logger = logging.getLogger(__name__)
 
 @dataclass
-class WanVTrainingConfig:
+class GeneralConfig:
+    resolution: Tuple[int, int] = (960, 544)  # [W, H]
+    caption_extension: Optional[str] = ".txt"
+    batch_size: int = 1
+    num_repeats: int = 1
+    enable_bucket: bool = True  # default provided value (can be overridden)
+    bucket_no_upscale: bool = False
+
+@dataclass
+class DatasetConfig:
+    # Common dataset fields (these may override general settings)
+    resolution: Optional[Tuple[int, int]] = None
+    caption_extension: Optional[str] = None
+    batch_size: Optional[int] = None
+    num_repeats: Optional[int] = None
+    enable_bucket: Optional[bool] = None
+    bucket_no_upscale: Optional[bool] = None
+    cache_directory: Optional[str] = None
+
+    # Fields for image datasets
+    image_directory: Optional[str] = None
+    image_jsonl_file: Optional[str] = None
+
+    # Fields for video datasets
+    video_directory: Optional[str] = None
+    video_jsonl_file: Optional[str] = None
+    target_frames: Optional[List[int]] = None  # e.g. [1, 25, 79]
+    frame_extraction: Optional[str] = None  # options: "head", "chunk", "slide", "uniform"
+    frame_stride: Optional[int] = None         # applicable for "slide"
+    frame_sample: Optional[int] = None         # applicable for "uniform"
+    max_frames: Optional[int] = None         # applicable for "full"
+
+@dataclass
+class WanDataSetConfig:
+    general: GeneralConfig = GeneralConfig()
+    datasets: List[DatasetConfig] = field(default_factory=list)
+
+@dataclass
+class WanTrainingConfig:
     async_upload: bool = False
     base_weights: str  = None
     base_weights_multiplier: float = None
@@ -23,14 +68,14 @@ class WanVTrainingConfig:
     gradient_accumulation_steps: int = 1
     gradient_checkpointing: bool = False
     guidance_scale: float = 1.0
-    huggingface_path_in_repo: str  = None
-    huggingface_repo_id: str  = None
-    huggingface_repo_type: str  = None
-    huggingface_repo_visibility: str  = None
-    huggingface_token: str  = None
+    huggingface_path_in_repo: str  = None # No need send from frontend
+    huggingface_repo_id: str  = None # No need send from frontend
+    huggingface_repo_type: str  = None # No need send from frontend
+    huggingface_repo_visibility: str  = None # No need send from frontend
+    huggingface_token: str  = None # No need send from frontend
     img_in_txt_in_offloading: bool = False
     learning_rate: float = 2e-06
-    log_config: bool = False
+    log_config: bool = False # No need send from frontend
     log_prefix: str  = None # No need send from frontend
     log_tracker_config: str  = None
     log_tracker_name: str  = None
@@ -47,7 +92,7 @@ class WanVTrainingConfig:
     lr_scheduler_timescale: int = None
     lr_scheduler_type: str  = ""
     lr_warmup_steps: int = 0
-    max_data_loader_n_workers: int = 8
+    max_data_loader_n_workers: int = 8 
     max_grad_norm: float = 1.0
     max_timestep: int = None
     max_train_epochs: int = None
@@ -105,3 +150,17 @@ class WanVTrainingConfig:
     wandb_run_name: str  = None # Don't display in frontend, no need send from frontend
     weighting_scheme: str  = "none"
     xformers: bool = False
+
+@dataclass
+class WanTrainingParamer:
+    dataset: Optional[WanDataSetConfig] = None
+    config: Optional[WanTrainingConfig] = None
+    frontend_config: str
+
+    @classmethod
+    def from_dict(cls, dikt) -> 'WanTrainingParamer':
+        try: 
+            return dacite.from_dict(data_class=WanTrainingParamer, data=dikt) 
+        except Exception as e:
+            logger.warning(f"WanTrainingParameter.from_dict failed, error: ", exc_info=e)
+            raise ValueError(f"WanTrainingParameter.from_dict failed, error: {str(e)}")

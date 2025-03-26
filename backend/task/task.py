@@ -3,6 +3,7 @@ from typing import Optional, Callable, List
 from subprocess import Popen
 from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
+from app.api.model.wan_paramter import WanTrainingParameter
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
 from app.api.common.utils import is_flux_sampling
@@ -109,6 +110,11 @@ class Task:
         task.global_prompt = global_prompt
         task.is_append = is_append
         return task    
+
+    @staticmethod
+    def wrap_wan_training(proc : Popen, training_paramter: WanTrainingParameter, 
+                      task_id: str) -> 'Task':
+        pass
 
 
     def run(self):

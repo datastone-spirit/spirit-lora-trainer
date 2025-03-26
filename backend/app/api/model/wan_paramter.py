@@ -41,7 +41,6 @@ class GeneralConfig:
     def validate(config: 'GeneralConfig') -> 'GeneralConfig':
         """
         Validate the GeneralConfig instance.
-        This method is a placeholder for any validation logic you want to implement.
         """
 
         if config.resolution[0] <= 0 or config.resolution[1] <= 0:
@@ -357,27 +356,24 @@ class WanTrainingConfig:
         return config
 
 @dataclass
-class WanTrainingParamer:
+class WanTrainingParameter:
     dataset: Optional[WanDataSetConfig] = None
     config: Optional[WanTrainingConfig] = None
     frontend_config: str
 
     @classmethod
-    def from_dict(cls, dikt) -> 'WanTrainingParamer':
+    def from_dict(cls, dikt) -> 'WanTrainingParameter':
         try: 
-            return dacite.from_dict(data_class=WanTrainingParamer, data=dikt) 
+            return dacite.from_dict(data_class=WanTrainingParameter, data=dikt) 
         except Exception as e:
             logger.warning(f"WanTrainingParameter.from_dict failed, error: ", exc_info=e)
             raise ValueError(f"WanTrainingParameter.from_dict failed, error: {str(e)}")
     
     @classmethod
-    def validate(parameter: 'WanTrainingParamer') -> 'WanTrainingParamer':
+    def validate(parameter: 'WanTrainingParameter') -> 'WanTrainingParameter':
         """
         Validate the WanTrainingParamer instance.
-        This method is a placeholder for any validation logic you want to implement.
         """
-        # Add your validation logic here
-        # For example, check if required fields are present
         if not parameter.config:
             raise ValueError("Training config is required.")
         
@@ -387,5 +383,4 @@ class WanTrainingParamer:
             raise ValueError("Dataset config is required.")
         
         parameter.dataset = WanDataSetConfig.validate(parameter.dataset, task=parameter.config.task)
-        
         return parameter

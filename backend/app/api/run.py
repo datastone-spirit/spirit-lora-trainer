@@ -12,6 +12,7 @@ from .resources.upload import Upload
 from .resources.tagging import Tagging,ManualTagging
 from .resources.training import Training
 from .resources.hunyuan_trainning import HunyuanTraining
+from app.api.resources.wan_trainning import WanTraining
 from .resources.gpu_log import GpuLog
 from .resources.current_task import CurrentTask
 from .resources.task_history import TaskHistory
@@ -54,8 +55,9 @@ api.add_resource(Image, "/image/<path:image_path>")  # 获取图片
 api.add_resource(Upload, "/upload")  # 上传文件的接口
 api.add_resource(Tagging, "/training/tag")  # 打标数据集
 api.add_resource(ManualTagging, "/training/tag_manual")  # 手动打标接口
-api.add_resource(Training, "/training/start")  # 启动训练
-api.add_resource(HunyuanTraining, "/training/hunyuan/start")  # 启动训练
+api.add_resource(Training, "/training/start")  # 启动Flux训练
+api.add_resource(HunyuanTraining, "/training/hunyuan/start")  # 启动Hunyuan训练
+api.add_resource(WanTraining, "/training/wan/start")  # 启动Wan(万象）训练
 api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
 api.add_resource(CurrentTask, "/tasks/current") # gpu功耗、显存信息
 api.add_resource(TaskHistory, "/tasks/history") # gpu功耗、显存信息

@@ -112,8 +112,7 @@ class Task:
         return task    
 
     @staticmethod
-    def wrap_wan_training(proc : Popen, training_paramter: WanTrainingParameter, 
-                      task_id: str) -> 'Task':
+    def wrap_wan_training(training_paramter: WanTrainingParameter, task_id: str) -> 'Task':
         pass
 
 
@@ -437,3 +436,56 @@ class HunyuanTrainingTask(Task):
             self.detail['estimate_steps_per_epoch'] = current_step
         self.detail['epoch_loss']=get_value(step=current_epoch, tag="train/epoch_loss")
         
+@dataclass
+class WanTrainingTask(Task):
+    training_parameters: WanTrainingParameter = None 
+    is_sampling :bool = False
+    phase: str = None
+
+    def __init__(self, parameter: WanTrainingParameter, is_sampling):
+        self.training_parameters = parameter
+        self.is_sampling = is_sampling
+
+
+class TaskChian:
+
+    def __init__(self, sub_tasks: List['SubTask'], task: WanTrainingTask):
+        self.task = task
+        self.sub_tasks = sub_tasks
+        self.current = 0
+    
+    def excute(self):
+        if self.current == len(self.sub_tasks):
+            return
+        sub_task = self.sub_tasks[self.current]
+        self.current += 1
+        sub_task.do_task(self.task, self)
+
+
+class SubTask:
+    
+    def do_task(self, task: WanTrainingTask,  task_chain: TaskChian):
+        pass
+
+class WanCacheLatentSubTask(SubTask):
+
+    def __init__(self):
+        super().__init__()
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        return task_chain.excute(task)
+
+class WanTextEncoderOutputCacheSubTask:
+    
+    def __init__(self):
+        super().__init__()
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        return task_chain.excute(task)
+
+class WanTrainingSubTask:
+    def __init__(self):
+        super().__init__()
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        return task_chain.excute(self.task)

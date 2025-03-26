@@ -40,7 +40,6 @@ class WanTrainingService():
 
 
     @task_decorator 
-    @task_decorator 
     def run_train(self,
               config_file: str,
               script: str = "",
@@ -64,4 +63,4 @@ class WanTrainingService():
         customize_env["NCCL_P2P_DISABLE"]="1" # For flux training, we disable NCCL P2P and IB
         customize_env["NCCL_IB_DISABLE"]="1"
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env)
-        return Task.wrap_wan_training(proc, training_paramters, task_id)    
+        return Task.wrap_wan_training(training_paramters, task_id, args, customize_env)    

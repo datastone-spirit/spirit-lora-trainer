@@ -359,7 +359,7 @@ class WanTrainingConfig:
 class WanTrainingParameter:
     dataset: Optional[WanDataSetConfig] = None
     config: Optional[WanTrainingConfig] = None
-    frontend_config: str
+    frontend_config: Optional[str] = None
 
     @classmethod
     def from_dict(cls, dikt) -> 'WanTrainingParameter':

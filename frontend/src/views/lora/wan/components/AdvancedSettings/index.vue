@@ -1,23 +1,31 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 15:37:04
- * @LastEditTime: 2025-03-24 15:56:39
+ * @LastEditTime: 2025-03-26 16:38:28
  * @LastEditors: mulingyuer
  * @Description: 高级设置
  * @FilePath: \frontend\src\views\lora\wan\components\AdvancedSettings\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<SamplingOptions v-model:form="ruleForm" />
-	<OptimizerOptions v-model:form="ruleForm" />
-	<MiscOptions v-model:form="ruleForm" />
+	<OptimizerAndLROptions v-model:form="ruleForm" />
+	<ModelOptions v-model:form="ruleForm" />
+	<TrainingControlOptions v-model:form="ruleForm" />
+	<TrainingDistributedOptions v-model:form="ruleForm" />
+	<SampleValidatorOptions v-model:form="ruleForm" />
+	<AdvancedMemoryOptimizer v-model:form="ruleForm" />
+	<DiffusionModelOptions v-model:form="ruleForm" />
 </template>
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
-import SamplingOptions from "./SamplingOptions.vue";
-import OptimizerOptions from "./OptimizerOptions.vue";
-import MiscOptions from "./MiscOptions.vue";
+import OptimizerAndLROptions from "./OptimizerAndLROptions.vue";
+import ModelOptions from "./ModelOptions.vue";
+import TrainingControlOptions from "./TrainingControlOptions.vue";
+import TrainingDistributedOptions from "./TrainingDistributedOptions.vue";
+import SampleValidatorOptions from "./SampleValidatorOptions.vue";
+import AdvancedMemoryOptimizer from "./AdvancedMemoryOptimizer.vue";
+import DiffusionModelOptions from "./DiffusionModelOptions.vue";
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 </script>

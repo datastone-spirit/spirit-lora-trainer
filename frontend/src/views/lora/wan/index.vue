@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-03-24 16:24:52
+ * @LastEditTime: 2025-03-26 16:41:36
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan\index.vue
@@ -22,40 +22,11 @@
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo v-model:form="ruleForm" />
 					</Collapse>
-					<Collapse v-model="openStep2" title="第2步：训练用的数据">
-						<Dataset
-							v-if="!isT2V"
-							v-model:dataset-path="ruleForm.image_dir"
-							dataset-path-prop="image_dir"
-							dataset-path-popover-content="image_dir"
-							v-model:tagger-model="ruleForm.tagger_model"
-							tagger-model-prop="tagger_model"
-							tagger-model-popover-content="tagger_model"
-							v-model:joy-caption-prompt-type="ruleForm.prompt_type"
-							joy-caption-prop="prompt_type"
-							joy-caption-popover-content="prompt_type"
-							v-model:output-trigger-words="ruleForm.output_trigger_words"
-							output-trigger-words-prop="output_trigger_words"
-							output-trigger-words-popover-content="output_trigger_words"
-							:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
-							@tagger-click="onTaggerClick"
-						/>
-						<DatasetAdvanced
-							v-if="!isT2V"
-							:tagger-model="ruleForm.tagger_model"
-							v-model:advanced="ruleForm.tagger_advanced_settings"
-							v-model:tagger-prompt="ruleForm.tagger_global_prompt"
-							tagger-prompt-prop="tagger_global_prompt"
-							tagger-prompt-popover-content="tagger_global_prompt"
-							v-model:tagger-append-file="ruleForm.tagger_is_append"
-							tagger-append-file-prop="tagger_is_append"
-							tagger-append-file-popover-content="tagger_is_append"
-						/>
-						<T2VOptions v-if="isT2V" v-model:form="ruleForm" />
-						<TrainingData v-model:form="ruleForm" />
+					<Collapse v-model="openStep2" title="第2步：AI数据集">
+						<WanDataSet v-model:form="ruleForm" />
 					</Collapse>
-					<Collapse v-show="isExpert" v-model="openStep3" title="模型参数调教">
-						<ModelParameters v-model:form="ruleForm" />
+					<Collapse v-model="openStep3" title="第3步：训练数据配置">
+						<TrainingData v-model:form="ruleForm" />
 					</Collapse>
 					<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
 						<AdvancedSettings v-model:form="ruleForm" />
@@ -63,7 +34,7 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
+				<SplitRightPanel :toml="toml" :dir="ruleForm.dataset.datasets[0].image_directory" />
 			</template>
 		</TwoSplit>
 		<FooterButtonGroup
@@ -108,134 +79,252 @@ import ModelParameters from "./components/ModelParameters.vue";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import { checkDirectory, checkHYData } from "@/utils/lora.helper";
 import { getEnv } from "@/utils/env";
+import WanDataSet from "./components/WanDataSet.vue";
 
 const env = getEnv();
 /** 是否开启小白校验 */
 const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_wan_form`;
-const defaultForm = readonly<RuleForm>({
-	output_name: "",
-	class_tokens: "",
-	// -----
-	image_dir: "/root",
-	tagger_model: "joy-caption-alpha-two",
-	prompt_type: "Training Prompt",
-	output_trigger_words: true,
-	tagger_advanced_settings: false,
-	tagger_global_prompt: "",
-	tagger_is_append: false,
-	task: "i2v_14B",
-	dit: "",
-	sdpa: true,
-	mixed_precision: "bf16",
-	fp8_base: true,
-	fp8_scaled: false,
-	t5_model: "",
-	fp8_t5: false,
-	t5_checkpoint: "",
-	t5_tokenizer: "google/umt5-xxl",
-	vae: "",
-	vae_checkpoint: "",
-	vae_stride: "(4, 8, 8)",
-	optimizer_type: "adamw8bit",
-	learning_rate: "2e-4",
-	gradient_checkpointing: true,
-	network_dim: 32,
-	save_merged_model: "",
-	discrete_flow_shift: 3,
-	text_len: 512,
-	epoch: 1,
-	save_every_n_epochs: 16,
-	guidance_scale: 1,
-	timestep_sampling: "shift",
-	sigmoid_scale: 1,
-	weighting_scheme: "none",
-	logit_mean: 0,
-	logit_std: 1,
-	mode_scale: 1.29,
-	min_timestep: 0,
-	max_timestep: 1000,
-	output_dir: "",
-	save_state: true,
-	resume: "",
-	num_train_timesteps: 1000,
-	sample_fps: 16,
-	sample_neg_prompt:
-		"色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
-	clip: "",
-	clip_checkpoint: "",
-	clip_tokenizer: "xlm-roberta-large",
-	patch_size: "1, 2, 2",
-	dim: 5120,
-	ffn_dim: 13824,
-	num_heads: 40,
-	num_layers: 40,
-	window_size: "-1, -1",
-	qk_norm: true,
-	cross_attn_norm: true,
-	resolution_width: 720,
-	resolution_height: 1280,
-	batch_size: 1,
-	enable_bucket: true,
-	bucket_no_upscale: false,
-	cache_directory: "",
-	target_frames: "[1]",
-	frame_extraction: "head",
-	num_repeats: 2,
-	image_jsonl_file_image_path: "",
-	image_jsonl_file_caption: ""
-});
+const defaultForm: RuleForm = {
+	config: {
+		task: "i2v-14B",
+		output_name: "",
+		dit: "./models/wan/wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors",
+		clip: "./models/clip/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth",
+		t5: "./models/clip/models_t5_umt5-xxl-enc-bf16.pth",
+		fp8_t5: false,
+		vae: "./models/vae/wan_2.1_vae.safetensors",
+		vae_cache_cpu: false,
+		vae_dtype: "float16",
+		output_dir: "",
+		max_train_epochs: 1,
+		max_train_steps: undefined,
+		seed: undefined,
+		mixed_precision: "bf16",
+		persistent_data_loader_workers: false,
+		max_data_loader_n_workers: 8,
+		optimizer_type: "",
+		optimizer_args: "",
+		learning_rate: "2e-06",
+		lr_decay_steps: 0,
+		lr_scheduler: "constant",
+		lr_scheduler_args: "",
+		lr_scheduler_min_lr_ratio: undefined,
+		lr_scheduler_num_cycles: 1,
+		lr_scheduler_power: 1,
+		lr_scheduler_type: "",
+		lr_warmup_steps: 0,
+		network_alpha: 1,
+		network_args: "",
+		network_dim: undefined,
+		network_dropout: undefined,
+		network_module: "",
+		network_weights: "",
+		dim_from_weights: false,
+		blocks_to_swap: undefined,
+		fp8_base: true,
+		fp8_scaled: false,
+		save_every_n_epochs: undefined,
+		save_every_n_steps: undefined,
+		save_last_n_epochs: undefined,
+		save_last_n_epochs_state: undefined,
+		save_last_n_steps: undefined,
+		save_last_n_steps_state: undefined,
+		save_state: false,
+		save_state_on_train_end: false,
+		resume: "",
+		scale_weight_norms: undefined,
+		max_grad_norm: 1,
+		ddp_gradient_as_bucket_view: false,
+		ddp_static_graph: false,
+		ddp_timeout: undefined,
+		sample_at_first: false,
+		sample_every_n_epochs: undefined,
+		sample_every_n_steps: undefined,
+		sample_prompts: "",
+		guidance_scale: undefined,
+		show_timesteps: "",
+		gradient_accumulation_steps: 1,
+		gradient_checkpointing: false,
+		img_in_txt_in_offloading: false,
+		flash3: false,
+		flash_attn: false,
+		sage_attn: false,
+		sdpa: false,
+		split_attn: false,
+		xformers: false,
+		discrete_flow_shift: 1,
+		min_timestep: undefined,
+		max_timestep: undefined,
+		mode_scale: 1.29,
+		logit_mean: 0,
+		logit_std: 1,
+		timestep_sampling: "sigma",
+		sigmoid_scale: 1,
+		weighting_scheme: "none"
+	},
+	dataset: {
+		general: {
+			resolution: [960, 544],
+			batch_size: 1,
+			enable_bucket: true,
+			bucket_no_upscale: false,
+			caption_extension: ".txt",
+			num_repeats: 1
+		},
+		datasets: [
+			{
+				image_directory: "/root"
+			}
+		]
+	},
+	tagConfig: {
+		tag_model: "joy-caption-alpha-two",
+		joy_caption_prompt_type: "Training Prompt",
+		tag_advanced_settings: false,
+		tag_global_prompt: "",
+		tag_is_append: false
+	}
+};
+// const defaultForm = readonly<RuleForm>({
+// 	output_name: "",
+// 	class_tokens: "",
+// 	// -----
+// 	image_dir: "/root",
+// 	tagger_model: "joy-caption-alpha-two",
+// 	prompt_type: "Training Prompt",
+// 	output_trigger_words: true,
+// 	tagger_advanced_settings: false,
+// 	tagger_global_prompt: "",
+// 	tagger_is_append: false,
+// 	task: "i2v_14B",
+// 	dit: "",
+// 	sdpa: true,
+// 	mixed_precision: "bf16",
+// 	fp8_base: true,
+// 	fp8_scaled: false,
+// 	t5_model: "",
+// 	fp8_t5: false,
+// 	t5_checkpoint: "",
+// 	t5_tokenizer: "google/umt5-xxl",
+// 	vae: "",
+// 	vae_checkpoint: "",
+// 	vae_stride: "(4, 8, 8)",
+// 	optimizer_type: "adamw8bit",
+// 	learning_rate: "2e-4",
+// 	gradient_checkpointing: true,
+// 	network_dim: 32,
+// 	save_merged_model: "",
+// 	discrete_flow_shift: 3,
+// 	text_len: 512,
+// 	epoch: 1,
+// 	save_every_n_epochs: 16,
+// 	guidance_scale: 1,
+// 	timestep_sampling: "shift",
+// 	sigmoid_scale: 1,
+// 	weighting_scheme: "none",
+// 	logit_mean: 0,
+// 	logit_std: 1,
+// 	mode_scale: 1.29,
+// 	min_timestep: 0,
+// 	max_timestep: 1000,
+// 	output_dir: "",
+// 	save_state: true,
+// 	resume: "",
+// 	num_train_timesteps: 1000,
+// 	sample_fps: 16,
+// 	sample_neg_prompt:
+// 		"色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
+// 	clip: "",
+// 	clip_checkpoint: "",
+// 	clip_tokenizer: "xlm-roberta-large",
+// 	patch_size: "1, 2, 2",
+// 	dim: 5120,
+// 	ffn_dim: 13824,
+// 	num_heads: 40,
+// 	num_layers: 40,
+// 	window_size: "-1, -1",
+// 	qk_norm: true,
+// 	cross_attn_norm: true,
+// 	resolution_width: 720,
+// 	resolution_height: 1280,
+// 	batch_size: 1,
+// 	enable_bucket: true,
+// 	bucket_no_upscale: false,
+// 	cache_directory: "",
+// 	target_frames: "[1]",
+// 	frame_extraction: "head",
+// 	num_repeats: 2,
+// 	image_jsonl_file_image_path: "",
+// 	image_jsonl_file_caption: ""
+// });
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
 const rules = reactive<FormRules<RuleForm>>({
-	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
-	output_dir: [
-		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
+	"config.task": [
 		{
-			asyncValidator: async (
-				_rule: any,
-				value: string,
-				callback: (error?: string | Error) => void
-			) => {
-				try {
-					const isExists = await checkDirectory(value);
-					if (!isExists) {
-						callback(new Error("LoRA保存目录不存在"));
-						return;
-					}
-					const isDataExists = await checkHYData(value);
-					if (isDataExists) {
-						callback(new Error("LoRA保存目录已存在数据，请提供空目录"));
-						return;
-					}
-					return callback();
-				} catch (error) {
-					return callback(new Error((error as Error).message));
-				}
-			}
-		},
-		{
-			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (!isWhiteCheck) return callback();
-				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
-				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
-			}
+			// validator: (rule: any, value: string, callback: (error?: string | Error) => void) => {
+			// 	callback(new Error("请选择训练任务"));
+			// }
 		}
 	],
-	image_dir: [
-		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+	"dataset.datasets.0.image_directory": [
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
-						callback(new Error("数据集目录不存在"));
-						return;
-					}
-					callback();
-				});
-			}
+			validator: (rule: any, value: string, callback: (error?: string | Error) => void) => {
+				console.log("🚀 ~ string:", value);
+				callback(new Error("请选择训练用的数据集目录"));
+			},
+			trigger: "change"
 		}
 	]
+	// class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
+	// output_dir: [
+	// 	{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
+	// 	{
+	// 		asyncValidator: async (
+	// 			_rule: any,
+	// 			value: string,
+	// 			callback: (error?: string | Error) => void
+	// 		) => {
+	// 			try {
+	// 				const isExists = await checkDirectory(value);
+	// 				if (!isExists) {
+	// 					callback(new Error("LoRA保存目录不存在"));
+	// 					return;
+	// 				}
+	// 				const isDataExists = await checkHYData(value);
+	// 				if (isDataExists) {
+	// 					callback(new Error("LoRA保存目录已存在数据，请提供空目录"));
+	// 					return;
+	// 				}
+	// 				return callback();
+	// 			} catch (error) {
+	// 				return callback(new Error((error as Error).message));
+	// 			}
+	// 		}
+	// 	},
+	// 	{
+	// 		validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+	// 			if (!isWhiteCheck) return callback();
+	// 			if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
+	// 			callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
+	// 		}
+	// 	}
+	// ],
+	// image_dir: [
+	// 	{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+	// 	{
+	// 		asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+	// 			checkDirectory(value).then((exists) => {
+	// 				if (!exists) {
+	// 					callback(new Error("数据集目录不存在"));
+	// 					return;
+	// 				}
+	// 				callback();
+	// 			});
+	// 		}
+	// 	}
+	// ]
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
@@ -274,33 +363,34 @@ function onExportConfig() {
 	return ruleForm.value;
 }
 
-/** 打标 */
-const taggerBtnLoading = ref(false);
-async function onTaggerClick() {
-	try {
-		taggerBtnLoading.value = true;
+// /** 打标 */
+// const tagLoading = ref(false);
+// const tagDisabled = computed(() => tagLoading.value || trainingStore.useGPU);
+// async function onTagClick() {
+// 	try {
+// 		tagLoading.value = true;
 
-		const tagResult = await tag({
-			tagDir: ruleForm.value.image_dir,
-			tagModel: ruleForm.value.tagger_model,
-			joyCaptionPromptType: ruleForm.value.prompt_type,
-			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
-			globalPrompt: ruleForm.value.class_tokens,
-			tagPrompt: ruleForm.value.tagger_global_prompt,
-			isAppend: ruleForm.value.tagger_is_append,
-			showTaskStartPrompt: true
-		});
+// 		const tagResult = await tag({
+// 			tagDir: ruleForm.value.image_dir,
+// 			tagModel: ruleForm.value.tagger_model,
+// 			joyCaptionPromptType: ruleForm.value.prompt_type,
+// 			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
+// 			globalPrompt: ruleForm.value.class_tokens,
+// 			tagPrompt: ruleForm.value.tagger_global_prompt,
+// 			isAppend: ruleForm.value.tagger_is_append,
+// 			showTaskStartPrompt: true
+// 		});
 
-		// 触发查询打标任务
-		startQueryTagTask(tagResult.task_id);
-		taggerBtnLoading.value = false;
-	} catch (error) {
-		taggerBtnLoading.value = false;
-		stopQueryTagTask();
+// 		// 触发查询打标任务
+// 		startQueryTagTask(tagResult.task_id);
+// 		tagLoading.value = false;
+// 	} catch (error) {
+// 		tagLoading.value = false;
+// 		stopQueryTagTask();
 
-		console.log("打标任务创建失败", error);
-	}
-}
+// 		console.log("打标任务创建失败", error);
+// 	}
+// }
 
 /** 重置表单 */
 function onResetData() {
@@ -320,6 +410,9 @@ async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
+
+		ruleFormRef.value.validate(() => {});
+
 		// const valid = await validateForm({
 		// 	formRef: ruleFormRef,
 		// 	formData: ruleForm,

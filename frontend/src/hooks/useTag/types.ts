@@ -3,7 +3,7 @@ import type { ManualTagInfoResult } from "@/api/monitor";
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 11:36:57
- * @LastEditTime: 2025-03-21 09:28:05
+ * @LastEditTime: 2025-03-26 11:17:23
  * @LastEditors: mulingyuer
  * @Description: 打标类型
  * @FilePath: \frontend\src\hooks\useTag\types.ts
@@ -12,8 +12,8 @@ import type { ManualTagInfoResult } from "@/api/monitor";
 export type { BatchTagData } from "@/api/tag";
 export type { TagData } from "@/stores";
 
-/** 打标选项 */
-export interface TagOptions {
+/** 基础打标选项 */
+interface BaseTagOptions {
 	/** 打标模型 */
 	tagModel: string;
 	/** 打标的目录 */
@@ -22,8 +22,6 @@ export interface TagOptions {
 	joyCaptionPromptType?: string;
 	/** 是否添加原封不动输出到打标内容中 */
 	isAddGlobalPrompt: boolean;
-	/** 原封不动输出到打标内容中的文本 */
-	globalPrompt: string;
 	/** 打标时给AI的提示词（用于生成打标内容） */
 	tagPrompt: string;
 	/** 打标的是内容是否追加到原有内容后面 */
@@ -32,11 +30,27 @@ export interface TagOptions {
 	showTaskStartPrompt: boolean;
 }
 
+/** 需要原封不动输出到打标内容中的选项 */
+interface TagOptionsWithGlobalPrompt extends BaseTagOptions {
+	isAddGlobalPrompt: true;
+	/** 原封不动输出到打标内容中的文本 */
+	globalPrompt: string;
+}
+
+/** 不需要原封不动输出到打标内容中的选项 */
+interface TagOptionsWithoutGlobalPrompt extends BaseTagOptions {
+	isAddGlobalPrompt: false;
+	globalPrompt?: never;
+}
+
+/** 打标选项 */
+export type TagOptions = TagOptionsWithGlobalPrompt | TagOptionsWithoutGlobalPrompt;
+
 /** 打标校验参数 */
-export interface ValidateTagOptions extends TagOptions {
+export type ValidateTagOptions = TagOptions & {
 	/** 是否显示错误消息弹窗 */
 	showErrorMessage: boolean;
-}
+};
 
 /** 打标校验规则 */
 export type ValidateTagRules = Array<{

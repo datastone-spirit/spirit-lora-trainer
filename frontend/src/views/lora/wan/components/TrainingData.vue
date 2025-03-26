@@ -1,56 +1,153 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 14:42:11
- * @LastEditTime: 2025-03-24 14:50:12
+ * @LastEditTime: 2025-03-26 14:35:08
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\wan\components\TrainingData.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem label="数据集重复次数" prop="num_repeats" popover-content="num_repeats">
-		<el-input-number v-model.number="ruleForm.num_repeats" :step="1" step-strictly :min="1" />
-	</PopoverFormItem>
-	<PopoverFormItem label="训练轮数" prop="epoch" popover-content="epoch">
-		<el-input-number v-model.number="ruleForm.epoch" :step="1" step-strictly :min="1" />
-	</PopoverFormItem>
 	<el-row :gutter="16">
 		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-宽度px"
-				prop="resolution_width"
-				popover-content="resolution_width"
+				prop="dataset.general.resolution[0]"
+				popover-content="resolution"
 			>
-				<el-input-number v-model.number="ruleForm.resolution_width" :controls="false" />
+				<el-input-number
+					v-model.number="ruleForm.dataset.general.resolution[0]"
+					:controls="false"
+				/>
 			</PopoverFormItem>
 		</el-col>
 		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-高度px"
-				prop="resolution_height"
-				popover-content="resolution_height"
+				prop="dataset.general.resolution[1]"
+				popover-content="resolution"
 			>
-				<el-input-number v-model.number="ruleForm.resolution_height" :controls="false" />
+				<el-input-number
+					v-model.number="ruleForm.dataset.general.resolution[1]"
+					:controls="false"
+				/>
+			</PopoverFormItem>
+		</el-col>
+		<el-col :span="12">
+			<PopoverFormItem
+				label="批次大小"
+				prop="dataset.general.batch_size"
+				popover-content="batch_size"
+			>
+				<el-input-number
+					v-model.number="ruleForm.dataset.general.batch_size"
+					:step="1"
+					step-strictly
+					:min="0"
+				/>
+			</PopoverFormItem>
+		</el-col>
+		<el-col :span="12">
+			<PopoverFormItem
+				label="数据集重复次数"
+				prop="dataset.general.num_repeats"
+				popover-content="num_repeats"
+			>
+				<el-input-number
+					v-model.number="ruleForm.dataset.general.num_repeats"
+					:step="1"
+					step-strictly
+					:min="1"
+				/>
+			</PopoverFormItem>
+		</el-col>
+		<el-col :span="12">
+			<PopoverFormItem
+				label="总训练轮数"
+				prop="config.max_train_epochs"
+				popover-content="max_train_epochs"
+			>
+				<el-input-number
+					v-model.number="ruleForm.config.max_train_epochs"
+					:step="1"
+					step-strictly
+					:min="1"
+				/>
+			</PopoverFormItem>
+		</el-col>
+		<el-col :span="12">
+			<PopoverFormItem
+				label="总训练步数"
+				prop="config.max_train_steps"
+				popover-content="max_train_steps"
+			>
+				<el-input-number
+					v-model.number="ruleForm.config.max_train_steps"
+					:step="1"
+					step-strictly
+					:min="1"
+				/>
 			</PopoverFormItem>
 		</el-col>
 	</el-row>
-	<PopoverFormItem label="批次大小" prop="batch_size" popover-content="batch_size">
-		<el-input-number v-model.number="ruleForm.batch_size" :step="1" step-strictly :min="0" />
-	</PopoverFormItem>
 	<PopoverFormItem
 		label="启用动态分辨率，启用 arb 桶以允许非固定宽高比的图片"
-		prop="enable_bucket"
+		prop="dataset.general.enable_bucket"
 		popover-content="enable_bucket"
 	>
-		<el-switch v-model="ruleForm.enable_bucket" />
+		<el-switch v-model="ruleForm.dataset.general.enable_bucket" />
 	</PopoverFormItem>
 	<PopoverFormItem
 		label="允许小图放大，arb 桶不放大图片"
-		prop="bucket_no_upscale"
+		prop="dataset.general.bucket_no_upscale"
 		popover-content="bucket_no_upscale"
 	>
-		<el-switch v-model="ruleForm.bucket_no_upscale" />
+		<el-switch v-model="ruleForm.dataset.general.bucket_no_upscale" />
 	</PopoverFormItem>
+	<PopoverFormItem
+		label="描述文件扩展名"
+		prop="dataset.general.caption_extension"
+		popover-content="caption_extension"
+	>
+		<el-input
+			v-model="ruleForm.dataset.general.caption_extension"
+			placeholder="请输入描述文件扩展名"
+		/>
+	</PopoverFormItem>
+	<PopoverFormItem label="随机种子" prop="config.seed" popover-content="seed">
+		<el-input-number v-model.number="ruleForm.config.seed" :step="1" step-strictly />
+	</PopoverFormItem>
+	<BaseSelector
+		v-model="ruleForm.config.mixed_precision"
+		label="混合精度训练模式"
+		prop="config.mixed_precision"
+		popoverContent="mixed_precision"
+		:options="mixedPrecisionOptions"
+	/>
+	<PopoverFormItem
+		label="保留加载训练集的worker，减少每个 epoch 之间的停顿"
+		prop="config.persistent_data_loader_workers"
+		popover-content="persistent_data_loader_workers"
+	>
+		<el-switch v-model="ruleForm.config.persistent_data_loader_workers" />
+	</PopoverFormItem>
+	<PopoverFormItem
+		label="控制数据加载并行进程数，4-16（根据CPU核心数调整）"
+		prop="config.max_data_loader_n_workers"
+		popover-content="max_data_loader_n_workers"
+	>
+		<el-input-number
+			v-model.number="ruleForm.config.max_data_loader_n_workers"
+			:step="1"
+			step-strictly
+			:min="1"
+		/>
+	</PopoverFormItem>
+	<!--
+
+
+
+	-->
 </template>
 
 <script setup lang="ts">
@@ -63,6 +160,21 @@ const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, requi
 
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
+/** 混合精度选项 */
+const mixedPrecisionOptions = ref<ElOptions>([
+	{
+		label: "fp16",
+		value: "fp16"
+	},
+	{
+		label: "bf16",
+		value: "bf16"
+	},
+	{
+		label: "none",
+		value: "none"
+	}
+]);
 </script>
 
 <style scoped></style>

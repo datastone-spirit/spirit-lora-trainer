@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-03-06 15:30:27
+ * @LastEditTime: 2025-03-26 16:39:13
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -327,6 +327,280 @@ export interface StartHyVideoTrainingData {
 
 /** 启动混元视频训练结果 */
 export interface StartHyVideoTrainingResult {
+	msg: string;
+	success: boolean;
+	/** 任务id */
+	task_id: string;
+}
+
+/** 启动wan视频训练参数 */
+export interface StartWanVideoTrainingData {
+	config: {
+		// -------	LoRA 基本信息	-------
+		/** 任务类型，i2v-14B|t2v-14B， 默认："i2v-14B" */
+		task: string;
+		/** 模型文件名，默认："" */
+		output_name: string;
+		/** wan2模型地址 */
+		dit: string;
+		/** CLIP模型路径 */
+		clip: string;
+		/** T5模型路径，默认："" */
+		t5: string;
+		/** T5使用FP8模式，默认：false */
+		fp8_t5: boolean;
+		/** VAE模型路径，默认："" */
+		vae: string;
+		/** 将VAE缓存保留在CPU内存中（减少显存占用，但可能影响推理速度），默认：false */
+		vae_cache_cpu: boolean;
+		/** VAE模型的计算精度（默认float16），可选值如fp16/bf16/fp32等，默认："" */
+		vae_dtype: string;
+		/** 模型保存目录，默认："" */
+		output_dir: string;
+		// -------	数据集配置	-------
+		/** 总训练轮数，默认：1 */
+		max_train_epochs: number;
+		/** 总训练步数，默认：undefined */
+		max_train_steps: number | undefined;
+		/** 随机种子，用于复现训练结果，默认：undefined */
+		seed: number | undefined;
+		/** 混合精度训练模式，"no", "fp16", "bf16"，默认："bf16" */
+		mixed_precision: string;
+		/** 保留加载训练集的worker，减少每个 epoch 之间的停顿，默认：false */
+		persistent_data_loader_workers: boolean;
+		/** 控制数据加载并行进程数，4-16（根据CPU核心数调整），默认：8 */
+		max_data_loader_n_workers: number;
+		// -------	优化器与学习率	-------
+		/** 训练使用的优化器类型，默认："" */
+		optimizer_type: string;
+		/** 优化器的额外参数键值对，weight_decay=0.01 betas=0.9,0.999，默认："" */
+		optimizer_args: string;
+		/** 学习率，默认：2e-06 */
+		learning_rate: number;
+		/** 学习率衰减步数，0-总训练步数，默认：0 */
+		lr_decay_steps: number;
+		/** 学习率调度器类型选择，"cosine", "linear"，默认："constant" */
+		lr_scheduler: string;
+		/** 自定义调度器参数，默认："" */
+		lr_scheduler_args: string;
+		/** 最小学习率比例，0.01-0.1 */
+		lr_scheduler_min_lr_ratio: number | undefined;
+		/** 余弦重启次数，默认：1 */
+		lr_scheduler_num_cycles: number;
+		/** 多项式衰减强度，1.0-5.0，默认：1 */
+		lr_scheduler_power: number;
+		/** 逆平方根调度时间系数，默认：undefined */
+		lr_scheduler_timescale: number | undefined;
+		/** 自定义调度器模块，默认："" */
+		lr_scheduler_type: string;
+		/** 学习率预热步数，0 - 1000,默认：0 */
+		lr_warmup_steps: number;
+		// -------	模型结构相关	-------
+		/** LoRA权重缩放因子，8-128（推荐等于dim），默认：1 */
+		network_alpha: number;
+		/** 自定义网络参数，"conv_dim=4 conv_alpha=1"，默认："" */
+		network_args: string;
+		/** LoRA的秩（rank），8-128，默认：undefined */
+		network_dim: number | undefined;
+		/** 训练时随机失活比例，0.1-0.3，默认：undefined */
+		network_dropout: number | undefined;
+		/** 指定要加载的神经网络模块，默认："" */
+		network_module: string;
+		/** 预训练权重文件路径，默认："" */
+		network_weights: string;
+		/** 用于自动从预训练权重中推断网络维度（rank）,必须与 --network_weights 配合使用，默认：false */
+		dim_from_weights: boolean;
+		/** 指定要交换的网络块数量，用于调整LoRA模型结构 */
+		blocks_to_swap: number | undefined;
+		/** 启用基础FP8模式，目前云端必须开启，默认：true */
+		fp8_base: boolean;
+		/** 启用FP8缩放模式，云端不支持，默认：false */
+		fp8_scaled: boolean;
+		// -------	训练过程控制	-------
+		/** 每N epoch保存模型，默认：undefined */
+		save_every_n_epochs: number | undefined;
+		/** 每N步保存模型，默认：undefined */
+		save_every_n_steps: number | undefined;
+		/** 保留最近N个epoch的检查点，默认：undefined */
+		save_last_n_epochs: number | undefined;
+		/** 保留最近N步训练状态，默认：undefined */
+		save_last_n_epochs_state: number | undefined;
+		/** 保留最近N步的检查点，默认：undefined */
+		save_last_n_steps: number | undefined;
+		/** 专门控制state步数保留（覆盖save_last_n_steps），默认：undefined */
+		save_last_n_steps_state: number | undefined;
+		/** 保存训练状态 配合 resume 参数可以继续从某个状态训练，默认：false */
+		save_state: boolean;
+		/** 训练结束时强制保存state（即使未启用save_state），默认：false */
+		save_state_on_train_end: boolean;
+		/** 从某个 save_state 保存的中断状态继续训练，默认："" */
+		resume: string;
+		/** 权重标准化防梯度爆炸，默认：undefined */
+		scale_weight_norms: number | undefined;
+		/** 梯度裁剪阈值（防止梯度爆炸），0.5-2.0（0表示禁用），默认：1.0 */
+		max_grad_norm: number;
+		// -------	分布式训练	-------
+		/** 启用梯度桶视图优化，默认：false */
+		ddp_gradient_as_bucket_view: boolean;
+		/** 固定结构模型加速, 默认：false */
+		ddp_static_graph: boolean;
+		/** 设置DDP进程间通信的超时时间 */
+		ddp_timeout: number | undefined;
+		// -------	采样与验证	-------
+		/** 训练前生成初始样本，默认：false */
+		sample_at_first: boolean;
+		/** 每N个epoch生成样本，默认：undefined */
+		sample_every_n_epochs: number | undefined;
+		/** 每N步生成样本，默认：undefined */
+		sample_every_n_steps: number | undefined;
+		/** 采样使用的提示词，默认："" */
+		sample_prompts: string;
+		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
+		guidance_scale: number | undefined;
+		/** 显示时间步的方式（"image"生成时序图，"console"打印到控制台），默认："" */
+		show_timesteps: string;
+		// -------	高级显存优化	-------
+		/** 显存优化技术，通过累积多个小批次的梯度来等效大batch_size训练，默认：1 */
+		gradient_accumulation_steps: number;
+		/** 显存优化技术，通过时间换空间策略，减少约30%显存占用，开启会增加训练时间，默认：false */
+		gradient_checkpointing: boolean;
+		/** 显存优化技术，将图像输入（img_in）和文本输入（txt_in）张量保留在CPU内存中，减少显存占用，默认：false */
+		img_in_txt_in_offloading: boolean;
+		/** 启用FlashAttention 3，默认：false */
+		flash3: boolean;
+		/** 启用FlashAttention优化CrossAttention计算，默认：false */
+		flash_attn: boolean;
+		/**  是否使用SageAttention优化节省显存，默认：false */
+		sage_attn: boolean;
+		/** 使用PyTorch原生注意力，默认：false */
+		sdpa: boolean;
+		/** 是否使用split attention优化（需要XFORMERS），默认：false */
+		split_attn: boolean;
+		/** 启用xformers优化库（需要安装xformers），用于CrossAttention层的显存优化，默认：false */
+		xformers: boolean;
+		// -------	扩散模型参数	-------
+		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：1.0 */
+		discrete_flow_shift: number;
+		/** 最小扩散时间步长，0-999（控制起始噪声水平），默认：undefined */
+		min_timestep: number | undefined;
+		/** 最大扩散时间步长，1-1000（控制噪声水平），默认：undefined */
+		max_timestep: number | undefined;
+		/** 时间步权重分布集中度，1.0-2.0（值越大越集中），默认：1.29 */
+		mode_scale: number;
+		/** logit_normal权重均值，默认：0.0 */
+		logit_mean: number;
+		/** logit_normal权重标准差，默认：1.0 */
+		logit_std: number;
+		/** 时间步采样方法，uniform|sigmoid|shift|sigma，默认："sigma" */
+		timestep_sampling: string;
+		/** 时间步采样sigmoid缩放系数（仅当timestep_sampling为sigmoid/shift时生效），默认：1.0 */
+		sigmoid_scale: number;
+		/** 时间步权重分配方案，可选值：logit_normal|mode|uniform|none，默认："none" */
+		weighting_scheme: string;
+		// // -------	日志与元数据	-------
+		// /** 记录训练配置，默认：false */
+		// log_config?: boolean;
+		// /** 日志目录前缀，前端不需要展示出表单和传递给后端 */
+		// log_prefix?: string;
+		// /** 跟踪器配置文件路径 */
+		// log_tracker_config?: string;
+		// /** 自定义跟踪器名称 */
+		// log_tracker_name?: string;
+		// /** 指定日志工具 */
+		// log_with?: string;
+		// /** 日志存储目录，前端不需要展示出表单和传递给后端 */
+		// logging_dir?: string;
+		// /** 禁用元数据保存，默认：false */
+		// no_metadata?: boolean;
+		// /** 作者/开发者信息，默认："" */
+		// metadata_author?: string;
+		// /** 模型功能描述，默认："" */
+		// metadata_description?: string;
+		// /** 使用许可协议，默认："" */
+		// metadata_license?: string;
+		// /** 模型特征标签，英文逗号分隔，默认："" */
+		// metadata_tags?: string;
+		// /** 模型显示名称，默认："" */
+		// metadata_title?: string;
+		// /** 存储在模型元数据中的任意注释文本，默认："" */
+		// training_comment?: string;
+		// /** WandB服务的API密钥，用于训练前登录，前端不需要展示出表单和传递给后端 */
+		// wandb_api_key?: string;
+		// /** 指定WandB运行会话名称（显示在WandB日志中的实验名称），前端不需要展示出表单和传递给后端 */
+		// wandb_run_name?: string;
+		// // -------	HuggingFace集成	-------
+		// /** 异步上传模型到huggingface，与huggingface_repo_id配合使用 */
+		// async_upload?: boolean;
+		// /** 指定仓库内存储路径 */
+		// huggingface_path_in_repo?: string;
+		// /** 指定HuggingFace仓库名称 */
+		// huggingface_repo_id?: string;
+		// /** 指定仓库类型 */
+		// huggingface_repo_type?: string;
+		// /** 控制仓库可见性：public/private */
+		// huggingface_repo_visibility?: string;
+		// /** API访问令牌（用于私有仓库操作） */
+		// huggingface_token?: string;
+		// /** 将state同步上传到HuggingFace仓库，默认：false */
+		// save_state_to_huggingface: boolean;
+		// /** 启用从HuggingFace模型仓库恢复训练状态的能力，默认：false */
+		// resume_from_huggingface: boolean;
+		// // -------	其他不需要的	-------
+		// /** 指定在训练前需要合并到基础模型的预训练网络权重文件 */
+		// base_weights?: string;
+		// /** 用于指定预训练权重文件的融合比例，需要与 `base_weights` 配合使用 */
+		// base_weights_multiplier?: number;
+		// /** 训练配置文件的路径 */
+		// config_file?: string;
+		// /** 数据集配置 */
+		// dataset_config?: string;
+	};
+	dataset: {
+		general: {
+			/** 图片尺寸，默认：[960, 544] */
+			resolution: [number, number];
+			/** 批次大小，默认：1 */
+			batch_size: number;
+			/** 启用动态分辨率，启用 arb 桶以允许非固定宽高比的图片，默认：true */
+			enable_bucket: boolean;
+			/** 允许小图放大，arb 桶不放大图片，默认：false */
+			bucket_no_upscale: boolean;
+			/** 描述文件扩展名，默认：".txt" */
+			caption_extension: string;
+			/** 数据集重复次数，默认：1 */
+			num_repeats: number;
+		};
+		datasets: [
+			{
+				/** 数据目录 */
+				image_directory: string;
+				// /** 缓存目录，永远为空，后端自动生成 */
+				// cache_directory?: string;
+				// /** 后端生成的描述文件路径 */
+				// image_jsonl_file?: string;
+				// /** 单帧训练模式，前端不需要展示和传递给后端 */
+				// target_frames?: string;
+				// /** 提取首帧，前端不需要展示和传递给后端 */
+				// frame_extraction?: string;
+				// /** 视频目录，前端不需要展示和传递给后端 */
+				// video_directory?: string;
+				// /** 视频描述文件路径，前端不需要展示和传递给后端 */
+				// video_jsonl_file?: string;
+				// /** 视频帧步长，前端不需要展示和传递给后端 */
+				// frame_stride?: number;
+				// /** 视频帧采样率，前端不需要展示和传递给后端 */
+				// frame_sample?: number;
+				// /** 视频帧最大数量，前端不需要展示和传递给后端 */
+				// max_frames?: number;
+			}
+		];
+	};
+	/** 训练器的训练配置 */
+	frontend_config: string;
+}
+
+/** 启动wan视频训练结果 */
+export interface StartWanVideoTrainingResult {
 	msg: string;
 	success: boolean;
 	/** 任务id */

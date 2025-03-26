@@ -5,7 +5,7 @@ from os import path
 import dacite
 import os
 
-from utils.util import setup_logging
+from utils.util import setup_logging, is_blank
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
@@ -37,6 +37,24 @@ class GeneralConfig:
     enable_bucket: bool = True  # default provided value (can be overridden)
     bucket_no_upscale: bool = False
 
+    @staticmethod
+    def validate(config: 'GeneralConfig') -> 'GeneralConfig':
+        """
+        Validate the GeneralConfig instance.
+        This method is a placeholder for any validation logic you want to implement.
+        """
+
+        if config.resolution[0] <= 0 or config.resolution[1] <= 0:
+            raise ValueError("Resolution must be positive integers.")
+        
+        if config.batch_size <= 0:
+            raise ValueError("Batch size must be a positive integer.")
+        
+        if config.num_repeats <= 0:
+            raise ValueError("Number of repeats must be a positive integer.")
+        
+        return config
+
 @dataclass
 class DatasetConfig:
     # Common dataset fields (these may override general settings)
@@ -61,10 +79,64 @@ class DatasetConfig:
     frame_sample: Optional[int] = None         # applicable for "uniform"
     max_frames: Optional[int] = None         # applicable for "full"
 
+    @staticmethod
+    def validate(config: 'DatasetConfig', task: str = 'i2v-14B') -> 'DatasetConfig':
+        """
+        Validate the DatasetConfig instance.
+        """
+
+        if is_blank(config.image_directory) or not path.exists(config.image_directory):
+            logger.warning("Image_directory can't be empty or not exist.")
+            raise ValueError("Image directory can't be empty or not exist.")
+
+        if not is_blank(config.video_directory):
+            logger.warning("For now, we don't support training WAN for video dataset")
+            config.video_directory = None
+
+        config.video_jsonl_file = None
+        config.target_frames = None
+        config.frame_extraction = None
+        config.frame_stride = None
+        config.frame_sample = None
+        config.max_frames = None
+
+        if not is_blank(config.video_jsonl_file):
+            logger.warning("For now, we don't support image_jsonl_file")
+            config.image_jsonl_file = None
+        
+        if not is_blank(config.cache_directory) and not path.exists(config.cache_directory):
+            logger.warning("if specified cache_directory, it must a valid directory")
+            raise ValueError("If specified cache_directory, it must a valid directory")
+        
+        config.cache_directory = path.join(config.image_directory, f"{task}-cache") 
+        os.makedirs(config.cache_directory, exist_ok=True)
+        return config
+
 @dataclass
 class WanDataSetConfig:
     general: GeneralConfig = GeneralConfig()
     datasets: List[DatasetConfig] = field(default_factory=list)
+
+    @staticmethod
+    def validate(config: 'WanDataSetConfig', task: str = 'i2v-14B') -> 'WanDataSetConfig':
+        """
+        Validate the WanDataSetConfig instance.
+        """
+
+        if not config.general:
+            logger.warning("General configuration is required.")
+            raise ValueError("General configuration is required.")
+        
+        config.general = GeneralConfig.validate(config.general)
+        
+        if not config.datasets or len(config.datasets) == 0:
+            logger.warning("At least one dataset configuration is required.")
+            raise ValueError("At least one dataset configuration is required.")
+        
+        for i in range(len(config.datasets)):
+            config.dataset[i] = DatasetConfig.validate(config.dataset[i], task = task)
+        return config
+
 
 @dataclass
 class WanTrainingConfig:
@@ -183,40 +255,44 @@ class WanTrainingConfig:
         config.dataset_config = None
 
         config.logging_dir
-        if config.logging_dir is None or config.logging_dir == "":
+        if is_blank(config.logging_dir):
             config.logging_dir = os.path.join(getprojectpath(), "logs")
-        elif not os.path.isabs(config.logging_dir):
+
+        if not os.path.isabs(config.logging_dir):
             config.logging_dir = os.path.join(getprojectpath(), config.logging_dir)
+
         if not os.path.exists(config.logging_dir):
             os.makedirs(config.logging_dir)
 
         if not config.blocks_to_swap and config.blocks_to_swap <=0:
             raise ValueError("blocks_to_swap must be greater than 0.")
 
-        if not config.task:
-            config.task = 'i2v-14B'
+        if is_blank(config.task):
+            logger.warning("task is required.")
+            raise ValueError("task must be i2v_14b or t2v_14b, can't be empty")
 
         if not is_wan_task(config.task):
             logger.warning(f"Invalid task: {config.task}. Supported tasks are: {', '.join(WanTaskMap.keys())}")
             raise ValueError(f"Invalid task: {config.task}. Supported tasks are: {', '.join(WanTaskMap.keys())}")
         
         if is_i2v(config.task) :
-            if not config.clip:
+            if is_blank(config.clip):
                 config.clip = path.join(getprojectpath(), "models","clip", "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth")
 
             if not path.exists(config.clip):
                 logger.warning(f"clip path does not exist: {config.clip}")
                 raise ValueError(f"clip path does not exist: {config.clip}")
         
-        if not config.dit:
+        if is_blank(config.dit):
             config.dit = path.join(getprojectpath(), "models", 
                                    "wan", "wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors")
         if not path.exists(config.dit):
             logger.warning(f"dit path does not exist: {config.dit}")
             raise ValueError(f"dit path does not exist: {config.dit}")
 
-        if not config.vae:
+        if is_blank(config.vae):
             config.vae = path.join(getprojectpath(), "models", "vae", "wan_2.1_vae.safetensors")
+
         if not path.exists(config.vae):
             logger.warning(f"vae path does not exist: {config.vae}")
             raise ValueError(f"vae path does not exist: {config.vae}")
@@ -253,8 +329,23 @@ class WanTrainingConfig:
         if not config.resume and not path.exists(config.resume):
             logger.warning(f"Resuming training must set correct resume path: {config.resume}")
             raise ValueError(f"Resuming training must set correct resume path: {config.resume}")
-    
-        if not config.output_dir:
+        
+        if not config.sample_every_n_steps and config.sample_every_n_steps <= 0:
+            logger.warning("sample_every_n_steps must be greater than 0.")
+            config.sample_every_n_steps = None
+        
+        if not config.save_every_n_epochs and config.save_every_n_epochs <= 0:
+            logger.warning("save_every_n_epochs must be greater than 0.")
+            config.save_every_n_epochs = None
+        
+        if (not config.sample and config.sample_every_n_steps > 0 or  \
+            not config.sample_last_n_epoch and config.sample_last_n_epoch > 0) and \
+                is_blank(config.sample_prompts):
+            logger.warning("Do sampling requires sample_prompts.")
+            raise ValueError("Do sampling requires sample_prompts.")
+        
+
+        if is_blank(config.output_dir):
             raise ValueError("Output directory is required.")
         elif not path.exists(config.output_dir):
             raise ValueError(f"Output directory does not exist: {config.output_dir}")
@@ -295,6 +386,6 @@ class WanTrainingParamer:
         if not parameter.dataset:
             raise ValueError("Dataset config is required.")
         
-        parameter.dataset = WanDataSetConfig.validate(parameter.dataset)
+        parameter.dataset = WanDataSetConfig.validate(parameter.dataset, task=parameter.config.task)
         
         return parameter

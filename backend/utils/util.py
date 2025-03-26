@@ -15,6 +15,9 @@ mimetypes.add_type("image/bmp", ".bmp")
 mimetypes.add_type("image/tiff", ".tiff")
 mimetypes.add_type("image/tif", ".tif")
 
+def is_blank (args: str):
+    return not (args and args.strip())
+
 def getmodelpath() -> str:
      return  os.path.join(getprojectpath() , "models")
 

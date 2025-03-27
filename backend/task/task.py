@@ -1,13 +1,12 @@
 from enum import Enum
 from typing import Optional, Callable, List
-from subprocess import Popen
 from dataclasses import dataclass, asdict
 from app.api.model.training_paramter import TrainingParameter
-from app.api.model.wan_paramter import WanTrainingParameter
+from app.api.model.wan_paramter import WanTrainingParameter, is_i2v
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
-from app.api.common.utils import is_flux_sampling
-from subprocess import Popen, TimeoutExpired
+from app.api.common.utils import is_flux_sampling, dataset2toml
+from subprocess import Popen, TimeoutExpired, PIPE, STDOUT
 import uuid
 import re
 from tbparse import SummaryReader
@@ -24,6 +23,7 @@ class TaskType(Enum):
     NONE = "none"
     TRAINING = "training"
     HUNYUAN_TRAINING = "hunyuan_training"
+    WAN_TRAINING = "wan_training"
     CAPTIONING = "captioning"
 
 class TaskStatus(Enum):
@@ -112,8 +112,20 @@ class Task:
         return task    
 
     @staticmethod
-    def wrap_wan_training(training_paramter: WanTrainingParameter, task_id: str) -> 'Task':
-        pass
+    def wrap_wan_training(parameter: WanTrainingParameter, task_id: str, model_path :str, is_sampling: bool = False) -> 'Task':
+        task = WanTrainingTask(parameter, model_path, is_sampling)
+        if not task_id:
+            task.id = uuid.uuid4().hex
+        else:
+            task.id = task_id
+        task.detail = {
+            #total': caculate_image_steps([(dir.path, dir.num_repeats) for dir in training_paramter.dataset.directory]) * training_paramter.config.epochs,
+            'current': 0
+        }
+        task.task_type = TaskType.WAN_TRAINING
+        task.start_time = time.time()
+        task.status = TaskStatus.CREATED
+        return task
 
 
     def run(self):
@@ -438,18 +450,65 @@ class HunyuanTrainingTask(Task):
         
 @dataclass
 class WanTrainingTask(Task):
-    training_parameters: WanTrainingParameter = None 
+    wan_parameter: WanTrainingParameter = None 
     is_sampling :bool = False
     phase: str = None
+    model_path: str = None
 
-    def __init__(self, parameter: WanTrainingParameter, is_sampling):
-        self.training_parameters = parameter
+    def __init__(self, parameter: WanTrainingParameter, model_path: str, is_sampling: bool):
+        self.wan_parameter = parameter
         self.is_sampling = is_sampling
+        self.model_path = model_path
+        self.task_chain = TaskChian(self,
+            [WanCacheLatentSubTask(), WanTextEncoderOutputCacheSubTask(), WanTrainingSubTask()])
+    
+    def _run(self):
+        logger.info("beginning to run all subtasks")
+        self.task_chain.excute()
+        return
+    
+    def to_dict(self, verbose: bool = False, show_config: bool = False):
+        pass
+
+    def update_detail_with_tb(self):
+        logdir = self.wan_parameter.config.log_dir
+        reader = SummaryReader(logdir)
+        df=reader.scalars
+        current_step = max(df.get('step', [0]))
+        if current_step == 0:
+            return 
+
+        def get_value(step=None, tag=None):
+            try:
+                return df.query('step==@step and tag==@tag')['value'].iloc[0]
+            except Exception as e:
+                logger.warning(f"get value failed with step {step} and tag {tag}, error: {e}")
+                return 0
+
+        self.detail['current'] = current_step
+        self.detail['loss'] = get_value(step=current_step, tag="train/loss")
+        self.detail['elapsed'] = time.time() - self.start_time
+        self.detail['total_epoch'] = self.wan_parameter.config.epochs
+        epoch_seq = df.query('tag=="train/epoch_loss"').get('step', None)
+        if epoch_seq is None or len(epoch_seq) == 0:
+            return
+        current_epoch = max(epoch_seq.values)
+        self.detail['current_epoch'] = int(current_epoch)
+        if current_epoch == 1:
+            self.detail['estimate_steps_per_epoch'] = current_step
+        self.detail['epoch_loss']=get_value(step=current_epoch, tag="train/epoch_loss")
+        self.detail['lr_unet'] = get_value(step=current_step, tag="train/lr/unet")
+        self.detail['lr_text_encoder'] = get_value(step=current_step, tag="train/lr/text_encoder")
+        self.detail['lr_unet'] = get_value(step=current_step, tag="train/lr/unet")
+        self.detail['lr_text_encoder'] = get_value(step=current_step, tag="train/lr/text_encoder")  
+        return
+
+    
 
 
 class TaskChian:
 
-    def __init__(self, sub_tasks: List['SubTask'], task: WanTrainingTask):
+    def __init__(self, task: WanTrainingTask, sub_tasks: List['SubTask']):
         self.task = task
         self.sub_tasks = sub_tasks
         self.current = 0
@@ -459,33 +518,102 @@ class TaskChian:
             return
         sub_task = self.sub_tasks[self.current]
         self.current += 1
+        self.task.phase = type(sub_task).__name__
         sub_task.do_task(self.task, self)
 
 
 class SubTask:
     
     def do_task(self, task: WanTrainingTask,  task_chain: TaskChian):
+        self.executable = os.path.join(task.model_path, "venv", "bin", "python")
+        self.customize_env = os.environ.copy()
+        self.customize_env["ACCELERATE_DISABLE_RICH"] = "1"
+        self.customize_env["PYTHONUNBUFFERED"] = "1"
+        self.customize_env["PYTHONWARNINGS"] = "ignore::FutureWarning,ignore::UserWarning"
+        self.customize_env["NCCL_P2P_DISABLE"]="1" # For flux training, we disable NCCL P2P and IB
+        self.customize_env["NCCL_IB_DISABLE"]="1"        
         pass
+    
+    def wait(self, proc: Popen):
+        try:
+            logger.info("beginning to run proc communication with hunyuan training process")
+            stdout_lines = []
+            linestr = ''
+            line = bytearray()
+            while True:
+                ch = proc.stdout.read(1)
+                if ch == b'' and proc.poll() is not None:
+                    break
+                line.extend(ch)
+                if ch == b'\n':
+                    linestr = line.decode('utf-8', errors='ignore')
+                    print(linestr, end='')
+                    stdout_lines.append(linestr)
+                    line = bytearray()  #
+            stdout, stderr = self.proc.communicate()
+        except TimeoutExpired as exc:
+            self.proc.kill()
+            self.proc.wait()
+            raise
+        except:
+            self.proc.kill()
+            raise
 
 class WanCacheLatentSubTask(SubTask):
 
     def __init__(self):
         super().__init__()
+        self.script = "wan_cache_latents.py"
     
     def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        logger.info("beginning to run cache latent sub task")
+        
+        args = [
+            self.executable, 
+            self.script,
+            "--dataset_config", dataset2toml(task.wan_parameter.dataset),
+ --         "--vae", task.wan_parameter.config.vae,
+        ]
+        if is_i2v(task.wan_parameter.config.task):
+            args.append("--clip")
+            args.append(task.wan_parameter.config.clip)
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env))
         return task_chain.excute(task)
 
 class WanTextEncoderOutputCacheSubTask:
     
     def __init__(self):
         super().__init__()
+        self.script = "wan_cache_text_encoder_outputs.py"
     
     def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        logger.info("beginning to run text encoder output cache sub task")
+        args = [
+            self.executable, 
+            self.script,
+            "--dataset_config", dataset2toml(task.wan_parameter.dataset),
+            "--batch_size", "16",
+            "-t5", task.wan_parameter.config.t5,
+        ]
+        
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env))
         return task_chain.excute(task)
 
 class WanTrainingSubTask:
     def __init__(self):
         super().__init__()
+        self.executable = os.path.join(self.task.model_path, "venv", "bin","accelerate")
+        self.script = "wan_train_network.py"
     
     def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        task.wan_parameter.config.dataset_config = dataset2toml(task.wan_parameter.dataset)
+        args = [
+            self.executable,
+            "launch",
+            "--num_processes", "4",
+            "--mixed_precision", "bf16",
+            self.script,
+            "--config", dataset2toml(task.wan_parameter.config),
+        ]
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env))
         return task_chain.excute(self.task)

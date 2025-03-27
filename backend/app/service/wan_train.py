@@ -21,20 +21,15 @@ class WanTrainingService():
         self.module_path = os.path.join(getprojectpath(), "musubi-tuner")
         if not os.path.exists(self.module_path):
             raise FileNotFoundError(f"Training script not found at {self.module_path}")
-        self.script = os.path.join(self.module_path, " wan_train_network.py")
-        if not os.path.exists(self.script):
-            raise FileNotFoundError(f"Training script not found at {self.script}")
     
     def start_train(self, parameter: WanTrainingParameter) -> Task:
         taskid = uuid.uuid4().hex
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         parameter.config.log_dir = os.path.join(getprojectpath(), "logs", f"wan-{taskid}-{timestamp}")
         os.makedirs(parameter.config.log_dir, exist_ok=True)
-        return self.run_train(parameter, taskid, self.module_path)
+        return self.run_train(parameter, task_id=taskid, module_path=self.module_path)
 
 
     @task_decorator 
-    def run_train(self, training_paramters: WanTrainingParameter, task_id: str=None):
-        return Task.wrap_wan_training(training_paramters, 
-                                      task_id, 
-                                      self.model_path)    
+    def run_train(self, training_paramters: WanTrainingParameter, task_id: str=None, module_path:str = None):
+        return Task.wrap_wan_training(training_paramters, task_id, module_path)    

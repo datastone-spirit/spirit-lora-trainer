@@ -133,7 +133,7 @@ class WanDataSetConfig:
             raise ValueError("At least one dataset configuration is required.")
         
         for i in range(len(config.datasets)):
-            config.dataset[i] = DatasetConfig.validate(config.dataset[i], task = task)
+            config.datasets[i] = DatasetConfig.validate(config.datasets[i], task = task)
         return config
 
 
@@ -296,17 +296,19 @@ class WanTrainingConfig:
             logger.warning(f"vae path does not exist: {config.vae}")
             raise ValueError(f"vae path does not exist: {config.vae}")
         
-        if not is_i2v(config.task):
-            if not config.t5:
-                config.t5 = path.join(getprojectpath(), "models", "clip", "models_t5_umt5-xxl-enc-bf16.pth")
-            if not path.exists(config.t5):
-                logger.warning(f"t5 path does not exist: {config.t5}")
-                raise ValueError(f"t5 path does not exist: {config.t5}")
+        if not config.t5:
+            config.t5 = path.join(getprojectpath(), "models", "clip", "models_t5_umt5-xxl-enc-bf16.pth")
+
+        if not path.exists(config.t5):
+            logger.warning(f"t5 path does not exist: {config.t5}")
+            raise ValueError(f"t5 path does not exist: {config.t5}")
         
         config.log_with = "tensorboard" 
         if config.lr_scheduler == "constant" and config.lr_warmup_steps > 0:
             logger.warning("lr_warmup_steps is ignored when using constant scheduler")
             config.lr_warmup_steps = 0
+        
+        config.network_module = "networks.lora_wan"
 
         if not config.max_train_epochs:
             logger.warning("max_train_epochs must have a value.")
@@ -317,28 +319,28 @@ class WanTrainingConfig:
 
         config.max_data_loader_n_workers = 4
 
-        if not config.network_alpha and config.network_alpha <= 0:
+        if config.network_alpha and config.network_alpha <= 0:
             logger.warning("network_alpha must be greater than 0.")
             raise ValueError("network_alpha must be greater than 0.")
 
-        if not config.network_dim and config.network_dim <= 0:
+        if config.network_dim and config.network_dim <= 0:
             logger.warning("network_dim must be greater than 0.")
             raise ValueError("network_dim must be greater than 0.")
         
-        if not config.resume and not path.exists(config.resume):
+        if config.resume and not path.exists(config.resume):
             logger.warning(f"Resuming training must set correct resume path: {config.resume}")
             raise ValueError(f"Resuming training must set correct resume path: {config.resume}")
         
-        if not config.sample_every_n_steps and config.sample_every_n_steps <= 0:
+        if config.sample_every_n_steps and config.sample_every_n_steps <= 0:
             logger.warning("sample_every_n_steps must be greater than 0.")
             config.sample_every_n_steps = None
         
-        if not config.save_every_n_epochs and config.save_every_n_epochs <= 0:
+        if config.save_every_n_epochs and config.save_every_n_epochs <= 0:
             logger.warning("save_every_n_epochs must be greater than 0.")
             config.save_every_n_epochs = None
         
-        if (not config.sample and config.sample_every_n_steps > 0 or  \
-            not config.sample_last_n_epoch and config.sample_last_n_epoch > 0) and \
+        if (config.sample_every_n_steps and config.sample_every_n_steps > 0 or  \
+            config.sample_every_n_epochs and config.sample_every_n_epoch > 0) and \
                 is_blank(config.sample_prompts):
             logger.warning("Do sampling requires sample_prompts.")
             raise ValueError("Do sampling requires sample_prompts.")
@@ -364,12 +366,13 @@ class WanTrainingParameter:
     @classmethod
     def from_dict(cls, dikt) -> 'WanTrainingParameter':
         try: 
-            return dacite.from_dict(data_class=WanTrainingParameter, data=dikt) 
+            return dacite.from_dict(data_class=WanTrainingParameter, data=dikt,
+                                    config=dacite.Config(type_hooks={Tuple[int, int]: lambda x: tuple(x)}))
         except Exception as e:
             logger.warning(f"WanTrainingParameter.from_dict failed, error: ", exc_info=e)
             raise ValueError(f"WanTrainingParameter.from_dict failed, error: {str(e)}")
     
-    @classmethod
+    @staticmethod
     def validate(parameter: 'WanTrainingParameter') -> 'WanTrainingParameter':
         """
         Validate the WanTrainingParamer instance.

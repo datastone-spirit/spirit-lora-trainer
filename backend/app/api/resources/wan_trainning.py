@@ -22,7 +22,6 @@ class WanTraining(Resource):
         parameter = None
         try:
             parameter = WanTrainingParameter.from_dict(data)
-            
             parameter = WanTrainingParameter.validate(parameter)
 
             task = WanTrainingService().start_train(parameter)

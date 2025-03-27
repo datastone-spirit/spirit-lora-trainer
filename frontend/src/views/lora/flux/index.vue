@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-21 09:42:37
+ * @LastEditTime: 2025-03-27 09:52:27
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -89,7 +89,6 @@
 			</template>
 		</FooterButtonGroup>
 		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
-		<SavePathWarningDialog v-model="openSavePathWarningDialog" />
 	</div>
 </template>
 
@@ -97,7 +96,6 @@
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import type { LoRATrainingInfoResult } from "@/api/monitor";
-import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
 import ViewSampling from "@/components/ViewSampling/index.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useFluxLora } from "@/hooks/useFluxLora";
@@ -489,8 +487,6 @@ const rules = reactive<FormRules<RuleForm>>({
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
-/** lora保存警告弹窗 */
-const openSavePathWarningDialog = ref(false);
 
 // 折叠
 const openStep1 = ref(true);
@@ -569,8 +565,7 @@ async function onSubmit() {
 		const valid = await validateForm({
 			formRef: ruleFormRef,
 			formData: ruleForm,
-			trainingStore: trainingStore,
-			openSavePathWarningDialog: openSavePathWarningDialog
+			trainingStore: trainingStore
 		});
 		if (!valid) {
 			submitLoading.value = false;

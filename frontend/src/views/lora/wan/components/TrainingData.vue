@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 14:42:11
- * @LastEditTime: 2025-03-26 14:35:08
+ * @LastEditTime: 2025-03-26 17:01:59
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\wan\components\TrainingData.vue
@@ -91,6 +91,7 @@
 		</el-col>
 	</el-row>
 	<PopoverFormItem
+		v-show="isExpert"
 		label="启用动态分辨率，启用 arb 桶以允许非固定宽高比的图片"
 		prop="dataset.general.enable_bucket"
 		popover-content="enable_bucket"
@@ -98,6 +99,7 @@
 		<el-switch v-model="ruleForm.dataset.general.enable_bucket" />
 	</PopoverFormItem>
 	<PopoverFormItem
+		v-show="isExpert"
 		label="允许小图放大，arb 桶不放大图片"
 		prop="dataset.general.bucket_no_upscale"
 		popover-content="bucket_no_upscale"
@@ -105,6 +107,7 @@
 		<el-switch v-model="ruleForm.dataset.general.bucket_no_upscale" />
 	</PopoverFormItem>
 	<PopoverFormItem
+		v-show="isExpert"
 		label="描述文件扩展名"
 		prop="dataset.general.caption_extension"
 		popover-content="caption_extension"
@@ -118,6 +121,7 @@
 		<el-input-number v-model.number="ruleForm.config.seed" :step="1" step-strictly />
 	</PopoverFormItem>
 	<BaseSelector
+		v-show="isExpert"
 		v-model="ruleForm.config.mixed_precision"
 		label="混合精度训练模式"
 		prop="config.mixed_precision"
@@ -125,6 +129,7 @@
 		:options="mixedPrecisionOptions"
 	/>
 	<PopoverFormItem
+		v-show="isExpert"
 		label="保留加载训练集的worker，减少每个 epoch 之间的停顿"
 		prop="config.persistent_data_loader_workers"
 		popover-content="persistent_data_loader_workers"
@@ -132,6 +137,7 @@
 		<el-switch v-model="ruleForm.config.persistent_data_loader_workers" />
 	</PopoverFormItem>
 	<PopoverFormItem
+		v-show="isExpert"
 		label="控制数据加载并行进程数，4-16（根据CPU核心数调整）"
 		prop="config.max_data_loader_n_workers"
 		popover-content="max_data_loader_n_workers"
@@ -143,11 +149,6 @@
 			:min="1"
 		/>
 	</PopoverFormItem>
-	<!--
-
-
-
-	-->
 </template>
 
 <script setup lang="ts">

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-03-26 16:41:36
+ * @LastEditTime: 2025-03-27 11:37:03
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan\index.vue
@@ -27,6 +27,9 @@
 					</Collapse>
 					<Collapse v-model="openStep3" title="第3步：训练数据配置">
 						<TrainingData v-model:form="ruleForm" />
+					</Collapse>
+					<Collapse v-model="openStep3" title="第4步：采样与验证选项">
+						<SampleValidator v-model:form="ruleForm" />
 					</Collapse>
 					<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
 						<AdvancedSettings v-model:form="ruleForm" />
@@ -57,7 +60,6 @@
 				</el-button>
 			</template> -->
 		</FooterButtonGroup>
-		<SavePathWarningDialog v-model="openSavePathWarningDialog" />
 	</div>
 </template>
 
@@ -68,18 +70,19 @@ import type { FormInstance, FormRules } from "element-plus";
 import { tomlStringify } from "@/utils/toml";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 import BasicInfo from "./components/BasicInfo.vue";
-import { useTag } from "@/hooks/useTag/index";
+import TrainingData from "./components/TrainingData.vue";
+import AdvancedSettings from "./components/AdvancedSettings/index.vue";
+import { checkDirectory } from "@/utils/lora.helper";
+import { getEnv } from "@/utils/env";
+import WanDataSet from "./components/WanDataSet.vue";
+import SampleValidator from "./components/SampleValidator.vue";
+import { WanValidate } from "./wan.validate";
+import { WanHelper } from "./wan.helper";
+import { startWanVideoTraining, type StartWanVideoTrainingData } from "@/api/lora";
+
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
-import TrainingData from "./components/TrainingData.vue";
-import T2VOptions from "./components/T2VOptions.vue";
-import ModelParameters from "./components/ModelParameters.vue";
-import AdvancedSettings from "./components/AdvancedSettings/index.vue";
-import { checkDirectory, checkHYData } from "@/utils/lora.helper";
-import { getEnv } from "@/utils/env";
-import WanDataSet from "./components/WanDataSet.vue";
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -97,7 +100,7 @@ const defaultForm: RuleForm = {
 		vae: "./models/vae/wan_2.1_vae.safetensors",
 		vae_cache_cpu: false,
 		vae_dtype: "float16",
-		output_dir: "",
+		output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 		max_train_epochs: 1,
 		max_train_steps: undefined,
 		seed: undefined,
@@ -113,6 +116,7 @@ const defaultForm: RuleForm = {
 		lr_scheduler_min_lr_ratio: undefined,
 		lr_scheduler_num_cycles: 1,
 		lr_scheduler_power: 1,
+		lr_scheduler_timescale: undefined,
 		lr_scheduler_type: "",
 		lr_warmup_steps: 0,
 		network_alpha: 1,
@@ -187,153 +191,76 @@ const defaultForm: RuleForm = {
 		tag_is_append: false
 	}
 };
-// const defaultForm = readonly<RuleForm>({
-// 	output_name: "",
-// 	class_tokens: "",
-// 	// -----
-// 	image_dir: "/root",
-// 	tagger_model: "joy-caption-alpha-two",
-// 	prompt_type: "Training Prompt",
-// 	output_trigger_words: true,
-// 	tagger_advanced_settings: false,
-// 	tagger_global_prompt: "",
-// 	tagger_is_append: false,
-// 	task: "i2v_14B",
-// 	dit: "",
-// 	sdpa: true,
-// 	mixed_precision: "bf16",
-// 	fp8_base: true,
-// 	fp8_scaled: false,
-// 	t5_model: "",
-// 	fp8_t5: false,
-// 	t5_checkpoint: "",
-// 	t5_tokenizer: "google/umt5-xxl",
-// 	vae: "",
-// 	vae_checkpoint: "",
-// 	vae_stride: "(4, 8, 8)",
-// 	optimizer_type: "adamw8bit",
-// 	learning_rate: "2e-4",
-// 	gradient_checkpointing: true,
-// 	network_dim: 32,
-// 	save_merged_model: "",
-// 	discrete_flow_shift: 3,
-// 	text_len: 512,
-// 	epoch: 1,
-// 	save_every_n_epochs: 16,
-// 	guidance_scale: 1,
-// 	timestep_sampling: "shift",
-// 	sigmoid_scale: 1,
-// 	weighting_scheme: "none",
-// 	logit_mean: 0,
-// 	logit_std: 1,
-// 	mode_scale: 1.29,
-// 	min_timestep: 0,
-// 	max_timestep: 1000,
-// 	output_dir: "",
-// 	save_state: true,
-// 	resume: "",
-// 	num_train_timesteps: 1000,
-// 	sample_fps: 16,
-// 	sample_neg_prompt:
-// 		"色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
-// 	clip: "",
-// 	clip_checkpoint: "",
-// 	clip_tokenizer: "xlm-roberta-large",
-// 	patch_size: "1, 2, 2",
-// 	dim: 5120,
-// 	ffn_dim: 13824,
-// 	num_heads: 40,
-// 	num_layers: 40,
-// 	window_size: "-1, -1",
-// 	qk_norm: true,
-// 	cross_attn_norm: true,
-// 	resolution_width: 720,
-// 	resolution_height: 1280,
-// 	batch_size: 1,
-// 	enable_bucket: true,
-// 	bucket_no_upscale: false,
-// 	cache_directory: "",
-// 	target_frames: "[1]",
-// 	frame_extraction: "head",
-// 	num_repeats: 2,
-// 	image_jsonl_file_image_path: "",
-// 	image_jsonl_file_caption: ""
-// });
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
 const rules = reactive<FormRules<RuleForm>>({
-	"config.task": [
+	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
+	"config.output_dir": [
+		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
-			// validator: (rule: any, value: string, callback: (error?: string | Error) => void) => {
-			// 	callback(new Error("请选择训练任务"));
-			// }
+			asyncValidator: async (
+				_rule: any,
+				value: string,
+				callback: (error?: string | Error) => void
+			) => {
+				try {
+					const isExists = await checkDirectory(value);
+					if (!isExists) {
+						callback(new Error("LoRA保存目录不存在"));
+						return;
+					}
+					return callback();
+				} catch (error) {
+					return callback(new Error((error as Error).message));
+				}
+			}
+		},
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (!isWhiteCheck) return callback();
+				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
+				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
+			}
 		}
 	],
 	"dataset.datasets.0.image_directory": [
+		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
-			validator: (rule: any, value: string, callback: (error?: string | Error) => void) => {
-				console.log("🚀 ~ string:", value);
-				callback(new Error("请选择训练用的数据集目录"));
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("数据集目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		}
+	],
+	"config.max_train_epochs": [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				// 轮数必须大于或等于保存轮数
+				const { save_every_n_epochs } = ruleForm.value.config;
+
+				if (value <= 0) {
+					return callback(new Error("总训练轮数必须是一个正整数"));
+				}
+				if (typeof save_every_n_epochs === "number" && value < save_every_n_epochs) {
+					return callback(new Error("总训练轮数 必须大于或等于save_every_n_epochs"));
+				}
+
+				callback();
 			},
 			trigger: "change"
 		}
 	]
-	// class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
-	// output_dir: [
-	// 	{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
-	// 	{
-	// 		asyncValidator: async (
-	// 			_rule: any,
-	// 			value: string,
-	// 			callback: (error?: string | Error) => void
-	// 		) => {
-	// 			try {
-	// 				const isExists = await checkDirectory(value);
-	// 				if (!isExists) {
-	// 					callback(new Error("LoRA保存目录不存在"));
-	// 					return;
-	// 				}
-	// 				const isDataExists = await checkHYData(value);
-	// 				if (isDataExists) {
-	// 					callback(new Error("LoRA保存目录已存在数据，请提供空目录"));
-	// 					return;
-	// 				}
-	// 				return callback();
-	// 			} catch (error) {
-	// 				return callback(new Error((error as Error).message));
-	// 			}
-	// 		}
-	// 	},
-	// 	{
-	// 		validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-	// 			if (!isWhiteCheck) return callback();
-	// 			if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
-	// 			callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
-	// 		}
-	// 	}
-	// ],
-	// image_dir: [
-	// 	{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
-	// 	{
-	// 		asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-	// 			checkDirectory(value).then((exists) => {
-	// 				if (!exists) {
-	// 					callback(new Error("数据集目录不存在"));
-	// 					return;
-	// 				}
-	// 				callback();
-	// 			});
-	// 		}
-	// 	}
-	// ]
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
-/** lora保存警告弹窗 */
-const openSavePathWarningDialog = ref(false);
-/** 是否是T2V训练 */
-const isT2V = computed(() => ruleForm.value.task === "t2v_14B");
+/** wan帮助类 */
+const wanHelper = new WanHelper();
 
 // 折叠
 const openStep1 = ref(true);
@@ -351,7 +278,7 @@ watch(ruleForm, generateToml, { deep: true, immediate: true });
 /** 导入配置 */
 function onLoadConfig(toml: RuleForm) {
 	try {
-		// mergeDataToForm(toml, ruleForm.value);
+		ruleForm.value = wanHelper.mergeToForm(toml, ruleForm.value);
 		ElMessage.success("配置导入成功");
 	} catch (error) {
 		ElMessage.error((error as Error)?.message ?? "配置导入失败");
@@ -362,35 +289,6 @@ function onLoadConfig(toml: RuleForm) {
 function onExportConfig() {
 	return ruleForm.value;
 }
-
-// /** 打标 */
-// const tagLoading = ref(false);
-// const tagDisabled = computed(() => tagLoading.value || trainingStore.useGPU);
-// async function onTagClick() {
-// 	try {
-// 		tagLoading.value = true;
-
-// 		const tagResult = await tag({
-// 			tagDir: ruleForm.value.image_dir,
-// 			tagModel: ruleForm.value.tagger_model,
-// 			joyCaptionPromptType: ruleForm.value.prompt_type,
-// 			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
-// 			globalPrompt: ruleForm.value.class_tokens,
-// 			tagPrompt: ruleForm.value.tagger_global_prompt,
-// 			isAppend: ruleForm.value.tagger_is_append,
-// 			showTaskStartPrompt: true
-// 		});
-
-// 		// 触发查询打标任务
-// 		startQueryTagTask(tagResult.task_id);
-// 		tagLoading.value = false;
-// 	} catch (error) {
-// 		tagLoading.value = false;
-// 		stopQueryTagTask();
-
-// 		console.log("打标任务创建失败", error);
-// 	}
-// }
 
 /** 重置表单 */
 function onResetData() {
@@ -411,22 +309,20 @@ async function onSubmit() {
 		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
 
-		ruleFormRef.value.validate(() => {});
+		// 校验
+		const valid = await new WanValidate().validate({
+			form: ruleFormRef.value,
+			formData: ruleForm.value
+		});
+		if (!valid) {
+			submitLoading.value = false;
+			return;
+		}
 
-		// const valid = await validateForm({
-		// 	formRef: ruleFormRef,
-		// 	formData: ruleForm,
-		// 	trainingStore: trainingStore,
-		// 	openSavePathWarningDialog: openSavePathWarningDialog
-		// });
-		// if (!valid) {
-		// 	submitLoading.value = false;
-		// 	return;
-		// }
-
-		// // 开始训练
-		// const data: StartFluxTrainingData = formatFormData(ruleForm.value);
-		// const { task_id } = await startFluxTraining(data);
+		// 开始训练
+		const data: StartWanVideoTrainingData = wanHelper.formatData(ruleForm.value);
+		const { task_id } = await startWanVideoTraining(data);
+		console.log("🚀 ~ onSubmit ~ task_id:", task_id);
 		// // 监听训练数据
 		// startFluxLoraListen(task_id);
 

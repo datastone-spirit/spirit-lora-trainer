@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-06 15:41:05
- * @LastEditTime: 2025-03-07 10:27:51
+ * @LastEditTime: 2025-03-27 09:55:03
  * @LastEditors: mulingyuer
  * @Description: flux校验相关
  * @FilePath: \frontend\src\views\lora\flux\flux.validate.ts
@@ -12,13 +12,12 @@ import type { RuleForm } from "./types";
 import type { Ref } from "vue";
 import { formatFormValidateMessage } from "@/utils/tools";
 import { checkData } from "@/utils/lora.helper";
-import { useTrainingStore } from "@/stores";
+import { useTrainingStore, useModalManagerStore } from "@/stores";
 
 export interface ValidateFormData {
 	formRef: Ref<FormInstance | undefined>;
 	formData: Ref<RuleForm>;
 	trainingStore: ReturnType<typeof useTrainingStore>;
-	openSavePathWarningDialog: Ref<boolean>;
 }
 
 /** 显示错误消息 */
@@ -65,10 +64,13 @@ async function validateDataset(imageDir: string): Promise<boolean> {
 }
 
 /** LoRA保存路径校验 */
-export function validateLoRASaveDir(formData: Ref<RuleForm>, openDialog: Ref<boolean>): boolean {
+export function validateLoRASaveDir(formData: Ref<RuleForm>): boolean {
 	if (import.meta.env.VITE_APP_WHITE_CHECK === "false") return true;
 	if (formData.value.output_dir.startsWith("/root")) return true;
-	openDialog.value = true;
+	// 展示警告弹窗
+	const modelManagerStore = useModalManagerStore();
+	modelManagerStore.setLoraSavePathWarningModal(true);
+
 	return false;
 }
 
@@ -136,10 +138,10 @@ export function validateLoRASaveDir(formData: Ref<RuleForm>, openDialog: Ref<boo
 
 /** 主校验函数 */
 export async function validateForm(data: ValidateFormData): Promise<boolean> {
-	const { formRef, formData, trainingStore, openSavePathWarningDialog } = data;
+	const { formRef, formData, trainingStore } = data;
 
 	const validations = [
-		() => validateLoRASaveDir(formData, openSavePathWarningDialog),
+		() => validateLoRASaveDir(formData),
 		() => validateFormFields(formRef),
 		() => validateGPU(trainingStore),
 		() => validateDataset(formData.value.image_dir)

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-10 15:36:10
- * @LastEditTime: 2025-03-10 16:18:29
+ * @LastEditTime: 2025-03-27 10:39:36
  * @LastEditors: mulingyuer
  * @Description: 网络重试弹窗
  * @FilePath: \frontend\src\components\Dialog\NetworkRetryDialog.vue
@@ -29,11 +29,18 @@
 </template>
 
 <script setup lang="ts">
-import { useTrainingStore } from "@/stores";
+import { useModalManagerStore } from "@/stores";
 
-const trainingStore = useTrainingStore();
+const modalManagerStore = useModalManagerStore();
 
-const open = storeToRefs(trainingStore).isOffline;
+const open = computed({
+	get() {
+		return modalManagerStore.networkDisconnectModal;
+	},
+	set(val: boolean) {
+		modalManagerStore.setNetworkDisconnectModal(val);
+	}
+});
 </script>
 
 <style lang="scss" scoped>

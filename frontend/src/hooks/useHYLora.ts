@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-03-11 10:30:55
+ * @LastEditTime: 2025-03-27 10:37:09
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -10,7 +10,7 @@
 import type { HyVideoTrainingInfoResult } from "@/api/monitor";
 import { hyVideoTrainingInfo } from "@/api/monitor";
 import type { MonitorHYLoraData } from "@/stores";
-import { useTrainingStore } from "@/stores";
+import { useTrainingStore, useModalManagerStore } from "@/stores";
 import { isEmptyObject } from "@/utils/tools";
 import mitt from "mitt";
 import BigNumber from "bignumber.js";
@@ -119,6 +119,7 @@ export const useHYLora = (() => {
 
 	return function useHYLora(options: HYLoraOptions = {}) {
 		const trainingStore = useTrainingStore();
+		const modalManagerStore = useModalManagerStore();
 		const { monitorHYLoraData } = storeToRefs(trainingStore);
 		firstGetConfig.open = options.isFirstGetConfig ?? firstGetConfig.open;
 		if (typeof options.firstGetConfigCallback === "function") {
@@ -142,7 +143,9 @@ export const useHYLora = (() => {
 						firstGetConfig.callbackList = [];
 					}
 					// 更新网络弹窗
-					if (trainingStore.isOffline) trainingStore.setIsOffline(false);
+					if (modalManagerStore.networkDisconnectModal) {
+						modalManagerStore.setNetworkDisconnectModal(false);
+					}
 
 					return updateHYLoraData(res);
 				})
@@ -150,7 +153,7 @@ export const useHYLora = (() => {
 					const status = error?.status ?? 0;
 					const is5xxError = status >= 500 && status < 600;
 					if (isNetworkError(error) || is5xxError) {
-						trainingStore.setIsOffline(true);
+						modalManagerStore.setNetworkDisconnectModal(true);
 						return;
 					}
 

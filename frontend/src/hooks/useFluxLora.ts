@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-03-11 10:28:43
+ * @LastEditTime: 2025-03-27 10:36:08
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -9,7 +9,7 @@
  */
 import { loRATrainingInfo, type LoRATrainingInfoResult } from "@/api/monitor";
 import type { MonitorFluxLoraData } from "@/stores";
-import { useTrainingStore } from "@/stores";
+import { useTrainingStore, useModalManagerStore } from "@/stores";
 import { isEmptyObject } from "@/utils/tools";
 import mitt from "mitt";
 import { Log, serializeError } from "@/utils/log";
@@ -86,6 +86,7 @@ export const useFluxLora = (() => {
 
 	return function useFluxLora(options: FluxLoraOptions = {}) {
 		const trainingStore = useTrainingStore();
+		const modalManagerStore = useModalManagerStore();
 		const { monitorFluxLoraData } = storeToRefs(trainingStore);
 		firstGetConfig.open = options.isFirstGetConfig ?? firstGetConfig.open;
 		if (typeof options.firstGetConfigCallback === "function") {
@@ -108,7 +109,9 @@ export const useFluxLora = (() => {
 						firstGetConfig.callbackList = [];
 					}
 					// 更新网络弹窗
-					if (trainingStore.isOffline) trainingStore.setIsOffline(false);
+					if (modalManagerStore.networkDisconnectModal) {
+						modalManagerStore.setNetworkDisconnectModal(false);
+					}
 
 					return updateFluxLoraData(res);
 				})
@@ -116,7 +119,7 @@ export const useFluxLora = (() => {
 					const status = error?.status ?? 0;
 					const is5xxError = status >= 500 && status < 600;
 					if (isNetworkError(error) || is5xxError) {
-						trainingStore.setIsOffline(true);
+						modalManagerStore.setNetworkDisconnectModal(true);
 						return;
 					}
 					// 错误处理

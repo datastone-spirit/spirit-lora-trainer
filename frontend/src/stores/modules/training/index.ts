@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-03-21 09:05:19
+ * @LastEditTime: 2025-03-27 10:38:34
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -200,12 +200,6 @@ export const useTrainingStore = defineStore("training", () => {
 		return monitorTagData.value.isListen || !isFluxLoraTaskEnd() || !isHYLoraTaskEnd();
 	});
 
-	/** 训练中是否断网了 */
-	const isOffline = ref(false);
-	function setIsOffline(val: boolean) {
-		isOffline.value = val;
-	}
-
 	return {
 		monitorGPUData,
 		setGPUIsListen,
@@ -236,8 +230,6 @@ export const useTrainingStore = defineStore("training", () => {
 		setHYLoraIsPolling,
 		setHYLoraData,
 		resetHYLoraData,
-		useGPU,
-		isOffline,
-		setIsOffline
+		useGPU
 	};
 });

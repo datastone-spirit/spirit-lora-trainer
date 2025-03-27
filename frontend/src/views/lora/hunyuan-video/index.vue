@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-03-21 09:46:36
+ * @LastEditTime: 2025-03-27 09:55:17
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -73,18 +73,16 @@
 			:submit-loading="submitLoading"
 			@submit="onSubmit"
 		></FooterButtonGroup>
-		<SavePathWarningDialog v-model="openSavePathWarningDialog" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
 import type { HyVideoTrainingInfoResult } from "@/api/monitor";
-import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useHYLora } from "@/hooks/useHYLora";
 import { useTag } from "@/hooks/useTag";
-import { useSettingsStore, useTrainingStore } from "@/stores";
+import { useSettingsStore, useTrainingStore, useModalManagerStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { checkData, checkDirectory, checkHYData } from "@/utils/lora.helper";
 import { tomlParse, tomlStringify } from "@/utils/toml";
@@ -99,6 +97,7 @@ import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
+const modelManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
 const { startHYLoraListen, stopHYLoraListen } = useHYLora({
@@ -241,8 +240,6 @@ const rules = reactive<FormRules<RuleForm>>({
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
-/** lora保存警告弹窗 */
-const openSavePathWarningDialog = ref(false);
 
 /** toml */
 const toml = ref("");
@@ -423,7 +420,8 @@ function firstResetFormConfig(taskData: HyVideoTrainingInfoResult) {
 function confirmLoRASaveDir() {
 	if (!isWhiteCheck) return true;
 	if (ruleForm.value.output_dir.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return true;
-	openSavePathWarningDialog.value = true;
+	// 展示警告弹窗
+	modelManagerStore.setLoraSavePathWarningModal(true);
 	return false;
 }
 </script>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 11:04:52
- * @LastEditTime: 2025-03-26 11:51:14
+ * @LastEditTime: 2025-03-27 08:42:50
  * @LastEditors: mulingyuer
  * @Description: wan数据集
  * @FilePath: \frontend\src\views\lora\wan\components\WanDataSet.vue
@@ -52,7 +52,11 @@
 			popover-content="tag_is_append"
 		/>
 	</template>
-	<TagSubmitButton @submit="onTagClick" />
+	<TagSubmitButton
+		:loading="loading || monitorTagData.isListen"
+		:disabled="disabled"
+		@submit="onTagClick"
+	/>
 </template>
 
 <script setup lang="ts">
@@ -65,8 +69,8 @@ const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, requi
 // hooks
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
 
-const tagLoading = ref(false);
-const tagDisabled = computed(() => tagLoading.value || trainingStore.useGPU);
+const loading = ref(false);
+const disabled = computed(() => loading.value || trainingStore.useGPU);
 /** 是否是Joy Caption 2.0模型 */
 const isJoyCaption2Model = computed(
 	() => ruleForm.value.tagConfig.tag_model === "joy-caption-alpha-two"
@@ -77,7 +81,7 @@ const isAdvancedSetting = computed(() => ruleForm.value.tagConfig.tag_advanced_s
 /** 打标 */
 async function onTagClick() {
 	try {
-		tagLoading.value = true;
+		loading.value = true;
 
 		const { dataset, tagConfig } = ruleForm.value;
 		const tagResult = await tag({
@@ -92,9 +96,9 @@ async function onTagClick() {
 
 		// 触发查询打标任务
 		startQueryTagTask(tagResult.task_id);
-		tagLoading.value = false;
+		loading.value = false;
 	} catch (error) {
-		tagLoading.value = false;
+		loading.value = false;
 		stopQueryTagTask();
 
 		console.log("打标任务创建失败", error);

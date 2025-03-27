@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 11:17:50
- * @LastEditTime: 2025-03-21 09:28:19
+ * @LastEditTime: 2025-03-27 08:58:47
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag\index.ts
@@ -40,7 +40,7 @@ async function tag(options: TagOptions) {
 		image_path: options.tagDir,
 		model_name: options.tagModel,
 		prompt_type: options.joyCaptionPromptType ?? "",
-		class_token: options.isAddGlobalPrompt ? options.globalPrompt : "",
+		class_token: options.isAddGlobalPrompt ? (options.globalPrompt ?? "") : "",
 		global_prompt: isJoyCaption2Model(options.tagModel) ? options.tagPrompt : "",
 		is_append: options.isAppend
 	};
@@ -95,7 +95,11 @@ async function validateTag(options: ValidateTagOptions): Promise<ValidateTagResu
 			message: "请选择 Joy Caption2 的提示词类型"
 		},
 		{
-			condition: () => isAddGlobalPrompt && globalPrompt.trim() === "",
+			condition: () => {
+				if (!isAddGlobalPrompt) return false;
+				if (typeof globalPrompt !== "string" || globalPrompt.trim() === "") return true;
+				return false;
+			},
 			message: "请填写触发词"
 		}
 	];

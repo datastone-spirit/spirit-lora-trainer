@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 17:37:15
- * @LastEditTime: 2025-02-20 10:04:23
+ * @LastEditTime: 2025-03-27 16:02:27
  * @LastEditors: mulingyuer
  * @Description: gpu hooks
  * @FilePath: \frontend\src\hooks\useGPU.ts
@@ -14,7 +14,7 @@ import type { GPUData } from "@/stores";
 
 export function useGPU() {
 	const trainingStore = useTrainingStore();
-	const { monitorGPUData } = storeToRefs(trainingStore);
+	const { monitorGPUData, useGPU } = storeToRefs(trainingStore);
 	/** 定时器 */
 	let timer: number | null = null;
 
@@ -76,6 +76,7 @@ export function useGPU() {
 
 	return {
 		monitorGPUData: readonly(monitorGPUData),
+		isUseGpu: useGPU,
 		startGPUListen,
 		stopGPUListen
 	};

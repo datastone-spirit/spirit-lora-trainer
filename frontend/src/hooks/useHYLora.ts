@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-13 10:24:35
- * @LastEditTime: 2025-03-27 10:37:09
+ * @LastEditTime: 2025-03-27 17:14:37
  * @LastEditors: mulingyuer
  * @Description: 训练混元视频 lora hooks
  * @FilePath: \frontend\src\hooks\useHYLora.ts
@@ -165,6 +165,7 @@ export const useHYLora = (() => {
 		function updateHYLoraData(res: HyVideoTrainingInfoResult) {
 			trainingStore.setHYLoraData(formatData(res));
 			trainingStore.setHYLoraTaskStatus(res.status);
+			trainingStore.setCurrentTaskType("hunyuan-video");
 
 			if (!res?.detail) return;
 			if (isEmptyObject(res.detail)) return;
@@ -195,6 +196,7 @@ export const useHYLora = (() => {
 			trainingStore.setHYLoraIsPolling(false);
 			trainingStore.setHYLoraTaskStatus("none");
 			trainingStore.resetHYLoraData();
+			trainingStore.setCurrentTaskType("none");
 
 			// 触发回调
 			hyLoraEvents.emit("complete");
@@ -223,6 +225,7 @@ export const useHYLora = (() => {
 			trainingStore.setHYLoraIsPolling(false);
 			trainingStore.setHYLoraTaskStatus("none");
 			trainingStore.resetHYLoraData();
+			trainingStore.setCurrentTaskType("none");
 
 			// 触发回调
 			hyLoraEvents.emit("failed");
@@ -276,6 +279,7 @@ export const useHYLora = (() => {
 				trainingStore.setHYLoraTaskId("");
 				trainingStore.setHYLoraTaskStatus("none");
 				trainingStore.resetHYLoraData();
+				trainingStore.setCurrentTaskType("none");
 			}
 		}
 

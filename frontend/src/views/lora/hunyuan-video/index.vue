@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-03-27 09:55:17
+ * @LastEditTime: 2025-03-27 16:37:19
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -63,16 +63,18 @@
 				<SplitRightPanel :toml="toml" :dir="ruleForm.directory_path" />
 			</template>
 		</TwoSplit>
-		<FooterButtonGroup
-			left-to="#footer-bar-left"
-			:getExportConfig="onExportConfig"
-			export-config-prefix="hunyuan-video"
-			@load-config="onLoadConfig"
-			@reset-data="onResetData"
-			right-to="#footer-bar-center"
+		<TeleportFooterBarContent
+			v-model:merge-data="ruleForm"
+			training-type="hunyuan-video"
+			:reset-data="defaultForm"
 			:submit-loading="submitLoading"
+			@reset-data="onResetData"
 			@submit="onSubmit"
-		></FooterButtonGroup>
+		>
+			<template #monitor-progress-bar>
+				<HYTrainingMonitor />
+			</template>
+		</TeleportFooterBarContent>
 	</div>
 </template>
 
@@ -100,7 +102,7 @@ const trainingStore = useTrainingStore();
 const modelManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
-const { startHYLoraListen, stopHYLoraListen } = useHYLora({
+const { startHYLoraListen, stopHYLoraListen, isHYLoraTaskEnd } = useHYLora({
 	isFirstGetConfig: true,
 	firstGetConfigCallback: firstResetFormConfig
 });
@@ -254,31 +256,9 @@ const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
 
-/** 导入配置 */
-function onLoadConfig(toml: RuleForm) {
-	try {
-		mergeDataToForm(toml, ruleForm.value);
-		ElMessage.success("配置导入成功");
-	} catch (error) {
-		ElMessage.error((error as Error)?.message ?? "配置导入失败");
-		console.error(error);
-	}
-}
-/** 导出配置 */
-function onExportConfig() {
-	return ruleForm.value;
-}
-
 /** 重置表单 */
 function onResetData() {
-	// 重置数据
-	ruleForm.value = structuredClone(toRaw(defaultForm) as RuleForm);
-	// 重置表单
-	if (ruleFormRef.value) {
-		ruleFormRef.value.resetFields();
-	}
-
-	ElMessage.success("重置成功");
+	if (ruleFormRef.value) ruleFormRef.value.resetFields();
 }
 
 /** 打标 */
@@ -376,7 +356,6 @@ function onEpochsConfirm() {
 		}
 	});
 }
-
 async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
@@ -424,6 +403,16 @@ function confirmLoRASaveDir() {
 	modelManagerStore.setLoraSavePathWarningModal(true);
 	return false;
 }
+
+// 组件生命周期
+onMounted(() => {
+	if (!isHYLoraTaskEnd()) {
+		startHYLoraListen();
+	}
+});
+onUnmounted(() => {
+	stopHYLoraListen();
+});
 </script>
 
 <style lang="scss" scoped>

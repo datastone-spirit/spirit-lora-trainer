@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-03-27 11:37:03
+ * @LastEditTime: 2025-03-27 16:37:35
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
- * @FilePath: \frontend\src\views\lora\wan\index.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -40,26 +40,18 @@
 				<SplitRightPanel :toml="toml" :dir="ruleForm.dataset.datasets[0].image_directory" />
 			</template>
 		</TwoSplit>
-		<FooterButtonGroup
-			left-to="#footer-bar-left"
-			:getExportConfig="onExportConfig"
-			export-config-prefix="wan"
-			@load-config="onLoadConfig"
-			@reset-data="onResetData"
-			right-to="#footer-bar-center"
+		<TeleportFooterBarContent
+			v-model:merge-data="ruleForm"
+			training-type="wan-video"
+			:reset-data="defaultForm"
 			:submit-loading="submitLoading"
+			@reset-data="onResetData"
 			@submit="onSubmit"
 		>
-			<!-- <template #right-btn-group>
-				<el-button
-					v-if="monitorFluxLoraData.data.showSampling"
-					size="large"
-					@click="onViewSampling"
-				>
-					查看采样
-				</el-button>
-			</template> -->
-		</FooterButtonGroup>
+			<template #monitor-progress-bar>
+				<WanTrainingMonitor />
+			</template>
+		</TeleportFooterBarContent>
 	</div>
 </template>
 
@@ -68,7 +60,7 @@ import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import type { RuleForm } from "./types";
 import type { FormInstance, FormRules } from "element-plus";
 import { tomlStringify } from "@/utils/toml";
-import { useSettingsStore, useTrainingStore } from "@/stores";
+import { useSettingsStore } from "@/stores";
 import BasicInfo from "./components/BasicInfo.vue";
 import TrainingData from "./components/TrainingData.vue";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
@@ -81,7 +73,6 @@ import { WanHelper } from "./wan.helper";
 import { startWanVideoTraining, type StartWanVideoTrainingData } from "@/api/lora";
 
 const settingsStore = useSettingsStore();
-const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const env = getEnv();
@@ -275,31 +266,9 @@ const generateToml = useDebounceFn(() => {
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
-/** 导入配置 */
-function onLoadConfig(toml: RuleForm) {
-	try {
-		ruleForm.value = wanHelper.mergeToForm(toml, ruleForm.value);
-		ElMessage.success("配置导入成功");
-	} catch (error) {
-		ElMessage.error((error as Error)?.message ?? "配置导入失败");
-		console.error(error);
-	}
-}
-/** 导出配置 */
-function onExportConfig() {
-	return ruleForm.value;
-}
-
 /** 重置表单 */
 function onResetData() {
-	// 重置数据
-	ruleForm.value = structuredClone(toRaw(defaultForm) as RuleForm);
-	// 重置表单
-	if (ruleFormRef.value) {
-		ruleFormRef.value.resetFields();
-	}
-
-	ElMessage.success("重置成功");
+	if (ruleFormRef.value) ruleFormRef.value.resetFields();
 }
 
 /** 提交表单 */

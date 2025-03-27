@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:14:16
- * @LastEditTime: 2025-01-09 18:17:38
+ * @LastEditTime: 2025-03-27 16:23:11
  * @LastEditors: mulingyuer
  * @Description: 设置数据仓库
  * @FilePath: \frontend\src\stores\modules\settings\index.ts
@@ -60,3 +60,5 @@ export const useSettingsStore = defineStore(
 		persist: true
 	}
 );
+
+export type UseSettingsStore = ReturnType<typeof useSettingsStore>;

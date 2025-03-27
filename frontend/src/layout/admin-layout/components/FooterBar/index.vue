@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2025-03-21 09:30:46
+ * @LastEditTime: 2025-03-27 15:50:29
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
@@ -19,9 +19,9 @@
 						@change="onComplexityChange"
 					/>
 				</div>
-				<div class="footer-bar-body">
-					<div id="footer-bar-left" class="footer-bar-body-left"></div>
-					<div id="footer-bar-center" class="footer-bar-body-center"></div>
+				<div class="footer-bar-right">
+					<div id="footer-bar-teleport-left" class="footer-bar-teleport-left"></div>
+					<div id="footer-bar-teleport-right" class="footer-bar-teleport-right"></div>
 				</div>
 			</div>
 			<div
@@ -93,32 +93,29 @@ const progress = computed(() => {
 	height: 100%;
 	display: flex;
 }
+.footer-bar-left,
+.footer-bar-right {
+	height: 100%;
+}
 .footer-bar-left {
 	width: $zl-aside-width;
-	margin-right: $zl-padding;
-	padding: 0 $zl-padding;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
-.footer-bar-body {
+.footer-bar-right {
 	flex-grow: 1;
 	min-width: 0;
 	display: flex;
+	justify-content: space-between;
+	padding: 0 $zl-padding;
 }
-// .footer-bar-content-left,
-// .footer-bar-content-center {
-// 	display: flex;
-// 	align-items: center;
-// 	justify-content: center;
-// }
-.footer-bar-body-left {
+.footer-bar-teleport-left {
 	flex-shrink: 0;
 }
-.footer-bar-body-center {
+.footer-bar-teleport-right {
 	flex-grow: 1;
 	min-width: 0;
-	padding: 0 $zl-padding;
 }
 .footer-bar-progress-bar {
 	position: absolute;

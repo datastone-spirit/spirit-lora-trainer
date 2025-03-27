@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 11:34:06
- * @LastEditTime: 2024-09-30 09:41:56
+ * @LastEditTime: 2025-03-27 16:23:41
  * @LastEditors: mulingyuer
  * @Description: 用户数据模块
- * @FilePath: \spirit-app-microservice-admin\src\stores\modules\user\index.ts
+ * @FilePath: \frontend\src\stores\modules\user\index.ts
  * 怎么可能会有bug！！！
  */
 import { defineStore } from "pinia";
@@ -34,3 +34,5 @@ export const useUserStore = defineStore(
 		persist: true
 	}
 );
+
+export type UseUserStore = ReturnType<typeof useUserStore>;

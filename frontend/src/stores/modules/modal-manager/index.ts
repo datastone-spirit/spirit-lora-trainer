@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:36:24
- * @LastEditTime: 2025-03-27 09:54:18
+ * @LastEditTime: 2025-03-27 16:23:28
  * @LastEditors: mulingyuer
  * @Description: 弹窗数据管理
  * @FilePath: \frontend\src\stores\modules\modal-manager\index.ts
@@ -29,3 +29,5 @@ export const useModalManagerStore = defineStore("modalManager", () => {
 		setNetworkDisconnectModal
 	};
 });
+
+export type UseModalManagerStore = ReturnType<typeof useModalManagerStore>;

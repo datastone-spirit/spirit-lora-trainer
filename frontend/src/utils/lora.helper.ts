@@ -1,13 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 15:38:33
- * @LastEditTime: 2025-03-27 10:50:03
+ * @LastEditTime: 2025-03-27 16:47:03
  * @LastEditors: mulingyuer
  * @Description: lora helper
  * @FilePath: \frontend\src\utils\lora.helper.ts
  * 怎么可能会有bug！！！
  */
 import { checkDirectoryExists, hyCheckDirectoryExists } from "@/api/common";
+import type { UseTrainingStore } from "@/stores";
 
 /** 检测目录是否存在 */
 export async function checkDirectory(path: string): Promise<boolean> {
@@ -67,6 +68,36 @@ export function filterAndConvertKeysToNumber(
 			result[key] = Number(value);
 		}
 	});
+
+	return result;
+}
+
+export interface RunLoraTaskResult {
+	type: LoRATaskType;
+	taskName: string;
+}
+/** 获取当前训练的任务数据 */
+export function getRunLoraTask(store: UseTrainingStore): RunLoraTaskResult {
+	const { currentTaskType } = storeToRefs(store);
+	const result: RunLoraTaskResult = {
+		type: "none",
+		taskName: ""
+	};
+
+	switch (currentTaskType.value) {
+		case "flux":
+			result.type = "flux";
+			result.taskName = "Flux";
+			break;
+		case "hunyuan-video":
+			result.type = "hunyuan-video";
+			result.taskName = "混元视频";
+			break;
+		case "wan-video":
+			result.type = "wan-video";
+			result.taskName = "wan视频";
+			break;
+	}
 
 	return result;
 }

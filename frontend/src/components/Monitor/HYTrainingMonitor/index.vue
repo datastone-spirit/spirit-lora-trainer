@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2025-01-14 16:39:18
+ * @LastEditTime: 2025-03-27 17:22:40
  * @LastEditors: mulingyuer
  * @Description: 混元训练监控
  * @FilePath: \frontend\src\components\Monitor\HYTrainingMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="lo-ra-training-monitor">
+	<div v-if="monitorHYLoraData.isListen" class="lo-ra-training-monitor">
 		<div v-if="isLoad" class="lo-ra-training-monitor-empty">
 			<el-text> 模型加载中 </el-text>
 			<el-text class="text-dot"></el-text>
@@ -87,8 +87,11 @@ function toFixed(num: number, precision = 5) {
 </script>
 
 <style lang="scss" scoped>
-// .lo-ra-training-monitor {
-// }
+.lo-ra-training-monitor {
+	height: 100%;
+	display: flex;
+	align-items: center;
+}
 .lo-ra-training-monitor-empty {
 	padding: 0 $zl-padding;
 	display: flex;

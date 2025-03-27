@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-27 09:52:27
+ * @LastEditTime: 2025-03-27 16:37:08
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -68,16 +68,17 @@
 				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
 			</template>
 		</TwoSplit>
-		<FooterButtonGroup
-			left-to="#footer-bar-left"
-			:getExportConfig="onExportConfig"
-			export-config-prefix="flux"
-			@load-config="onLoadConfig"
-			@reset-data="onResetData"
-			right-to="#footer-bar-center"
+		<TeleportFooterBarContent
+			v-model:merge-data="ruleForm"
+			training-type="flux"
+			:reset-data="defaultForm"
 			:submit-loading="submitLoading"
+			@reset-data="onResetData"
 			@submit="onSubmit"
 		>
+			<template #monitor-progress-bar>
+				<LoRATrainingMonitor />
+			</template>
 			<template #right-btn-group>
 				<el-button
 					v-if="monitorFluxLoraData.data.showSampling"
@@ -87,7 +88,7 @@
 					查看采样
 				</el-button>
 			</template>
-		</FooterButtonGroup>
+		</TeleportFooterBarContent>
 		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
 	</div>
 </template>
@@ -117,10 +118,11 @@ import { getEnv } from "@/utils/env";
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
-const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFluxLora({
-	isFirstGetConfig: true,
-	firstGetConfigCallback: firstResetFormConfig
-});
+const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData, isFluxLoraTaskEnd } =
+	useFluxLora({
+		isFirstGetConfig: true,
+		firstGetConfigCallback: firstResetFormConfig
+	});
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const env = getEnv();
@@ -501,31 +503,9 @@ const generateToml = useDebounceFn(() => {
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
-/** 导入配置 */
-function onLoadConfig(toml: RuleForm) {
-	try {
-		mergeDataToForm(toml, ruleForm.value);
-		ElMessage.success("配置导入成功");
-	} catch (error) {
-		ElMessage.error((error as Error)?.message ?? "配置导入失败");
-		console.error(error);
-	}
-}
-/** 导出配置 */
-function onExportConfig() {
-	return ruleForm.value;
-}
-
 /** 重置表单 */
 function onResetData() {
-	// 重置数据
-	ruleForm.value = structuredClone(toRaw(defaultForm) as RuleForm);
-	// 重置表单
-	if (ruleFormRef.value) {
-		ruleFormRef.value.resetFields();
-	}
-
-	ElMessage.success("重置成功");
+	if (ruleFormRef.value) ruleFormRef.value.resetFields();
 }
 
 /** 打标 */
@@ -607,6 +587,16 @@ function firstResetFormConfig(taskData: LoRATrainingInfoResult) {
 	mergeDataToForm(tomlData, ruleForm.value);
 	ElMessage.success("训练配置已恢复");
 }
+
+// 组件生命周期
+onMounted(() => {
+	if (!isFluxLoraTaskEnd()) {
+		startFluxLoraListen();
+	}
+});
+onUnmounted(() => {
+	stopFluxLoraListen();
+});
 </script>
 
 <style lang="scss" scoped>

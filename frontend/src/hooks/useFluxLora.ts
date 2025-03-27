@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 10:17:35
- * @LastEditTime: 2025-03-27 10:36:08
+ * @LastEditTime: 2025-03-27 16:45:41
  * @LastEditors: mulingyuer
  * @Description: 训练 flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora.ts
@@ -138,6 +138,7 @@ export const useFluxLora = (() => {
 		function updateFluxLoraData(res: LoRATrainingInfoResult) {
 			trainingStore.setFluxLoraData(formatData(res));
 			trainingStore.setFluxLoraTaskStatus(res.status);
+			trainingStore.setCurrentTaskType("flux");
 
 			if (!res?.detail) return;
 			if (isEmptyObject(res?.detail)) return;
@@ -174,6 +175,7 @@ export const useFluxLora = (() => {
 			trainingStore.setFluxLoraIsPolling(false);
 			trainingStore.setFluxLoraTaskStatus("none");
 			trainingStore.resetFluxLoraData();
+			trainingStore.setCurrentTaskType("none");
 
 			// 触发回调
 			fluxLoraEvents.emit("complete");
@@ -203,6 +205,7 @@ export const useFluxLora = (() => {
 			trainingStore.setFluxLoraIsPolling(false);
 			trainingStore.setFluxLoraTaskStatus("none");
 			trainingStore.resetFluxLoraData();
+			trainingStore.setCurrentTaskType("none");
 
 			// 触发回调
 			fluxLoraEvents.emit("failed");
@@ -256,6 +259,7 @@ export const useFluxLora = (() => {
 				trainingStore.setFluxLoraTaskId("");
 				trainingStore.setFluxLoraTaskStatus("none");
 				trainingStore.resetFluxLoraData();
+				trainingStore.setCurrentTaskType("none");
 			}
 		}
 

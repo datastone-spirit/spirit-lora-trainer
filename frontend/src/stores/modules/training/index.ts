@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-03-27 10:38:34
+ * @LastEditTime: 2025-03-27 16:42:35
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -50,10 +50,6 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听打标数据 */
 	const monitorTagData = ref<MonitorTagData>({
 		isListen: false,
-		// taskId: "", // 没什么作用
-		// taskStatus: "none", // 没什么作用
-		// sleepTime: 3000, // 没什么作用
-		// isPolling: false, // 没什么作用
 		data: {
 			current: 0,
 			total: 0,
@@ -63,19 +59,6 @@ export const useTrainingStore = defineStore("training", () => {
 	function setTagIsListen(val: boolean) {
 		monitorTagData.value.isListen = val;
 	}
-	// function setTagTaskId(taskId: string) {
-	// 	monitorTagData.value.taskId = taskId;
-	// }
-	// function setTagTaskStatus(status: MonitorTagData["taskStatus"]) {
-	// 	monitorTagData.value.taskStatus = status;
-	// }
-	// function isTagTaskEnd(status?: MonitorTagData["taskStatus"]) {
-	// 	status = status ?? monitorTagData.value.taskStatus;
-	// 	return ["complete", "failed", "none"].includes(status);
-	// }
-	// function setTagIsPolling(val: boolean) {
-	// 	monitorTagData.value.isPolling = val;
-	// }
 	function setTagData(data: TagData) {
 		monitorTagData.value.data = data;
 	}
@@ -200,6 +183,12 @@ export const useTrainingStore = defineStore("training", () => {
 		return monitorTagData.value.isListen || !isFluxLoraTaskEnd() || !isHYLoraTaskEnd();
 	});
 
+	/** 当前训练的任务类型 */
+	const currentTaskType = ref<LoRATaskType>("none");
+	function setCurrentTaskType(type: LoRATaskType) {
+		currentTaskType.value = type;
+	}
+
 	return {
 		monitorGPUData,
 		setGPUIsListen,
@@ -208,10 +197,6 @@ export const useTrainingStore = defineStore("training", () => {
 		setGPUIsPolling,
 		monitorTagData,
 		setTagIsListen,
-		// setTagTaskId,
-		// setTagTaskStatus,
-		// isTagTaskEnd,
-		// setTagIsPolling,
 		setTagData,
 		resetTagData,
 		monitorFluxLoraData,
@@ -230,6 +215,10 @@ export const useTrainingStore = defineStore("training", () => {
 		setHYLoraIsPolling,
 		setHYLoraData,
 		resetHYLoraData,
-		useGPU
+		useGPU,
+		currentTaskType,
+		setCurrentTaskType
 	};
 });
+
+export type UseTrainingStore = ReturnType<typeof useTrainingStore>;

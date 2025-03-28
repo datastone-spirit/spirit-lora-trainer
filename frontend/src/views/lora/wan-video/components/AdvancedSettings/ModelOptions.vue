@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:31:41
- * @LastEditTime: 2025-03-26 15:44:51
+ * @LastEditTime: 2025-03-28 16:17:51
  * @LastEditors: mulingyuer
  * @Description: 模型结构参数设置
- * @FilePath: \frontend\src\views\lora\wan\components\AdvancedSettings\ModelOptions.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\ModelOptions.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -94,18 +94,33 @@
 			/>
 		</el-form-item>
 		<PopoverFormItem label="启用基础FP8模式" prop="config.fp8_base" popover-content="fp8_base">
-			<el-switch v-model="ruleForm.config.fp8_base" />
+			<el-switch v-model="ruleForm.config.fp8_base" @change="onFP8BaseChange" />
 		</PopoverFormItem>
 		<PopoverFormItem label="启用FP8缩放模式" prop="config.fp8_scaled" popover-content="fp8_scaled">
-			<el-switch v-model="ruleForm.config.fp8_scaled" />
+			<el-switch v-model="ruleForm.config.fp8_scaled" @change="onFP8ScaledChange" />
 		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
+import type { ElSwitch } from "element-plus";
+
+type ChangeCallback = InstanceType<typeof ElSwitch>["onChange"];
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
+
+// 监听fp8_base和fp8_scaled的变化，如果同时启用，则自动关闭另一个
+const onFP8BaseChange: ChangeCallback = (val) => {
+	if (val && ruleForm.value.config.fp8_scaled) {
+		ruleForm.value.config.fp8_scaled = false;
+	}
+};
+const onFP8ScaledChange: ChangeCallback = (val) => {
+	if (val && ruleForm.value.config.fp8_base) {
+		ruleForm.value.config.fp8_base = false;
+	}
+};
 </script>
 
 <style scoped></style>

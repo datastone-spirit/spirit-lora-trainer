@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 11:17:50
- * @LastEditTime: 2025-03-27 08:58:47
+ * @LastEditTime: 2025-03-27 17:43:58
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag\index.ts
@@ -316,7 +316,7 @@ function formatTagTaskData(res: ManualTagInfoResult): TagData {
 	return {
 		current,
 		total: total,
-		percentage: calculatePercentage(current, total)
+		progress: calculatePercentage(current, total)
 	};
 }
 

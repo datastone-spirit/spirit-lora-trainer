@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 14:52:03
- * @LastEditTime: 2025-03-27 16:03:17
+ * @LastEditTime: 2025-03-28 15:20:42
  * @LastEditors: mulingyuer
  * @Description: 系统监控：gpu、训练轮数
  * @FilePath: \frontend\src\components\Monitor\GPUMonitor\index.vue
@@ -56,9 +56,14 @@
 
 <script setup lang="ts">
 import { useGPU } from "@/hooks/useGPU";
+import { useTrainingStore } from "@/stores";
 
-const { monitorGPUData, isUseGpu } = useGPU();
+const trainingStore = useTrainingStore();
+const { monitorGPUData } = useGPU();
+/** gpu数据 */
 const gpuData = computed(() => monitorGPUData.value.data);
+/** 是否使用gpu */
+const isUseGpu = computed(() => trainingStore.useGPU);
 </script>
 
 <style lang="scss" scoped>

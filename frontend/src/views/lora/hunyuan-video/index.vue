@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-03-27 16:37:19
+ * @LastEditTime: 2025-03-28 10:35:09
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -65,7 +65,6 @@
 		</TwoSplit>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
-			training-type="hunyuan-video"
 			:reset-data="defaultForm"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"

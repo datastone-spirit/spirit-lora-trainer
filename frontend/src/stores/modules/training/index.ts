@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-03-27 16:42:35
+ * @LastEditTime: 2025-03-28 15:31:37
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -14,6 +14,7 @@ import type {
 	MonitorGPUData,
 	MonitorHYLoraData,
 	MonitorTagData,
+	MonitorWanLoraData,
 	TagData
 } from "./types";
 export type * from "./types";
@@ -22,8 +23,6 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听GPU相关数据 */
 	const monitorGPUData = ref<MonitorGPUData>({
 		isListen: false,
-		sleepTime: 15000,
-		isPolling: false,
 		data: {
 			gpuPower: 0,
 			gpuMemory: 0,
@@ -32,9 +31,6 @@ export const useTrainingStore = defineStore("training", () => {
 	});
 	function setGPUIsListen(val: boolean) {
 		monitorGPUData.value.isListen = val;
-	}
-	function setGPUIsPolling(val: boolean) {
-		monitorGPUData.value.isPolling = val;
 	}
 	function setGPUData(data: GPUData) {
 		monitorGPUData.value.data = data;
@@ -53,7 +49,7 @@ export const useTrainingStore = defineStore("training", () => {
 		data: {
 			current: 0,
 			total: 0,
-			percentage: 0
+			progress: 0
 		}
 	});
 	function setTagIsListen(val: boolean) {
@@ -66,7 +62,30 @@ export const useTrainingStore = defineStore("training", () => {
 		monitorTagData.value.data = {
 			current: 0,
 			total: 0,
-			percentage: 0
+			progress: 0
+		};
+	}
+
+	/** 监听wan lora训练 */
+	const monitorWanLoraData = ref<MonitorWanLoraData>({
+		isListen: false,
+		data: {
+			current: 0,
+			total: 0,
+			progress: 0
+		}
+	});
+	function setWanLoraIsListen(val: boolean) {
+		monitorWanLoraData.value.isListen = val;
+	}
+	function setWanLoraData(data: TagData) {
+		monitorWanLoraData.value.data = data;
+	}
+	function resetWanLoraData() {
+		monitorWanLoraData.value.data = {
+			current: 0,
+			total: 0,
+			progress: 0
 		};
 	}
 
@@ -75,7 +94,7 @@ export const useTrainingStore = defineStore("training", () => {
 		isListen: false,
 		taskId: "",
 		taskStatus: "none",
-		sleepTime: 15000,
+		sleepTime: 3000,
 		isPolling: false,
 		data: {
 			current: 0,
@@ -194,7 +213,6 @@ export const useTrainingStore = defineStore("training", () => {
 		setGPUIsListen,
 		setGPUData,
 		resetGPUData,
-		setGPUIsPolling,
 		monitorTagData,
 		setTagIsListen,
 		setTagData,
@@ -217,7 +235,11 @@ export const useTrainingStore = defineStore("training", () => {
 		resetHYLoraData,
 		useGPU,
 		currentTaskType,
-		setCurrentTaskType
+		setCurrentTaskType,
+		monitorWanLoraData,
+		setWanLoraIsListen,
+		setWanLoraData,
+		resetWanLoraData
 	};
 });
 

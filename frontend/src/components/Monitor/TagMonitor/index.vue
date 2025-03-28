@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2025-03-27 17:10:48
+ * @LastEditTime: 2025-03-27 17:43:50
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
@@ -17,7 +17,7 @@
 			<el-text class="tag-monitor-label"> 打标进度 </el-text>
 			<el-progress
 				class="tag-monitor-progress"
-				:percentage="tagData.percentage"
+				:percentage="tagData.progress"
 				:show-text="false"
 				:stroke-width="8"
 			></el-progress>

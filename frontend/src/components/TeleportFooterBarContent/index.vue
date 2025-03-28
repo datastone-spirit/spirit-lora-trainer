@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-03-27 17:06:32
+ * @LastEditTime: 2025-03-28 15:26:38
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -76,7 +76,7 @@ import { downloadTomlFile, readTomlFile, tomlParse, tomlStringify } from "@/util
 import { useGPU } from "@/hooks/useGPU";
 import { useTrainingStore } from "@/stores";
 import { useTag } from "@/hooks/useTag";
-import { getRunLoraTask } from "@/utils/lora.helper";
+import { getRunLoraTask, mergeTrainingFormData } from "@/utils/lora.helper";
 
 export interface ConfigProps {
 	/** 左按钮组teleport节点 */
@@ -91,8 +91,8 @@ export interface ConfigProps {
 	submitLoading?: boolean;
 	/** 重置用的原数据 */
 	resetData: Record<string, any>;
-	/** 当前训练任务类型 */
-	trainingType: LoRATaskType;
+	/** 导出的配置文件前缀 */
+	exportFileNamePrefix?: string;
 }
 
 const props = withDefaults(defineProps<ConfigProps>(), {
@@ -115,9 +115,14 @@ const mergeData = defineModel("mergeData", { type: Object, required: true });
 /** 训练的任务与页面不符的提示 */
 const taskMismatchWarning = ref("");
 
+const route = useRoute();
 const trainingStore = useTrainingStore();
-const { startGPUListen, stopGPUListen } = useGPU();
+const { startQueryGPUInfo, stopQueryGPUInfo } = useGPU();
 const { resumeQueryTagTask, pauseQueryTagTask } = useTag();
+
+/** 当前路由的训练类型 */
+const routeTrainingType = computed(() => route.meta.loRATaskType ?? "none");
+
 // 配置导入
 const uploadRef = ref<UploadInstance>();
 const uploadFileList = ref<UploadUserFile[]>([]);
@@ -142,15 +147,8 @@ const onUploadRequest: UploadProps["beforeUpload"] = async (file) => {
 // 合并数据
 function onMergeData(tomlObj: Record<string, any>) {
 	try {
-		const setKeys = new Set(Object.keys(tomlObj));
-		const dataKeys = Object.keys(mergeData.value);
-		// 求交集
-		const keys = dataKeys.filter((key) => setKeys.has(key));
-
 		// 合并数据
-		keys.forEach((key) => {
-			mergeData.value[key] = tomlObj[key];
-		});
+		mergeTrainingFormData(mergeData.value, tomlObj);
 
 		ElMessage.success("配置导入成功");
 	} catch (error) {
@@ -163,7 +161,12 @@ function onMergeData(tomlObj: Record<string, any>) {
 async function onExportConfig() {
 	try {
 		const tomlStr = tomlStringify(mergeData.value);
-		const fileNamePrefix = props.trainingType === "none" ? "" : props.trainingType;
+		let fileNamePrefix = "";
+		if (props.exportFileNamePrefix) {
+			fileNamePrefix = props.exportFileNamePrefix;
+		} else {
+			fileNamePrefix = routeTrainingType.value !== "none" ? routeTrainingType.value : "";
+		}
 		downloadTomlFile({ text: tomlStr, fileNamePrefix });
 	} catch (error) {
 		ElMessage.error(`配置导出发生错误：${(error as Error)?.message ?? "未知错误"}`);
@@ -198,10 +201,13 @@ function onStopTraining() {
 
 // 初始化
 (function init() {
-	if (props.trainingType && props.trainingType !== "none") {
+	if (routeTrainingType.value && routeTrainingType.value !== "none") {
 		taskMismatchWarning.value = ""; // 先重置警告信息
 		const currentRunTaskResult = getRunLoraTask(trainingStore);
-		if (currentRunTaskResult.type !== "none" && currentRunTaskResult.type !== props.trainingType) {
+		if (
+			currentRunTaskResult.type !== "none" &&
+			currentRunTaskResult.type !== routeTrainingType.value
+		) {
 			taskMismatchWarning.value = `请切换到 ${currentRunTaskResult.taskName} 训练页面查看训练进度`;
 		}
 	}
@@ -212,9 +218,9 @@ watch(
 	() => trainingStore.useGPU,
 	(newVal) => {
 		if (newVal) {
-			startGPUListen();
+			startQueryGPUInfo();
 		} else {
-			stopGPUListen();
+			stopQueryGPUInfo();
 		}
 	},
 	{ immediate: true }
@@ -228,7 +234,7 @@ onMounted(() => {
 onUnmounted(() => {
 	// 暂停打标查询任务
 	pauseQueryTagTask();
-	stopGPUListen();
+	stopQueryGPUInfo();
 });
 </script>
 

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-03-27 16:37:35
+ * @LastEditTime: 2025-03-28 16:26:57
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -42,7 +42,6 @@
 		</TwoSplit>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
-			training-type="wan-video"
 			:reset-data="defaultForm"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
@@ -56,24 +55,34 @@
 </template>
 
 <script setup lang="ts">
+import type { StartWanVideoTrainingData } from "@/api/lora";
+import { startWanVideoTraining } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import type { RuleForm } from "./types";
-import type { FormInstance, FormRules } from "element-plus";
-import { tomlStringify } from "@/utils/toml";
+import { useWanLora } from "@/hooks/useWanLora";
 import { useSettingsStore } from "@/stores";
-import BasicInfo from "./components/BasicInfo.vue";
-import TrainingData from "./components/TrainingData.vue";
-import AdvancedSettings from "./components/AdvancedSettings/index.vue";
-import { checkDirectory } from "@/utils/lora.helper";
 import { getEnv } from "@/utils/env";
-import WanDataSet from "./components/WanDataSet.vue";
+import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
+import { tomlStringify } from "@/utils/toml";
+import type { FormInstance, FormRules } from "element-plus";
+import AdvancedSettings from "./components/AdvancedSettings/index.vue";
+import BasicInfo from "./components/BasicInfo.vue";
 import SampleValidator from "./components/SampleValidator.vue";
-import { WanValidate } from "./wan.validate";
+import TrainingData from "./components/TrainingData.vue";
+import WanDataSet from "./components/WanDataSet.vue";
+import type { RuleForm } from "./types";
 import { WanHelper } from "./wan.helper";
-import { startWanVideoTraining, type StartWanVideoTrainingData } from "@/api/lora";
+import { WanValidate } from "./wan.validate";
 
 const settingsStore = useSettingsStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
+const {
+	startQueryWanTask,
+	pauseQueryWanTask,
+	resumeQueryWanTask,
+	stopQueryWanTask,
+	monitorWanLoraData,
+	queryWanTaskInfo
+} = useWanLora();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -98,7 +107,7 @@ const defaultForm: RuleForm = {
 		mixed_precision: "bf16",
 		persistent_data_loader_workers: false,
 		max_data_loader_n_workers: 8,
-		optimizer_type: "",
+		optimizer_type: "adamw8bit",
 		optimizer_args: "",
 		learning_rate: "2e-06",
 		lr_decay_steps: 0,
@@ -244,12 +253,43 @@ const rules = reactive<FormRules<RuleForm>>({
 			},
 			trigger: "change"
 		}
+	],
+	"dataset.general.batch_size": [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				if (isWhiteCheck && value !== 1) {
+					return callback(new Error("批量大小必须为1"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.fp8_base": [
+		{
+			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (isWhiteCheck && !value) {
+					return callback(new Error("fp8_base必须开启"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.optimizer_type": [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (isWhiteCheck && value !== "adamw8bit") {
+					return callback(new Error("优化器类型必须为adamw8bit"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
 	]
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-/** 是否已经恢复训练配置 */
-const isRestored = ref(false);
 /** wan帮助类 */
 const wanHelper = new WanHelper();
 
@@ -291,21 +331,35 @@ async function onSubmit() {
 		// 开始训练
 		const data: StartWanVideoTrainingData = wanHelper.formatData(ruleForm.value);
 		const { task_id } = await startWanVideoTraining(data);
-		console.log("🚀 ~ onSubmit ~ task_id:", task_id);
-		// // 监听训练数据
-		// startFluxLoraListen(task_id);
+		// 监听训练数据
+		startQueryWanTask(task_id);
 
 		submitLoading.value = false;
-		// isRestored.value = true;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
-		// stopFluxLoraListen(true);
+		stopQueryWanTask();
+
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
 }
+
+// 组件生命周期
+onMounted(() => {
+	resumeQueryWanTask();
+	// 恢复表单数据
+	recoveryTaskFormData({
+		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
+		isListen: monitorWanLoraData.value.isListen,
+		taskId: queryWanTaskInfo.value.taskId,
+		formData: ruleForm.value
+	});
+});
+onUnmounted(() => {
+	pauseQueryWanTask();
+});
 </script>
 
 <style lang="scss" scoped>

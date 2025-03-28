@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-03-21 09:11:51
+ * @LastEditTime: 2025-03-28 15:34:49
  * @LastEditors: mulingyuer
  * @Description: 页脚按钮组
  * @FilePath: \frontend\src\components\FooterButtonGroup\FooterButtonGroup.vue
@@ -111,7 +111,7 @@ const emits = defineEmits<{
 }>();
 
 const trainingStore = useTrainingStore();
-const { startGPUListen, stopGPUListen } = useGPU();
+const { startQueryGPUInfo, pauseQueryGPUInfo } = useGPU();
 const { monitorTagData, resumeQueryTagTask, pauseQueryTagTask } = useTag();
 const { monitorFluxLoraData, startFluxLoraListen, stopFluxLoraListen, isFluxLoraTaskEnd } =
 	useFluxLora();
@@ -174,9 +174,9 @@ watch(
 	() => trainingStore.useGPU,
 	(newVal) => {
 		if (newVal) {
-			startGPUListen();
+			startQueryGPUInfo();
 		} else {
-			stopGPUListen();
+			pauseQueryGPUInfo();
 		}
 	},
 	{ immediate: true }
@@ -196,7 +196,7 @@ onMounted(() => {
 onUnmounted(() => {
 	// 暂停打标查询任务
 	pauseQueryTagTask();
-	stopGPUListen();
+	pauseQueryGPUInfo();
 	stopFluxLoraListen();
 	stopHYLoraListen();
 });

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2025-03-27 16:14:16
+ * @LastEditTime: 2025-03-28 10:18:03
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
@@ -33,7 +33,8 @@ export default {
 			name: "LoRA-Flux",
 			component: () => import("@/views/lora/flux/index.vue"),
 			meta: {
-				title: "Flux"
+				title: "Flux",
+				loRATaskType: "flux"
 			}
 		},
 		{
@@ -41,7 +42,8 @@ export default {
 			name: "LoRA-HunyuanVideo",
 			component: () => import("@/views/lora/hunyuan-video/index.vue"),
 			meta: {
-				title: "混元视频"
+				title: "混元视频",
+				loRATaskType: "hunyuan-video"
 			}
 		},
 		{
@@ -49,7 +51,8 @@ export default {
 			name: "LoRA-WanVideo",
 			component: () => import("@/views/lora/wan-video/index.vue"),
 			meta: {
-				title: "Wan2.1"
+				title: "Wan2.1",
+				loRATaskType: "wan-video"
 			}
 		}
 	]

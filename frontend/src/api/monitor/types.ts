@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-02-18 10:41:04
+ * @LastEditTime: 2025-03-28 11:25:18
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -176,4 +176,42 @@ export interface HyVideoTrainingInfoResult {
 		| string;
 	/** 训练器的训练配置 */
 	frontend_config: string;
+}
+
+/** 监听wan视频训练信息参数 */
+export interface WanVideoTrainingInfoParams {
+	/** 任务id */
+	task_id: string;
+}
+
+/** 监听wan视频训练信息结果 */
+export interface WanVideoTrainingInfoResult {
+	/** 任务 ID */
+	id: string;
+	/** 任务状态 */
+	status: TaskStatus;
+	/** 任务类型 */
+	task_type: TaskType.CAPTIONING;
+	/** 打标输出目录 */
+	output_dir: string;
+	/** 开始时间 */
+	start_time: number;
+	/** 结束时间 */
+	end_time: number | null;
+	/** 图片素材数组 */
+	image_paths: string[];
+	/** 详情 */
+	detail: {
+		/** 打标结果 */
+		captions: Array<{
+			image: string;
+			caption: string;
+			path: string;
+			success: boolean;
+		}>;
+		/** 总文件数量 */
+		total: number;
+		/** 当前进度??? */
+		current: number;
+	};
 }

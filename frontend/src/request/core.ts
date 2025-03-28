@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-25 16:18:26
- * @LastEditTime: 2025-03-11 09:33:22
+ * @LastEditTime: 2025-03-28 10:03:58
  * @LastEditors: mulingyuer
  * @Description: 请求核心
  * @FilePath: \frontend\src\request\core.ts
@@ -19,7 +19,8 @@ import {
 const isDev = import.meta.env.MODE === "development";
 
 const instance = axios.create({
-	baseURL: isDev ? "/api" : import.meta.env.VITE_APP_API_BASE_URL,
+	// baseURL: isDev ? "/api" : import.meta.env.VITE_APP_API_BASE_URL,
+	baseURL: import.meta.env.VITE_APP_API_BASE_URL,
 	enableRetry: true,
 	showErrorMessage: true,
 	// showCancelErrorMessage: true, // 这里配置无效，索性注释了

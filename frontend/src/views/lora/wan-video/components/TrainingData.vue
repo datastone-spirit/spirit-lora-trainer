@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 14:42:11
- * @LastEditTime: 2025-03-26 17:01:59
+ * @LastEditTime: 2025-03-28 16:07:09
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
- * @FilePath: \frontend\src\views\lora\wan\components\TrainingData.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\TrainingData.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -43,7 +43,7 @@
 					v-model.number="ruleForm.dataset.general.batch_size"
 					:step="1"
 					step-strictly
-					:min="0"
+					:min="1"
 				/>
 			</PopoverFormItem>
 		</el-col>

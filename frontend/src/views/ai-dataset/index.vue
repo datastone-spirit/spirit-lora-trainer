@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-03-21 09:40:30
+ * @LastEditTime: 2025-03-28 15:37:19
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -117,7 +117,7 @@ const {
 	pauseQueryTagTask,
 	resumeQueryTagTask
 } = useTag();
-const { startGPUListen, stopGPUListen } = useGPU();
+const { startQueryGPUInfo, pauseQueryGPUInfo } = useGPU();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
@@ -202,9 +202,9 @@ watch(
 	() => trainingStore.useGPU,
 	(newVal) => {
 		if (newVal) {
-			startGPUListen();
+			startQueryGPUInfo();
 		} else {
-			stopGPUListen();
+			pauseQueryGPUInfo();
 		}
 	},
 	{ immediate: true }
@@ -217,7 +217,7 @@ onMounted(() => {
 onUnmounted(() => {
 	// 组件销毁时，停止监听
 	pauseQueryTagTask();
-	stopGPUListen();
+	pauseQueryGPUInfo();
 });
 </script>
 

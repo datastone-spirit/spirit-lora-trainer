@@ -283,8 +283,13 @@ class WanTrainingConfig:
                 raise ValueError(f"clip path does not exist: {config.clip}")
         
         if is_blank(config.dit):
-            config.dit = path.join(getprojectpath(), "models", 
-                                   "wan", "wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors")
+            if is_i2v(config.task):
+                config.dit = path.join(getprojectpath(), "models", 
+                                       "wan", "wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors")
+            else:
+                config.dit = path.join(getprojectpath(), "models", 
+                                   "wan", "wan2.1_t2v_14B_fp8_e4m3fn.safetensors")
+
         if not path.exists(config.dit):
             logger.warning(f"dit path does not exist: {config.dit}")
             raise ValueError(f"dit path does not exist: {config.dit}")

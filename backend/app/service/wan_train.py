@@ -25,8 +25,8 @@ class WanTrainingService():
     def start_train(self, parameter: WanTrainingParameter) -> Task:
         taskid = uuid.uuid4().hex
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        parameter.config.log_dir = os.path.join(getprojectpath(), "logs", f"wan-{taskid}-{timestamp}")
-        os.makedirs(parameter.config.log_dir, exist_ok=True)
+        parameter.config.logging_dir = os.path.join(getprojectpath(), "logs", f"wan-{taskid}-{timestamp}")
+        os.makedirs(parameter.config.logging_dir, exist_ok=True)
         return self.run_train(parameter, task_id=taskid, module_path=self.module_path)
 
 

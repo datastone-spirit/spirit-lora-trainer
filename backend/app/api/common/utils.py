@@ -394,3 +394,28 @@ def write_caption_file(image_path: str, output_dir: str, caption_text: str, clas
         txt_file.write(caption_text)    
     return True, cap_file_path
 
+def get_dataset_contents(dataset_dir: str):
+    """
+    Get the contents of the image file.
+    """
+    extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".tif", ".gif"}
+    for filename in os.listdir(dataset_dir):
+        file_path = os.path.join(dataset_dir, filename)
+        if not os.path.isfile(file_path) or not os.path.splitext(filename)[1].lower() in extensions:
+            continue
+
+        # Get the base filename without extension
+        base_name = os.path.splitext(filename)[0]
+
+        # Construct full image path
+        txt_path = os.path.join(dataset_dir, f"{base_name}.txt")
+        caption = ""
+        if not os.path.exists(txt_path):
+            continue
+        try:
+            with open(txt_path, 'r', encoding='utf-8') as txt_file:
+                caption = txt_file.read().strip()
+        except Exception as e:
+                logger.warning(f"Error reading caption from {txt_path}", exc_info=e)
+        yield file_path, caption
+

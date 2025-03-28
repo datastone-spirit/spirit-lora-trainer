@@ -3,6 +3,7 @@ import logging
 import os
 import mimetypes
 import sys
+import re
 from typing import Tuple
 
 # Register common image MIME types
@@ -103,3 +104,69 @@ def get_image_mime_type(file_path: str) -> str:
         else:
             mime_type = "application/octet-stream"
     return mime_type
+
+def parse_kohya_stdout(stdout, detail: dict) -> None:
+    """_summary_
+
+    Args:
+        stdout (_type_): _description_
+
+need to parse the following information, include number of train images, number of reg images, number of batches per epoch, number of epochs, batch size per device, gradient accumulation steps, total optimization steps
+running training / 学習開始
+num train images * repeats / 学習画像の数×繰り返し回数: 10
+num reg images / 正則化画像の数: 0
+num batches per epoch / 1epochのバッチ数: 10
+num epochs / epoch数: 10
+batch size per device / バッチサイズ: 1
+gradient accumulation steps / 勾配を合計するステップ数 = 1
+total optimization steps / 学習ステップ数: 100
+    """
+    pattern = {
+         "num_train_images": r"num train images \* repeats .*?: (\d+)",
+         "num_reg_images": r"num reg images .*?: (\d+)",
+         "num_batches_per_epoch": r"num batches per epoch .*?: (\d+)",
+         "num_epochs": r"num epochs .*?: (\d+)",
+         "batch_size_per_device": r"batch size per device .*?: (\d+)",
+         "gradient_accumulation_steps": r"gradient accumulation steps .*?=? (\d+)",
+         "total_optimization_steps": r"total optimization steps .*?: (\d+)"
+     }
+     
+    for key, regex in pattern.items():
+        match = re.search(regex, stdout)
+        if match:
+            detail[key] = int(match.group(1))
+
+def parse_kohya_progress_line(line: str, detail: dict):
+     """Parse elements from progress bar output
+     Examples:
+        >>> parse_progress_line("steps: 100%|██████████| 40/40 [00:42<00:00,  1.07s/it, avr_loss=0.145]")
+        {
+            'progress': 100,
+            'current': 40,
+            'total': 40,
+            'elapsed': '00:42',
+            'remaining': '00:00',
+            'speed': 1.07,
+            'loss': 0.145
+        }
+    """
+     if not ('|' in line and '%' in line and 'steps' in line and '/' in line ):
+          return
+            
+     patterns = {
+          'steps': r'\|?\s*(\d+)/(\d+)',
+          'time': r'\[(.*?)(?=<)<(.*?)(?=,)',  # Using lookahead to exclude < and ,
+          'speed': r'([\d.]+)s/it',
+          'loss': r'avr_loss=([\d.]+)'
+     }
+        
+     for key, pattern in patterns.items():
+          match = re.search(pattern, line)
+          if match:
+               if key == 'steps' and detail.get('total') is None:
+                   detail['total'] = int(match.group(2))
+               elif key == 'time':
+                   detail['elapsed'] = match.group(1)
+                   detail['remaining'] = match.group(2)
+               elif key == 'speed':
+                   detail[key] = float(match.group(1))

@@ -5,13 +5,14 @@ from app.api.model.training_paramter import TrainingParameter
 from app.api.model.wan_paramter import WanTrainingParameter, is_i2v
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
-from app.api.common.utils import is_flux_sampling, dataset2toml
+from app.api.common.utils import is_flux_sampling, dataset2toml, get_dataset_contents
 from subprocess import Popen, TimeoutExpired, PIPE, STDOUT
+from utils.util import parse_kohya_stdout, parse_kohya_progress_line
 import uuid
-import re
 from tbparse import SummaryReader
 import time
 import os
+import tempfile
 
 
 from utils.util import setup_logging
@@ -224,71 +225,11 @@ class TrainingTask(Task):
         return d
 
     def parse_stdout(self, stdout):
-        """_summary_
-
-        Args:
-            stdout (_type_): _description_
-
-need to parse the following information, include number of train images, number of reg images, number of batches per epoch, number of epochs, batch size per device, gradient accumulation steps, total optimization steps
-running training / 学習開始
-num train images * repeats / 学習画像の数×繰り返し回数: 10
-num reg images / 正則化画像の数: 0
-num batches per epoch / 1epochのバッチ数: 10
-num epochs / epoch数: 10
-batch size per device / バッチサイズ: 1
-gradient accumulation steps / 勾配を合計するステップ数 = 1
-total optimization steps / 学習ステップ数: 100
-        """
-        pattern = {
-             "num_train_images": r"num train images \* repeats .*?: (\d+)",
-             "num_reg_images": r"num reg images .*?: (\d+)",
-             "num_batches_per_epoch": r"num batches per epoch .*?: (\d+)",
-             "num_epochs": r"num epochs .*?: (\d+)",
-             "batch_size_per_device": r"batch size per device .*?: (\d+)",
-             "gradient_accumulation_steps": r"gradient accumulation steps .*?=? (\d+)",
-             "total_optimization_steps": r"total optimization steps .*?: (\d+)"
-         }
-         
-        for key, regex in pattern.items():
-            match = re.search(regex, stdout)
-            if match:
-                self.detail[key] = int(match.group(1))
+        parse_kohya_stdout(stdout, self.detail)
 
     def parse_progress_line(self, line):
-        """Parse elements from progress bar output
-        
-        Examples:
-            >>> parse_progress_line("steps: 100%|██████████| 40/40 [00:42<00:00,  1.07s/it, avr_loss=0.145]")
-            {
-                'progress': 100,
-                'current': 40,
-                'total': 40,
-                'elapsed': '00:42',
-                'remaining': '00:00',
-                'speed': 1.07,
-                'loss': 0.145
-            }
-        """
-        if not ('|' in line and '%' in line and 'steps' in line and '/' in line ):
-            return
-            
-        patterns = {
-            'steps': r'\|?\s*(\d+)/(\d+)',
-            'time': r'\[(.*?)(?=<)<(.*?)(?=,)',  # Using lookahead to exclude < and ,
-            'speed': r'([\d.]+)s/it',
-            'loss': r'avr_loss=([\d.]+)'
-        }
-        
-        for key, pattern in patterns.items():
-            match = re.search(pattern, line)
-            if match:
-                if key == 'steps' and self.detail.get('total') is None:
-                    self.detail['total'] = int(match.group(2))
-                elif key == 'time':
-                    self.detail['elapsed'] = match.group(1)
-                    self.detail['remaining'] = match.group(2)
-                elif key == 'speed':
-                    self.detail[key] = float(match.group(1))
+        parse_kohya_progress_line(line, self.detail)
+
 
     def update_detail_with_tb(self):
         import os
@@ -459,6 +400,7 @@ class WanTrainingTask(Task):
         self.wan_parameter = parameter
         self.is_sampling = is_sampling
         self.task_chain = TaskChian(self, [
+            WanPrepareJsonlFileSubTask(module_path),
             WanCacheLatentSubTask(module_path), 
             WanTextEncoderOutputCacheSubTask(module_path), 
             WanTrainingSubTask(module_path)])
@@ -469,10 +411,21 @@ class WanTrainingTask(Task):
         return
     
     def to_dict(self, verbose: bool = False, show_config: bool = False):
-        pass
+        """Override to_dict to enum """
+        # Create shallow copy of self.__dict__
+        d = dict(self.__dict__)
+        # Convert status enum
+        d['status'] = self.status.value
+        # Convert task_type enum 
+        d['task_type'] = self.task_type.value
+        d.pop('wan_parameter') 
+        d.pop('task_chain')
+        if show_config is True and self.wan_parameter:
+            d['frontend_config'] = self.wan_parameter.frontend_config
+        return d
 
     def update_detail_with_tb(self):
-        logdir = self.wan_parameter.config.log_dir
+        logdir = self.wan_parameter.config.logging_dir
         reader = SummaryReader(logdir)
         df=reader.scalars
         current_step = max(df.get('step', [0]))
@@ -487,21 +440,13 @@ class WanTrainingTask(Task):
                 return 0
 
         self.detail['current'] = current_step
-        self.detail['loss'] = get_value(step=current_step, tag="train/loss")
+        self.detail['loss'] = get_value(step=current_step, tag="loss/current")
         self.detail['elapsed'] = time.time() - self.start_time
-        self.detail['total_epoch'] = self.wan_parameter.config.epochs
-        epoch_seq = df.query('tag=="train/epoch_loss"').get('step', None)
-        if epoch_seq is None or len(epoch_seq) == 0:
-            return
-        current_epoch = max(epoch_seq.values)
-        self.detail['current_epoch'] = int(current_epoch)
-        if current_epoch == 1:
-            self.detail['estimate_steps_per_epoch'] = current_step
-        self.detail['epoch_loss']=get_value(step=current_epoch, tag="train/epoch_loss")
-        self.detail['lr_unet'] = get_value(step=current_step, tag="train/lr/unet")
-        self.detail['lr_text_encoder'] = get_value(step=current_step, tag="train/lr/text_encoder")
-        self.detail['lr_unet'] = get_value(step=current_step, tag="train/lr/unet")
-        self.detail['lr_text_encoder'] = get_value(step=current_step, tag="train/lr/text_encoder")  
+        self.detail['total_epoch'] = self.wan_parameter.config.max_train_epochs
+        self.detail['current_loss'] = get_value(step=current_step, tag="loss/current")
+        self.detail['average_loss'] = get_value(step=current_step, tag="loss/average")
+        self.detail['lr_unet'] = get_value(step=current_step, tag="lr/unet")
+        self.detail['lr_group0'] = get_value(step=current_step, tag="lr/group0")
         return
 
     
@@ -536,7 +481,7 @@ class SubTask:
         self.customize_env["NCCL_IB_DISABLE"]="1"        
         self.customize_env["PATHONPATH"]=self.module_path
     
-    def wait(self, proc: Popen):
+    def wait(self, proc: Popen, task: WanTrainingTask = None):
         try:
             logger.info("beginning to run proc communication with task training process")
             stdout_lines = []
@@ -551,6 +496,9 @@ class SubTask:
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
                     stdout_lines.append(linestr)
+                    if task is not None:
+                        parse_kohya_progress_line(linestr, task.detail)
+                        parse_kohya_stdout(linestr, task.detail)
                     line = bytearray()  #
             stdout, stderr = proc.communicate()
         except TimeoutExpired as exc:
@@ -568,6 +516,34 @@ class SubTask:
 
         logger.info(f"training subprocess {self.__class__.__name__} run complete successfully, retcode is {retcode}")
         return          
+    
+class WanPrepareJsonlFileSubTask(SubTask):
+    def __init__(self, module_path: str):
+        super().__init__(module_path)
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        import json
+        logger.info("beginning to run prepare wan jsonl file sub task")
+        for i in range(len(task.wan_parameter.dataset.datasets)):
+            ds = task.wan_parameter.dataset.datasets[i]
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
+            temp_file_path = temp_file.name
+            logger.info(f"jsonl file path is {temp_file_path}")
+            # Write the dictionary to the temporary file in TOML format
+            with open(temp_file_path, 'w+', encoding='utf-8') as f:
+                for image_path, caption in get_dataset_contents(ds.image_directory):
+                    entry = {
+                        "image_path": image_path,
+                        "caption": caption,
+                        "init_frame_weight": 0.8
+                    }
+                    f.write(json.dumps(entry, ensure_ascii=False))
+                    f.write("\n")
+            # Close the temporary file  
+            temp_file.close()
+            # Update the dataset with the temporary file path
+            task.wan_parameter.dataset.datasets[i].image_jsonl_file = temp_file_path
+        return task_chain.excute()
 
 class WanCacheLatentSubTask(SubTask):
 
@@ -630,5 +606,5 @@ class WanTrainingSubTask(SubTask):
             "--config", dataset2toml(task.wan_parameter.config),
             "--dataset_config", dataset2toml(task.wan_parameter.dataset),
         ]
-        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env))
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
         return task_chain.excute()

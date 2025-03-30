@@ -521,28 +521,58 @@ class WanPrepareJsonlFileSubTask(SubTask):
     def __init__(self, module_path: str):
         super().__init__(module_path)
     
-    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+    def _gen_jsonl_file(self, data_dir: str, is_video: bool = False):
         import json
-        logger.info("beginning to run prepare wan jsonl file sub task")
-        for i in range(len(task.wan_parameter.dataset.datasets)):
-            ds = task.wan_parameter.dataset.datasets[i]
-            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
-            temp_file_path = temp_file.name
-            logger.info(f"jsonl file path is {temp_file_path}")
-            # Write the dictionary to the temporary file in TOML format
-            with open(temp_file_path, 'w+', encoding='utf-8') as f:
-                for image_path, caption in get_dataset_contents(ds.image_directory):
+        json_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl")
+        exts = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".tif", ".gif"]
+        if is_video:
+            exts = [".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv"]
+
+        with open(json_file.name, 'w+', encoding='utf-8') as f:
+            for path, caption, _ in get_dataset_contents(data_dir, exts):
+                if is_video:
                     entry = {
-                        "image_path": image_path,
+                        "video_path": path,
+                        "caption": caption,
+                    }
+                else:
+                    entry = {
+                        "image_path": path,
                         "caption": caption,
                         "init_frame_weight": 0.8
                     }
-                    f.write(json.dumps(entry, ensure_ascii=False))
-                    f.write("\n")
-            # Close the temporary file  
-            temp_file.close()
-            # Update the dataset with the temporary file path
-            task.wan_parameter.dataset.datasets[i].image_jsonl_file = temp_file_path
+                f.write(json.dumps(entry, ensure_ascii=False))
+                f.write("\n")
+        return json_file.name 
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        logger.info("beginning to run prepare wan jsonl file sub task")
+        for i in range(len(task.wan_parameter.dataset.datasets)):
+            ds = task.wan_parameter.dataset.datasets[i] 
+            video_data = True
+            if ds.video_directory and os.path.exists(ds.video_directory):
+                task.wan_parameter.dataset.datasets[i].video_jsonl_file = self._gen_jsonl_file(ds.video_directory, is_video=True)
+            elif ds.image_directory and os.path.exists(ds.image_directory):
+                video_data = False
+                task.wan_parameter.dataset.datasets[i].image_jsonl_file= self._gen_jsonl_file(ds.image_directory)
+            else:
+                logger.warning(f"dataset {i} video_directory {ds.video_directory} and image_directory {ds.image_directory} are both not exists")
+                raise Exception(f"dataset {i} video_directory {ds.video_directory} and image_directory {ds.image_directory} are both not exists")
+
+            if video_data and os.path.getsize(task.wan_parameter.dataset.datasets[i].video_jsonl_file) == 0:
+                logger.warning(f"dataset {i} video jsonl exists but empty, "
+                               f"there are no valid data file in the directory {ds.video_directory} ")
+                raise Exception(f"dataset {i} video jsonl file are both empty,"
+                                f" there are no valid data files in the directory {ds.video_directory}")
+
+            if not video_data and os.path.getsize(task.wan_parameter.dataset.datasets[i].image_jsonl_file) == 0:
+                logger.warning(f"dataset {i} image jsonl file is empty, "
+                               f"there is no valid data file in the directory {ds.image_directory} ")
+                raise Exception(f"dataset {i} image jsonl file is empty,"
+                               f"there is no valid data file in the directory {ds.image_directory} ")
+
+            logger.info(f"Dataset {i}: video_jsonl_file={task.wan_parameter.dataset.datasets[i].video_jsonl_file}, "
+                        f"image_jsonl_file={task.wan_parameter.dataset.datasets[i].image_jsonl_file}")
         return task_chain.excute()
 
 class WanCacheLatentSubTask(SubTask):

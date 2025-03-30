@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Tuple, List 
 from utils.util import getprojectpath
 from os import path
+from enum import Enum
 import dacite
 import os
 
@@ -15,6 +16,19 @@ WanTaskMap = {
     't2v-14B': False, # is i2v ?
     'i2v-14B': True, # 
 }
+
+# enumerate(FRAM_EXTRACTION_METHODS := ["head", "chunk", "slide", "uniform", "full"])
+
+class FrameExtractionMethod(str, Enum):
+    HEAD = "head"
+    CHUNK = "chunk"
+    SLIDE = "slide" 
+    UNIFORM = "uniform"
+    FULL = "full"
+
+    @classmethod
+    def values(cls) -> List[str]:
+        return [member.value for member in cls]
 
 def is_wan_task(task: str) -> bool:
     """
@@ -73,7 +87,7 @@ class DatasetConfig:
     video_directory: Optional[str] = None
     video_jsonl_file: Optional[str] = None
     target_frames: Optional[List[int]] = None  # e.g. [1, 25, 79]
-    frame_extraction: Optional[str] = None  # options: "head", "chunk", "slide", "uniform"
+    frame_extraction: Optional[FrameExtractionMethod] = None  # options: "head", "chunk", "slide", "uniform", full
     frame_stride: Optional[int] = None         # applicable for "slide"
     frame_sample: Optional[int] = None         # applicable for "uniform"
     max_frames: Optional[int] = None         # applicable for "full"
@@ -84,30 +98,39 @@ class DatasetConfig:
         Validate the DatasetConfig instance.
         """
 
-        if is_blank(config.image_directory) or not path.exists(config.image_directory):
-            logger.warning("Image_directory can't be empty or not exist.")
-            raise ValueError("Image directory can't be empty or not exist.")
+        # C heck if both directories are None or don't exist
+        has_image_dir = config.image_directory is not None and path.exists(config.image_directory)
+        has_video_dir = config.video_directory is not None and path.exists(config.video_directory)
+    
+        if not has_image_dir and not has_video_dir:
+            logger.warning("Image_directory or video_directory can't be both empty or not exist.")
+            raise ValueError("Image directory or video_directory can't be both empty or not exist")
 
-        if not is_blank(config.video_directory):
-            logger.warning("For now, we don't support training WAN for video dataset")
-            config.video_directory = None
+        if config.frame_extraction and not isinstance(config.frame_extraction, FrameExtractionMethod):
+            try:
+                config.frame_extraction = FrameExtractionMethod(config.frame_extraction)
+            except ValueError:
+                raise ValueError(f"Invalid frame extraction method: {config.frame_extraction}. Valid values are: {FrameExtractionMethod.values()}")
 
+        if config.frame_extraction and config.frame_extraction != FrameExtractionMethod.FULL:
+            if config.target_frames is None:
+                raise ValueError("target_frames must be specified when using 'head, chunk, slide, uniform' frame extraction method.")
+            if config.frame_extraction == FrameExtractionMethod.SLIDE and config.frame_stride is None:
+                raise ValueError("frame_stride must be specified when using 'slide' frame extraction method.")
+
+        if config.frame_extraction and not config.max_frames:
+            logger.warning("max_frames is not specified, using default value of 129.")
+            config.max_frames = 129
+
+        config.image_jsonl_file = None
         config.video_jsonl_file = None
-        config.target_frames = None
-        config.frame_extraction = None
-        config.frame_stride = None
-        config.frame_sample = None
-        config.max_frames = None
-
-        if not is_blank(config.video_jsonl_file):
-            logger.warning("For now, we don't support image_jsonl_file")
-            config.image_jsonl_file = None
         
-        if not is_blank(config.cache_directory) and not path.exists(config.cache_directory):
-            logger.warning("if specified cache_directory, it must a valid directory")
-            raise ValueError("If specified cache_directory, it must a valid directory")
         
-        config.cache_directory = path.join(config.image_directory, f"{task}-cache") 
+        if has_image_dir:
+            config.cache_directory = path.join(config.image_directory, f"{task}-cache") 
+        if has_video_dir:
+            config.cache_directory = path.join(config.video_directory, f"{task}-cache") 
+            
         os.makedirs(config.cache_directory, exist_ok=True)
         return config
 
@@ -372,7 +395,12 @@ class WanTrainingParameter:
     def from_dict(cls, dikt) -> 'WanTrainingParameter':
         try: 
             return dacite.from_dict(data_class=WanTrainingParameter, data=dikt,
-                                    config=dacite.Config(type_hooks={Tuple[int, int]: lambda x: tuple(x)}))
+                                    config=dacite.Config(
+                                        type_hooks={
+                                            Tuple[int, int]: lambda x: tuple(x), 
+                                            FrameExtractionMethod: lambda x: FrameExtractionMethod(x) if x else None
+                                            }
+                                        ))
         except Exception as e:
             logger.warning(f"WanTrainingParameter.from_dict failed, error: ", exc_info=e)
             raise ValueError(f"WanTrainingParameter.from_dict failed, error: {str(e)}")

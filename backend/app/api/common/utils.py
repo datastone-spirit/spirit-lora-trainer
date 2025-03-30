@@ -4,6 +4,7 @@ from dataclasses import asdict, fields
 from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset
 from typing import List, Tuple, Any
 from utils.util import getmodelpath, getprojectpath
+from enum import Enum
 import tempfile
 import toml
 import mimetypes
@@ -347,12 +348,23 @@ def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
     return validated, reason
 
 
+def convert_enum_to_dict(obj):
+    """Helper function to convert Enum values to strings during dict conversion"""
+    if isinstance(obj, Enum):
+        return obj.value
+    elif isinstance(obj, dict):
+        return {k: convert_enum_to_dict(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_enum_to_dict(x) for x in obj]
+    return obj
+
 def config2toml(config: TrainingConfig, dataset_path: str) -> str:
     config.dataset_config = dataset_path
     # whole number write to toml file will parse as integer which could cause the sd-script thrown exception
     # force whole number convert to float, e.g. 1 -> 1.0
     force_float_fields(config)
-    configdikt = asdict(config)
+    configdikt = asdict(config, 
+                        dict_factory=lambda x: {k: convert_enum_to_dict(v) for k, v in x})
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
     temp_file_path = temp_file.name
@@ -394,19 +406,18 @@ def write_caption_file(image_path: str, output_dir: str, caption_text: str, clas
         txt_file.write(caption_text)    
     return True, cap_file_path
 
-def get_dataset_contents(dataset_dir: str):
+def get_dataset_contents(dataset_dir: str, extensions: List[str]):
     """
     Get the contents of the image file.
     """
-    extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".tif", ".gif"}
     for filename in os.listdir(dataset_dir):
         file_path = os.path.join(dataset_dir, filename)
-        if not os.path.isfile(file_path) or not os.path.splitext(filename)[1].lower() in extensions:
+        ext = os.path.splitext(filename)[1].lower() 
+        if not os.path.isfile(file_path) or not ext in extensions:
             continue
 
         # Get the base filename without extension
         base_name = os.path.splitext(filename)[0]
-
         # Construct full image path
         txt_path = os.path.join(dataset_dir, f"{base_name}.txt")
         caption = ""
@@ -417,5 +428,5 @@ def get_dataset_contents(dataset_dir: str):
                 caption = txt_file.read().strip()
         except Exception as e:
                 logger.warning(f"Error reading caption from {txt_path}", exc_info=e)
-        yield file_path, caption
+        yield file_path, caption, ext
 

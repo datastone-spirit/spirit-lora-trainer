@@ -289,6 +289,9 @@ class Image(Resource):
         compress = request.args.get("compress", "true").lower() == "true"
         if not compress:
             try:
+                # For videos, implement partial content support for streaming
+                if is_video:
+                    return self.stream_video(full_path, mime_type)
                 return send_file(full_path, mimetype=mime_type)  # 根据实际类型修改 mimetype
             except Exception as e:
                 return {"success": False, "message": f"无法返回图片: {str(e)}"}, 500
@@ -357,4 +360,106 @@ class Image(Resource):
             logger.warning(f"Failed to generate video thumbnail: {video_path}", exc_info=e)
             return None
 
+    def stream_video(self, video_path: str, mime_type: str):
+        """
+        Stream video file with support for range requests
+        """
+        import re
+        from flask import Response, stream_with_context
 
+        file_size = os.path.getsize(video_path)
+        range_header = request.headers.get('Range', None)
+
+        # Increased chunk size to 2MB for better streaming
+        chunk_size = 2 * 1024 * 1024
+
+        if range_header:
+            byte1, byte2 = 0, None
+            match = re.search(r'bytes=(\d+)-(\d*)', range_header)
+            if match:
+                groups = match.groups()
+                if groups[0]:
+                    byte1 = int(groups[0])
+                if groups[1] and groups[1].isdigit():
+                    byte2 = int(groups[1])
+                else:
+                    byte2 = file_size - 1
+            else:
+                byte1 = 0
+                byte2 = file_size - 1
+
+            length = byte2 - byte1 + 1
+
+            def generate():
+                try:
+                    with open(video_path, 'rb') as f:
+                        f.seek(byte1)
+                        remaining = length
+                        while remaining > 0:
+                            chunk = min(chunk_size, remaining)
+                            data = f.read(chunk)
+                            if not data:
+                                break
+                            remaining -= len(data)
+                            yield data
+                except Exception as e:
+                    logger.error(f"Error streaming video {video_path}: {str(e)}")
+                    return
+
+            headers = {
+                'Content-Type': mime_type,
+                'Accept-Ranges': 'bytes',
+                'Content-Range': f'bytes {byte1}-{byte2}/{file_size}',
+                'Content-Length': str(length),
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS, HEAD',
+                'Access-Control-Allow-Headers': 'Range, Accept-Ranges, Content-Range',
+                'Access-Control-Expose-Headers': 'Accept-Ranges, Content-Range, Content-Length',
+                'Cache-Control': 'no-cache, must-revalidate',
+                'Pragma': 'no-cache',
+                'Connection': 'keep-alive',
+                'X-Content-Type-Options': 'nosniff',  # Prevent MIME sniffing
+                'Content-Disposition': 'inline'       # Force inline display
+            }
+
+            return Response(
+                stream_with_context(generate()),
+                status=206,
+                headers=headers,
+                direct_passthrough=True
+            )
+
+        # If no range header, serve the whole file
+        def generate():
+            try:
+                with open(video_path, 'rb') as f:
+                    while True:
+                        data = f.read(chunk_size)
+                        if not data:
+                            break
+                        yield data
+            except Exception as e:
+                logger.error(f"Error streaming video {video_path}: {str(e)}")
+                return
+
+        headers = {
+            'Content-Type': mime_type,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': str(file_size),
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS, HEAD',
+            'Access-Control-Allow-Headers': 'Range, Accept-Ranges, Content-Range',
+            'Access-Control-Expose-Headers': 'Accept-Ranges, Content-Range, Content-Length',
+            'Cache-Control': 'no-cache, must-revalidate',
+            'Pragma': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Content-Type-Options': 'nosniff',  # Prevent MIME sniffing
+            'Content-Disposition': 'inline'       # Force inline display
+        }
+
+        return Response(
+            stream_with_context(generate()),
+            status=200,
+            headers=headers,
+            direct_passthrough=True
+        )

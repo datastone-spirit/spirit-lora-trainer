@@ -9,4 +9,4 @@ venv/
 nohup.out
 diffusion-pipe/
 musubi-tuner/
-
+.venv/

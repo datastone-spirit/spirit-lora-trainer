@@ -81,7 +81,7 @@ def caculate_image_steps(images :Tuple[(str, int)]) -> int:
           total_steps *= item[1]
      return total_steps
 
-def get_image_mime_type(file_path: str) -> str:
+def get_path_mime_type(file_path: str) -> str:
     """
     Returns the MIME type for an image file.
     Falls back to a common type based on file extension if mimetypes.guess_type returns None.
@@ -101,6 +101,14 @@ def get_image_mime_type(file_path: str) -> str:
             mime_type = "image/bmp"
         elif ext in [".tiff", ".tif"]:
             mime_type = "image/tiff"
+        elif ext in [".mp4", ".mp4v", ".m4v"]:
+            mime_type = "video/mp4"
+        elif ext in [".avi", ".mov", ".wmv", ".mkv"]:
+            mime_type = "video/x-msvideo"
+        elif ext in [".flv", ".f4v"]:
+            mime_type = "video/x-flv"
+        elif ext in [".webm"]:
+            mime_type = "video/webm"
         else:
             mime_type = "application/octet-stream"
     return mime_type

@@ -5,9 +5,9 @@ from flask import request, send_file
 from flask_restful import Resource
 from ..common.utils import res, get_directory_structure, use_swagger_config, validate_training_data
 from ..swagger.swagger_config import file_config, file_check_config, tag_dir_config,delete_file_config, preview_file_config
-from utils.util import pathFormat, setup_logging, get_image_mime_type
+from utils.util import pathFormat, setup_logging, get_path_mime_type
 from PIL import Image as PILImage
-import tempfile
+from typing import Tuple
 
 setup_logging()
 import logging
@@ -192,7 +192,8 @@ class TagDirFile(Resource):
                 
                 if os.path.isfile(item_path):
                     # 查找图片文件，支持多种格式
-                    if item.lower().endswith(('.png', '.jpg', '.jpeg', ".bmp", ".tiff", ".webp", ".tif", ".gif")):
+                    if item.lower().endswith(('.png', '.jpg', '.jpeg', ".bmp", ".tiff", ".webp", ".tif", ".gif", 
+                                              ".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv")):
                         # 去掉文件扩展名后保存
                         base_name = os.path.splitext(item)[0]
                         images[base_name] = item_path
@@ -272,10 +273,18 @@ class Image(Resource):
         if not os.path.isfile('/' + full_path):
             return {"success": False, "message": f"文件不存在: {full_path}"}, 400
         
-        mime_type = get_image_mime_type(full_path)
-        if not mime_type or not mime_type.startswith("image/"):
-            return {"success": False, "message": f"文件不是图片类型: {full_path}"}, 400
+        mime_type = get_path_mime_type(full_path)
+        if not mime_type:
+            return {"success": False, "message": f"无法获取文件类型: {full_path}"}, 400
 
+
+        is_image = mime_type.startswith("image/")
+        is_video = mime_type.startswith("video/")
+        
+        if not is_image and not is_video:
+            return {"success": False, "message": f"{full_path} isn't image or video format"}, 400
+
+        thumbnail = self.get_image_thumbnail if is_image else self.get_video_thumbnail
          # 检查是否需要压缩
         compress = request.args.get("compress", "true").lower() == "true"
         if not compress:
@@ -288,15 +297,64 @@ class Image(Resource):
         thumbnail_size = (64, 64)  # 缩略图尺寸，可自定义
         # 生成缩略图
         try:
-            with PILImage.open(full_path) as img:
-                img_format = img.format  # 保留原始格式
-                img.thumbnail(thumbnail_size)  # 创建缩略图
-                    # 缓存缩略图到临时文件
-                buf = io.BytesIO()
-                img.save(buf, format=img_format)
-                buf.seek(0)
-                return send_file(buf, mimetype=mime_type)
+                return send_file(thumbnail(full_path, thumbnail_size), mimetype=mime_type)
         except Exception as e:
                 return {"success": False, "message": f"图片压缩失败: {str(e)}"}, 500
+    
+    def get_image_thumbnail(self, image_path: str, thumnail_size: Tuple[int, int]) -> io.BytesIO:
+        """
+        生成缩略图
+        """
+        try:
+            with PILImage.open(image_path) as img:
+                img.thumbnail(thumnail_size)  # 缩略图尺寸
+                buf = io.BytesIO()
+                img.save(buf, format=img.format)
+                buf.seek(0)
+                return buf
+        except Exception as e:
+            logger.warning("生成缩略图失败:", exc_info=e)
+            return None
+    
+    def get_video_thumbnail(self, video_path: str, thumbnail_size: Tuple[int, int]) -> io.BytesIO:
+        """
+        Generate video thumbnail from first frame
+        Args:
+            video_path: Path to video file
+            thumbnail_size: Tuple of (width, height) for thumbnail
+        Returns:
+            BytesIO object containing the thumbnail image
+        """
+        try:
+            import cv2
+            import numpy as np
+            
+            # Read the first frame of the video
+            cap = cv2.VideoCapture(video_path)
+            ret, frame = cap.read()
+            cap.release()
+
+            if not ret:
+                logger.warning(f"Failed to read video frame from {video_path}")
+                return None
+
+            # Convert BGR to RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+            # Convert to PIL Image for easy resizing
+            pil_image = PILImage.fromarray(frame_rgb)
+            
+            # Create thumbnail
+            pil_image.thumbnail(thumbnail_size)
+            
+            # Save to bytes buffer
+            buf = io.BytesIO()
+            pil_image.save(buf, format='JPEG')
+            buf.seek(0)
+            
+            return buf
+        except Exception as e:
+            logger.warning(f"Failed to generate video thumbnail: {video_path}", exc_info=e)
+            return None
 
 

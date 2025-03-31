@@ -136,7 +136,7 @@ class DatasetConfig:
 
 @dataclass
 class WanDataSetConfig:
-    general: GeneralConfig = GeneralConfig()
+    general: GeneralConfig = field(default_factory=GeneralConfig)
     datasets: List[DatasetConfig] = field(default_factory=list)
 
     @staticmethod

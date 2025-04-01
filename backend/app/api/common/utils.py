@@ -148,7 +148,7 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
         return False, f"{image_dir} is not a valid directory"
 
     valid_data_extensions = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff", ".gif", ".tif", 
-                              "mp4", ".mov", ".avi", ".mkv", ".webm", ".flv", ".wmv", ".mpg", ".mpeg"}
+                              ".mp4", ".mov", ".avi", ".mkv", ".webm", ".flv", ".wmv", ".mpg", ".mpeg"}
     valid_images = []
     valid_captions = []
 

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-04-01 09:19:17
+ * @LastEditTime: 2025-04-01 15:36:04
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -232,7 +232,7 @@ export interface WanVideoTrainingInfoResult {
 				/** 总共优化步数，应该是 total / gradient_accumulation_steps 计算得出 */
 				total_optimization_steps: number;
 				/** 已经耗时 */
-				elapsed: number;
+				elapsed: string;
 				/** 剩余时间 */
 				remaining: string;
 				/** 损失当前 */

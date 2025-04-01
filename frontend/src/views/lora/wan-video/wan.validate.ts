@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:02:06
- * @LastEditTime: 2025-03-27 09:56:17
+ * @LastEditTime: 2025-04-01 18:40:16
  * @LastEditors: mulingyuer
  * @Description: wan 校验器
- * @FilePath: \frontend\src\views\lora\wan\wan.validate.ts
+ * @FilePath: \frontend\src\views\lora\wan-video\wan.validate.ts
  * 怎么可能会有bug！！！
  */
 import { formatFormValidateMessage } from "@/utils/tools";
@@ -59,8 +59,16 @@ export class WanValidate {
 	}
 
 	/** 校验数据集目录是否存在素材 */
-	private async validateDataset(imageDir: string): Promise<boolean> {
-		const hasData = await checkData(imageDir);
+	private async validateDataset(formData: RuleForm): Promise<boolean> {
+		const { data_mode } = formData;
+		let dir: string;
+		if (data_mode === "image") {
+			dir = formData.dataset.datasets[0].image_directory;
+		} else {
+			dir = formData.dataset.datasets[0].video_directory;
+			return true;
+		}
+		const hasData = await checkData(dir);
 		if (!hasData) {
 			this.showErrorMessage({ message: "数据集目录下没有数据，请上传训练素材" });
 			return false;
@@ -87,7 +95,7 @@ export class WanValidate {
 			() => this.validateLoRASaveDir(formData.config.output_dir),
 			() => this.validateForm(form),
 			() => this.validateGpu(),
-			() => this.validateDataset(formData.dataset.datasets[0].image_directory)
+			() => this.validateDataset(formData)
 		];
 
 		for (const validation of validations) {

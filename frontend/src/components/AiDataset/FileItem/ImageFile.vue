@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import type { BaseFileItemProps, FileItem } from "./types";
+import type { BaseFileItemProps, FileItem } from "../types";
 import type { ImageProps } from "element-plus";
 import DefaultImageIcon from "@/assets/images/ai-dataset/image_icon.svg";
 
@@ -45,5 +45,5 @@ withDefaults(defineProps<ImageFileProps>(), {
 </script>
 
 <style lang="scss" scoped>
-@use "./style.scss" as *;
+@use "../style.scss" as *;
 </style>

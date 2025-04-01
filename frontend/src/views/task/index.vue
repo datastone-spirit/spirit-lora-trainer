@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:21:01
- * @LastEditTime: 2025-01-10 16:26:03
+ * @LastEditTime: 2025-04-01 15:15:05
  * @LastEditors: mulingyuer
  * @Description: 任务列表页
  * @FilePath: \frontend\src\views\task\index.vue
@@ -13,10 +13,11 @@
 			<TaskEmpty v-if="list.length <= 0 && !loading" />
 			<template v-else>
 				<TaskItem
-					v-for="item in list"
+					v-for="(item, index) in list"
 					:key="item.id"
 					:class="{ active: activeItemData?.id === item.id }"
 					:data="item"
+					:index="index"
 					@click="onItemClick(item)"
 				></TaskItem>
 			</template>
@@ -40,14 +41,17 @@ import TaskItem from "./components/TaskItem.vue";
 import TagTaskDetail from "./components/TagTaskDetail.vue";
 import LoraTaskDetail from "./components/LoraTaskDetail.vue";
 import HYDetail from "./components/HYDetail.vue";
+import WanDetail from "./components/WanDetail.vue";
+import type { TaskType } from "@/api/types";
 
 const loading = ref(true);
 const list = ref<TaskListResult>([]);
 const activeItemData = ref<TaskListResult[number]>();
-const DetailMap = {
+const DetailMap: Record<TaskType, any> = {
 	captioning: TagTaskDetail,
 	training: LoraTaskDetail,
-	hunyuan_training: HYDetail
+	hunyuan_training: HYDetail,
+	wan_training: WanDetail
 };
 // HACK: QTMD 类型校验
 function getItemData() {

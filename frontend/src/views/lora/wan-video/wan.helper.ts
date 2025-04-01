@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-01 09:47:26
+ * @LastEditTime: 2025-04-01 18:04:06
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -155,7 +155,7 @@ export class WanHelper {
 				formatDatasets = {
 					video_directory: datasets[0].video_directory,
 					frame_extraction: datasets[0].frame_extraction,
-					target_frames: datasets[0].target_frames,
+					target_frames: JSON.parse(datasets[0].target_frames) as Array<number>,
 					frame_stride: datasets[0].frame_stride,
 					frame_sample: datasets[0].frame_sample
 				};

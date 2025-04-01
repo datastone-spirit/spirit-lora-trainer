@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-01 10:55:46
+ * @LastEditTime: 2025-04-01 18:01:43
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -305,6 +305,23 @@ const rules = reactive<FormRules<RuleForm>>({
 				callback();
 			},
 			trigger: "change"
+		}
+	],
+	"dataset.datasets.0.target_frames": [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (value.trim() === "") {
+					callback(new Error("请配置target_frames参数"));
+					return;
+				}
+				try {
+					JSON.parse(value);
+					return callback();
+				} catch (_error) {
+					return callback(new Error("target_frames参数格式错误，格式必须为：[x,...]"));
+				}
+			},
+			trigger: ""
 		}
 	]
 });

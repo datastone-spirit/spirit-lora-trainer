@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-13 17:41:25
- * @LastEditTime: 2024-12-27 16:35:59
+ * @LastEditTime: 2025-04-01 16:20:52
  * @LastEditors: mulingyuer
  * @Description: 右键菜单帮助工具
  * @FilePath: \frontend\src\components\AiDataset\context-menu.helper.ts
@@ -61,6 +61,7 @@ export function updateMenuList(data: FileItem) {
 	// 根据文件类型更新菜单
 	switch (data.type) {
 		case FileType.IMAGE:
+		case FileType.VIDEO:
 			menuList.value[0].show = false;
 			break;
 		case FileType.TEXT:

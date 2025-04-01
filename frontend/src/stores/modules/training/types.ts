@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-04-01 11:32:18
+ * @LastEditTime: 2025-04-01 15:38:15
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -143,7 +143,7 @@ export interface WanLoraData extends BaseMonitorData {
 	/** 总进度 */
 	total: number;
 	/** 已用时长 */
-	elapsed: number;
+	elapsed: string;
 	/** 预估剩余时长 */
 	remaining: string | number;
 	/** 当前loss */

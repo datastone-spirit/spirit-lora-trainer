@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-18 15:40:09
- * @LastEditTime: 2025-01-15 11:17:02
+ * @LastEditTime: 2025-04-01 15:58:37
  * @LastEditors: mulingyuer
  * @Description: 公共api类型
  * @FilePath: \frontend\src\api\common\types.ts
@@ -75,6 +75,7 @@ export type DirectoryFilesResult = Array<{
 	txt_content: string;
 	txt_name: string;
 	txt_path: string;
+	mime_type: string;
 }>;
 
 /** 混元视频：检测目录是否存参数 */

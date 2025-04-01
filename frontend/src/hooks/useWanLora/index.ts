@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-28 10:45:50
- * @LastEditTime: 2025-04-01 11:40:21
+ * @LastEditTime: 2025-04-01 15:37:39
  * @LastEditors: mulingyuer
  * @Description: 训练wan lora的hooks
  * @FilePath: \frontend\src\hooks\useWanLora\index.ts
@@ -224,7 +224,7 @@ function formatWanTaskData(res: WanVideoTrainingInfoResult): WanLoraData {
 		progress: calculatePercentage(detail.current, detail.total),
 		current: detail.current ?? 0,
 		total: detail.total ?? 0,
-		elapsed: detail.elapsed ?? 0,
+		elapsed: detail.elapsed ?? "",
 		remaining: detail.remaining ?? "00:00",
 		current_loss: detail.current_loss ?? 0,
 		average_loss: detail.average_loss ?? 0,

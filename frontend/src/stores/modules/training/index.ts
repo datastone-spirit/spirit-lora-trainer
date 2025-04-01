@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-04-01 11:32:37
+ * @LastEditTime: 2025-04-01 15:38:21
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -73,7 +73,7 @@ export const useTrainingStore = defineStore("training", () => {
 		data: {
 			current: 0,
 			total: 0,
-			elapsed: 0,
+			elapsed: "",
 			remaining: 0,
 			current_loss: 0,
 			average_loss: 0,
@@ -95,7 +95,7 @@ export const useTrainingStore = defineStore("training", () => {
 		monitorWanLoraData.value.data = {
 			current: 0,
 			total: 0,
-			elapsed: 0,
+			elapsed: "",
 			remaining: 0,
 			current_loss: 0,
 			average_loss: 0,

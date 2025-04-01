@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-01 10:55:42
+ * @LastEditTime: 2025-04-01 17:50:13
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -593,7 +593,7 @@ export interface StartWanVideoTrainingVideoDataset {
 	/** 提取首帧，head|chunk|slide|uniform，默认："head" */
 	frame_extraction: string;
 	/** 是一个列表，指定了从视频中提取的帧的数量，例：[1,13,25] */
-	target_frames: string;
+	target_frames: Array<number>;
 	/** 是一个整数，仅在 frame_extraction 为 slide 时有效。它定义了提取帧时的步长，例：10，表示每隔 10 帧提取一次 */
 	frame_stride: number;
 	/** 指定从视频中均匀提取的样本数量，仅frame_extraction为uniform时有效，默认：1 */

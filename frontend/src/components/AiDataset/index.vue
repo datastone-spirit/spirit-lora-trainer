@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-04-01 11:50:48
+ * @LastEditTime: 2025-04-01 17:31:51
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -101,14 +101,16 @@ import { checkDirectory } from "@/utils/lora.helper";
 import { generateUUID, sleep } from "@/utils/tools";
 import type { AxiosProgressEvent } from "axios";
 import type { UploadInstance, UploadUserFile } from "element-plus";
-import { formatDirectoryFiles } from "./ai-dataset.helper";
+import { AiDatasetHelper } from "./ai-dataset.helper";
 import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
 import ContextMenu from "./ContextMenu.vue";
-import ImageFile from "./ImageFile.vue";
+import ImageFile from "./FileItem/ImageFile.vue";
 import TagEdit from "./TagEdit.vue";
-import TextFile from "./TextFile.vue";
+import TextFile from "./FileItem/TextFile.vue";
+import VideoFile from "./FileItem/VideoFile.vue";
 import type { FileItem, FileList } from "./types";
 import { FileType } from "./types";
+import { useVideoPreview } from "@/hooks/useVideoPreview";
 
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
@@ -122,9 +124,10 @@ export interface AiDatasetProps {
 }
 
 /** 组件map */
-const componentMap = {
+const componentMap: Record<FileType, any> = {
 	[FileType.IMAGE]: ImageFile,
-	[FileType.TEXT]: TextFile
+	[FileType.TEXT]: TextFile,
+	[FileType.VIDEO]: VideoFile
 };
 
 const props = withDefaults(defineProps<AiDatasetProps>(), {
@@ -133,7 +136,9 @@ const props = withDefaults(defineProps<AiDatasetProps>(), {
 		"image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,text/plain,video/mp4, video/quicktime, video/x-msvideo, video/webm"
 });
 const { previewImages } = useImageViewer();
+const { previewVideo } = useVideoPreview();
 const { tagEvents } = useTag();
+const aiDatasetHelper = new AiDatasetHelper();
 
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
 const list = ref<FileList>([]);
@@ -149,7 +154,7 @@ async function getList() {
 
 		// api
 		const fileList = await directoryFiles({ path: props.dir });
-		list.value = formatDirectoryFiles(fileList);
+		list.value = aiDatasetHelper.formatDirectoryFiles(fileList);
 
 		loading.value = false;
 	} catch (error) {
@@ -170,7 +175,7 @@ async function getList() {
 // }
 
 // 预览图片
-function onPreview(data: FileItem) {
+function onImagePreview(data: FileItem) {
 	const imgList = list.value.filter((item) => item.type === FileType.IMAGE);
 	let initialIndex = imgList.findIndex((item) => item === data);
 	if (initialIndex === -1) initialIndex = 0;
@@ -181,16 +186,28 @@ function onPreview(data: FileItem) {
 	});
 }
 
+// 视频预览
+function onVideoPreview(data: FileItem) {
+	return previewVideo({
+		src: `${data.value}?compress=false`,
+		title: data.name
+	});
+}
+
 // 双击
 function onDoubleClick(data: FileItem, index: number) {
 	activeItemIndex.value = index;
 	switch (data.type) {
 		case FileType.IMAGE:
 			onQuitEdit();
-			onPreview(data);
+			onImagePreview(data);
 			break;
 		case FileType.TEXT:
 			onEdit(data);
+			break;
+		case FileType.VIDEO:
+			onQuitEdit();
+			onVideoPreview(data);
 			break;
 	}
 }
@@ -200,6 +217,7 @@ function onItemClick(data: FileItem, index: number) {
 	activeItemIndex.value = index;
 	switch (data.type) {
 		case FileType.IMAGE:
+		case FileType.VIDEO:
 			onQuitEdit();
 			break;
 		case FileType.TEXT:
@@ -243,7 +261,7 @@ const editTagTextLoading = ref(false);
 function onEdit(data: FileItem) {
 	editData.value = data;
 	// 如果是图片需要判断是否存在text文件
-	if (data.type === FileType.IMAGE) {
+	if (data.type !== FileType.TEXT) {
 		tagText.value = data.hasTagText ? data.raw.txt_content : "";
 	} else {
 		tagText.value = data.value;

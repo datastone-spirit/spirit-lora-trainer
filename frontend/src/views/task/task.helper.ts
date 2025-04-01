@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:32:42
- * @LastEditTime: 2025-01-13 09:38:50
+ * @LastEditTime: 2025-04-01 14:47:06
  * @LastEditors: mulingyuer
  * @Description: task帮助
  * @FilePath: \frontend\src\views\task\task.helper.ts
@@ -21,6 +21,8 @@ export function taskTypeToName(taskType: TaskType) {
 			return "Flux 训练";
 		case TaskType.HUNYUAN_TRAINING:
 			return "混元视频训练";
+		case TaskType.WAN_TRAINING:
+			return "wan视频训练";
 		default:
 			return "未知任务";
 	}

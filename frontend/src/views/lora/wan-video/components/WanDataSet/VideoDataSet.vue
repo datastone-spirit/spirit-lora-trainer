@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-31 10:42:26
- * @LastEditTime: 2025-04-01 08:51:28
+ * @LastEditTime: 2025-04-01 18:00:54
  * @LastEditors: mulingyuer
  * @Description: 视频数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\VideoDataSet.vue
@@ -10,7 +10,7 @@
 <template>
 	<PopoverFormItem
 		label="视频目录"
-		prop="dataset.datasets[0].video_directory"
+		prop="dataset.datasets.0.video_directory"
 		popover-content="video_directory"
 	>
 		<FolderSelector
@@ -20,7 +20,7 @@
 	</PopoverFormItem>
 	<PopoverFormItem
 		label="提取首帧方式"
-		prop="dataset.datasets[0].frame_extraction"
+		prop="dataset.datasets.0.frame_extraction"
 		popover-content="target_frames"
 	>
 		<el-space>
@@ -49,14 +49,17 @@
 	</el-form-item>
 	<PopoverFormItem
 		label="指定了从视频中提取的帧的数量"
-		prop="dataset.datasets[0].target_frames"
+		prop="dataset.datasets.0.target_frames"
 		popover-content="target_frames"
 	>
-		<el-input v-model="ruleForm.dataset.datasets[0].target_frames" placeholder="请输入LoRA名称" />
+		<el-input
+			v-model="ruleForm.dataset.datasets[0].target_frames"
+			placeholder="请输入视频中提取的帧的数量"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		label="提取帧时的步长，仅在 frame_extraction 为 slide 时有效"
-		prop="dataset.datasets[0].frame_stride"
+		prop="dataset.datasets.0.frame_stride"
 		popover-content="frame_stride"
 	>
 		<el-input-number
@@ -68,7 +71,7 @@
 	</PopoverFormItem>
 	<PopoverFormItem
 		label="从视频中均匀提取的样本数量，仅在 frame_extraction 为 uniform 时有效"
-		prop="dataset.datasets[0].frame_sample"
+		prop="dataset.datasets.0.frame_sample"
 		popover-content="frame_sample"
 	>
 		<el-input-number

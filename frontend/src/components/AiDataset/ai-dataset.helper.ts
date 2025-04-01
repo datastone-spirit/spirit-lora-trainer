@@ -1,55 +1,123 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 17:05:19
- * @LastEditTime: 2024-12-23 16:30:08
+ * @LastEditTime: 2025-04-01 16:12:46
  * @LastEditors: mulingyuer
  * @Description: 数据集帮助工具
  * @FilePath: \frontend\src\components\AiDataset\ai-dataset.helper.ts
  * 怎么可能会有bug！！！
  */
 import type { DirectoryFilesResult } from "@/api/common";
-import { type FileList, FileType, type ImageFileItem } from "./types";
+import {
+	type FileList,
+	FileType,
+	type ImageFileItem,
+	type TextFileItem,
+	type VideoFileItem
+} from "./types";
 
-/** 是否存在text文件 */
-function hasText(item: DirectoryFilesResult[number]): boolean {
-	const { txt_path } = item;
-	return !!txt_path;
-}
+export class AiDatasetHelper {
+	/** 格式化api目录下的列表数据 */
+	public formatDirectoryFiles(data: DirectoryFilesResult): FileList {
+		const list: FileList = [];
 
-/** 拼接图片url */
-function joinImageUrl(imagePath: string): string {
-	return `${import.meta.env.VITE_APP_API_BASE_URL}/image${imagePath}`;
-}
+		// HACK: 接口有时候返回的不是数组
+		if (!Array.isArray(data)) return list;
 
-/** 格式化api目录下的列表数据 */
-export function formatDirectoryFiles(data: DirectoryFilesResult): FileList {
-	const list: FileList = [];
+		data.forEach((item) => {
+			const { mime_type } = item;
+			if (this.isImage(mime_type)) {
+				list.push(...this.createImageFileItem(item));
+			} else if (this.isVideo(mime_type)) {
+				list.push(...this.createVideoFileItem(item));
+			}
+		});
 
-	// HACK: 接口有时候返回的不是数组
-	if (!Array.isArray(data)) return list;
+		return list;
+	}
 
-	data.forEach((item) => {
+	/** 是否存在text文件 */
+	private hasText(item: DirectoryFilesResult[number]): boolean {
+		const { txt_path } = item;
+		return !!txt_path;
+	}
+
+	/** 是否是图片文件 */
+	private isImage(mime: string): boolean {
+		return /image\//.test(mime);
+	}
+
+	/** 是否是视频文件 */
+	private isVideo(mime: string): boolean {
+		return /video\//.test(mime);
+	}
+
+	/** 拼接图片url */
+	private joinImageUrl(imagePath: string): string {
+		return `${import.meta.env.VITE_APP_API_BASE_URL}/image${imagePath}`;
+	}
+
+	/** 生成图片文件对象 */
+	private createImageFileItem(
+		item: DirectoryFilesResult[number]
+	): Array<ImageFileItem | TextFileItem> {
+		const list: Array<ImageFileItem | TextFileItem> = [];
+
 		const imgItem: ImageFileItem = {
 			type: FileType.IMAGE,
 			name: item.image_name,
 			path: item.image_path,
-			value: joinImageUrl(item.image_path),
+			value: this.joinImageUrl(item.image_path),
+			mime: item.mime_type,
 			raw: item,
 			hasTagText: false
 		};
 		list.push(imgItem);
-		// 打标文件
-		if (hasText(item)) {
-			imgItem.hasTagText = true;
-			list.push({
-				type: FileType.TEXT,
-				name: item.txt_name,
-				path: item.txt_path,
-				value: item.txt_content,
-				raw: item
-			});
-		}
-	});
 
-	return list;
+		// 存在打标文件
+		if (this.hasText(item)) {
+			list.push(this.createTextFileItem(item));
+			imgItem.hasTagText = true;
+		}
+
+		return list;
+	}
+
+	/** 生成视频文件对象 */
+	private createVideoFileItem(
+		item: DirectoryFilesResult[number]
+	): Array<VideoFileItem | TextFileItem> {
+		const list: Array<VideoFileItem | TextFileItem> = [];
+
+		const videoItem: VideoFileItem = {
+			type: FileType.VIDEO,
+			name: item.image_name,
+			path: item.image_path,
+			value: this.joinImageUrl(item.image_path),
+			mime: item.mime_type,
+			raw: item,
+			hasTagText: false
+		};
+		list.push(videoItem);
+
+		// 存在打标文件
+		if (this.hasText(item)) {
+			list.push(this.createTextFileItem(item));
+			videoItem.hasTagText = true;
+		}
+
+		return list;
+	}
+
+	/** 生成打标文件对象 */
+	private createTextFileItem(item: DirectoryFilesResult[number]): TextFileItem {
+		return {
+			type: FileType.TEXT,
+			name: item.txt_name,
+			path: item.txt_path,
+			value: item.txt_content,
+			mime: item.mime_type,
+			raw: item
+		};
+	}
 }

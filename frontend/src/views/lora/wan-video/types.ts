@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 09:30:27
- * @LastEditTime: 2025-03-31 10:37:08
+ * @LastEditTime: 2025-04-01 17:49:12
  * @LastEditors: mulingyuer
  * @Description: wan类型
  * @FilePath: \frontend\src\views\lora\wan-video\types.ts
@@ -12,6 +12,13 @@ import type {
 	StartWanVideoTrainingImageDataset,
 	StartWanVideoTrainingVideoDataset
 } from "@/api/lora";
+
+type StartWanVideoTrainingVideoDataset1 = Omit<
+	StartWanVideoTrainingVideoDataset,
+	"target_frames"
+> & {
+	target_frames: string;
+};
 
 /** 表单类型 */
 export interface RuleForm
@@ -40,7 +47,7 @@ export interface RuleForm
 	/** 数据集 */
 	dataset: {
 		general: StartWanVideoTrainingData["dataset"]["general"];
-		datasets: [Prettify<StartWanVideoTrainingImageDataset & StartWanVideoTrainingVideoDataset>];
+		datasets: [Prettify<StartWanVideoTrainingImageDataset & StartWanVideoTrainingVideoDataset1>];
 	};
 }
 

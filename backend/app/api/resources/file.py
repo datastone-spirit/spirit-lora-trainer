@@ -215,6 +215,7 @@ class TagDirFile(Resource):
                             "txt_path": txt_path,
                             "image_name": os.path.basename(image_path),
                             "txt_name": os.path.basename(txt_path),
+                            "mime_type": get_path_mime_type(image_path),
                             "txt_content": txt_content
                         })
                     except Exception as e:
@@ -224,6 +225,7 @@ class TagDirFile(Resource):
                             "txt_path": txt_path,
                             "image_name": os.path.basename(image_path),
                             "txt_name": os.path.basename(txt_path),
+                            "mime_type": get_path_mime_type(image_path),
                             "txt_content": f"Error reading txt file: {str(e)}"
                         })
                 else:
@@ -232,6 +234,7 @@ class TagDirFile(Resource):
                         "image_path": image_path,
                         "txt_path": "",
                         "image_name": os.path.basename(image_path),
+                        "mime_type": get_path_mime_type(image_path),
                         "txt_name": "",
                         "txt_content": ""
                     })

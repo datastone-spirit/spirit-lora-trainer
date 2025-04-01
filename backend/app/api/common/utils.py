@@ -147,7 +147,8 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
     if not os.path.isdir(image_dir):
         return False, f"{image_dir} is not a valid directory"
 
-    valid_image_extensions = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff", ".gif", ".tif"}
+    valid_data_extensions = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff", ".gif", ".tif", 
+                              "mp4", ".mov", ".avi", ".mkv", ".webm", ".flv", ".wmv", ".mpg", ".mpeg"}
     valid_images = []
     valid_captions = []
 
@@ -160,7 +161,7 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
                 continue
 
             file_ext = file[1].lower()
-            if file_ext in valid_image_extensions:
+            if file_ext in valid_data_extensions:
                 valid_images.append(file_name)
                 caption_file = file[0] + caption_ext
                 caption_path = os.path.join(image_dir, caption_file)
@@ -168,11 +169,11 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
                     valid_captions.append(caption_file)
 
     if len(valid_images) < 1 or len(valid_captions) < 1:
-        return False, f"No valid images found in the directory {image_dir}"
+        return False, f"No valid images (or videos) found in the directory {image_dir}"
 
     if len(valid_images) != len(valid_captions):
-        logger.warning(f"Mismatch between images:{len(valid_images)} and caption files {len(valid_captions)}")
-        return True, f"Mismatch between images {len(valid_images)} and caption files {len(valid_captions)}"
+        logger.warning(f"Mismatch between images (or videos):{len(valid_images)} and caption files {len(valid_captions)}")
+        return True, f"Mismatch between images (or videos) {len(valid_images)} and caption files {len(valid_captions)}"
 
     return True, "OK" 
 

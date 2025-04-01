@@ -377,11 +377,18 @@ def config2toml(config: TrainingConfig, dataset_path: str) -> str:
     return temp_file_path
 
 
-def dataset2toml(dataset :Any) -> str:
-    # accroding to the value of feild to generate a toml format file 
-    # in the temporary directory and return the path
-    # Convert the TrainingDataset instance to a dictionary
-    data = asdict(dataset)
+def dataset2toml(dataset: Any) -> str:
+    """
+    Convert dataset configuration to TOML format, handling Enum values properly.
+    
+    Args:
+        dataset: Dataset configuration object
+    
+    Returns:
+        str: Path to generated TOML file
+    """
+    # Convert the dataset instance to a dictionary with enum handling
+    data = asdict(dataset, dict_factory=lambda x: {k: convert_enum_to_dict(v) for k, v in x})
 
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")

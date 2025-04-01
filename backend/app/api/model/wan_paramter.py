@@ -285,6 +285,10 @@ class WanTrainingConfig:
 
         if not os.path.exists(config.logging_dir):
             os.makedirs(config.logging_dir)
+        
+        if is_blank(config.network_weights):
+            # Force empty str to None
+            config.network_weights = None
 
         if config.blocks_to_swap and config.blocks_to_swap <=0:
             raise ValueError("blocks_to_swap must be greater than 0.")

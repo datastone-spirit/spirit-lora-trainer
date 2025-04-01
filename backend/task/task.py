@@ -376,6 +376,7 @@ class HunyuanTrainingTask(Task):
                 return 0
 
         self.detail['current'] = current_step
+        self.detail['elapsed'] = time.time() - self.start_time
         self.detail['loss'] = get_value(step=current_step, tag="train/loss")
         self.detail['total_epoch'] = self.hunyuan_parameters.config.epochs
 
@@ -440,7 +441,6 @@ class WanTrainingTask(Task):
 
         self.detail['current'] = current_step
         self.detail['loss'] = get_value(step=current_step, tag="loss/current")
-        self.detail['elapsed'] = time.time() - self.start_time
         self.detail['total_epoch'] = self.wan_parameter.config.max_train_epochs
         self.detail['current_loss'] = get_value(step=current_step, tag="loss/current")
         self.detail['average_loss'] = get_value(step=current_step, tag="loss/average")

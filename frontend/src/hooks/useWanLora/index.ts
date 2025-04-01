@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-28 10:45:50
- * @LastEditTime: 2025-03-28 16:02:46
+ * @LastEditTime: 2025-04-01 11:40:21
  * @LastEditors: mulingyuer
  * @Description: 训练wan lora的hooks
  * @FilePath: \frontend\src\hooks\useWanLora\index.ts
@@ -44,19 +44,17 @@ function startQueryWanTask(taskId: string) {
 
 	const trainingStore = useTrainingStore();
 	trainingStore.setWanLoraIsListen(true);
+	trainingStore.setCurrentTaskType("wan-video");
 
 	queryWanTask();
 }
 
 /** 暂停查询wan训练任务信息 */
 function pauseQueryWanTask() {
-	if (queryWanTaskInfo.value.status === "querying") return;
+	if (queryWanTaskInfo.value.status !== "querying") return;
 
 	// 更新状态
 	queryWanTaskInfo.value.status = "paused";
-
-	const trainingStore = useTrainingStore();
-	trainingStore.setWanLoraIsListen(false);
 
 	// 清理定时器
 	if (queryWanTaskInfo.value.timer) {
@@ -74,6 +72,7 @@ function resumeQueryWanTask() {
 
 	const trainingStore = useTrainingStore();
 	trainingStore.setWanLoraIsListen(true);
+	trainingStore.setCurrentTaskType("wan-video");
 
 	// 立即查询
 	queryWanTask();
@@ -88,6 +87,7 @@ function stopQueryWanTask() {
 
 	const trainingStore = useTrainingStore();
 	trainingStore.setWanLoraIsListen(false);
+	trainingStore.setCurrentTaskType("none");
 
 	// 清理定时器
 	if (queryWanTaskInfo.value.timer) {
@@ -106,6 +106,7 @@ function initQueryWanTask(options: InitWanTrainingTaskOptions) {
 	// 更新状态
 	const trainingStore = useTrainingStore();
 	trainingStore.setWanLoraIsListen(true);
+	trainingStore.setCurrentTaskType("wan-video");
 	queryWanTaskInfo.value.status = "querying";
 	queryWanTaskInfo.value.taskId = id;
 	// 更新当前任务状态和创建查询任务
@@ -133,8 +134,8 @@ function handleQuerySuccess(res: WanVideoTrainingInfoResult) {
 	const trainingStore = useTrainingStore();
 	const modalManagerStore = useModalManagerStore();
 
-	// 更新打标任务的数据
-	trainingStore.setTagData(formatWanTaskData(res));
+	// 更新wan任务的数据
+	trainingStore.setWanLoraData(formatWanTaskData(res));
 	modalManagerStore.setNetworkDisconnectModal(false);
 	wanEvents.emit("update");
 
@@ -144,6 +145,7 @@ function handleQuerySuccess(res: WanVideoTrainingInfoResult) {
 			queryWanTaskInfo.value.status = "success";
 			trainingStore.resetWanLoraData();
 			trainingStore.setWanLoraIsListen(false);
+			trainingStore.setCurrentTaskType("none");
 			wanEvents.emit("complete");
 
 			ElMessageBox({
@@ -158,6 +160,7 @@ function handleQuerySuccess(res: WanVideoTrainingInfoResult) {
 			queryWanTaskInfo.value.status = "failure";
 			trainingStore.resetWanLoraData();
 			trainingStore.setWanLoraIsListen(false);
+			trainingStore.setCurrentTaskType("none");
 			wanEvents.emit("failed");
 
 			ElMessageBox({
@@ -213,14 +216,24 @@ function canQueryTagTask(status: QueryTaskStatus) {
 
 /** 格式化wan训练任务信息 */
 function formatWanTaskData(res: WanVideoTrainingInfoResult): WanLoraData {
-	const detail = res?.detail ?? {};
+	// @ts-expect-error 取消类型检查
+	let detail: Exclude<WanVideoTrainingInfoResult["detail"], string> = res?.detail ?? {};
+	if (typeof res.detail === "string") detail = {} as any;
 
-	const current = detail?.current >= 0 ? detail.current : 0;
-	const total = detail?.total ?? 0;
 	return {
-		current,
-		total: total,
-		progress: calculatePercentage(current, total)
+		progress: calculatePercentage(detail.current, detail.total),
+		current: detail.current ?? 0,
+		total: detail.total ?? 0,
+		elapsed: detail.elapsed ?? 0,
+		remaining: detail.remaining ?? "00:00",
+		current_loss: detail.current_loss ?? 0,
+		average_loss: detail.average_loss ?? 0,
+		current_epoch: detail.num_epochs ?? 0,
+		total_epoch: detail.total_epoch ?? 0,
+		showSampling: res.is_sampling ?? false,
+		samplingPath: res.sampling_path ?? "",
+		phase: res.phase,
+		raw: res
 	};
 }
 

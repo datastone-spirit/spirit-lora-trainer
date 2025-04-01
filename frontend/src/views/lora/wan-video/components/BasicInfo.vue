@@ -1,17 +1,17 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 10:12:06
- * @LastEditTime: 2025-03-26 16:56:29
+ * @LastEditTime: 2025-03-31 10:33:53
  * @LastEditors: mulingyuer
  * @Description: lora基本信息
- * @FilePath: \frontend\src\views\lora\wan\components\BasicInfo.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\BasicInfo.vue
  * 怎么可能会有bug！！！
 -->
 <template>
 	<PopoverFormItem label="训练任务类型" prop="config.task" popover-content="task">
 		<el-radio-group v-model="ruleForm.config.task">
-			<el-radio-button label="图片训练（i2v）" value="i2v-14B" />
-			<el-radio-button label="文本训练（t2v）" value="t2v-14B" />
+			<el-radio-button label="I2V" value="i2v-14B" />
+			<el-radio-button label="T2V" value="t2v-14B" />
 		</el-radio-group>
 	</PopoverFormItem>
 	<PopoverFormItem label="LoRA 名称" prop="config.output_name" popover-content="output_name">

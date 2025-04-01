@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-03-28 15:31:31
+ * @LastEditTime: 2025-04-01 11:32:18
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -11,7 +11,9 @@ import type { TaskStatus } from "@/api/types";
 import type {
 	GPUMonitorInfoResult,
 	HyVideoTrainingInfoResult,
-	LoRATrainingInfoResult
+	LoRATrainingInfoResult,
+	WanVideoTrainingInfoResult,
+	WanVideoTrainingPhase
 } from "@/api/monitor";
 
 /** GPU数据 */
@@ -136,10 +138,30 @@ export interface MonitorHYLoraData {
 
 /** wan lora训练数据 */
 export interface WanLoraData extends BaseMonitorData {
-	/** 当前第几个 */
+	/** 当前进度 */
 	current: number;
-	/** 总共多少个 */
+	/** 总进度 */
 	total: number;
+	/** 已用时长 */
+	elapsed: number;
+	/** 预估剩余时长 */
+	remaining: string | number;
+	/** 当前loss */
+	current_loss: number;
+	/** 平均loss */
+	average_loss: number;
+	/** 当前轮 */
+	current_epoch: number | string;
+	/** 总轮数 */
+	total_epoch: number | string;
+	/** 是否显示查看采样 */
+	showSampling: boolean;
+	/** 采样文件路径，开启采样时才有值，否则是空字符串 */
+	samplingPath: string;
+	/** 训练阶段 */
+	phase: WanVideoTrainingPhase;
+	/** 源数据，可能为空对象 */
+	raw?: WanVideoTrainingInfoResult;
 }
 
 /** 监听打标数据 */

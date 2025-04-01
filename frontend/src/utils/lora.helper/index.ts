@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 15:38:33
- * @LastEditTime: 2025-03-28 14:46:08
+ * @LastEditTime: 2025-04-01 10:43:57
  * @LastEditors: mulingyuer
  * @Description: lora helper
  * @FilePath: \frontend\src\utils\lora.helper\index.ts
@@ -93,7 +93,8 @@ export function mergeTrainingFormData(form: Record<string, any>, data: Record<st
 
 /** 获取当前训练的任务数据 */
 export function getRunLoraTask(store: UseTrainingStore): RunLoraTaskResult {
-	const { currentTaskType, monitorFluxLoraData, monitorHYLoraData } = storeToRefs(store);
+	const { currentTaskType, monitorFluxLoraData, monitorHYLoraData, monitorWanLoraData } =
+		storeToRefs(store);
 	const result: RunLoraTaskResult = {
 		type: "none",
 		taskName: "",
@@ -116,6 +117,7 @@ export function getRunLoraTask(store: UseTrainingStore): RunLoraTaskResult {
 		case "wan-video":
 			result.type = "wan-video";
 			result.taskName = "wan视频";
+			result.taskData.progress = monitorWanLoraData.value.data.progress;
 			break;
 	}
 

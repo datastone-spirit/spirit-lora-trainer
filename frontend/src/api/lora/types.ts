@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-03-26 16:39:13
+ * @LastEditTime: 2025-04-01 10:55:42
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -400,13 +400,13 @@ export interface StartWanVideoTrainingData {
 		network_alpha: number;
 		/** 自定义网络参数，"conv_dim=4 conv_alpha=1"，默认："" */
 		network_args: string;
-		/** LoRA的秩（rank），8-128，默认：undefined */
+		/** LoRA的秩（rank），8-128，默认：64 */
 		network_dim: number | undefined;
 		/** 训练时随机失活比例，0.1-0.3，默认：undefined */
 		network_dropout: number | undefined;
 		/** 指定要加载的神经网络模块，默认："" */
 		network_module: string;
-		/** 预训练权重文件路径，默认："" */
+		/** 预训练权重文件路径，默认：""，空字符的情况下不要传递该属性 */
 		network_weights: string;
 		/** 用于自动从预训练权重中推断网络维度（rank）,必须与 --network_weights 配合使用，默认：false */
 		dim_from_weights: boolean;
@@ -462,7 +462,7 @@ export interface StartWanVideoTrainingData {
 		// -------	高级显存优化	-------
 		/** 显存优化技术，通过累积多个小批次的梯度来等效大batch_size训练，默认：1 */
 		gradient_accumulation_steps: number;
-		/** 显存优化技术，通过时间换空间策略，减少约30%显存占用，开启会增加训练时间，默认：false */
+		/** 显存优化技术，通过时间换空间策略，减少约30%显存占用，开启会增加训练时间，默认：true */
 		gradient_checkpointing: boolean;
 		/** 显存优化技术，将图像输入（img_in）和文本输入（txt_in）张量保留在CPU内存中，减少显存占用，默认：false */
 		img_in_txt_in_offloading: boolean;
@@ -472,14 +472,14 @@ export interface StartWanVideoTrainingData {
 		flash_attn: boolean;
 		/**  是否使用SageAttention优化节省显存，默认：false */
 		sage_attn: boolean;
-		/** 使用PyTorch原生注意力，默认：false */
+		/** 使用PyTorch原生注意力，默认：true */
 		sdpa: boolean;
 		/** 是否使用split attention优化（需要XFORMERS），默认：false */
 		split_attn: boolean;
 		/** 启用xformers优化库（需要安装xformers），用于CrossAttention层的显存优化，默认：false */
 		xformers: boolean;
 		// -------	扩散模型参数	-------
-		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：1.0 */
+		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：3.0 */
 		discrete_flow_shift: number;
 		/** 最小扩散时间步长，0-999（控制起始噪声水平），默认：undefined */
 		min_timestep: number | undefined;
@@ -570,36 +570,41 @@ export interface StartWanVideoTrainingData {
 			/** 数据集重复次数，默认：1 */
 			num_repeats: number;
 		};
-		datasets: [
-			{
-				/** 数据目录 */
-				image_directory: string;
-				// /** 缓存目录，永远为空，后端自动生成 */
-				// cache_directory?: string;
-				// /** 后端生成的描述文件路径 */
-				// image_jsonl_file?: string;
-				// /** 单帧训练模式，前端不需要展示和传递给后端 */
-				// target_frames?: string;
-				// /** 提取首帧，前端不需要展示和传递给后端 */
-				// frame_extraction?: string;
-				// /** 视频目录，前端不需要展示和传递给后端 */
-				// video_directory?: string;
-				// /** 视频描述文件路径，前端不需要展示和传递给后端 */
-				// video_jsonl_file?: string;
-				// /** 视频帧步长，前端不需要展示和传递给后端 */
-				// frame_stride?: number;
-				// /** 视频帧采样率，前端不需要展示和传递给后端 */
-				// frame_sample?: number;
-				// /** 视频帧最大数量，前端不需要展示和传递给后端 */
-				// max_frames?: number;
-			}
-		];
+		datasets: [StartWanVideoTrainingImageDataset | StartWanVideoTrainingVideoDataset];
 	};
 	/** 训练器的训练配置 */
 	frontend_config: string;
 }
 
-/** 启动wan视频训练结果 */
+/** 启动wan视频训练参数-图片训练数据集 */
+export interface StartWanVideoTrainingImageDataset {
+	/** 数据目录 */
+	image_directory: string;
+	// /** 缓存目录，永远为空，后端自动生成 */
+	// cache_directory?: string;
+	// /** 后端生成的描述文件路径 */
+	// image_jsonl_file?: string;
+}
+
+/** 启动wan视频训练参数-视频训练数据集 */
+export interface StartWanVideoTrainingVideoDataset {
+	/** 视频目录 */
+	video_directory: string;
+	/** 提取首帧，head|chunk|slide|uniform，默认："head" */
+	frame_extraction: string;
+	/** 是一个列表，指定了从视频中提取的帧的数量，例：[1,13,25] */
+	target_frames: string;
+	/** 是一个整数，仅在 frame_extraction 为 slide 时有效。它定义了提取帧时的步长，例：10，表示每隔 10 帧提取一次 */
+	frame_stride: number;
+	/** 指定从视频中均匀提取的样本数量，仅frame_extraction为uniform时有效，默认：1 */
+	frame_sample: number;
+	/** 视频描述文件路径，前端不需要展示和传递给后端 */
+	// video_jsonl_file: string;
+	/** 视频帧最大数量，前端不需要展示和传递给后端，默认最大129帧 */
+	// max_frames?: number;
+}
+
+/** 视频目录 */
 export interface StartWanVideoTrainingResult {
 	msg: string;
 	success: boolean;

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-03-28 15:31:37
+ * @LastEditTime: 2025-04-01 11:32:37
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -15,7 +15,8 @@ import type {
 	MonitorHYLoraData,
 	MonitorTagData,
 	MonitorWanLoraData,
-	TagData
+	TagData,
+	WanLoraData
 } from "./types";
 export type * from "./types";
 
@@ -72,19 +73,37 @@ export const useTrainingStore = defineStore("training", () => {
 		data: {
 			current: 0,
 			total: 0,
+			elapsed: 0,
+			remaining: 0,
+			current_loss: 0,
+			average_loss: 0,
+			current_epoch: "",
+			total_epoch: "",
+			showSampling: false,
+			samplingPath: "",
+			phase: "none",
 			progress: 0
 		}
 	});
 	function setWanLoraIsListen(val: boolean) {
 		monitorWanLoraData.value.isListen = val;
 	}
-	function setWanLoraData(data: TagData) {
+	function setWanLoraData(data: WanLoraData) {
 		monitorWanLoraData.value.data = data;
 	}
 	function resetWanLoraData() {
 		monitorWanLoraData.value.data = {
 			current: 0,
 			total: 0,
+			elapsed: 0,
+			remaining: 0,
+			current_loss: 0,
+			average_loss: 0,
+			current_epoch: "",
+			total_epoch: "",
+			showSampling: false,
+			samplingPath: "",
+			phase: "none",
 			progress: 0
 		};
 	}
@@ -199,7 +218,12 @@ export const useTrainingStore = defineStore("training", () => {
 
 	/** gpu是否在使用中 */
 	const useGPU = computed(() => {
-		return monitorTagData.value.isListen || !isFluxLoraTaskEnd() || !isHYLoraTaskEnd();
+		return (
+			monitorTagData.value.isListen ||
+			!isFluxLoraTaskEnd() ||
+			!isHYLoraTaskEnd() ||
+			monitorWanLoraData.value.isListen
+		);
 	});
 
 	/** 当前训练的任务类型 */

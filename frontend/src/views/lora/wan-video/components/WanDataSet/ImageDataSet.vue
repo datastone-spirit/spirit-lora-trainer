@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 11:04:52
- * @LastEditTime: 2025-03-27 08:42:50
+ * @LastEditTime: 2025-03-31 10:39:39
  * @LastEditors: mulingyuer
  * @Description: wan数据集
- * @FilePath: \frontend\src\views\lora\wan\components\WanDataSet.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\ImageDataSet.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import { useTrainingStore } from "@/stores";
-import type { RuleForm } from "../types";
+import type { RuleForm } from "../../types";
 import { useTag } from "@/hooks/useTag";
 
 const trainingStore = useTrainingStore();

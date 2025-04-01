@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-03-28 16:26:57
+ * @LastEditTime: 2025-04-01 10:55:46
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -37,7 +37,7 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="ruleForm.dataset.datasets[0].image_directory" />
+				<SplitRightPanel :toml="toml" :dir="wanDatasetPath" />
 			</template>
 		</TwoSplit>
 		<TeleportFooterBarContent
@@ -68,7 +68,7 @@ import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo.vue";
 import SampleValidator from "./components/SampleValidator.vue";
 import TrainingData from "./components/TrainingData.vue";
-import WanDataSet from "./components/WanDataSet.vue";
+import WanDataSet from "./components/WanDataSet/index.vue";
 import type { RuleForm } from "./types";
 import { WanHelper } from "./wan.helper";
 import { WanValidate } from "./wan.validate";
@@ -121,7 +121,7 @@ const defaultForm: RuleForm = {
 		lr_warmup_steps: 0,
 		network_alpha: 1,
 		network_args: "",
-		network_dim: undefined,
+		network_dim: 64,
 		network_dropout: undefined,
 		network_module: "",
 		network_weights: "",
@@ -150,15 +150,15 @@ const defaultForm: RuleForm = {
 		guidance_scale: undefined,
 		show_timesteps: "",
 		gradient_accumulation_steps: 1,
-		gradient_checkpointing: false,
+		gradient_checkpointing: true,
 		img_in_txt_in_offloading: false,
 		flash3: false,
 		flash_attn: false,
 		sage_attn: false,
-		sdpa: false,
+		sdpa: true,
 		split_attn: false,
 		xformers: false,
-		discrete_flow_shift: 1,
+		discrete_flow_shift: 3,
 		min_timestep: undefined,
 		max_timestep: undefined,
 		mode_scale: 1.29,
@@ -168,6 +168,7 @@ const defaultForm: RuleForm = {
 		sigmoid_scale: 1,
 		weighting_scheme: "none"
 	},
+	data_mode: "image",
 	dataset: {
 		general: {
 			resolution: [960, 544],
@@ -179,7 +180,12 @@ const defaultForm: RuleForm = {
 		},
 		datasets: [
 			{
-				image_directory: "/root"
+				image_directory: "/root",
+				video_directory: "/root",
+				frame_extraction: "head",
+				target_frames: "[1, 13, 25]",
+				frame_stride: 10,
+				frame_sample: 1
 			}
 		]
 	},
@@ -223,6 +229,20 @@ const rules = reactive<FormRules<RuleForm>>({
 		}
 	],
 	"dataset.datasets.0.image_directory": [
+		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("数据集目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		}
+	],
+	"dataset.datasets.0.video_directory": [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
@@ -292,6 +312,13 @@ const rules = reactive<FormRules<RuleForm>>({
 const isExpert = computed(() => settingsStore.isExpert);
 /** wan帮助类 */
 const wanHelper = new WanHelper();
+/** AI数据集path */
+const wanDatasetPath = computed(() => {
+	if (ruleForm.value.data_mode === "image") {
+		return ruleForm.value.dataset.datasets[0].image_directory;
+	}
+	return ruleForm.value.dataset.datasets[0].video_directory;
+});
 
 // 折叠
 const openStep1 = ref(true);
@@ -331,7 +358,7 @@ async function onSubmit() {
 		// 开始训练
 		const data: StartWanVideoTrainingData = wanHelper.formatData(ruleForm.value);
 		const { task_id } = await startWanVideoTraining(data);
-		// 监听训练数据
+		// // 监听训练数据
 		startQueryWanTask(task_id);
 
 		submitLoading.value = false;

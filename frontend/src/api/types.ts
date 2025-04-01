@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 10:20:37
- * @LastEditTime: 2025-01-13 09:38:10
+ * @LastEditTime: 2025-03-31 08:41:12
  * @LastEditors: mulingyuer
  * @Description: 通用类型
  * @FilePath: \frontend\src\api\types.ts
@@ -26,5 +26,7 @@ export enum TaskType {
 	/** flux训练 */
 	TRAINING = "training",
 	/** 混元视频训练 */
-	HUNYUAN_TRAINING = "hunyuan_training"
+	HUNYUAN_TRAINING = "hunyuan_training",
+	/** wan视频训练 */
+	WAN_TRAINING = "wan_training"
 }

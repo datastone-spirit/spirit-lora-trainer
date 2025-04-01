@@ -1,16 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-03-27 11:36:23
+ * @LastEditTime: 2025-04-01 09:47:26
  * @LastEditors: mulingyuer
  * @Description: wan helper
- * @FilePath: \frontend\src\views\lora\wan\wan.helper.ts
+ * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
  * 怎么可能会有bug！！！
  */
-import { filterAndConvertKeysToNumber } from "@/utils/lora.helper";
-import type { RuleForm } from "./types";
 import type { StartWanVideoTrainingData } from "@/api/lora";
+import { filterAndConvertKeysToNumber } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
+import type { RuleForm } from "./types";
 
 export class WanHelper {
 	/** config上科学计数的key数组 */
@@ -121,27 +121,50 @@ export class WanHelper {
 			config[key] = data.config[key];
 		});
 
+		// network_weights 如果为空就设置为null，最后会被移除
+		if (typeof config.network_weights === "string" && config.network_weights.trim() === "") {
+			// @ts-expect-error 去除ts类型检查
+			config.network_weights = null;
+		}
+
 		return this.removeNullProperty(config);
 	}
 
 	/** 格式化dataset数据 */
 	private formatDataset(data: RuleForm): StartWanVideoTrainingData["dataset"] {
+		const { data_mode } = data;
 		const { general, datasets } = data.dataset;
 
-		return {
-			general: {
-				resolution: [general.resolution[0], general.resolution[1]],
-				batch_size: general.batch_size,
-				enable_bucket: general.enable_bucket,
-				bucket_no_upscale: general.bucket_no_upscale,
-				caption_extension: general.caption_extension,
-				num_repeats: general.num_repeats
-			},
-			datasets: [
-				{
+		const formatGeneral: StartWanVideoTrainingData["dataset"]["general"] = {
+			resolution: [general.resolution[0], general.resolution[1]],
+			batch_size: general.batch_size,
+			enable_bucket: general.enable_bucket,
+			bucket_no_upscale: general.bucket_no_upscale,
+			caption_extension: general.caption_extension,
+			num_repeats: general.num_repeats
+		};
+		let formatDatasets: StartWanVideoTrainingData["dataset"]["datasets"][number];
+
+		switch (data_mode) {
+			case "image":
+				formatDatasets = {
 					image_directory: datasets[0].image_directory
-				}
-			]
+				};
+				break;
+			case "video":
+				formatDatasets = {
+					video_directory: datasets[0].video_directory,
+					frame_extraction: datasets[0].frame_extraction,
+					target_frames: datasets[0].target_frames,
+					frame_stride: datasets[0].frame_stride,
+					frame_sample: datasets[0].frame_sample
+				};
+				break;
+		}
+
+		return {
+			general: formatGeneral,
+			datasets: [formatDatasets]
 		};
 	}
 

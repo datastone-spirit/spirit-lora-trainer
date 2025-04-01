@@ -1,16 +1,21 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 09:30:27
- * @LastEditTime: 2025-03-26 11:19:00
+ * @LastEditTime: 2025-03-31 10:37:08
  * @LastEditors: mulingyuer
  * @Description: wan类型
- * @FilePath: \frontend\src\views\lora\wan\types.ts
+ * @FilePath: \frontend\src\views\lora\wan-video\types.ts
  * 怎么可能会有bug！！！
  */
-import type { StartWanVideoTrainingData } from "@/api/lora";
+import type {
+	StartWanVideoTrainingData,
+	StartWanVideoTrainingImageDataset,
+	StartWanVideoTrainingVideoDataset
+} from "@/api/lora";
 
 /** 表单类型 */
-export interface RuleForm extends Omit<StartWanVideoTrainingData, "config" | "frontend_config"> {
+export interface RuleForm
+	extends Omit<StartWanVideoTrainingData, "config" | "frontend_config" | "dataset"> {
 	config: Prettify<
 		Omit<StartWanVideoTrainingData["config"], "learning_rate"> & {
 			/** 学习率，默认：2e-06，需从string转换为数字 */
@@ -29,6 +34,13 @@ export interface RuleForm extends Omit<StartWanVideoTrainingData, "config" | "fr
 		tag_global_prompt: string;
 		/** 是否追加到已有打标文件中 */
 		tag_is_append: boolean;
+	};
+	/** 训练的数据模式 */
+	data_mode: "image" | "video";
+	/** 数据集 */
+	dataset: {
+		general: StartWanVideoTrainingData["dataset"]["general"];
+		datasets: [Prettify<StartWanVideoTrainingImageDataset & StartWanVideoTrainingVideoDataset>];
 	};
 }
 

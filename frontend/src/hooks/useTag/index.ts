@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 11:17:50
- * @LastEditTime: 2025-03-27 17:43:58
+ * @LastEditTime: 2025-04-01 11:41:04
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag\index.ts
@@ -164,9 +164,6 @@ function pauseQueryTagTask() {
 
 	// 更新状态
 	queryTagTaskInfo.value.status = "paused";
-
-	const trainingStore = useTrainingStore();
-	trainingStore.setTagIsListen(false);
 
 	// 清理定时器
 	if (queryTagTaskInfo.value.timer) {

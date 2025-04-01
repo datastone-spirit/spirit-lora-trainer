@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-02-19 10:45:13
+ * @LastEditTime: 2025-04-01 11:50:48
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -79,7 +79,7 @@
 				<el-upload
 					ref="uploadRef"
 					v-model:file-list="uploadFileList"
-					accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,text/plain"
+					:accept="accept"
 					multiple
 					:show-file-list="false"
 					:auto-upload="false"
@@ -117,6 +117,8 @@ export interface AiDatasetProps {
 	showTeleportBtn?: boolean;
 	/** 目录路径 */
 	dir: string;
+	/** 上传文件MIME类型 */
+	accept?: string;
 }
 
 /** 组件map */
@@ -126,7 +128,9 @@ const componentMap = {
 };
 
 const props = withDefaults(defineProps<AiDatasetProps>(), {
-	showTeleportBtn: true
+	showTeleportBtn: true,
+	accept:
+		"image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,text/plain,video/mp4, video/quicktime, video/x-msvideo, video/webm"
 });
 const { previewImages } = useImageViewer();
 const { tagEvents } = useTag();

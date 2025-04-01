@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-03-21 09:29:46
+ * @LastEditTime: 2025-04-01 09:34:16
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
@@ -10,14 +10,17 @@
 import type {
 	HyVideoTrainingInfoResult,
 	LoRATrainingInfoResult,
-	ManualTagInfoResult
+	ManualTagInfoResult,
+	WanVideoTrainingInfoResult
 } from "@/api/monitor";
 import type { CurrentTaskResult } from "@/api/task";
 import { currentTask } from "@/api/task";
+import { TaskType } from "@/api/types";
 import { useFluxLora } from "@/hooks/useFluxLora";
 import { useHYLora } from "@/hooks/useHYLora";
 import { useTag } from "@/hooks/useTag";
 import type { AxiosError } from "axios";
+import { useWanLora } from "@/hooks/useWanLora";
 
 class TaskInitializer {
 	constructor(private readonly taskData: CurrentTaskResult) {}
@@ -27,14 +30,17 @@ class TaskInitializer {
 		let initPromise: Promise<void>;
 
 		switch (this.taskData.task_type) {
-			case "captioning": // 打标
+			case TaskType.CAPTIONING: // 打标
 				initPromise = this.initTag();
 				break;
-			case "training": // flux 训练
+			case TaskType.TRAINING: // flux 训练
 				initPromise = this.initFluxTraining();
 				break;
-			case "hunyuan_training": // 混元视频训练
+			case TaskType.HUNYUAN_TRAINING: // 混元视频训练
 				initPromise = this.initHyVideoTraining();
+				break;
+			case TaskType.WAN_TRAINING: // wan训练
+				initPromise = this.initWanTraining();
 				break;
 			default:
 				console.warn("未知任务类型", this.taskData.task_type);
@@ -85,6 +91,16 @@ class TaskInitializer {
 		ElMessage({
 			message: "当前正在训练混元视频LoRA...",
 			type: "info"
+		});
+	}
+
+	/** wan 训练初始化 */
+	private async initWanTraining() {
+		const { initQueryWanTask } = useWanLora();
+
+		return initQueryWanTask({
+			wanTaskData: this.taskData as WanVideoTrainingInfoResult,
+			showTaskStartPrompt: true
 		});
 	}
 }

@@ -377,7 +377,6 @@ class HunyuanTrainingTask(Task):
 
         self.detail['current'] = current_step
         self.detail['loss'] = get_value(step=current_step, tag="train/loss")
-        self.detail['elapsed'] = time.time() - self.start_time
         self.detail['total_epoch'] = self.hunyuan_parameters.config.epochs
 
         epoch_seq = df.query('tag=="train/epoch_loss"').get('step', None)

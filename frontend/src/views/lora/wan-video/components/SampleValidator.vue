@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:58:45
- * @LastEditTime: 2025-03-26 17:06:59
+ * @LastEditTime: 2025-04-02 10:29:06
  * @LastEditors: mulingyuer
  * @Description: 采样与验证选项
- * @FilePath: \frontend\src\views\lora\wan\components\SampleValidator.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\SampleValidator.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -53,7 +53,7 @@
 	</PopoverFormItem>
 	<el-form-item>
 		<el-alert
-			title="注意：开启采样会增加训练时间，如果要开启训练时采样， 采样间隔步数和采样提示词都必须设置，其中采样间隔步数必须大于10，采样提示词必须是非空"
+			title="注意：采样会增加训练时间，不管设置哪种采样方式，都需要配置采样提示词"
 			type="warning"
 			:closable="false"
 			show-icon

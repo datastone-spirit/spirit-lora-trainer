@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-01 18:04:06
+ * @LastEditTime: 2025-04-02 09:24:42
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -13,9 +13,6 @@ import { tomlStringify } from "@/utils/toml";
 import type { RuleForm } from "./types";
 
 export class WanHelper {
-	/** config上科学计数的key数组 */
-	private readonly scientificNumberKeys: string[] = ["learning_rate"];
-
 	/** 数据格式化 */
 	public formatData(data: RuleForm): StartWanVideoTrainingData {
 		const deepCloneForm = structuredClone(toRaw(data));
@@ -109,12 +106,18 @@ export class WanHelper {
 		};
 
 		// 将科学计数的string转成number
-		const scientificObj = filterAndConvertKeysToNumber(data.config, this.scientificNumberKeys);
+		const scientificNumberKeys = ["learning_rate"];
+		const scientificObj = filterAndConvertKeysToNumber(data.config, scientificNumberKeys);
 		Object.assign(config, scientificObj);
 
+		// wan模型的配置项
+		const wanDitKeys = ["dit", "i2v_dit", "t2v_dit"];
+		config.dit = data.config.task === "i2v-14B" ? data.config.i2v_dit : data.config.t2v_dit;
+
 		// 其它数据直接赋值
+		const excludeKeys = [...scientificNumberKeys, ...wanDitKeys];
 		const otherKeys = Object.keys(config).filter(
-			(key) => !this.scientificNumberKeys.includes(key) && Object.hasOwn(data.config, key)
+			(key) => !excludeKeys.includes(key) && Object.hasOwn(data.config, key)
 		);
 		otherKeys.forEach((key) => {
 			// @ts-expect-error 去除ts类型检查

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-31 10:37:56
- * @LastEditTime: 2025-03-31 10:44:40
+ * @LastEditTime: 2025-04-02 10:08:11
  * @LastEditors: mulingyuer
  * @Description: wan AI数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\index.vue
@@ -19,6 +19,7 @@
 </template>
 
 <script setup lang="ts">
+import type { ElRadioGroup } from "element-plus";
 import type { RuleForm } from "../../types";
 import ImageDataSet from "./ImageDataSet.vue";
 import VideoDataSet from "./VideoDataSet.vue";

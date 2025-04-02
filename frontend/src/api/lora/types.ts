@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-01 17:50:13
+ * @LastEditTime: 2025-04-02 09:40:38
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -410,7 +410,7 @@ export interface StartWanVideoTrainingData {
 		network_weights: string;
 		/** 用于自动从预训练权重中推断网络维度（rank）,必须与 --network_weights 配合使用，默认：false */
 		dim_from_weights: boolean;
-		/** 指定要交换的网络块数量，用于调整LoRA模型结构 */
+		/** 指定要交换的网络块数量，用于调整LoRA模型结构，默认36 */
 		blocks_to_swap: number | undefined;
 		/** 启用基础FP8模式，目前云端必须开启，默认：true */
 		fp8_base: boolean;

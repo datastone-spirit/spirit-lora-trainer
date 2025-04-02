@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 10:12:06
- * @LastEditTime: 2025-03-31 10:33:53
+ * @LastEditTime: 2025-04-02 08:48:42
  * @LastEditors: mulingyuer
  * @Description: lora基本信息
  * @FilePath: \frontend\src\views\lora\wan-video\components\BasicInfo.vue
@@ -17,8 +17,21 @@
 	<PopoverFormItem label="LoRA 名称" prop="config.output_name" popover-content="output_name">
 		<el-input v-model="ruleForm.config.output_name" placeholder="请输入LoRA名称" />
 	</PopoverFormItem>
-	<PopoverFormItem v-show="isExpert" label="wan2模型地址" prop="config.dit" popover-content="dit">
-		<FileSelector v-model="ruleForm.config.dit" placeholder="请选择训练用的wan2模型" />
+	<PopoverFormItem
+		v-show="isExpert && isI2V"
+		label="wan2模型地址"
+		prop="config.i2v_dit"
+		popover-content="i2v_dit"
+	>
+		<FileSelector v-model="ruleForm.config.i2v_dit" placeholder="请选择训练用的wan2模型" />
+	</PopoverFormItem>
+	<PopoverFormItem
+		v-show="isExpert && isT2V"
+		label="wan2模型地址"
+		prop="config.t2v_dit"
+		popover-content="t2v_dit"
+	>
+		<FileSelector v-model="ruleForm.config.t2v_dit" placeholder="请选择训练用的wan2模型" />
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert && isI2V"

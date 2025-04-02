@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:02:06
- * @LastEditTime: 2025-04-01 18:40:16
+ * @LastEditTime: 2025-04-02 09:57:55
  * @LastEditors: mulingyuer
  * @Description: wan 校验器
  * @FilePath: \frontend\src\views\lora\wan-video\wan.validate.ts
@@ -66,7 +66,6 @@ export class WanValidate {
 			dir = formData.dataset.datasets[0].image_directory;
 		} else {
 			dir = formData.dataset.datasets[0].video_directory;
-			return true;
 		}
 		const hasData = await checkData(dir);
 		if (!hasData) {

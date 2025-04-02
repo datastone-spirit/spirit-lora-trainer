@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 09:30:27
- * @LastEditTime: 2025-04-01 17:49:12
+ * @LastEditTime: 2025-04-02 08:45:08
  * @LastEditors: mulingyuer
  * @Description: wan类型
  * @FilePath: \frontend\src\views\lora\wan-video\types.ts
@@ -24,7 +24,11 @@ type StartWanVideoTrainingVideoDataset1 = Omit<
 export interface RuleForm
 	extends Omit<StartWanVideoTrainingData, "config" | "frontend_config" | "dataset"> {
 	config: Prettify<
-		Omit<StartWanVideoTrainingData["config"], "learning_rate"> & {
+		Omit<StartWanVideoTrainingData["config"], "learning_rate" | "dit"> & {
+			/** i2v wan2模型地址 */
+			i2v_dit: string;
+			/** t2v wan2模型地址 */
+			t2v_dit: string;
 			/** 学习率，默认：2e-06，需从string转换为数字 */
 			learning_rate: string;
 		}

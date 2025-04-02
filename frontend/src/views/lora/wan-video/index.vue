@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-01 18:01:43
+ * @LastEditTime: 2025-04-02 10:10:02
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -93,7 +93,8 @@ const defaultForm: RuleForm = {
 	config: {
 		task: "i2v-14B",
 		output_name: "",
-		dit: "./models/wan/wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors",
+		i2v_dit: "./models/wan/wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors",
+		t2v_dit: "./models/wan/wan2.1_t2v_14B_fp8_e4m3fn.safetensors",
 		clip: "./models/clip/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth",
 		t5: "./models/clip/models_t5_umt5-xxl-enc-bf16.pth",
 		fp8_t5: false,
@@ -101,7 +102,7 @@ const defaultForm: RuleForm = {
 		vae_cache_cpu: false,
 		vae_dtype: "float16",
 		output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
-		max_train_epochs: 1,
+		max_train_epochs: 10,
 		max_train_steps: undefined,
 		seed: undefined,
 		mixed_precision: "bf16",
@@ -126,7 +127,7 @@ const defaultForm: RuleForm = {
 		network_module: "",
 		network_weights: "",
 		dim_from_weights: false,
-		blocks_to_swap: undefined,
+		blocks_to_swap: 36,
 		fp8_base: true,
 		fp8_scaled: false,
 		save_every_n_epochs: undefined,
@@ -144,7 +145,7 @@ const defaultForm: RuleForm = {
 		ddp_static_graph: false,
 		ddp_timeout: undefined,
 		sample_at_first: false,
-		sample_every_n_epochs: undefined,
+		sample_every_n_epochs: 4,
 		sample_every_n_steps: undefined,
 		sample_prompts: "",
 		guidance_scale: undefined,
@@ -228,6 +229,110 @@ const rules = reactive<FormRules<RuleForm>>({
 			}
 		}
 	],
+	"config.max_train_epochs": [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				// 轮数必须大于或等于保存轮数
+				const { save_every_n_epochs } = ruleForm.value.config;
+
+				if (value <= 0) {
+					return callback(new Error("总训练轮数必须是一个正整数"));
+				}
+				if (typeof save_every_n_epochs === "number" && value < save_every_n_epochs) {
+					return callback(new Error("总训练轮数 必须大于或等于save_every_n_epochs"));
+				}
+
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.fp8_base": [
+		{
+			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (isWhiteCheck && !value) {
+					return callback(new Error("fp8_base必须开启"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.optimizer_type": [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (isWhiteCheck && value !== "adamw8bit") {
+					return callback(new Error("优化器类型必须为adamw8bit"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.sample_at_first": [
+		{
+			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
+				if (!value) return callback();
+				// 联动校验
+				ruleFormRef.value?.validateField("config.sample_prompts");
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.sample_every_n_epochs": [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				if (typeof value !== "number" || value <= 0) return callback();
+				// 联动校验
+				ruleFormRef.value?.validateField("config.sample_prompts");
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.sample_every_n_steps": [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				if (typeof value !== "number" || value <= 0) return callback();
+				// 联动校验
+				ruleFormRef.value?.validateField("config.sample_prompts");
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.sample_prompts": [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				const { sample_at_first, sample_every_n_epochs, sample_every_n_steps } =
+					ruleForm.value.config;
+				// 如果配置了采样选项，则提示必须输入采样提示
+				const isLength = value.trim().length > 0;
+				const isValidLength =
+					sample_at_first ||
+					(sample_every_n_epochs && sample_every_n_epochs > 0) ||
+					(sample_every_n_steps && sample_every_n_steps > 0);
+				if (isValidLength && !isLength) {
+					return callback(new Error("请输入采样提示"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.blocks_to_swap": [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				if (ruleForm.value.data_mode !== "video") return callback();
+				if (typeof value !== "number" || value < 36) {
+					return callback(new Error("视频训练时，blocks_to_swap必须大于或等于36"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
 	"dataset.datasets.0.image_directory": [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
@@ -256,51 +361,11 @@ const rules = reactive<FormRules<RuleForm>>({
 			}
 		}
 	],
-	"config.max_train_epochs": [
-		{
-			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				// 轮数必须大于或等于保存轮数
-				const { save_every_n_epochs } = ruleForm.value.config;
-
-				if (value <= 0) {
-					return callback(new Error("总训练轮数必须是一个正整数"));
-				}
-				if (typeof save_every_n_epochs === "number" && value < save_every_n_epochs) {
-					return callback(new Error("总训练轮数 必须大于或等于save_every_n_epochs"));
-				}
-
-				callback();
-			},
-			trigger: "change"
-		}
-	],
 	"dataset.general.batch_size": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
 				if (isWhiteCheck && value !== 1) {
 					return callback(new Error("批量大小必须为1"));
-				}
-				callback();
-			},
-			trigger: "change"
-		}
-	],
-	"config.fp8_base": [
-		{
-			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
-				if (isWhiteCheck && !value) {
-					return callback(new Error("fp8_base必须开启"));
-				}
-				callback();
-			},
-			trigger: "change"
-		}
-	],
-	"config.optimizer_type": [
-		{
-			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (isWhiteCheck && value !== "adamw8bit") {
-					return callback(new Error("优化器类型必须为adamw8bit"));
 				}
 				callback();
 			},

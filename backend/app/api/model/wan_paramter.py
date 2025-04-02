@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, List 
-from utils.util import getprojectpath
 from os import path
 from enum import Enum
 import dacite
 import os
 
-from utils.util import setup_logging, is_blank
+from utils.util import setup_logging, is_blank, getprojectpath
+from app.api.common.utils import generate_sample_prompt_file
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
@@ -372,10 +372,12 @@ class WanTrainingConfig:
             config.save_every_n_epochs = None
         
         if (config.sample_every_n_steps and config.sample_every_n_steps > 0 or  \
-            config.sample_every_n_epochs and config.sample_every_n_epoch > 0) and \
-                is_blank(config.sample_prompts):
-            logger.warning("Do sampling requires sample_prompts.")
-            raise ValueError("Do sampling requires sample_prompts.")
+            config.sample_every_n_epochs and config.sample_every_n_epoch > 0): 
+            if is_blank(config.sample_prompts):
+                logger.warning("Do sampling requires sample_prompts.")
+                raise ValueError("Do sampling requires sample_prompts.")
+            else:
+                config.sample_prompts = generate_sample_prompt_file(config.sample_prompts)  
         
 
         if is_blank(config.output_dir):

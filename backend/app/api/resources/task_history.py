@@ -29,3 +29,23 @@ class TaskHistory(Resource):
                 'success': False,
                 'msg': f"Internal server error: {e}"
             }, 500
+
+
+
+
+class TaskStdout(Resource):
+    
+    def get(self):
+        try:
+            task_id = request.args.get('task_id')
+        except FileNotFoundError as e:
+            return {
+                'success': False,
+                'msg': str(e)
+            }, 404
+        except Exception as e:
+            logger.error(f"get current task failed: {e}", exc_info=True)
+            return {
+                'success': False,
+                'msg': f"Internal server error: {e}"
+            }, 500

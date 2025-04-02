@@ -438,3 +438,36 @@ def get_dataset_contents(dataset_dir: str, extensions: List[str]):
                 logger.warning(f"Error reading caption from {txt_path}", exc_info=e)
         yield file_path, caption, ext
 
+
+def generate_sample_prompt_file(sample_prompts: str) -> str:
+    import json
+    sample_content = sample_prompts.strip()
+    temp_file = None
+    
+    # Try to parse as JSON first (more structured and reliable to detect)
+    try:
+        parsed_json = json.loads(sample_content)
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.json')
+        with open(temp_file.name, 'w', encoding='utf-8') as f:
+            json.dump(parsed_json, f, ensure_ascii=False, indent=2)
+        logger.info(f"Sample prompts detected as JSON and saved to: {temp_file.name}")
+    except json.JSONDecodeError:
+        # Not valid JSON, try TOML
+        try:
+            parsed_toml = toml.loads(sample_content)
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.toml')
+            with open(temp_file.name, 'w', encoding='utf-8') as f:
+                toml.dump(parsed_toml, f)
+            logger.info(f"Sample prompts detected as TOML and saved to: {temp_file.name}")
+        except Exception:
+            # Neither JSON nor TOML, treat as plain text
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
+            with open(temp_file.name, 'w', encoding='utf-8') as f:
+                f.write(sample_content)
+            logger.info(f"Sample prompts saved as plain text to: {temp_file.name}")
+    
+    # Assign the temporary file path to sample_prompts
+    if temp_file:
+        return temp_file.name    
+    else:
+        raise ValueError("Failed to generate sample prompt {sample_prompts} to file.")

@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Optional, Callable, List
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from app.api.model.training_paramter import TrainingParameter
 from app.api.model.wan_paramter import WanTrainingParameter, is_i2v
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
@@ -48,6 +48,7 @@ class Task:
     end_time: float = None
     id: str = None
     detail: Optional[dict] = None
+    stdout_lines: Optional[List] = field(default_factory=list)
 
     @staticmethod
     def wrap_training(proc : Popen, training_paramter: TrainingParameter, task_id: str) -> 'Task':
@@ -171,7 +172,6 @@ class TrainingTask(Task):
         try:
             logger.info("beginning to run proc communication with training process")
             #self.proc = subprocess.Popen(self.proc.args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            stdout_lines = []
             linestr = ''
             line = bytearray()
             while True:
@@ -183,7 +183,7 @@ class TrainingTask(Task):
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
                     self.parse_progress_line(linestr) 
-                    stdout_lines.append(linestr)
+                    self.stdout_lines.append(linestr)
                     self.parse_stdout(linestr)
                     line = bytearray()  #
             stdout, stderr = self.proc.communicate()
@@ -209,6 +209,7 @@ class TrainingTask(Task):
         d = dict(self.__dict__)
         d.pop('training_parameters') 
         d.pop('proc') 
+        d.pop('stdout_lines')
         # Replace proc with safe dict
         if verbose is True and self.proc:
             d['proc'] = self._get_proc_info()
@@ -316,7 +317,6 @@ class HunyuanTrainingTask(Task):
     def _run(self):
         try:
             logger.info("beginning to run proc communication with hunyuan training process")
-            stdout_lines = []
             linestr = ''
             line = bytearray()
             while True:
@@ -327,7 +327,7 @@ class HunyuanTrainingTask(Task):
                 if ch == b'\n':
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
-                    stdout_lines.append(linestr)
+                    self.stdout_lines.append(linestr)
                     line = bytearray()  #
             stdout, stderr = self.proc.communicate()
         except TimeoutExpired as exc:
@@ -356,6 +356,7 @@ class HunyuanTrainingTask(Task):
         d['task_type'] = self.task_type.value
         d.pop('hunyuan_parameters') 
         d.pop('proc') 
+        d.pop('stdout_lines')
         if show_config is True and self.hunyuan_parameters:
             d['frontend_config'] = self.hunyuan_parameters.frontend_config
         return d
@@ -420,6 +421,7 @@ class WanTrainingTask(Task):
         d['task_type'] = self.task_type.value
         d.pop('wan_parameter') 
         d.pop('task_chain')
+        d.pop('stdout_lines')
         if show_config is True and self.wan_parameter:
             d['frontend_config'] = self.wan_parameter.frontend_config
         return d
@@ -483,7 +485,6 @@ class SubTask:
     def wait(self, proc: Popen, task: WanTrainingTask = None):
         try:
             logger.info("beginning to run proc communication with task training process")
-            stdout_lines = []
             linestr = ''
             line = bytearray()
             while True:
@@ -494,7 +495,7 @@ class SubTask:
                 if ch == b'\n':
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
-                    stdout_lines.append(linestr)
+                    self.stdout_lines.append(linestr)
                     if task is not None:
                         parse_kohya_progress_line(linestr, task.detail)
                         parse_kohya_stdout(linestr, task.detail)

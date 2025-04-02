@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:32:42
- * @LastEditTime: 2025-04-01 14:47:06
+ * @LastEditTime: 2025-04-02 09:28:16
  * @LastEditors: mulingyuer
  * @Description: task帮助
  * @FilePath: \frontend\src\views\task\task.helper.ts
@@ -53,4 +53,22 @@ export function unixFormat(timestamp: number | null, placeholder = "任务还未
 /** 格式化json字符串，让其更好阅读 */
 export function formatJson(obj: object) {
 	return JSON.stringify(obj, null, 2);
+}
+
+/** 根据任务类型返回item的class
+ *  一共item0-5的class
+ */
+export function taskTypeToClass(taskType: TaskType) {
+	switch (taskType) {
+		case TaskType.CAPTIONING:
+			return "item0";
+		case TaskType.TRAINING:
+			return "item1";
+		case TaskType.HUNYUAN_TRAINING:
+			return "item2";
+		case TaskType.WAN_TRAINING:
+			return "item3";
+		default:
+			return "item0";
+	}
 }

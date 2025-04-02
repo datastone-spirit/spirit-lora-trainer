@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:21:01
- * @LastEditTime: 2025-04-01 15:15:05
+ * @LastEditTime: 2025-04-02 09:29:02
  * @LastEditors: mulingyuer
  * @Description: 任务列表页
  * @FilePath: \frontend\src\views\task\index.vue
@@ -13,11 +13,10 @@
 			<TaskEmpty v-if="list.length <= 0 && !loading" />
 			<template v-else>
 				<TaskItem
-					v-for="(item, index) in list"
+					v-for="item in list"
 					:key="item.id"
 					:class="{ active: activeItemData?.id === item.id }"
 					:data="item"
-					:index="index"
 					@click="onItemClick(item)"
 				></TaskItem>
 			</template>

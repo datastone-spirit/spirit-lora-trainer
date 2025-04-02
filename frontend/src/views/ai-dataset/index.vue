@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-03-28 15:37:19
+ * @LastEditTime: 2025-04-02 09:33:53
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -64,8 +64,14 @@
 					</el-button>
 				</el-form-item>
 			</el-form>
-			<TagMonitor v-if="monitorTagData.isListen" />
-			<GPUMonitor v-if="trainingStore.useGPU" class="ai-dataset-page-left-gpu-monitor" />
+			<div class="ai-dataset-page-monitor">
+				<div class="ai-dataset-page-monitor-head">
+					<TagMonitor />
+				</div>
+				<div class="ai-dataset-page-monitor-body">
+					<GPUMonitor class="ai-dataset-page-left-gpu-monitor" />
+				</div>
+			</div>
 		</div>
 		<div class="ai-dataset-page-right">
 			<div id="ai-dataset-header" class="ai-dataset-header"></div>
@@ -239,9 +245,14 @@ onUnmounted(() => {
 .ai-dataset-page-left-btn {
 	width: 100%;
 }
-.ai-dataset-page-left-gpu-monitor {
+.ai-dataset-page-monitor-head {
+	display: flex;
 	justify-content: center;
+}
+.ai-dataset-page-monitor-body {
 	margin-top: 24px;
+	display: flex;
+	justify-content: center;
 }
 .ai-dataset-page-right {
 	flex-grow: 1;

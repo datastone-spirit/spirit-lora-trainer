@@ -72,6 +72,7 @@ class Task:
         task.is_sampling = is_flux_sampling(training_paramter.config)
         if task.is_sampling:
             task.sampling_path = os.path.join(training_paramter.config.output_dir, "sample")
+        task.stdout_lines = []
         return task
 
     @staticmethod
@@ -90,6 +91,7 @@ class Task:
         }
         task.task_type = TaskType.HUNYUAN_TRAINING
         task.start_time = time.time()
+        task.stdout_lines = []
         return task
 
     @staticmethod
@@ -111,6 +113,7 @@ class Task:
         task.captioning = cap_model.captioning
         task.global_prompt = global_prompt
         task.is_append = is_append
+        task.stdout_lines = []
         return task    
 
     @staticmethod
@@ -127,6 +130,7 @@ class Task:
         task.task_type = TaskType.WAN_TRAINING
         task.start_time = time.time()
         task.status = TaskStatus.CREATED
+        task.stdout_lines = []
         return task
 
 
@@ -209,7 +213,7 @@ class TrainingTask(Task):
         d = dict(self.__dict__)
         d.pop('training_parameters') 
         d.pop('proc') 
-        d.pop('stdout_lines')
+        d.pop('stdout_lines', None)
         # Replace proc with safe dict
         if verbose is True and self.proc:
             d['proc'] = self._get_proc_info()
@@ -356,7 +360,7 @@ class HunyuanTrainingTask(Task):
         d['task_type'] = self.task_type.value
         d.pop('hunyuan_parameters') 
         d.pop('proc') 
-        d.pop('stdout_lines')
+        d.pop('stdout_lines', None)
         if show_config is True and self.hunyuan_parameters:
             d['frontend_config'] = self.hunyuan_parameters.frontend_config
         return d
@@ -421,7 +425,7 @@ class WanTrainingTask(Task):
         d['task_type'] = self.task_type.value
         d.pop('wan_parameter') 
         d.pop('task_chain')
-        d.pop('stdout_lines')
+        d.pop('stdout_lines', None)
         if show_config is True and self.wan_parameter:
             d['frontend_config'] = self.wan_parameter.frontend_config
         return d
@@ -482,7 +486,7 @@ class SubTask:
         self.customize_env["NCCL_IB_DISABLE"]="1"        
         self.customize_env["PATHONPATH"]=self.module_path
     
-    def wait(self, proc: Popen, task: WanTrainingTask = None):
+    def wait(self, proc: Popen, task: WanTrainingTask = None, detail: dict = None):
         try:
             logger.info("beginning to run proc communication with task training process")
             linestr = ''
@@ -495,10 +499,11 @@ class SubTask:
                 if ch == b'\n':
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
-                    self.stdout_lines.append(linestr)
                     if task is not None:
-                        parse_kohya_progress_line(linestr, task.detail)
-                        parse_kohya_stdout(linestr, task.detail)
+                        task.stdout_lines.append(linestr)
+                    if detail is not None:
+                        parse_kohya_progress_line(linestr, detail)
+                        parse_kohya_stdout(linestr, detail)
                     line = bytearray()  #
             stdout, stderr = proc.communicate()
         except TimeoutExpired as exc:
@@ -595,7 +600,7 @@ class WanCacheLatentSubTask(SubTask):
         if is_i2v(task.wan_parameter.config.task):
             args.append("--clip")
             args.append(task.wan_parameter.config.clip)
-        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env))
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
         return task_chain.excute()
 
 class WanTextEncoderOutputCacheSubTask(SubTask):
@@ -616,7 +621,7 @@ class WanTextEncoderOutputCacheSubTask(SubTask):
             "--t5", 
             task.wan_parameter.config.t5,
         ]
-        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env))
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
         return task_chain.excute()
 
 class WanTrainingSubTask(SubTask):
@@ -636,5 +641,5 @@ class WanTrainingSubTask(SubTask):
             "--config", dataset2toml(task.wan_parameter.config),
             "--dataset_config", dataset2toml(task.wan_parameter.dataset),
         ]
-        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task, detail=task.detail)
         return task_chain.excute()

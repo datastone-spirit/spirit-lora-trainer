@@ -1384,3 +1384,60 @@ wan_training_api_config = {
         }
     }
 }
+
+task_run_log = {
+    "tags": ["Task"],
+    "description": "获取任务的运行日志",
+    "parameters": [
+        {
+            "name": "task_id",
+            "in": "query",
+            "type": "string",
+            "required": True,
+            "description": "任务的唯一标识",
+        }
+    ],
+    "responses": {
+        "200": {
+            "description": "成功返回任务日志",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": True},
+                    "message": {"type": "string", "example": "OK"},
+                    "data": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "任务运行日志行",
+                        "example": [
+                            "2025-04-02 10:15:23 - INFO - 任务开始初始化",
+                            "2025-04-02 10:15:24 - INFO - 加载训练配置",
+                            "2025-04-02 10:15:28 - INFO - 开始处理数据集",
+                            "2025-04-02 10:16:02 - INFO - 开始训练: 第1轮，共10轮"
+                        ]
+                    }
+                }
+            }
+        },
+        "404": {
+            "description": "任务不存在",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "msg": {"type": "string", "example": "task id 12345 not found"}
+                }
+            }
+        },
+        "500": {
+            "description": "服务器错误，获取任务日志失败",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": False},
+                    "msg": {"type": "string", "example": "Internal server error: [error details]"}
+                }
+            }
+        }
+    }
+}

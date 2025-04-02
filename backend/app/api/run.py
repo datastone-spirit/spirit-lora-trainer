@@ -15,7 +15,7 @@ from .resources.hunyuan_trainning import HunyuanTraining
 from app.api.resources.wan_trainning import WanTraining
 from .resources.gpu_log import GpuLog
 from .resources.current_task import CurrentTask
-from .resources.task_history import TaskHistory
+from .resources.task_history import TaskHistory, TaskRunLog
 from flasgger import Swagger
 from utils.util import getprojectpath
 
@@ -61,6 +61,7 @@ api.add_resource(WanTraining, "/training/wan/start")  # 启动Wan(万象）训�
 api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
 api.add_resource(CurrentTask, "/tasks/current") # gpu功耗、显存信息
 api.add_resource(TaskHistory, "/tasks/history") # gpu功耗、显存信息
+api.add_resource(TaskRunLog, "/tasks/logs") # gpu功耗、显存信息
 
 
 

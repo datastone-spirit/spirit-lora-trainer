@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-28 10:35:03
+ * @LastEditTime: 2025-04-02 15:04:44
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -95,33 +95,40 @@
 <script setup lang="ts">
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
-import type { LoRATrainingInfoResult } from "@/api/monitor";
 import ViewSampling from "@/components/ViewSampling/index.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useFluxLora } from "@/hooks/useFluxLora";
 import { useTag } from "@/hooks/useTag";
 import { useSettingsStore, useTrainingStore } from "@/stores";
-import { checkDirectory } from "@/utils/lora.helper";
-import { tomlParse, tomlStringify } from "@/utils/toml";
+import { getEnv } from "@/utils/env";
+import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
+import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
-import { formatFormData, mergeDataToForm } from "./flux.helper";
+import { formatFormData } from "./flux.helper";
 import { validateForm } from "./flux.validate";
 import type { RuleForm } from "./types";
-import { getEnv } from "@/utils/env";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
-const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData, isFluxLoraTaskEnd } =
-	useFluxLora({
-		isFirstGetConfig: true,
-		firstGetConfigCallback: firstResetFormConfig
-	});
+const {
+	monitorFluxLoraData,
+	startQueryFluxTask,
+	stopQueryFluxTask,
+	resumeQueryFluxTask,
+	pauseQueryFluxTask,
+	queryFluxTaskInfo
+} = useFluxLora();
+// const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData, isFluxLoraTaskEnd } =
+// 	useFluxLora({
+// 		isFirstGetConfig: true,
+// 		firstGetConfigCallback: firstResetFormConfig
+// 	});
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const env = getEnv();
@@ -555,7 +562,7 @@ async function onSubmit() {
 		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startFluxTraining(data);
 		// 监听训练数据
-		startFluxLoraListen(task_id);
+		startQueryFluxTask(task_id);
 
 		submitLoading.value = false;
 		isRestored.value = true;
@@ -563,7 +570,7 @@ async function onSubmit() {
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
-		stopFluxLoraListen(true);
+		stopQueryFluxTask();
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
@@ -578,23 +585,19 @@ function onViewSampling() {
 	openViewSampling.value = true;
 }
 
-/** 如果存在运行的任务，则在每次第一次更新任务时恢复表单配置为训练时的配置 */
-function firstResetFormConfig(taskData: LoRATrainingInfoResult) {
-	if (!taskData.frontend_config || isRestored.value) return;
-	isRestored.value = true;
-	const tomlData = tomlParse(taskData.frontend_config);
-	mergeDataToForm(tomlData, ruleForm.value);
-	ElMessage.success("训练配置已恢复");
-}
-
 // 组件生命周期
 onMounted(() => {
-	if (!isFluxLoraTaskEnd()) {
-		startFluxLoraListen();
-	}
+	resumeQueryFluxTask();
+	// 恢复表单数据
+	recoveryTaskFormData({
+		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
+		isListen: monitorFluxLoraData.value.isListen,
+		taskId: queryFluxTaskInfo.value.taskId,
+		formData: ruleForm.value
+	});
 });
 onUnmounted(() => {
-	stopFluxLoraListen();
+	pauseQueryFluxTask();
 });
 </script>
 

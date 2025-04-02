@@ -1,13 +1,12 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-04-01 15:38:15
+ * @LastEditTime: 2025-04-02 15:31:20
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
  * 怎么可能会有bug！！！
  */
-import type { TaskStatus } from "@/api/types";
 import type {
 	GPUMonitorInfoResult,
 	HyVideoTrainingInfoResult,
@@ -84,14 +83,6 @@ export interface FluxLoraData extends BaseMonitorData {
 export interface MonitorFluxLoraData {
 	/** 是否监听 */
 	isListen: boolean;
-	/** 任务id */
-	taskId: string;
-	/** 任务状态 */
-	taskStatus: TaskStatus | "none";
-	/** 监听间隔 */
-	sleepTime: number;
-	/** 是否在轮询 */
-	isPolling: boolean;
 	/** lora数据 */
 	data: FluxLoraData;
 }
@@ -124,14 +115,6 @@ export interface HYLoraData extends BaseMonitorData {
 export interface MonitorHYLoraData {
 	/** 是否监听 */
 	isListen: boolean;
-	/** 任务id */
-	taskId: string;
-	/** 任务状态 */
-	taskStatus: TaskStatus | "none";
-	/** 监听间隔 */
-	sleepTime: number;
-	/** 是否在轮询 */
-	isPolling: boolean;
 	/** lora数据 */
 	data: HYLoraData;
 }

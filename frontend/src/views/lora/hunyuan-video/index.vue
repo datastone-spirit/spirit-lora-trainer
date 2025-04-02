@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-03-28 10:35:09
+ * @LastEditTime: 2025-04-02 15:30:56
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -79,21 +79,20 @@
 
 <script setup lang="ts">
 import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
-import type { HyVideoTrainingInfoResult } from "@/api/monitor";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useHYLora } from "@/hooks/useHYLora";
 import { useTag } from "@/hooks/useTag";
-import { useSettingsStore, useTrainingStore, useModalManagerStore } from "@/stores";
+import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
-import { checkData, checkDirectory, checkHYData } from "@/utils/lora.helper";
-import { tomlParse, tomlStringify } from "@/utils/toml";
+import { checkData, checkDirectory, checkHYData, recoveryTaskFormData } from "@/utils/lora.helper";
+import { tomlStringify } from "@/utils/toml";
 import { formatFormValidateMessage } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
-import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
+import { formatFormData } from "./hunyuan.helper";
 import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
@@ -101,10 +100,14 @@ const trainingStore = useTrainingStore();
 const modelManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
-const { startHYLoraListen, stopHYLoraListen, isHYLoraTaskEnd } = useHYLora({
-	isFirstGetConfig: true,
-	firstGetConfigCallback: firstResetFormConfig
-});
+const {
+	monitorHYLoraData,
+	queryHYTaskInfo,
+	startQueryHYTask,
+	stopQueryHYTask,
+	resumeQueryHYTask,
+	pauseQueryHYTask
+} = useHYLora();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -371,27 +374,18 @@ async function onSubmit() {
 		const data: StartHyVideoTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startHyVideoTraining(data);
 		// 监听训练数据
-		startHYLoraListen(task_id);
+		startQueryHYTask(task_id);
 
 		submitLoading.value = false;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控训练数据
-		stopHYLoraListen(true);
+		stopQueryHYTask();
 
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
-}
-
-/** 如果存在运行的任务，则在每次第一次更新任务时恢复表单配置为训练时的配置 */
-function firstResetFormConfig(taskData: HyVideoTrainingInfoResult) {
-	if (!taskData.frontend_config || isRestored.value) return;
-	isRestored.value = true;
-	const tomlData = tomlParse(taskData.frontend_config);
-	mergeDataToForm(tomlData, ruleForm.value);
-	ElMessage.success("训练配置已恢复");
 }
 
 /** lora保存目录非/root确认弹窗 */
@@ -405,12 +399,17 @@ function confirmLoRASaveDir() {
 
 // 组件生命周期
 onMounted(() => {
-	if (!isHYLoraTaskEnd()) {
-		startHYLoraListen();
-	}
+	resumeQueryHYTask();
+	// 恢复表单数据
+	recoveryTaskFormData({
+		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
+		isListen: monitorHYLoraData.value.isListen,
+		taskId: queryHYTaskInfo.value.taskId,
+		formData: ruleForm.value
+	});
 });
 onUnmounted(() => {
-	stopHYLoraListen();
+	pauseQueryHYTask();
 });
 </script>
 

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-04-01 09:34:16
+ * @LastEditTime: 2025-04-02 15:27:16
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
@@ -62,35 +62,21 @@ class TaskInitializer {
 
 	/** flux 训练初始化 */
 	private async initFluxTraining() {
-		const { id, status } = this.taskData;
-		const { isFluxLoraTaskEnd, setFluxTaskId, updateFluxLoraData } = useFluxLora();
+		const { initQueryFluxTask } = useFluxLora();
 
-		// 如果已经完成或者失败，不做任何操作
-		if (isFluxLoraTaskEnd(status)) return;
-		// 未完成只更新状态数据，轮询请求由页面来控制
-		setFluxTaskId(id);
-		updateFluxLoraData(this.taskData as LoRATrainingInfoResult);
-
-		ElMessage({
-			message: "当前正在训练LoRA...",
-			type: "info"
+		return initQueryFluxTask({
+			taskData: this.taskData as LoRATrainingInfoResult,
+			showTaskStartPrompt: true
 		});
 	}
 
 	/** 混元视频训练初始化 */
 	private async initHyVideoTraining() {
-		const { id, status } = this.taskData;
-		const { isHYLoraTaskEnd, setHYLoraTaskId, updateHYLoraData } = useHYLora();
+		const { initQueryHYTask } = useHYLora();
 
-		// 如果已经完成或者失败，不做任何操作
-		if (isHYLoraTaskEnd(status)) return;
-		// 未完成只更新状态数据，轮询请求由页面来控制
-		setHYLoraTaskId(id);
-		updateHYLoraData(this.taskData as HyVideoTrainingInfoResult);
-
-		ElMessage({
-			message: "当前正在训练混元视频LoRA...",
-			type: "info"
+		return initQueryHYTask({
+			wanTaskData: this.taskData as HyVideoTrainingInfoResult,
+			showTaskStartPrompt: true
 		});
 	}
 

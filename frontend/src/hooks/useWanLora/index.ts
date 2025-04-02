@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-28 10:45:50
- * @LastEditTime: 2025-04-01 15:37:39
+ * @LastEditTime: 2025-04-02 15:41:31
  * @LastEditors: mulingyuer
  * @Description: 训练wan lora的hooks
  * @FilePath: \frontend\src\hooks\useWanLora\index.ts
@@ -14,9 +14,12 @@ import type {
 	QueryWanTaskInfo,
 	InitWanTrainingTaskOptions
 } from "./types";
+export type * from "./types";
 import mitt from "mitt";
-import { useModalManagerStore, useTrainingStore, type WanLoraData } from "@/stores";
-import { wanVideoTrainingInfo, type WanVideoTrainingInfoResult } from "@/api/monitor";
+import { useModalManagerStore, useTrainingStore } from "@/stores";
+import type { WanLoraData } from "@/stores";
+import { wanVideoTrainingInfo } from "@/api/monitor";
+import type { WanVideoTrainingInfoResult } from "@/api/monitor";
 import { calculatePercentage } from "@/utils/tools";
 import { isNetworkError } from "@/request";
 
@@ -25,16 +28,16 @@ const queryWanTaskInfo = ref<QueryWanTaskInfo>({
 	taskId: "",
 	status: "idle",
 	timer: null,
-	delay: 3000
+	delay: 8000
 });
 /** wan任务事件订阅 */
 const wanEvents = mitt<TrainingEvent>();
 
 /** 开始查询wan训练任务信息 */
 function startQueryWanTask(taskId: string) {
-	if (!canQueryTagTask(queryWanTaskInfo.value.status)) return;
+	if (!canQueryWanTask(queryWanTaskInfo.value.status)) return;
 	if (typeof taskId !== "string" || taskId.trim() === "") {
-		console.warn("查询打标任务没有提供任务ID，本次查询已跳过");
+		console.warn("查询任务没有提供任务ID，本次查询已跳过");
 		return;
 	}
 
@@ -204,14 +207,14 @@ function handleQueryFailure(error: any) {
 }
 
 /** 允许查询的状态 */
-const canQueryTagTaskStatus: Array<QueryTaskStatus> = ["idle", "success", "failure"];
+const canQueryWanTaskStatus: Array<QueryTaskStatus> = ["idle", "success", "failure"];
 /** 允许再次查询 */
-function canQueryTagTask(status: QueryTaskStatus) {
+function canQueryWanTask(status: QueryTaskStatus) {
 	if (typeof status !== "string") {
-		console.error("检查查询打标任务状态时，状态参数不是字符串：", status);
+		console.error("检查查询任务状态时，状态参数不是字符串：", status);
 		return false;
 	}
-	return canQueryTagTaskStatus.includes(status);
+	return canQueryWanTaskStatus.includes(status);
 }
 
 /** 格式化wan训练任务信息 */
@@ -250,7 +253,7 @@ export function useWanLora() {
 		initQueryWanTask,
 		handleQuerySuccess,
 		handleQueryFailure,
-		canQueryTagTask,
+		canQueryWanTask,
 		monitorWanLoraData,
 		queryWanTaskInfo,
 		wanEvents

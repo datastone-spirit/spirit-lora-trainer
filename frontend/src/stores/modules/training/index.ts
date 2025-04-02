@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-04-01 15:38:21
+ * @LastEditTime: 2025-04-02 15:32:09
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -111,10 +111,6 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听flux lora训练 */
 	const monitorFluxLoraData = ref<MonitorFluxLoraData>({
 		isListen: false,
-		taskId: "",
-		taskStatus: "none",
-		sleepTime: 3000,
-		isPolling: false,
 		data: {
 			current: 0,
 			elapsed: "",
@@ -130,19 +126,6 @@ export const useTrainingStore = defineStore("training", () => {
 	});
 	function setFluxLoraIsListen(val: boolean) {
 		monitorFluxLoraData.value.isListen = val;
-	}
-	function setFluxLoraTaskId(taskId: string) {
-		monitorFluxLoraData.value.taskId = taskId;
-	}
-	function setFluxLoraTaskStatus(status: MonitorFluxLoraData["taskStatus"]) {
-		monitorFluxLoraData.value.taskStatus = status;
-	}
-	function isFluxLoraTaskEnd(status?: MonitorFluxLoraData["taskStatus"]) {
-		status = status ?? monitorFluxLoraData.value.taskStatus;
-		return ["complete", "failed", "none"].includes(status);
-	}
-	function setFluxLoraIsPolling(val: boolean) {
-		monitorFluxLoraData.value.isPolling = val;
 	}
 	function setFluxLoraData(data: MonitorFluxLoraData["data"]) {
 		monitorFluxLoraData.value.data = data;
@@ -165,10 +148,6 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听混元视频 lora训练 */
 	const monitorHYLoraData = ref<MonitorHYLoraData>({
 		isListen: false,
-		taskId: "",
-		taskStatus: "none",
-		sleepTime: 15000,
-		isPolling: false,
 		data: {
 			current: 0,
 			total: 0,
@@ -184,19 +163,6 @@ export const useTrainingStore = defineStore("training", () => {
 	});
 	function setHYLoraIsListen(val: boolean) {
 		monitorHYLoraData.value.isListen = val;
-	}
-	function setHYLoraTaskId(taskId: string) {
-		monitorHYLoraData.value.taskId = taskId;
-	}
-	function setHYLoraTaskStatus(status: MonitorHYLoraData["taskStatus"]) {
-		monitorHYLoraData.value.taskStatus = status;
-	}
-	function isHYLoraTaskEnd(status?: MonitorHYLoraData["taskStatus"]) {
-		status = status ?? monitorHYLoraData.value.taskStatus;
-		return ["complete", "failed", "none"].includes(status);
-	}
-	function setHYLoraIsPolling(val: boolean) {
-		monitorHYLoraData.value.isPolling = val;
 	}
 	function setHYLoraData(data: MonitorHYLoraData["data"]) {
 		monitorHYLoraData.value.data = data;
@@ -220,8 +186,8 @@ export const useTrainingStore = defineStore("training", () => {
 	const useGPU = computed(() => {
 		return (
 			monitorTagData.value.isListen ||
-			!isFluxLoraTaskEnd() ||
-			!isHYLoraTaskEnd() ||
+			monitorFluxLoraData.value.isListen ||
+			monitorHYLoraData.value.isListen ||
 			monitorWanLoraData.value.isListen
 		);
 	});
@@ -243,18 +209,10 @@ export const useTrainingStore = defineStore("training", () => {
 		resetTagData,
 		monitorFluxLoraData,
 		setFluxLoraIsListen,
-		setFluxLoraTaskId,
-		setFluxLoraTaskStatus,
-		isFluxLoraTaskEnd,
-		setFluxLoraIsPolling,
 		setFluxLoraData,
 		resetFluxLoraData,
 		monitorHYLoraData,
 		setHYLoraIsListen,
-		setHYLoraTaskId,
-		setHYLoraTaskStatus,
-		isHYLoraTaskEnd,
-		setHYLoraIsPolling,
 		setHYLoraData,
 		resetHYLoraData,
 		useGPU,

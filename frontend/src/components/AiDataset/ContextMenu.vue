@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 17:37:52
- * @LastEditTime: 2024-12-15 03:21:31
+ * @LastEditTime: 2025-04-02 15:32:58
  * @LastEditors: mulingyuer
  * @Description: 右键菜单
  * @FilePath: \frontend\src\components\AiDataset\ContextMenu.vue
@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { menuList } from "./context-menu.helper";
 import type { ContextMenuItem } from "./context-menu.helper";
-import type { FileItem } from "./types";
+import type { FileItem } from "@/utils/file-manager";
 
 export interface ContextMenuProps {
 	left: number;

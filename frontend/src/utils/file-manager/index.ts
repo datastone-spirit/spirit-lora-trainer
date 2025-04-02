@@ -1,22 +1,19 @@
 /*
  * @Author: mulingyuer
- * @Date: 2024-12-19 17:05:19
- * @LastEditTime: 2025-04-01 16:12:46
+ * @Date: 2025-04-02 11:25:07
+ * @LastEditTime: 2025-04-02 11:28:36
  * @LastEditors: mulingyuer
- * @Description: 数据集帮助工具
- * @FilePath: \frontend\src\components\AiDataset\ai-dataset.helper.ts
+ * @Description: 文件管理器
+ * @FilePath: \frontend\src\utils\file-manager\index.ts
  * 怎么可能会有bug！！！
  */
 import type { DirectoryFilesResult } from "@/api/common";
-import {
-	type FileList,
-	FileType,
-	type ImageFileItem,
-	type TextFileItem,
-	type VideoFileItem
-} from "./types";
+import type { FileList, ImageFileItem, TextFileItem, VideoFileItem } from "./types";
+export type * from "./types";
+import { FileType } from "./enums";
+export * from "./enums";
 
-export class AiDatasetHelper {
+export class FileManager {
 	/** 格式化api目录下的列表数据 */
 	public formatDirectoryFiles(data: DirectoryFilesResult): FileList {
 		const list: FileList = [];

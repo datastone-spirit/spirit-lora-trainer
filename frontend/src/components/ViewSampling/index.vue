@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-07 08:53:05
- * @LastEditTime: 2025-02-18 11:04:04
+ * @LastEditTime: 2025-04-02 11:51:40
  * @LastEditors: mulingyuer
  * @Description: 查看采样
  * @FilePath: \frontend\src\components\ViewSampling\index.vue
@@ -40,38 +40,13 @@
 			<el-scrollbar height="100%" v-loading="loading">
 				<el-empty v-if="list.length === 0" :image-size="100" />
 				<div v-else class="view-sampling-list">
-					<div
+					<component
 						v-for="(item, index) in list"
-						:key="index"
-						class="view-sampling-list-item"
+						:key="item.value"
+						:is="FileItemMap[item.type]"
+						:data="item"
 						@click="onItemClick(item, index)"
-					>
-						<el-image
-							class="view-sampling-list-item-img"
-							:src="item.image_path + '?compress=true'"
-							:fit="fit"
-							:lazy="lazy"
-							title="双击查看图片细节"
-						>
-							<template #placeholder>
-								<img
-									class="view-sampling-list-item-default-img"
-									:src="DefaultImageIcon"
-									:alt="item.image_name"
-								/>
-							</template>
-							<template #error>
-								<img
-									class="view-sampling-list-item-default-img"
-									:src="DefaultImageIcon"
-									:alt="item.image_name"
-								/>
-							</template>
-						</el-image>
-						<div class="view-sampling-list-item-name" :title="item.image_name">
-							{{ item.image_name }}
-						</div>
-					</div>
+					/>
 				</div>
 			</el-scrollbar>
 		</div>
@@ -79,11 +54,14 @@
 </template>
 
 <script setup lang="ts">
-import DefaultImageIcon from "@/assets/images/ai-dataset/image_icon.svg";
+import { directoryFiles } from "@/api/common";
+import { FileItemMap } from "@/components/FileManager";
 import { useIcon } from "@/hooks/useIcon";
 import { useImageViewer } from "@/hooks/useImageViewer";
-import { directoryFiles } from "@/api/common";
+import type { FileItem, FileList } from "@/utils/file-manager";
+import { FileManager, FileType } from "@/utils/file-manager";
 import type { ImageProps } from "element-plus";
+import { useVideoPreview } from "@/hooks/useVideoPreview";
 
 export interface ViewSamplingProps {
 	/** 采样图片存放路径 */
@@ -91,7 +69,6 @@ export interface ViewSamplingProps {
 	fit?: ImageProps["fit"];
 	lazy?: ImageProps["lazy"];
 }
-export type List = Array<{ image_name: string; image_path: string }>;
 
 const props = withDefaults(defineProps<ViewSamplingProps>(), {
 	fit: "cover",
@@ -99,12 +76,14 @@ const props = withDefaults(defineProps<ViewSamplingProps>(), {
 });
 
 const { previewImages } = useImageViewer();
+const { previewVideo } = useVideoPreview();
+const fileManager = new FileManager();
 
 const CloseIcon = useIcon({ name: "ri-close-line", size: 28 });
 const RefreshIcon = useIcon({ name: "ri-refresh-line", size: 24 });
 const open = defineModel("open", { type: Boolean, required: true });
 const loading = ref(false);
-const list = ref<List>([]);
+const list = ref<FileList>([]);
 
 /** 关闭抽屉 */
 function onClose() {
@@ -112,17 +91,19 @@ function onClose() {
 }
 
 /** 点击列表项 */
-function onItemClick(_item: List[0], index: number) {
-	previewImages({
-		urlList: list.value.map((item) => `${item.image_path}?compress=false`),
-		initialIndex: index,
-		filenameList: list.value.map((item) => item.image_name)
-	});
-}
-
-/** 拼接图片url */
-function joinImageUrl(imagePath: string): string {
-	return `${import.meta.env.VITE_APP_API_BASE_URL}/image${imagePath}`;
+function onItemClick(item: FileItem, index: number) {
+	if (item.type === FileType.IMAGE) {
+		previewImages({
+			urlList: list.value.map((item) => `${item.value}?compress=false`),
+			initialIndex: index,
+			filenameList: list.value.map((item) => item.name)
+		});
+	} else if (item.type === FileType.VIDEO) {
+		previewVideo({
+			src: item.value,
+			title: item.name
+		});
+	}
 }
 
 /** 获取采样数据 */
@@ -134,12 +115,9 @@ function getSamplingData() {
 	loading.value = true;
 	directoryFiles({ path: props.samplingPath })
 		.then((res) => {
-			list.value = res.map((item) => {
-				return {
-					image_name: item.image_name,
-					image_path: joinImageUrl(item.image_path)
-				};
-			});
+			list.value = fileManager
+				.formatDirectoryFiles(res)
+				.filter((item) => item.type !== FileType.TEXT);
 		})
 		.catch((error) => {
 			if (error?.response?.status === 401) return;

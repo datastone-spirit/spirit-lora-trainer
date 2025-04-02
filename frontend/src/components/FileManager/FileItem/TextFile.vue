@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 15:15:44
- * @LastEditTime: 2025-04-01 16:15:51
+ * @LastEditTime: 2025-04-02 11:46:15
  * @LastEditors: mulingyuer
  * @Description: 文本文件
- * @FilePath: \frontend\src\components\AiDataset\FileItem\TextFile.vue
+ * @FilePath: \frontend\src\components\FileManager\FileItem\TextFile.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -16,7 +16,8 @@
 
 <script setup lang="ts">
 import type { ImageProps } from "element-plus";
-import type { BaseFileItemProps, FileItem } from "../types";
+import type { BaseFileItemProps } from "../types";
+import type { FileItem } from "@/utils/file-manager";
 import TextIcon from "@/assets/images/ai-dataset/text_icon.svg";
 
 export interface TextFileProps extends BaseFileItemProps {
@@ -25,7 +26,8 @@ export interface TextFileProps extends BaseFileItemProps {
 }
 
 withDefaults(defineProps<TextFileProps>(), {
-	lazy: false
+	lazy: false,
+	selected: false
 });
 </script>
 

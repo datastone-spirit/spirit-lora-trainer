@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-13 15:15:16
- * @LastEditTime: 2025-02-17 16:01:55
+ * @LastEditTime: 2025-04-02 11:46:19
  * @LastEditors: mulingyuer
  * @Description: 图片文件
- * @FilePath: \frontend\src\components\AiDataset\ImageFile.vue
+ * @FilePath: \frontend\src\components\FileManager\FileItem\ImageFile.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -28,7 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import type { BaseFileItemProps, FileItem } from "../types";
+import type { BaseFileItemProps } from "../types";
+import type { FileItem } from "@/utils/file-manager";
 import type { ImageProps } from "element-plus";
 import DefaultImageIcon from "@/assets/images/ai-dataset/image_icon.svg";
 
@@ -40,7 +41,8 @@ export interface ImageFileProps extends BaseFileItemProps {
 
 withDefaults(defineProps<ImageFileProps>(), {
 	fit: "cover",
-	lazy: true
+	lazy: true,
+	selected: false
 });
 </script>
 

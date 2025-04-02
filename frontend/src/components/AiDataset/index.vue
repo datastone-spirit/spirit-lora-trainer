@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-04-01 17:31:51
+ * @LastEditTime: 2025-04-02 11:42:18
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -17,7 +17,7 @@
 						<component
 							v-for="(item, index) in list"
 							:key="item.value"
-							:is="componentMap[item.type]"
+							:is="FileItemMap[item.type]"
 							:data="item"
 							:selected="activeItemIndex !== null && activeItemIndex === index"
 							@contextmenu.prevent="onContextMenu($event, item)"
@@ -101,16 +101,13 @@ import { checkDirectory } from "@/utils/lora.helper";
 import { generateUUID, sleep } from "@/utils/tools";
 import type { AxiosProgressEvent } from "axios";
 import type { UploadInstance, UploadUserFile } from "element-plus";
-import { AiDatasetHelper } from "./ai-dataset.helper";
 import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
 import ContextMenu from "./ContextMenu.vue";
-import ImageFile from "./FileItem/ImageFile.vue";
 import TagEdit from "./TagEdit.vue";
-import TextFile from "./FileItem/TextFile.vue";
-import VideoFile from "./FileItem/VideoFile.vue";
-import type { FileItem, FileList } from "./types";
-import { FileType } from "./types";
 import { useVideoPreview } from "@/hooks/useVideoPreview";
+import { FileManager, FileType } from "@/utils/file-manager";
+import type { FileItem, FileList } from "@/utils/file-manager";
+import { FileItemMap } from "@/components/FileManager";
 
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
@@ -123,13 +120,6 @@ export interface AiDatasetProps {
 	accept?: string;
 }
 
-/** 组件map */
-const componentMap: Record<FileType, any> = {
-	[FileType.IMAGE]: ImageFile,
-	[FileType.TEXT]: TextFile,
-	[FileType.VIDEO]: VideoFile
-};
-
 const props = withDefaults(defineProps<AiDatasetProps>(), {
 	showTeleportBtn: true,
 	accept:
@@ -138,7 +128,7 @@ const props = withDefaults(defineProps<AiDatasetProps>(), {
 const { previewImages } = useImageViewer();
 const { previewVideo } = useVideoPreview();
 const { tagEvents } = useTag();
-const aiDatasetHelper = new AiDatasetHelper();
+const fileManager = new FileManager();
 
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
 const list = ref<FileList>([]);
@@ -154,7 +144,7 @@ async function getList() {
 
 		// api
 		const fileList = await directoryFiles({ path: props.dir });
-		list.value = aiDatasetHelper.formatDirectoryFiles(fileList);
+		list.value = fileManager.formatDirectoryFiles(fileList);
 
 		loading.value = false;
 	} catch (error) {

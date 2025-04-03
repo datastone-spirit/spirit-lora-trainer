@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:24:19
- * @LastEditTime: 2025-04-02 17:01:01
+ * @LastEditTime: 2025-04-03 16:16:10
  * @LastEditors: mulingyuer
  * @Description: 任务详情
  * @FilePath: \frontend\src\views\task\components\TagTaskDetail.vue
@@ -40,13 +40,7 @@
 					{{ formatJson(data.detail.captions) }}
 				</el-descriptions-item>
 			</template>
-			<el-descriptions-item label="查看日志" :span="2">
-				<el-button type="info" @click="onShowLog"> 查看日志 </el-button>
-			</el-descriptions-item>
 		</el-descriptions>
-		<div v-if="showLog" class="task-log">
-			<TaskLog :task-id="data.id" />
-		</div>
 	</div>
 </template>
 
@@ -62,12 +56,6 @@ const props = defineProps<TaskDetailProps>();
 
 /** 是否失败 */
 const isFailed = computed(() => typeof props.data.detail === "string");
-
-/** 查看日志 */
-const showLog = ref(false);
-function onShowLog() {
-	showLog.value = true;
-}
 </script>
 
 <style lang="scss" scoped>
@@ -78,8 +66,5 @@ function onShowLog() {
 	:deep(.task-detail-json) {
 		white-space: pre-wrap;
 	}
-}
-.task-log {
-	margin-top: 20px;
 }
 </style>

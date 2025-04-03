@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-31 10:42:26
- * @LastEditTime: 2025-04-03 14:55:31
+ * @LastEditTime: 2025-04-03 17:17:58
  * @LastEditors: mulingyuer
  * @Description: 视频数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\VideoDataSet.vue
@@ -115,7 +115,7 @@
 			@click="onGetCalcVideoImageCount"
 		>
 			<Icon class="video-dataset-calc-button-icon" name="ri-calculator-line" />
-			预估训练集图片数量：{{ calcVideoImageCount }}
+			batch 批次预估：{{ calcVideoImageCount }}
 		</el-button>
 	</el-form-item>
 </template>

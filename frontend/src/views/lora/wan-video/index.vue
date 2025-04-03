@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-03 11:05:45
+ * @LastEditTime: 2025-04-03 14:57:06
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -78,7 +78,6 @@ import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
 import { WanValidate } from "./wan.validate";
 import { generateUUID } from "@/utils/tools";
-import { validate } from "uuid";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();

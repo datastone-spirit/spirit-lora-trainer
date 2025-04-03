@@ -1,13 +1,17 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-03 10:59:56
+ * @LastEditTime: 2025-04-03 14:45:14
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
  * 怎么可能会有bug！！！
  */
-import type { StartWanVideoTrainingData, StartWanVideoTrainingVideoDataset } from "@/api/lora";
+import type {
+	StartWanVideoTrainingData,
+	StartWanVideoTrainingVideoDataset,
+	WanVideoTrainingImageDatasetCountData
+} from "@/api/lora";
 import { filterAndConvertKeysToNumber } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
 import type { RuleForm, TargetFrames } from "./types";
@@ -22,6 +26,11 @@ export class WanHelper {
 			dataset: this.formatDataset(deepCloneForm),
 			frontend_config: tomlStringify(deepCloneForm)
 		};
+	}
+
+	/** 计算视频预估图片数量数据格式化 */
+	public formatImagesCountEstimate(data: RuleForm): WanVideoTrainingImageDatasetCountData {
+		return this.formatDataset(data);
 	}
 
 	/** 格式化config数据 */

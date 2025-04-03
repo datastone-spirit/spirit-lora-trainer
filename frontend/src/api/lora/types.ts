@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-02 09:40:38
+ * @LastEditTime: 2025-04-03 14:40:07
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -610,4 +610,13 @@ export interface StartWanVideoTrainingResult {
 	success: boolean;
 	/** 任务id */
 	task_id: string;
+}
+
+/** 获取wan视频预估训练集图片数参数 */
+export type WanVideoTrainingImageDatasetCountData = StartWanVideoTrainingData["dataset"];
+
+/** 获取wan视频预估训练集图片数结果 */
+export interface WanVideoTrainingImageDatasetCountResult {
+	/** 预估图片数量 */
+	total_image: number;
 }

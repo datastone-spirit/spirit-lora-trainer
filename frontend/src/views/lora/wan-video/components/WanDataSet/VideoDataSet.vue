@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-31 10:42:26
- * @LastEditTime: 2025-04-03 11:06:44
+ * @LastEditTime: 2025-04-03 14:55:31
  * @LastEditors: mulingyuer
  * @Description: 视频数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\VideoDataSet.vue
@@ -106,12 +106,26 @@
 			:min="1"
 		/>
 	</PopoverFormItem>
+	<el-form-item class="no-mb">
+		<el-button
+			class="video-dataset-calc-button"
+			type="primary"
+			:loading="calcLoading"
+			round
+			@click="onGetCalcVideoImageCount"
+		>
+			<Icon class="video-dataset-calc-button-icon" name="ri-calculator-line" />
+			预估训练集图片数量：{{ calcVideoImageCount }}
+		</el-button>
+	</el-form-item>
 </template>
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
 import { useIcon } from "@/hooks/useIcon";
 import { generateUUID } from "@/utils/tools";
+import { wanVideoTrainingImageDatasetCount } from "@/api/lora";
+import { WanHelper } from "../../wan.helper";
 
 export type FrameExtractionExplain = Array<{
 	id: string;
@@ -122,6 +136,7 @@ export type FrameExtractionExplain = Array<{
 
 type TargetFramesItem = RuleForm["dataset"]["datasets"][number]["target_frames"][number];
 
+const wanHelper = new WanHelper();
 const RiDeleteBin_7Line = useIcon({ name: "ri-delete-bin-7-line" });
 const RiAddCircleLine = useIcon({ name: "ri-add-circle-line" });
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
@@ -211,6 +226,23 @@ function onAddTargetFrames() {
 		value: undefined
 	});
 }
+
+/** 预估图片数量 */
+const calcLoading = ref(false);
+const calcVideoImageCount = ref<string | number>("??");
+function onGetCalcVideoImageCount() {
+	calcLoading.value = true;
+	wanVideoTrainingImageDatasetCount(wanHelper.formatImagesCountEstimate(ruleForm.value))
+		.then((res) => {
+			calcVideoImageCount.value = res.total_image;
+		})
+		.catch((_error) => {
+			calcVideoImageCount.value = "计算失败，请检查输入参数";
+		})
+		.finally(() => {
+			calcLoading.value = false;
+		});
+}
 </script>
 
 <style lang="scss" scoped>
@@ -252,5 +284,14 @@ function onAddTargetFrames() {
 }
 .target-frames-item-delete {
 	margin-left: $zl-padding;
+}
+.el-form-item.no-mb {
+	margin-bottom: 0;
+}
+.video-dataset-calc-button {
+	width: 100%;
+}
+.video-dataset-calc-button-icon {
+	margin-right: 6px;
 }
 </style>

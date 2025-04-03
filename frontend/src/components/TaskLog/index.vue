@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-02 15:55:35
- * @LastEditTime: 2025-04-03 08:57:56
+ * @LastEditTime: 2025-04-03 16:10:15
  * @LastEditors: mulingyuer
  * @Description: 任务日志组件
  * @FilePath: \frontend\src\components\TaskLog\index.vue
@@ -50,10 +50,8 @@ function getTaskLog() {
 	loading.value = true;
 	return taskLog({ task_id: props.taskId })
 		.then((res) => {
-			console.log("🚀 ~ .then ~ res:", res);
 			logList.value = res;
 			logHtml.value = logToHtml(res);
-			console.log(111);
 		})
 		.catch(() => {})
 		.finally(() => {

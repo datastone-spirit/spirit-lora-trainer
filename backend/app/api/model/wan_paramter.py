@@ -6,7 +6,7 @@ import dacite
 import os
 
 from utils.util import setup_logging, is_blank, getprojectpath
-from app.api.common.utils import generate_sample_prompt_file
+from app.api.common.utils import generate_sample_prompt_file, get_dataset_contents
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
@@ -426,3 +426,4 @@ class WanTrainingParameter:
         
         parameter.dataset = WanDataSetConfig.validate(parameter.dataset, task=parameter.config.task)
         return parameter
+

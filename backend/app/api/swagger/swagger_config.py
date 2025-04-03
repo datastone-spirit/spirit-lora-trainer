@@ -1441,3 +1441,135 @@ task_run_log = {
         }
     }
 }
+
+wan_dataset_estimate = {
+    "tags": ["Dataset"],
+    "description": "Estimate the number of images that will be extracted from videos in the dataset",
+    "parameters": [
+        {
+            "name": "body",
+            "in": "body",
+            "required": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "general": {
+                        "type": "object",
+                        "properties": {
+                            "resolution": {
+                                "type": "array",
+                                "items": {"type": "integer"},
+                                "example": [960, 544],
+                                "description": "Resolution [width, height] for the dataset"
+                            },
+                            "caption_extension": {
+                                "type": "string",
+                                "example": ".txt",
+                                "description": "File extension for caption files"
+                            },
+                            "batch_size": {
+                                "type": "integer",
+                                "example": 1,
+                                "description": "Batch size for training"
+                            },
+                            "num_repeats": {
+                                "type": "integer",
+                                "example": 1,
+                                "description": "Number of times to repeat each image in dataset"
+                            },
+                            "enable_bucket": {
+                                "type": "boolean",
+                                "example": "true",
+                                "description": "Enable resolution buckets"
+                            },
+                            "bucket_no_upscale": {
+                                "type": "boolean",
+                                "example": "false",
+                                "description": "Don't upscale images in buckets"
+                            }
+                        }
+                    },
+                    "datasets": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "video_directory": {
+                                    "type": "string",
+                                    "example": "/path/to/videos",
+                                    "description": "Directory containing video files"
+                                },
+                                "image_directory": {
+                                    "type": "string",
+                                    "example": "/path/to/images",
+                                    "description": "Directory containing image files"
+                                },
+                                "frame_extraction": {
+                                    "type": "string",
+                                    "enum": ["head", "chunk", "slide", "uniform", "full"],
+                                    "example": "chunk",
+                                    "description": "Method for extracting frames from videos"
+                                },
+                                "target_frames": {
+                                    "type": "array",
+                                    "items": {"type": "integer"},
+                                    "example": [1, 25, 79],
+                                    "description": "List of frame indices to extract"
+                                },
+                                "frame_stride": {
+                                    "type": "integer",
+                                    "example": 4,
+                                    "description": "Step size for slide extraction method"
+                                },
+                                "frame_sample": {
+                                    "type": "integer",
+                                    "example": 8,
+                                    "description": "Number of frames to sample for uniform method"
+                                },
+                                "max_frames": {
+                                    "type": "integer",
+                                    "example": 129,
+                                    "description": "Maximum number of frames to extract for full method"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "responses": {
+        "200": {
+            "description": "Successfully estimated frame count",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": "true"},
+                    "message": {"type": "string", "example": "Ok"},
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "total_image": {
+                                "type": "integer", 
+                                "example": 1250,
+                                "description": "Total estimated number of images/frames"
+                            }
+                        }
+                    },
+                    "code": {"type": "integer", "example": 200}
+                }
+            }
+        },
+        "500": {
+            "description": "Server error while estimating frame count",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "success": {"type": "boolean", "example": "false"},
+                    "message": {"type": "string", "example": "Server internal error: [error details]"},
+                    "code": {"type": "integer", "example": 500}
+                }
+            }
+        }
+    }
+}

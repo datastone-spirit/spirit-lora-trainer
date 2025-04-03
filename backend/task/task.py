@@ -505,6 +505,7 @@ class SubTask:
                         parse_kohya_progress_line(linestr, detail)
                         parse_kohya_stdout(linestr, detail)
                     line = bytearray()  #
+
             stdout, stderr = proc.communicate()
         except TimeoutExpired as exc:
             proc.kill()

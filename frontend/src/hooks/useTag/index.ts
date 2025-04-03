@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 11:17:50
- * @LastEditTime: 2025-04-01 11:41:04
+ * @LastEditTime: 2025-04-03 09:03:13
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag\index.ts
@@ -20,7 +20,7 @@ import type {
 	TagEvents,
 	InitQueryTagTaskOptions
 } from "./types";
-import { useTrainingStore } from "@/stores";
+import { useModalManagerStore, useTrainingStore } from "@/stores";
 import { checkDirectory } from "@/utils/lora.helper";
 import { manualTagInfo, type ManualTagInfoResult } from "@/api/monitor";
 import { calculatePercentage } from "@/utils/tools";
@@ -238,6 +238,7 @@ function queryTagTask() {
 /** 查询打标任务信息统一成功处理 */
 function handleQuerySuccess(res: ManualTagInfoResult) {
 	const trainingStore = useTrainingStore();
+	const modalManagerStore = useModalManagerStore();
 
 	// 更新打标任务的数据
 	trainingStore.setTagData(formatTagTaskData(res));
@@ -268,9 +269,15 @@ function handleQuerySuccess(res: ManualTagInfoResult) {
 			ElMessageBox({
 				title: "打标失败",
 				type: "error",
-				showCancelButton: false,
+				showCancelButton: true,
+				cancelButtonText: "查看日志",
 				confirmButtonText: "知道了",
 				message: "打标失败，请检查日志或者重新打标"
+			}).catch(() => {
+				modalManagerStore.setLoraTaskLogModal({
+					open: true,
+					taskId: queryTagTaskInfo.value.taskId
+				});
 			});
 			break;
 		case "running":

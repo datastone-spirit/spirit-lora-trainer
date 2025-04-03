@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:31:23
- * @LastEditTime: 2025-02-24 16:42:47
+ * @LastEditTime: 2025-04-02 17:15:03
  * @LastEditors: mulingyuer
  * @Description: LoRA任务详情
  * @FilePath: \frontend\src\views\task\components\LoraTaskDetail.vue
@@ -74,11 +74,17 @@
 				<el-descriptions-item label="每秒速度">
 					{{ data.detail.speed }}
 				</el-descriptions-item>
-				<el-descriptions-item v-if="showSampling" label="训练采样">
+				<el-descriptions-item v-show="showSampling" label="训练采样" :span="2">
 					<el-button type="info" @click="onViewSampling"> 查看采样 </el-button>
 				</el-descriptions-item>
 			</template>
+			<el-descriptions-item label="查看日志" :span="2">
+				<el-button type="info" @click="onShowLog"> 查看日志 </el-button>
+			</el-descriptions-item>
 		</el-descriptions>
+		<div v-if="showLog" class="task-log">
+			<TaskLog :task-id="data.id" />
+		</div>
 		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
 	</div>
 </template>
@@ -149,6 +155,12 @@ const samplingPath = computed(() => {
 function onViewSampling() {
 	openViewSampling.value = true;
 }
+
+/** 查看日志 */
+const showLog = ref(false);
+function onShowLog() {
+	showLog.value = true;
+}
 </script>
 
 <style lang="scss" scoped>
@@ -159,5 +171,8 @@ function onViewSampling() {
 	:deep(.task-detail-json) {
 		white-space: pre-wrap;
 	}
+}
+.task-log {
+	margin-top: 20px;
 }
 </style>

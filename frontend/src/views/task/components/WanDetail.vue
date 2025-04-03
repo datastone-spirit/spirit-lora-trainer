@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-01 15:10:43
- * @LastEditTime: 2025-04-01 15:37:57
+ * @LastEditTime: 2025-04-02 17:02:17
  * @LastEditors: mulingyuer
  * @Description: wan视频训练详情
  * @FilePath: \frontend\src\views\task\components\WanDetail.vue
@@ -69,7 +69,13 @@
 					<el-button type="info" @click="onViewSampling"> 查看采样 </el-button>
 				</el-descriptions-item>
 			</template>
+			<el-descriptions-item label="查看日志" :span="2">
+				<el-button type="info" @click="onShowLog"> 查看日志 </el-button>
+			</el-descriptions-item>
 		</el-descriptions>
+		<div v-if="showLog" class="task-log">
+			<TaskLog :task-id="data.id" />
+		</div>
 		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
 	</div>
 </template>
@@ -139,6 +145,16 @@ const samplingPath = computed(() => {
 function onViewSampling() {
 	openViewSampling.value = true;
 }
+
+/** 查看日志 */
+const showLog = ref(false);
+function onShowLog() {
+	showLog.value = true;
+}
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.task-log {
+	margin-top: 20px;
+}
+</style>

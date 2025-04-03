@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-02 15:11:24
- * @LastEditTime: 2025-04-02 15:41:20
+ * @LastEditTime: 2025-04-03 09:00:45
  * @LastEditors: mulingyuer
  * @Description: 混元视频hooks
  * @FilePath: \frontend\src\hooks\useHYLora\index.ts
@@ -170,9 +170,15 @@ function handleQuerySuccess(res: HyVideoTrainingInfoResult) {
 			ElMessageBox({
 				title: "训练失败",
 				type: "error",
-				showCancelButton: false,
+				showCancelButton: true,
+				cancelButtonText: "查看日志",
 				confirmButtonText: "知道了",
 				message: "LoRA训练失败，请检查日志或者重新训练"
+			}).catch(() => {
+				modalManagerStore.setLoraTaskLogModal({
+					open: true,
+					taskId: queryHYTaskInfo.value.taskId
+				});
 			});
 			break;
 		case "running":

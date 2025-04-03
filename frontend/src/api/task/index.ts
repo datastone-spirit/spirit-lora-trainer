@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 16:53:10
- * @LastEditTime: 2025-03-28 10:54:18
+ * @LastEditTime: 2025-04-02 15:55:09
  * @LastEditors: mulingyuer
  * @Description: 任务api
  * @FilePath: \frontend\src\api\task\index.ts
@@ -12,7 +12,9 @@ import type {
 	CurrentTaskFormConfigResult,
 	CurrentTaskParams,
 	CurrentTaskResult,
-	TaskListResult
+	TaskListResult,
+	TaskLogParams,
+	TaskLogResult
 } from "./types";
 export type * from "./types";
 
@@ -41,5 +43,14 @@ export function currentTaskFormConfig(params: CurrentTaskParams) {
 		method: "GET",
 		params,
 		showErrorMessage: false
+	});
+}
+
+/** 获取训练任务日志 */
+export function taskLog(params: TaskLogParams) {
+	return request<TaskLogResult>({
+		url: "/tasks/logs",
+		method: "GET",
+		params
 	});
 }

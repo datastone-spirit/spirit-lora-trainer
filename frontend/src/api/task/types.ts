@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-24 17:02:02
- * @LastEditTime: 2025-03-28 10:54:12
+ * @LastEditTime: 2025-04-02 15:54:18
  * @LastEditors: mulingyuer
  * @Description: 任务api类型
  * @FilePath: \frontend\src\api\task\types.ts
@@ -48,3 +48,12 @@ export interface CurrentTaskFormConfigResult {
 	/** 训练器的训练配置 */
 	frontend_config: string;
 }
+
+/** 获取训练任务日志参数 */
+export interface TaskLogParams {
+	/** 任务id */
+	task_id: string;
+}
+
+/** 获取训练任务日志结果 */
+export type TaskLogResult = Array<string>;

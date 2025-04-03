@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-02 14:21:02
- * @LastEditTime: 2025-04-02 15:41:08
+ * @LastEditTime: 2025-04-03 09:01:51
  * @LastEditors: mulingyuer
  * @Description: flux lora hooks
  * @FilePath: \frontend\src\hooks\useFluxLora\index.ts
@@ -169,9 +169,15 @@ function handleQuerySuccess(res: LoRATrainingInfoResult) {
 			ElMessageBox({
 				title: "训练失败",
 				type: "error",
-				showCancelButton: false,
+				showCancelButton: true,
+				cancelButtonText: "查看日志",
 				confirmButtonText: "知道了",
 				message: "LoRA训练失败，请检查日志或者重新训练"
+			}).catch(() => {
+				modalManagerStore.setLoraTaskLogModal({
+					open: true,
+					taskId: queryFluxTaskInfo.value.taskId
+				});
 			});
 			break;
 		case "running":

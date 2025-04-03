@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-01 17:15:31
- * @LastEditTime: 2025-04-01 17:25:24
+ * @LastEditTime: 2025-04-02 15:48:14
  * @LastEditors: mulingyuer
  * @Description: 弹窗数据管理器的类型
  * @FilePath: \frontend\src\stores\modules\modal-manager\types.ts
@@ -16,4 +16,12 @@ export interface VideoPreviewModal {
 	title: string;
 	/** 视频地址 */
 	src: string;
+}
+
+/** lora任务日志弹窗 */
+export interface LoraTaskLogModal {
+	/** 是否打开 */
+	open: boolean;
+	/** 任务id */
+	taskId: string;
 }

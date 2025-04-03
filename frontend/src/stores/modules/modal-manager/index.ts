@@ -1,14 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:36:24
- * @LastEditTime: 2025-04-01 17:25:30
+ * @LastEditTime: 2025-04-02 16:26:52
  * @LastEditors: mulingyuer
  * @Description: 弹窗数据管理
  * @FilePath: \frontend\src\stores\modules\modal-manager\index.ts
  * 怎么可能会有bug！！！
  */
 import { defineStore } from "pinia";
-import type { VideoPreviewModal } from "./types";
+import type { VideoPreviewModal, LoraTaskLogModal } from "./types";
 export type * from "./types";
 
 export const useModalManagerStore = defineStore("modalManager", () => {
@@ -41,6 +41,21 @@ export const useModalManagerStore = defineStore("modalManager", () => {
 		};
 	}
 
+	/** lora任务日志弹窗 */
+	const loraTaskLogModal = ref<LoraTaskLogModal>({
+		open: false,
+		taskId: ""
+	});
+	function setLoraTaskLogModal(value: LoraTaskLogModal) {
+		loraTaskLogModal.value = value;
+	}
+	function resetLoraTaskLogModal() {
+		loraTaskLogModal.value = {
+			open: false,
+			taskId: ""
+		};
+	}
+
 	return {
 		loraSavePathWarningModal,
 		setLoraSavePathWarningModal,
@@ -48,7 +63,10 @@ export const useModalManagerStore = defineStore("modalManager", () => {
 		setNetworkDisconnectModal,
 		videoPreviewModal,
 		setVideoPreviewModal,
-		resetVideoPreviewModal
+		resetVideoPreviewModal,
+		loraTaskLogModal,
+		setLoraTaskLogModal,
+		resetLoraTaskLogModal
 	};
 });
 

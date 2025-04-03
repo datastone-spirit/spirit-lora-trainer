@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-28 10:45:50
- * @LastEditTime: 2025-04-02 15:41:31
+ * @LastEditTime: 2025-04-02 17:05:12
  * @LastEditors: mulingyuer
  * @Description: 训练wan lora的hooks
  * @FilePath: \frontend\src\hooks\useWanLora\index.ts
@@ -169,9 +169,15 @@ function handleQuerySuccess(res: WanVideoTrainingInfoResult) {
 			ElMessageBox({
 				title: "训练失败",
 				type: "error",
-				showCancelButton: false,
+				showCancelButton: true,
+				cancelButtonText: "查看日志",
 				confirmButtonText: "知道了",
 				message: "LoRA训练失败，请检查日志或者重新训练"
+			}).catch(() => {
+				modalManagerStore.setLoraTaskLogModal({
+					open: true,
+					taskId: queryWanTaskInfo.value.taskId
+				});
 			});
 			break;
 		case "running":

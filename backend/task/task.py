@@ -153,6 +153,11 @@ class Task:
     def to_dict(self, verbose: bool = False, show_config: bool = False):
         raise NotImplementedError 
     
+    def get_log(self) -> List:
+        if self.stdout_lines:
+            return self.stdout_lines
+        return []    
+
     def __str__(self):
         return f"{self.to_dict(verbose=True)}"
 

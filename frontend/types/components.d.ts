@@ -99,6 +99,7 @@ declare module 'vue' {
     VideoFile: typeof import('./../src/components/FileManager/FileItem/VideoFile.vue')['default']
     VideoPreview: typeof import('./../src/components/VideoPreview/index.vue')['default']
     ViewSampling: typeof import('./../src/components/ViewSampling/index.vue')['default']
+    ViewSamplingDrawer: typeof import('./../src/components/Drawer/ViewSamplingDrawer.vue')['default']
     WanMonitor: typeof import('./../src/components/Monitor/WanMonitor/index.vue')['default']
     WanTrainingMonitor: typeof import('./../src/components/Monitor/WanTrainingMonitor/index.vue')['default']
     WeightingSchemeSelect: typeof import('./../src/components/Form/WeightingSchemeSelect.vue')['default']

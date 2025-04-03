@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-01 17:15:31
- * @LastEditTime: 2025-04-02 15:48:14
+ * @LastEditTime: 2025-04-03 09:28:10
  * @LastEditors: mulingyuer
  * @Description: 弹窗数据管理器的类型
  * @FilePath: \frontend\src\stores\modules\modal-manager\types.ts
@@ -24,4 +24,12 @@ export interface LoraTaskLogModal {
 	open: boolean;
 	/** 任务id */
 	taskId: string;
+}
+
+/** 查看采样数据抽屉 */
+export interface ViewSamplingDrawerModal {
+	/** 是否打开 */
+	open: boolean;
+	/** 采样数据路径 */
+	filePath: string;
 }

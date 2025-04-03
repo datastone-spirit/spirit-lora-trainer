@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-02 10:10:02
+ * @LastEditTime: 2025-04-03 09:34:52
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -50,6 +50,11 @@
 			<template #monitor-progress-bar>
 				<WanTrainingMonitor />
 			</template>
+			<template #right-btn-group>
+				<el-button v-if="monitorWanLoraData.data.showSampling" size="large" @click="onViewSampling">
+					查看采样
+				</el-button>
+			</template>
 		</TeleportFooterBarContent>
 	</div>
 </template>
@@ -59,7 +64,7 @@ import type { StartWanVideoTrainingData } from "@/api/lora";
 import { startWanVideoTraining } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useWanLora } from "@/hooks/useWanLora";
-import { useSettingsStore } from "@/stores";
+import { useSettingsStore, useModalManagerStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
@@ -74,6 +79,7 @@ import { WanHelper } from "./wan.helper";
 import { WanValidate } from "./wan.validate";
 
 const settingsStore = useSettingsStore();
+const modalManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const {
 	startQueryWanTask,
@@ -453,6 +459,14 @@ async function onSubmit() {
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
+}
+
+/** 查看采样 */
+function onViewSampling() {
+	modalManagerStore.setViewSamplingDrawerModal({
+		open: true,
+		filePath: monitorWanLoraData.value.data.samplingPath
+	});
 }
 
 // 组件生命周期

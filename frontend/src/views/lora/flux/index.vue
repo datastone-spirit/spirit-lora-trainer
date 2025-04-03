@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-04-02 15:04:44
+ * @LastEditTime: 2025-04-03 09:40:15
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -88,18 +88,16 @@
 				</el-button>
 			</template>
 		</TeleportFooterBarContent>
-		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
-import ViewSampling from "@/components/ViewSampling/index.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useFluxLora } from "@/hooks/useFluxLora";
 import { useTag } from "@/hooks/useTag";
-import { useSettingsStore, useTrainingStore } from "@/stores";
+import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
@@ -115,6 +113,7 @@ import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
+const modalManagerStore = useModalManagerStore();
 const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
 const {
 	monitorFluxLoraData,
@@ -124,11 +123,6 @@ const {
 	pauseQueryFluxTask,
 	queryFluxTaskInfo
 } = useFluxLora();
-// const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData, isFluxLoraTaskEnd } =
-// 	useFluxLora({
-// 		isFirstGetConfig: true,
-// 		firstGetConfigCallback: firstResetFormConfig
-// 	});
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const env = getEnv();
@@ -577,12 +571,11 @@ async function onSubmit() {
 }
 
 /** 查看采样 */
-const openViewSampling = ref(false);
-const samplingPath = computed(() => {
-	return monitorFluxLoraData.value.data.samplingPath ?? "";
-});
 function onViewSampling() {
-	openViewSampling.value = true;
+	modalManagerStore.setViewSamplingDrawerModal({
+		open: true,
+		filePath: monitorFluxLoraData.value.data.samplingPath
+	});
 }
 
 // 组件生命周期

@@ -1,14 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:36:24
- * @LastEditTime: 2025-04-02 16:26:52
+ * @LastEditTime: 2025-04-03 09:28:38
  * @LastEditors: mulingyuer
  * @Description: 弹窗数据管理
  * @FilePath: \frontend\src\stores\modules\modal-manager\index.ts
  * 怎么可能会有bug！！！
  */
 import { defineStore } from "pinia";
-import type { VideoPreviewModal, LoraTaskLogModal } from "./types";
+import type { VideoPreviewModal, LoraTaskLogModal, ViewSamplingDrawerModal } from "./types";
 export type * from "./types";
 
 export const useModalManagerStore = defineStore("modalManager", () => {
@@ -56,6 +56,21 @@ export const useModalManagerStore = defineStore("modalManager", () => {
 		};
 	}
 
+	/** 查看采样数据抽屉 */
+	const viewSamplingDrawerModal = ref<ViewSamplingDrawerModal>({
+		open: false,
+		filePath: ""
+	});
+	function setViewSamplingDrawerModal(value: ViewSamplingDrawerModal) {
+		viewSamplingDrawerModal.value = value;
+	}
+	function resetViewSamplingDrawerModal() {
+		viewSamplingDrawerModal.value = {
+			open: false,
+			filePath: ""
+		};
+	}
+
 	return {
 		loraSavePathWarningModal,
 		setLoraSavePathWarningModal,
@@ -66,7 +81,10 @@ export const useModalManagerStore = defineStore("modalManager", () => {
 		resetVideoPreviewModal,
 		loraTaskLogModal,
 		setLoraTaskLogModal,
-		resetLoraTaskLogModal
+		resetLoraTaskLogModal,
+		viewSamplingDrawerModal,
+		setViewSamplingDrawerModal,
+		resetViewSamplingDrawerModal
 	};
 });
 

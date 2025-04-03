@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2025-02-07 08:53:05
- * @LastEditTime: 2025-04-02 11:51:40
+ * @Date: 2025-04-03 09:18:45
+ * @LastEditTime: 2025-04-03 09:32:04
  * @LastEditors: mulingyuer
- * @Description: 查看采样
- * @FilePath: \frontend\src\components\ViewSampling\index.vue
+ * @Description: 查看采样数据抽屉
+ * @FilePath: \frontend\src\components\Drawer\ViewSamplingDrawer.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -45,6 +45,8 @@
 						:key="item.value"
 						:is="FileItemMap[item.type]"
 						:data="item"
+						fit="cover"
+						lazy
 						@click="onItemClick(item, index)"
 					/>
 				</div>
@@ -60,30 +62,29 @@ import { useIcon } from "@/hooks/useIcon";
 import { useImageViewer } from "@/hooks/useImageViewer";
 import type { FileItem, FileList } from "@/utils/file-manager";
 import { FileManager, FileType } from "@/utils/file-manager";
-import type { ImageProps } from "element-plus";
 import { useVideoPreview } from "@/hooks/useVideoPreview";
-
-export interface ViewSamplingProps {
-	/** 采样图片存放路径 */
-	samplingPath: string;
-	fit?: ImageProps["fit"];
-	lazy?: ImageProps["lazy"];
-}
-
-const props = withDefaults(defineProps<ViewSamplingProps>(), {
-	fit: "cover",
-	lazy: true
-});
+import { useModalManagerStore } from "@/stores";
 
 const { previewImages } = useImageViewer();
 const { previewVideo } = useVideoPreview();
 const fileManager = new FileManager();
+const modalManagerStore = useModalManagerStore();
 
+const { viewSamplingDrawerModal } = storeToRefs(modalManagerStore);
 const CloseIcon = useIcon({ name: "ri-close-line", size: 28 });
 const RefreshIcon = useIcon({ name: "ri-refresh-line", size: 24 });
-const open = defineModel("open", { type: Boolean, required: true });
+const open = computed({
+	get() {
+		return viewSamplingDrawerModal.value.open;
+	},
+	set(val: boolean) {
+		viewSamplingDrawerModal.value.open = val;
+	}
+});
 const loading = ref(false);
 const list = ref<FileList>([]);
+/** 采样路径 */
+const samplingPath = computed(() => viewSamplingDrawerModal.value.filePath);
 
 /** 关闭抽屉 */
 function onClose() {
@@ -108,12 +109,12 @@ function onItemClick(item: FileItem, index: number) {
 
 /** 获取采样数据 */
 function getSamplingData() {
-	if (typeof props.samplingPath !== "string" || props.samplingPath.trim() === "") {
+	if (typeof samplingPath.value !== "string" || samplingPath.value.trim() === "") {
 		ElMessage.warning("暂时还未获取到采样路径，请确认是否已开启采样功能");
 		return;
 	}
 	loading.value = true;
-	directoryFiles({ path: props.samplingPath })
+	directoryFiles({ path: samplingPath.value })
 		.then((res) => {
 			list.value = fileManager
 				.formatDirectoryFiles(res)

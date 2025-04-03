@@ -1,16 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-02 09:24:42
+ * @LastEditTime: 2025-04-03 10:59:56
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
  * 怎么可能会有bug！！！
  */
-import type { StartWanVideoTrainingData } from "@/api/lora";
+import type { StartWanVideoTrainingData, StartWanVideoTrainingVideoDataset } from "@/api/lora";
 import { filterAndConvertKeysToNumber } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
-import type { RuleForm } from "./types";
+import type { RuleForm, TargetFrames } from "./types";
 
 export class WanHelper {
 	/** 数据格式化 */
@@ -158,7 +158,7 @@ export class WanHelper {
 				formatDatasets = {
 					video_directory: datasets[0].video_directory,
 					frame_extraction: datasets[0].frame_extraction,
-					target_frames: JSON.parse(datasets[0].target_frames) as Array<number>,
+					target_frames: this.formatTargetFrames(datasets[0].target_frames),
 					frame_stride: datasets[0].frame_stride,
 					frame_sample: datasets[0].frame_sample
 				};
@@ -198,5 +198,15 @@ export class WanHelper {
 		});
 
 		return form;
+	}
+
+	/** 将target_frames格式化成数组 */
+	private formatTargetFrames(
+		target_frames: TargetFrames
+	): StartWanVideoTrainingVideoDataset["target_frames"] {
+		target_frames = target_frames.filter((item) => item.value !== undefined);
+		return target_frames.map(
+			(item) => item.value
+		) as StartWanVideoTrainingVideoDataset["target_frames"];
 	}
 }

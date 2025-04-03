@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-03 09:34:52
+ * @LastEditTime: 2025-04-03 11:05:45
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -74,9 +74,11 @@ import BasicInfo from "./components/BasicInfo.vue";
 import SampleValidator from "./components/SampleValidator.vue";
 import TrainingData from "./components/TrainingData.vue";
 import WanDataSet from "./components/WanDataSet/index.vue";
-import type { RuleForm } from "./types";
+import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
 import { WanValidate } from "./wan.validate";
+import { generateUUID } from "@/utils/tools";
+import { validate } from "uuid";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();
@@ -190,7 +192,11 @@ const defaultForm: RuleForm = {
 				image_directory: "/root",
 				video_directory: "/root",
 				frame_extraction: "head",
-				target_frames: "[1, 13, 25]",
+				target_frames: [
+					{ key: generateUUID(), value: 1 },
+					{ key: generateUUID(), value: 13 },
+					{ key: generateUUID(), value: 25 }
+				],
 				frame_stride: 10,
 				frame_sample: 1
 			}
@@ -378,21 +384,34 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
+	"dataset.datasets.0.frame_extraction": [
+		{
+			validator: (_rule: any, _value: string, callback: (error?: string | Error) => void) => {
+				// 联动校验
+				ruleFormRef.value?.validateField("dataset.datasets.0.target_frames");
+				callback();
+			},
+			trigger: "change"
+		}
+	],
 	"dataset.datasets.0.target_frames": [
 		{
-			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (value.trim() === "") {
-					callback(new Error("请配置target_frames参数"));
+			validator: (_rule: any, value: TargetFrames, callback: (error?: string | Error) => void) => {
+				if (!Array.isArray(value)) {
+					callback(new Error("target_frames参数格式错误，请重置表单恢复"));
 					return;
 				}
-				try {
-					JSON.parse(value);
-					return callback();
-				} catch (_error) {
-					return callback(new Error("target_frames参数格式错误，格式必须为：[x,...]"));
+				if (ruleForm.value.dataset.datasets[0].frame_extraction === "chunk") {
+					const findIndex = value.findIndex((item) => item.value === 1);
+					if (findIndex !== -1) {
+						callback(new Error("chunk模式下，target_frames参数中不能包含1"));
+						return;
+					}
 				}
+
+				callback();
 			},
-			trigger: ""
+			trigger: ["blur", "change"]
 		}
 	]
 });

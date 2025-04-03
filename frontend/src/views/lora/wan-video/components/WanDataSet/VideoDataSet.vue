@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-31 10:42:26
- * @LastEditTime: 2025-04-01 18:00:54
+ * @LastEditTime: 2025-04-03 11:06:44
  * @LastEditors: mulingyuer
  * @Description: 视频数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\VideoDataSet.vue
@@ -21,8 +21,10 @@
 	<PopoverFormItem
 		label="提取首帧方式"
 		prop="dataset.datasets.0.frame_extraction"
-		popover-content="target_frames"
+		popover-content="frame_extraction"
 	>
+		<el-input v-show="false" :model-value="ruleForm.dataset.datasets[0].frame_extraction">
+		</el-input>
 		<el-space>
 			<el-button
 				v-for="(item, index) in frameExtractionOptions"
@@ -52,10 +54,33 @@
 		prop="dataset.datasets.0.target_frames"
 		popover-content="target_frames"
 	>
-		<el-input
-			v-model="ruleForm.dataset.datasets[0].target_frames"
-			placeholder="请输入视频中提取的帧的数量"
-		/>
+		<div class="target-frames-item">
+			<el-input class="target-frames-input" :model-value="targetFramesString">
+				<template #prepend>预览</template>
+			</el-input>
+		</div>
+		<div
+			v-for="item in ruleForm.dataset.datasets[0].target_frames"
+			:key="item.key"
+			class="target-frames-item"
+		>
+			<el-input-number v-model.number="item.value" :step="1" step-strictly :min="1" :max="129" />
+			<el-button
+				class="target-frames-item-delete"
+				:icon="RiDeleteBin_7Line"
+				@click="onDeleteTargetFrames(item)"
+			/>
+		</div>
+		<div class="target-frames-item">
+			<el-button
+				class="target-frames-item-add"
+				type="primary"
+				:icon="RiAddCircleLine"
+				@click="onAddTargetFrames"
+			>
+				新增提取帧数
+			</el-button>
+		</div>
 	</PopoverFormItem>
 	<PopoverFormItem
 		label="提取帧时的步长，仅在 frame_extraction 为 slide 时有效"
@@ -85,6 +110,8 @@
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
+import { useIcon } from "@/hooks/useIcon";
+import { generateUUID } from "@/utils/tools";
 
 export type FrameExtractionExplain = Array<{
 	id: string;
@@ -93,6 +120,10 @@ export type FrameExtractionExplain = Array<{
 	content: string;
 }>;
 
+type TargetFramesItem = RuleForm["dataset"]["datasets"][number]["target_frames"][number];
+
+const RiDeleteBin_7Line = useIcon({ name: "ri-delete-bin-7-line" });
+const RiAddCircleLine = useIcon({ name: "ri-add-circle-line" });
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 /** 提取首帧方式 */
 const frameExtractionOptions = ref<ElOptions>([
@@ -158,6 +189,28 @@ const currentFrameExtractionExplain = computed(() => {
 function onFrameExtractionChange(value: ElOptions[number]["value"]) {
 	ruleForm.value.dataset.datasets[0].frame_extraction = value as string;
 }
+
+const targetFramesString = computed(() => {
+	const target_frames = ruleForm.value.dataset.datasets[0].target_frames;
+	return `[${target_frames.map((item) => item.value).toString()}]`;
+});
+/** 删除提取帧 */
+function onDeleteTargetFrames(item: TargetFramesItem) {
+	const { key } = item;
+	const target_frames = ruleForm.value.dataset.datasets[0].target_frames;
+	const findIndex = target_frames.findIndex((item) => item.key === key);
+	if (findIndex !== -1) {
+		target_frames.splice(findIndex, 1);
+	}
+}
+/** 新增提取帧 */
+function onAddTargetFrames() {
+	const target_frames = ruleForm.value.dataset.datasets[0].target_frames;
+	target_frames.push({
+		key: generateUUID(),
+		value: undefined
+	});
+}
 </script>
 
 <style lang="scss" scoped>
@@ -184,5 +237,20 @@ function onFrameExtractionChange(value: ElOptions[number]["value"]) {
 }
 .frame-extraction-explain-content :deep(.frame-extraction-explain-warning) {
 	color: var(--el-color-primary);
+}
+.target-frames-item {
+	display: block;
+	width: 100%;
+	& + & {
+		margin-top: 10px;
+	}
+}
+.target-frames-input {
+	:deep(.el-input-group__prepend) {
+		color: var(--el-text-color-regular);
+	}
+}
+.target-frames-item-delete {
+	margin-left: $zl-padding;
 }
 </style>

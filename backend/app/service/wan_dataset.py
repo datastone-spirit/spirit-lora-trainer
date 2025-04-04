@@ -1,7 +1,7 @@
 import av
 import numpy as np
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from app.api.model.wan_paramter import FrameExtractionMethod, WanDataSetConfig, is_blank
 from app.api.common.utils import get_dataset_contents
 
@@ -12,20 +12,23 @@ logger = logging.getLogger(__name__)
 
 class WanDatasetService:
     
-    def eastimate_video_dataset_images_count(self, datasets: WanDataSetConfig)-> int:
+    def eastimate_video_dataset_count(self, datasets: WanDataSetConfig)-> Tuple[int, int]:
         exts = [".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv"]
         total_images = 0 
+        total_batches = 0
         for dataset in datasets.datasets:
             if is_blank(dataset.video_directory):
                 continue
             for video_path, _, _ in get_dataset_contents(dataset.video_directory, exts):
-                total_images += self._estimate_video_frame_count(video_path,
-                                                            dataset.frame_extraction,
-                                                            dataset.target_frames,
-                                                            dataset.frame_stride,
-                                                            dataset.frame_sample,
-                                                            dataset.max_frames)
-        return total_images
+                images, batches = self._estimate_video_frame_count(video_path, 
+                                                                 dataset.frame_extraction,
+                                                                 dataset.target_frames,
+                                                                 dataset.frame_stride,
+                                                                 dataset.frame_sample,
+                                                                 dataset.max_frames)
+                total_images += images
+                total_batches += batches
+        return (total_images, total_batches)
     
     def _estimate_video_frame_count(
         self,
@@ -35,7 +38,7 @@ class WanDatasetService:
         frame_stride: Optional[int] = None,
         frame_sample: Optional[int] = None,
         max_frames: Optional[int] = None,
-    ) -> int:
+    ) -> Tuple[int, int]:
         """
         Estimate the number of frames that will be extracted based on the frame extraction method.
         
@@ -74,11 +77,13 @@ class WanDatasetService:
             frame_extraction = FrameExtractionMethod.FULL
         
         total_extracted = 0
+        total_batch = 0
         # Calculate frames based on extraction method
         if frame_extraction == FrameExtractionMethod.HEAD:
             for target_frame in target_frames:
                 if total_frames >= target_frame:
                     total_extracted += target_frame
+                    total_batch += 1
         elif frame_extraction == FrameExtractionMethod.CHUNK:
             # CHUNK extracts chunk_size consecutive frames starting from each target frame
             if not target_frames:
@@ -88,12 +93,14 @@ class WanDatasetService:
                 for i in range(0, total_frames, target_frame):
                     if i + target_frame <= total_frames:
                         total_extracted += target_frame
+                        total_batch += 1
                 
         elif frame_extraction == FrameExtractionMethod.SLIDE:
             for target_frame in target_frames:
                 if total_frames >= target_frame:
                     for i in range(0, total_frames - target_frame + 1, frame_stride):
                         total_extracted += target_frame
+                        total_batch += 1
             # Extract frames with stride
         
         elif frame_extraction == FrameExtractionMethod.UNIFORM:
@@ -103,10 +110,12 @@ class WanDatasetService:
                     frame_indices = np.linspace(0, total_frames - target_frame, frame_sample, dtype=int)
                     for i in frame_indices:
                         total_extracted += target_frame
+                        total_batch += 1
         
         elif frame_extraction == FrameExtractionMethod.FULL:
             # select all frames
             target_frame = min(total_frames, max_frames)
+            total_batch += 1
             total_extracted = (target_frame - 1) // 4 * 4 + 1  # round to N*4+1
         
-        return total_extracted
+        return (total_extracted, total_batch)

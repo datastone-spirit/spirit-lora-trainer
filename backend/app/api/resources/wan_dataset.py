@@ -26,8 +26,8 @@ class WanDatasets(Resource):
                         )
                     )
         try:
-            total_images = WanDatasetService().eastimate_video_dataset_images_count(dataset)  
-            return res(data={"total_image": total_images })
+            total_images, total_batches = WanDatasetService().eastimate_video_dataset_count(dataset)  
+            return res(data={"total_images": total_images, "total_batches": total_batches},)
         except Exception as e:
             logger.error(f"eastimate frame in dataset {data} failed ", exc_info=e)
             return res(message=f"Server interal error: {str(e)}", code=500)

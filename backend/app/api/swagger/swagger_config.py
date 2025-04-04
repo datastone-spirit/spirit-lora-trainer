@@ -1479,12 +1479,12 @@ wan_dataset_estimate = {
                             },
                             "enable_bucket": {
                                 "type": "boolean",
-                                "example": "true",
+                                "example": True,
                                 "description": "Enable resolution buckets"
                             },
                             "bucket_no_upscale": {
                                 "type": "boolean",
-                                "example": "false",
+                                "example": False,
                                 "description": "Don't upscale images in buckets"
                             }
                         }
@@ -1549,7 +1549,12 @@ wan_dataset_estimate = {
                     "data": {
                         "type": "object",
                         "properties": {
-                            "total_image": {
+                            "total_images": {
+                                "type": "integer", 
+                                "example": 1250,
+                                "description": "Total estimated number of images/frames"
+                            },
+                            "total_batches": {
                                 "type": "integer", 
                                 "example": 1250,
                                 "description": "Total estimated number of images/frames"

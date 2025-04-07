@@ -390,6 +390,7 @@ class WanTrainingConfig:
             raise ValueError("Learning rate must be positive.")
         
         return config
+        
 
 @dataclass
 class WanTrainingParameter:
@@ -425,5 +426,54 @@ class WanTrainingParameter:
             raise ValueError("Dataset config is required.")
         
         parameter.dataset = WanDataSetConfig.validate(parameter.dataset, task=parameter.config.task)
+
+        if os.environ.get("DISABLE_STRICT_VALIDATION", "0") == "0":
+            # Strict validation is for cloud, try to avoid the run time error 
+            WanTrainingParameter.strict_validate(parameter) 
         return parameter
+
+
+    @staticmethod
+    def strict_validate(parameter: 'WanTrainingParameter'):
+        """
+        Validate the WanTrainingParamer instance.
+        """
+        if not parameter.config:
+            raise ValueError("Training config is required.")
+        
+        if not parameter.dataset:
+            raise ValueError("Dataset config is required.")
+        
+        for dataset in parameter.dataset.datasets:
+            if not dataset.image_directory and not dataset.video_directory:
+                raise ValueError("Either image_directory or video_directory must be specified.")
+            
+            if dataset.image_directory and not path.exists(dataset.image_directory):
+                raise ValueError(f"Image directory does not exist: {dataset.image_directory}")
+            
+            if dataset.video_directory and not path.exists(dataset.video_directory):
+                raise ValueError(f"Video directory does not exist: {dataset.video_directory}")
+
+            if dataset.frame_extraction and not isinstance(dataset.frame_extraction, FrameExtractionMethod):
+                raise ValueError(f"Invalid frame extraction method: {dataset.frame_extraction}. Valid values are: {FrameExtractionMethod.values()}")
+            
+            if dataset.frame_extraction != FrameExtractionMethod.FULL:
+                if dataset.target_frames is None:
+                    raise ValueError("target_frames must be specified when using 'head, chunk, slide, uniform' frame extraction method.")
+                if dataset.frame_extraction == FrameExtractionMethod.SLIDE and dataset.frame_stride is None:
+                    raise ValueError("frame_stride must be specified when using 'slide' frame extraction method.")
+                
+                if dataset.frame_extraction == FrameExtractionMethod.UNIFORM and dataset.frame_sample is None:
+                    raise ValueError("frame_sample must be specified when using 'uniform' frame extraction method.")
+                
+                if dataset.frame_extraction == FrameExtractionMethod.CHUNK:
+                    
+                    for i in range(len(dataset.target_frames)):
+                        if dataset.target_frames[i] <= 0:
+                            raise ValueError("target_frames must be positive integers when using 'chunk' frame extraction method.")
+                        if i == 0 :
+                            if dataset.target_frames[i] <= 10:
+                                raise ValueError("first target_frames must be greater than 10 when using 'chunk' frame extraction method.")
+                        elif dataset.target_frames[i] <=  dataset.target_frames[i-1]:
+                            raise ValueError("target_frames must be in ascending order when using 'chunk' frame extraction method.")
 

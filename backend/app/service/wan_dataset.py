@@ -77,13 +77,13 @@ class WanDatasetService:
             frame_extraction = FrameExtractionMethod.FULL
         
         total_extracted = 0
-        total_batch = 0
+        total_batches = 0
         # Calculate frames based on extraction method
         if frame_extraction == FrameExtractionMethod.HEAD:
             for target_frame in target_frames:
                 if total_frames >= target_frame:
                     total_extracted += target_frame
-                    total_batch += 1
+                    total_batches += 1
         elif frame_extraction == FrameExtractionMethod.CHUNK:
             # CHUNK extracts chunk_size consecutive frames starting from each target frame
             if not target_frames:
@@ -93,14 +93,14 @@ class WanDatasetService:
                 for i in range(0, total_frames, target_frame):
                     if i + target_frame <= total_frames:
                         total_extracted += target_frame
-                        total_batch += 1
+                        total_batches += 1
                 
         elif frame_extraction == FrameExtractionMethod.SLIDE:
             for target_frame in target_frames:
                 if total_frames >= target_frame:
                     for i in range(0, total_frames - target_frame + 1, frame_stride):
                         total_extracted += target_frame
-                        total_batch += 1
+                        total_batches += 1
             # Extract frames with stride
         
         elif frame_extraction == FrameExtractionMethod.UNIFORM:
@@ -110,12 +110,12 @@ class WanDatasetService:
                     frame_indices = np.linspace(0, total_frames - target_frame, frame_sample, dtype=int)
                     for i in frame_indices:
                         total_extracted += target_frame
-                        total_batch += 1
+                        total_batches += 1
         
         elif frame_extraction == FrameExtractionMethod.FULL:
             # select all frames
             target_frame = min(total_frames, max_frames)
-            total_batch += 1
+            total_batches += 1
             total_extracted = (target_frame - 1) // 4 * 4 + 1  # round to N*4+1
         
-        return (total_extracted, total_batch)
+        return (total_extracted, total_batches)

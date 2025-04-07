@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-04-07 17:18:18
+ * @LastEditTime: 2025-04-07 17:40:10
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -156,7 +156,7 @@ const ruleForm = useEnhancedLocalStorage<RuleForm>(
 	structuredClone(toRaw(defaultForm) as RuleForm)
 );
 const rules = reactive<FormRules<RuleForm>>({
-	image_dir: [
+	image_path: [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
@@ -171,11 +171,11 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	tagger_model: [{ required: true, message: "请选择打标模型", trigger: "change" }],
-	class_tokens: [
+	model_name: [{ required: true, message: "请选择打标模型", trigger: "change" }],
+	class_token: [
 		{
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (!ruleForm.value.output_trigger_words) return callback();
+				if (!ruleForm.value.is_add_global_prompt) return callback();
 				if (typeof value !== "string" || value.trim() === "") {
 					callback(new Error("请填写触发词"));
 					return;

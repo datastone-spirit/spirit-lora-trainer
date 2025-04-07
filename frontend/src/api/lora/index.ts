@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 09:32:40
- * @LastEditTime: 2025-04-03 14:40:24
+ * @LastEditTime: 2025-04-07 10:01:11
  * @LastEditors: mulingyuer
  * @Description: lora api
  * @FilePath: \frontend\src\api\lora\index.ts
@@ -16,8 +16,8 @@ import type {
 	StartHyVideoTrainingResult,
 	StartWanVideoTrainingData,
 	StartWanVideoTrainingResult,
-	WanVideoTrainingImageDatasetCountData,
-	WanVideoTrainingImageDatasetCountResult
+	WanVideoVideoDatasetEstimateData,
+	WanVideoVideoDatasetEstimateResult
 } from "./types";
 export type * from "./types";
 
@@ -48,10 +48,10 @@ export function startWanVideoTraining(data: StartWanVideoTrainingData) {
 	});
 }
 
-/** 获取wan视频预估训练集图片数量，仅视频素材训练时使用 */
-export function wanVideoTrainingImageDatasetCount(data: WanVideoTrainingImageDatasetCountData) {
-	return request<WanVideoTrainingImageDatasetCountResult>({
-		url: "/training/wan/datasets/images-count-estimate",
+/** 获取wan视频素材训练集提取的图片帧数量 */
+export function wanVideoVideoDatasetEstimate(data: WanVideoVideoDatasetEstimateData) {
+	return request<WanVideoVideoDatasetEstimateResult>({
+		url: "/training/wan/datasets/estimate",
 		method: "POST",
 		data
 	});

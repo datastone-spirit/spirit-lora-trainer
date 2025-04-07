@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-03 14:40:07
+ * @LastEditTime: 2025-04-07 15:17:52
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -375,7 +375,7 @@ export interface StartWanVideoTrainingData {
 		optimizer_type: string;
 		/** 优化器的额外参数键值对，weight_decay=0.01 betas=0.9,0.999，默认："" */
 		optimizer_args: string;
-		/** 学习率，默认：2e-06 */
+		/** 学习率，默认：2e-4 */
 		learning_rate: number;
 		/** 学习率衰减步数，0-总训练步数，默认：0 */
 		lr_decay_steps: number;
@@ -491,7 +491,7 @@ export interface StartWanVideoTrainingData {
 		logit_mean: number;
 		/** logit_normal权重标准差，默认：1.0 */
 		logit_std: number;
-		/** 时间步采样方法，uniform|sigmoid|shift|sigma，默认："sigma" */
+		/** 时间步采样方法，uniform|sigmoid|shift|sigma，默认："shift" */
 		timestep_sampling: string;
 		/** 时间步采样sigmoid缩放系数（仅当timestep_sampling为sigmoid/shift时生效），默认：1.0 */
 		sigmoid_scale: number;
@@ -612,11 +612,13 @@ export interface StartWanVideoTrainingResult {
 	task_id: string;
 }
 
-/** 获取wan视频预估训练集图片数参数 */
-export type WanVideoTrainingImageDatasetCountData = StartWanVideoTrainingData["dataset"];
+/** 获取wan视频素材训练集提取的图片帧数量参数 */
+export type WanVideoVideoDatasetEstimateData = StartWanVideoTrainingData["dataset"];
 
-/** 获取wan视频预估训练集图片数结果 */
-export interface WanVideoTrainingImageDatasetCountResult {
+/** 获取wan视频素材训练集提取的图片帧数量结果 */
+export interface WanVideoVideoDatasetEstimateResult {
+	/** 预估批次数量 */
+	total_batches: number;
 	/** 预估图片数量 */
-	total_image: number;
+	total_images: number;
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-03 14:45:14
+ * @LastEditTime: 2025-04-07 10:34:40
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -10,7 +10,7 @@
 import type {
 	StartWanVideoTrainingData,
 	StartWanVideoTrainingVideoDataset,
-	WanVideoTrainingImageDatasetCountData
+	WanVideoVideoDatasetEstimateData
 } from "@/api/lora";
 import { filterAndConvertKeysToNumber } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
@@ -29,7 +29,7 @@ export class WanHelper {
 	}
 
 	/** 计算视频预估图片数量数据格式化 */
-	public formatImagesCountEstimate(data: RuleForm): WanVideoTrainingImageDatasetCountData {
+	public formatImagesCountEstimate(data: RuleForm): WanVideoVideoDatasetEstimateData {
 		return this.formatDataset(data);
 	}
 

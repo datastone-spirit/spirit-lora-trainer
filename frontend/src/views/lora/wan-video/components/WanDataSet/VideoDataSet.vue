@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-31 10:42:26
- * @LastEditTime: 2025-04-03 17:17:58
+ * @LastEditTime: 2025-04-07 10:32:47
  * @LastEditors: mulingyuer
  * @Description: 视频数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\VideoDataSet.vue
@@ -106,25 +106,39 @@
 			:min="1"
 		/>
 	</PopoverFormItem>
-	<el-form-item class="no-mb">
+	<PopoverFormItem class="no-mb">
 		<el-button
 			class="video-dataset-calc-button"
 			type="primary"
 			:loading="calcLoading"
-			round
 			@click="onGetCalcVideoImageCount"
 		>
 			<Icon class="video-dataset-calc-button-icon" name="ri-calculator-line" />
-			batch 批次预估：{{ calcVideoImageCount }}
+			计算视频样本数量
 		</el-button>
-	</el-form-item>
+		<el-row class="video-dataset-calc-result">
+			<el-col :span="12">
+				<div class="video-dataset-calc-result-item">
+					<span>预估批次数量：</span>
+					<span>{{ calcVideoImageCount.total_batches }}</span>
+				</div>
+			</el-col>
+			<el-col :span="12">
+				<div class="video-dataset-calc-result-item">
+					<span>预估图片数量：</span>
+					<span>{{ calcVideoImageCount.total_images }}</span>
+				</div>
+			</el-col>
+		</el-row>
+	</PopoverFormItem>
 </template>
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
 import { useIcon } from "@/hooks/useIcon";
 import { generateUUID } from "@/utils/tools";
-import { wanVideoTrainingImageDatasetCount } from "@/api/lora";
+import { wanVideoVideoDatasetEstimate } from "@/api/lora";
+import type { WanVideoVideoDatasetEstimateResult } from "@/api/lora";
 import { WanHelper } from "../../wan.helper";
 
 export type FrameExtractionExplain = Array<{
@@ -229,15 +243,16 @@ function onAddTargetFrames() {
 
 /** 预估图片数量 */
 const calcLoading = ref(false);
-const calcVideoImageCount = ref<string | number>("??");
+const calcVideoImageCount = ref<WanVideoVideoDatasetEstimateResult>({
+	total_batches: 0,
+	total_images: 0
+});
 function onGetCalcVideoImageCount() {
 	calcLoading.value = true;
-	wanVideoTrainingImageDatasetCount(wanHelper.formatImagesCountEstimate(ruleForm.value))
+	wanVideoVideoDatasetEstimate(wanHelper.formatImagesCountEstimate(ruleForm.value))
 		.then((res) => {
-			calcVideoImageCount.value = res.total_image;
-		})
-		.catch((_error) => {
-			calcVideoImageCount.value = "计算失败，请检查输入参数";
+			calcVideoImageCount.value = res;
+			ElMessage.success("预估图片数量计算成功！");
 		})
 		.finally(() => {
 			calcLoading.value = false;
@@ -290,8 +305,21 @@ function onGetCalcVideoImageCount() {
 }
 .video-dataset-calc-button {
 	width: 100%;
+	height: 50px;
+	border-radius: 0;
+	font-size: 16px;
 }
 .video-dataset-calc-button-icon {
 	margin-right: 6px;
+}
+.video-dataset-calc-result {
+	width: 100%;
+	border: 1px dashed var(--el-color-primary);
+	border-top: none;
+	padding: 6px;
+}
+.video-dataset-calc-result-item {
+	color: var(--zl-popover-form-item-color);
+	font-size: var(--font-size);
 }
 </style>

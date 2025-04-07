@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 08:41:44
- * @LastEditTime: 2025-02-07 15:54:55
+ * @LastEditTime: 2025-04-07 10:17:42
  * @LastEditors: mulingyuer
  * @Description: 表单项组件
  * @FilePath: \frontend\src\components\Form\PopoverFormItem.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<el-form-item class="popover-form-item" :prop="prop">
-		<template #label>
+		<template v-if="label" #label>
 			<span class="popover-form-item-label">
 				{{ label }}
 				<span

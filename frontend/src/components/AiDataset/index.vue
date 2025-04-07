@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-04-02 11:42:18
+ * @LastEditTime: 2025-04-07 15:10:35
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -95,19 +95,19 @@
 // import DatasetPagination from "./DatasetPagination.vue";
 import { directoryFiles, uploadFiles } from "@/api/common";
 import { deleteFile, manualTag } from "@/api/tag";
+import { FileItemMap } from "@/components/FileManager";
 import { useImageViewer } from "@/hooks/useImageViewer";
 import { useTag } from "@/hooks/useTag";
-import { checkDirectory } from "@/utils/lora.helper";
+import { useVideoPreview } from "@/hooks/useVideoPreview";
+import type { FileItem, FileList } from "@/utils/file-manager";
+import { FileManager, FileType } from "@/utils/file-manager";
 import { generateUUID, sleep } from "@/utils/tools";
 import type { AxiosProgressEvent } from "axios";
 import type { UploadInstance, UploadUserFile } from "element-plus";
+import { AiDatasetHelper } from "./ai-dataset.helper";
 import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
 import ContextMenu from "./ContextMenu.vue";
 import TagEdit from "./TagEdit.vue";
-import { useVideoPreview } from "@/hooks/useVideoPreview";
-import { FileManager, FileType } from "@/utils/file-manager";
-import type { FileItem, FileList } from "@/utils/file-manager";
-import { FileItemMap } from "@/components/FileManager";
 
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
@@ -129,6 +129,7 @@ const { previewImages } = useImageViewer();
 const { previewVideo } = useVideoPreview();
 const { tagEvents } = useTag();
 const fileManager = new FileManager();
+const aiDatasetHelper = new AiDatasetHelper();
 
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
 const list = ref<FileList>([]);
@@ -334,15 +335,12 @@ function onCancelUpload() {
 async function onConfirmUpload() {
 	try {
 		// 检测目录是否存在
-		if (typeof props.dir === "string" && props.dir.trim() === "") {
-			ElMessage.error("请先选择目录");
-			return;
-		}
-		const exists = await checkDirectory(props.dir);
-		if (!exists) {
-			ElMessage.error("目录不存在");
-			return;
-		}
+		const isValidPath = await aiDatasetHelper.validateUploadPath(props.dir);
+		if (!isValidPath) return;
+		// 过滤视频文件
+		uploadFileList.value = await aiDatasetHelper.filterVideoFiles(uploadFileList.value);
+		if (uploadFileList.value.length <= 0) return;
+
 		uploadSubmitLoading.value = true;
 		uploadId.value = generateUUID();
 		// 生成formdata
@@ -351,7 +349,7 @@ async function onConfirmUpload() {
 			formData.append("files", file.raw!, file.name);
 		});
 		// 上传
-		const _result = await uploadFiles(
+		await uploadFiles(
 			{
 				upload_path: props.dir,
 				upload_id: uploadId.value
@@ -360,8 +358,8 @@ async function onConfirmUpload() {
 			onUploadProgress
 		);
 		await sleep(500);
+
 		// 上传成功
-		// list.value.push(...result);
 		onConfirmUploadSuccess();
 	} catch (error) {
 		uploadSubmitLoading.value = false;

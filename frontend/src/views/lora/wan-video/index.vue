@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-03 14:57:06
+ * @LastEditTime: 2025-04-07 15:18:03
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -117,7 +117,7 @@ const defaultForm: RuleForm = {
 		max_data_loader_n_workers: 8,
 		optimizer_type: "adamw8bit",
 		optimizer_args: "",
-		learning_rate: "2e-06",
+		learning_rate: "2e-4",
 		lr_decay_steps: 0,
 		lr_scheduler: "constant",
 		lr_scheduler_args: "",
@@ -172,7 +172,7 @@ const defaultForm: RuleForm = {
 		mode_scale: 1.29,
 		logit_mean: 0,
 		logit_std: 1,
-		timestep_sampling: "sigma",
+		timestep_sampling: "shift",
 		sigmoid_scale: 1,
 		weighting_scheme: "none"
 	},
@@ -405,6 +405,18 @@ const rules = reactive<FormRules<RuleForm>>({
 					if (findIndex !== -1) {
 						callback(new Error("chunk模式下，target_frames参数中不能包含1"));
 						return;
+					}
+					// 数组的值后一个必须大于前一个
+					if (value.length > 1) {
+						const isSorted = value.every((item, index) => {
+							if (index === 0) return true;
+							const current = item.value ?? 0;
+							const prev = value[index - 1].value ?? 0;
+							return current > prev;
+						});
+						if (!isSorted) {
+							return callback(new Error("后一个值必须大于前一个值"));
+						}
 					}
 				}
 

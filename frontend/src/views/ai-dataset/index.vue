@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-04-02 09:33:53
+ * @LastEditTime: 2025-04-07 17:18:18
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -18,51 +18,63 @@
 				label-position="top"
 				size="large"
 			>
-				<el-form-item label="数据集目录" prop="image_dir">
-					<FolderSelector v-model="ruleForm.image_dir" placeholder="请选择训练用的数据集目录" />
-				</el-form-item>
-				<TaggerModelSelect v-model="ruleForm.tagger_model" prop="tagger_model" />
-				<JoyCaptionPromptTypeSelect
-					v-if="ruleForm.tagger_model === 'joy-caption-alpha-two'"
+				<TagDirectory
+					v-model="ruleForm.image_path"
+					label="数据集目录"
+					prop="image_path"
+					placeholder="请选择训练用的数据集目录"
+				/>
+				<TagModelSelect
+					v-model="ruleForm.model_name"
+					label="打标模型"
+					prop="tagger_model"
+					placeholder="请选择打标模型"
+				/>
+				<TagJoyCaptionPromptTypeSelect
+					v-show="isJoyCaption2Model"
 					v-model="ruleForm.prompt_type"
 					label="Joy Caption 提示词类型"
 					prop="prompt_type"
 					placeholder="请选择Joy Caption 提示词类型"
 				/>
-				<el-form-item label="是否把触发词输出到打标文件中" prop="output_trigger_words">
-					<el-switch v-model="ruleForm.output_trigger_words" />
-				</el-form-item>
-				<el-form-item
-					v-show="ruleForm.output_trigger_words"
-					label="LoRA 触发词"
-					prop="class_tokens"
-				>
-					<el-input
-						v-model="ruleForm.class_tokens"
-						placeholder="请输入触发词，多个词用英文逗号分隔"
-						type="textarea"
-						:rows="4"
-					/>
-				</el-form-item>
-				<DatasetAdvanced
-					:tagger-model="ruleForm.tagger_model"
-					v-model:advanced="ruleForm.tagger_advanced_settings"
-					v-model:tagger-prompt="ruleForm.tagger_global_prompt"
-					tagger-prompt-prop="tagger_global_prompt"
-					v-model:tagger-append-file="ruleForm.tagger_is_append"
-					tagger-append-file-prop="tagger_is_append"
+				<TagAddGlobalPromptSwitch
+					v-model="ruleForm.is_add_global_prompt"
+					label="是否把触发词输出到打标文件中"
+					prop="is_add_global_prompt"
 				/>
-				<el-form-item>
-					<el-button
-						class="ai-dataset-page-left-btn"
-						type="primary"
-						:loading="submitLoading || monitorTagData.isListen"
-						:disabled="trainingStore.useGPU"
-						@click="onSubmit"
-					>
-						一键打标
-					</el-button>
-				</el-form-item>
+				<TagGlobalPrompt
+					v-show="ruleForm.is_add_global_prompt"
+					v-model="ruleForm.class_token"
+					label="原样保留的打标提示词"
+					prop="class_tokens"
+					placeholder="请输入原样保留的打标提示词"
+				/>
+				<TagAdvancedSwitch
+					v-model="ruleForm.tag_advanced_settings"
+					label="打标高级设置"
+					prop="tag_advanced_settings"
+				/>
+				<template v-if="isAdvancedSetting">
+					<TagJoyCaptionPrompt
+						v-show="isJoyCaption2Model"
+						v-model="ruleForm.global_prompt"
+						label="打标提示词"
+						prop="global_prompt"
+						placeholder="请输入打标提示词"
+					/>
+					<TagAppendSwitch
+						v-model="ruleForm.is_append"
+						label="追加到已有打标文件中"
+						prop="is_append"
+					/>
+				</template>
+				<TagSubmitButton
+					:loading="submitLoading || monitorTagData.isListen"
+					:disabled="trainingStore.useGPU"
+					:is-bottom-margin="false"
+					@click="onSubmit"
+				/>
+				<TagResetButton @reset="onReset" />
 			</el-form>
 			<div class="ai-dataset-page-monitor">
 				<div class="ai-dataset-page-monitor-head">
@@ -79,7 +91,7 @@
 				<AiDataset
 					ref="aiDatasetRef"
 					btn-teleport-to="#ai-dataset-header"
-					:dir="ruleForm.image_dir"
+					:dir="ruleForm.image_path"
 				/>
 			</div>
 		</div>
@@ -97,21 +109,21 @@ import type { FormInstance, FormRules } from "element-plus";
 
 interface RuleForm {
 	/** 图片目录 */
-	image_dir: string;
+	image_path: string;
 	/** 打标模型 */
-	tagger_model: string;
+	model_name: string;
 	/** joy-caption-alpha-two打标模型的提示词类型 */
 	prompt_type: string;
 	/** 是否把触发词输出到打标文件中 */
-	output_trigger_words: boolean;
+	is_add_global_prompt: boolean;
 	/** LoRA 触发词 */
-	class_tokens: string;
+	class_token: string;
 	/** 打标高级设置 */
-	tagger_advanced_settings: boolean;
+	tag_advanced_settings: boolean;
 	/** 打标提示词 */
-	tagger_global_prompt: string;
+	global_prompt: string;
 	/** 是否追加到已有打标文件中 */
-	tagger_is_append: boolean;
+	is_append: boolean;
 }
 
 const trainingStore = useTrainingStore();
@@ -130,14 +142,14 @@ const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}ai_dataset_form`;
 const defaultForm = readonly<RuleForm>({
-	image_dir: "/root",
-	tagger_model: "joy-caption-alpha-two",
+	image_path: "/root",
+	model_name: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
-	output_trigger_words: true,
-	class_tokens: "",
-	tagger_advanced_settings: false,
-	tagger_global_prompt: "",
-	tagger_is_append: false
+	is_add_global_prompt: true,
+	class_token: "",
+	tag_advanced_settings: false,
+	global_prompt: "",
+	is_append: false
 });
 const ruleForm = useEnhancedLocalStorage<RuleForm>(
 	localStorageKey,
@@ -175,6 +187,10 @@ const rules = reactive<FormRules<RuleForm>>({
 	]
 });
 const submitLoading = ref(false);
+/** 是否是Joy Caption 2.0模型 */
+const isJoyCaption2Model = computed(() => ruleForm.value.model_name === "joy-caption-alpha-two");
+/** 是否开启打标高级设置 */
+const isAdvancedSetting = computed(() => ruleForm.value.tag_advanced_settings);
 
 /** 打标 */
 async function onSubmit() {
@@ -183,13 +199,13 @@ async function onSubmit() {
 		submitLoading.value = true;
 
 		const tagResult = await tag({
-			tagDir: ruleForm.value.image_dir,
-			tagModel: ruleForm.value.tagger_model,
+			tagDir: ruleForm.value.image_path,
+			tagModel: ruleForm.value.model_name,
 			joyCaptionPromptType: ruleForm.value.prompt_type,
-			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
-			globalPrompt: ruleForm.value.class_tokens,
-			tagPrompt: ruleForm.value.tagger_global_prompt,
-			isAppend: ruleForm.value.tagger_is_append,
+			isAddGlobalPrompt: ruleForm.value.is_add_global_prompt,
+			globalPrompt: ruleForm.value.class_token,
+			tagPrompt: ruleForm.value.global_prompt,
+			isAppend: ruleForm.value.is_append,
 			showTaskStartPrompt: true
 		});
 
@@ -201,6 +217,14 @@ async function onSubmit() {
 		stopQueryTagTask();
 		console.log("打标任务创建失败", error);
 	}
+}
+
+/** 重置表单 */
+function onReset() {
+	// 还原数据
+	ruleForm.value = structuredClone(toRaw(defaultForm));
+
+	ElMessage.success("重置成功");
 }
 
 // 如果GPU被占用就开始监听
@@ -242,8 +266,8 @@ onUnmounted(() => {
 	margin-right: $zl-padding;
 	overflow-y: auto;
 }
-.ai-dataset-page-left-btn {
-	width: 100%;
+.ai-dataset-page-monitor {
+	margin-top: 24px;
 }
 .ai-dataset-page-monitor-head {
 	display: flex;

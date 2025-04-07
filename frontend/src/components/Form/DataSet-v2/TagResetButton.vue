@@ -1,24 +1,24 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2025-03-26 11:47:17
- * @LastEditTime: 2025-04-07 17:20:09
+ * @Date: 2025-04-07 17:13:16
+ * @LastEditTime: 2025-04-07 17:25:45
  * @LastEditors: mulingyuer
- * @Description: 打标提交按钮
- * @FilePath: \frontend\src\components\Form\DataSet-v2\TagSubmitButton.vue
+ * @Description: 打标重置按钮
+ * @FilePath: \frontend\src\components\Form\DataSet-v2\TagResetButton.vue
  * 怎么可能会有bug！！！
 -->
 <template>
 	<PopoverFormItem :class="{ 'no-mb': isBottomMargin }">
 		<el-button
-			class="tag-submit-button"
+			class="tag-reset-button"
 			:type="type"
 			:loading="loading"
 			:disabled="disabled"
 			:size="size"
 			:round="round"
-			@click="emits('submit')"
+			@click="emits('reset')"
 		>
-			<Icon class="tag-submit-button-icon" :name="iconName" />
+			<Icon class="tag-reset-button-icon" :name="iconName" />
 			{{ btnText }}
 		</el-button>
 	</PopoverFormItem>
@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import type { ButtonProps } from "element-plus";
 
-export interface TagSubmitButtonProps {
+export interface TagResetButtonProps {
 	type?: ButtonProps["type"];
 	loading?: ButtonProps["loading"];
 	disabled?: ButtonProps["disabled"];
@@ -40,18 +40,18 @@ export interface TagSubmitButtonProps {
 	iconName?: string;
 }
 
-withDefaults(defineProps<TagSubmitButtonProps>(), {
-	type: "primary",
-	btnText: "一键打标",
+withDefaults(defineProps<TagResetButtonProps>(), {
+	type: "default",
+	btnText: "重置表单",
 	size: "large",
 	round: true,
 	isBottomMargin: true,
-	iconName: "ri-price-tag-3-fill"
+	iconName: "ri-reset-left-line"
 });
 
 const emits = defineEmits<{
-	/** 提交按钮点击事件 */
-	submit: [];
+	/** 点击重置按钮 */
+	reset: [];
 }>();
 </script>
 
@@ -59,10 +59,10 @@ const emits = defineEmits<{
 .el-form-item.no-mb {
 	margin-bottom: 0;
 }
-.tag-submit-button {
+.tag-reset-button {
 	width: 100%;
 }
-.tag-submit-button-icon {
+.tag-reset-button-icon {
 	margin-right: 6px;
 }
 </style>

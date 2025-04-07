@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 10:48:16
- * @LastEditTime: 2025-03-26 11:32:17
+ * @LastEditTime: 2025-04-07 16:28:24
  * @LastEditors: mulingyuer
  * @Description: 打标模型选择器
  * @FilePath: \frontend\src\components\Form\DataSet-v2\TagModelSelect.vue
@@ -24,7 +24,7 @@
 import type { FormItemProps } from "element-plus";
 
 export interface TaggerModelSelectProps {
-	label: FormItemProps["label"];
+	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
 	popoverContent?: string;
 	placeholder?: string;

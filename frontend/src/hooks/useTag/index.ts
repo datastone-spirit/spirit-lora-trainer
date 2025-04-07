@@ -1,30 +1,30 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 11:17:50
- * @LastEditTime: 2025-04-03 09:03:13
+ * @LastEditTime: 2025-04-07 17:31:53
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\useTag\index.ts
  * 怎么可能会有bug！！！
  */
+import { manualTagInfo, type ManualTagInfoResult } from "@/api/monitor";
 import { batchTag } from "@/api/tag";
+import { useTrainingStore } from "@/stores";
+import { checkDirectory } from "@/utils/lora.helper";
+import { calculatePercentage } from "@/utils/tools";
+import mitt from "mitt";
 import type {
-	TagOptions,
-	ValidateTagOptions,
-	ValidateTagResult,
-	ValidateTagRules,
 	BatchTagData,
+	InitQueryTagTaskOptions,
 	QueryTagTaskInfo,
 	QueryTagTaskStatus,
 	TagData,
 	TagEvents,
-	InitQueryTagTaskOptions
+	TagOptions,
+	ValidateTagOptions,
+	ValidateTagResult,
+	ValidateTagRules
 } from "./types";
-import { useModalManagerStore, useTrainingStore } from "@/stores";
-import { checkDirectory } from "@/utils/lora.helper";
-import { manualTagInfo, type ManualTagInfoResult } from "@/api/monitor";
-import { calculatePercentage } from "@/utils/tools";
-import mitt from "mitt";
 
 /** 打标 */
 async function tag(options: TagOptions) {
@@ -238,7 +238,6 @@ function queryTagTask() {
 /** 查询打标任务信息统一成功处理 */
 function handleQuerySuccess(res: ManualTagInfoResult) {
 	const trainingStore = useTrainingStore();
-	const modalManagerStore = useModalManagerStore();
 
 	// 更新打标任务的数据
 	trainingStore.setTagData(formatTagTaskData(res));
@@ -269,15 +268,9 @@ function handleQuerySuccess(res: ManualTagInfoResult) {
 			ElMessageBox({
 				title: "打标失败",
 				type: "error",
-				showCancelButton: true,
-				cancelButtonText: "查看日志",
+				showCancelButton: false,
 				confirmButtonText: "知道了",
 				message: "打标失败，请检查日志或者重新打标"
-			}).catch(() => {
-				modalManagerStore.setLoraTaskLogModal({
-					open: true,
-					taskId: queryTagTaskInfo.value.taskId
-				});
 			});
 			break;
 		case "running":

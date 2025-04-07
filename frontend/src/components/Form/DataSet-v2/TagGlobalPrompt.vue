@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2025-03-26 11:34:21
- * @LastEditTime: 2025-04-07 16:28:14
+ * @Date: 2025-04-07 16:40:42
+ * @LastEditTime: 2025-04-07 16:59:23
  * @LastEditors: mulingyuer
- * @Description: joy caption的打标提示词
- * @FilePath: \frontend\src\components\Form\DataSet-v2\TagJoyCaptionPrompt.vue
+ * @Description: 原样保留的打标提示词
+ * @FilePath: \frontend\src\components\Form\DataSet-v2\TagGlobalPrompt.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -14,19 +14,19 @@
 </template>
 
 <script setup lang="ts">
-import type { FormItemProps, InputProps } from "element-plus";
+import type { FormItemProps } from "element-plus";
 
-export interface TagJoyCaptionPromptProps {
+export interface TagGlobalPromptProps {
 	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
 	popoverContent?: string;
 	placeholder?: string;
-	rows?: InputProps["rows"];
+	rows?: number;
 }
 
-withDefaults(defineProps<TagJoyCaptionPromptProps>(), {
-	label: "打标提示词",
-	placeholder: "请输入打标提示词",
+withDefaults(defineProps<TagGlobalPromptProps>(), {
+	label: "原样保留的打标提示词",
+	placeholder: "请输入原样保留的打标提示词",
 	rows: 4
 });
 

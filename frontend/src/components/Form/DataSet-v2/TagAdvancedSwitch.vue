@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 11:27:02
- * @LastEditTime: 2025-03-26 11:30:19
+ * @LastEditTime: 2025-04-07 16:28:08
  * @LastEditors: mulingyuer
  * @Description: 打标高级设置开关
  * @FilePath: \frontend\src\components\Form\DataSet-v2\TagAdvancedSwitch.vue
@@ -22,7 +22,7 @@
 import type { FormItemProps } from "element-plus";
 
 export interface TagAdvancedSwitchProps {
-	label: FormItemProps["label"];
+	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
 	popoverContent?: string;
 }

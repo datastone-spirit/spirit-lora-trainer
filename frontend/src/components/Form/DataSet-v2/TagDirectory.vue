@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 10:58:24
- * @LastEditTime: 2025-03-26 11:31:57
+ * @LastEditTime: 2025-04-07 16:27:56
  * @LastEditors: mulingyuer
  * @Description: 打标目录
  * @FilePath: \frontend\src\components\Form\DataSet-v2\TagDirectory.vue
@@ -17,7 +17,7 @@
 import type { FormItemProps } from "element-plus";
 
 export interface TagDirectoryProps {
-	label: FormItemProps["label"];
+	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
 	popoverContent?: string;
 	placeholder?: string;

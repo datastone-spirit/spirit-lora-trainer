@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2025-03-26 11:42:15
- * @LastEditTime: 2025-04-07 16:28:04
+ * @Date: 2025-04-07 16:56:46
+ * @LastEditTime: 2025-04-07 16:56:46
  * @LastEditors: mulingyuer
- * @Description: 打标内容是否追加到原有内容后面
- * @FilePath: \frontend\src\components\Form\DataSet-v2\TagAppendSwitch.vue
+ * @Description: 是否把触发词输出到打标文件中
+ * @FilePath: \frontend\src\components\Form\DataSet-v2\TagAddGlobalPromptSwitch.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -16,14 +16,14 @@
 <script setup lang="ts">
 import type { FormItemProps } from "element-plus";
 
-export interface TagAppendSwitchProps {
+export interface TagAddGlobalPromptSwitchProps {
 	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
 	popoverContent?: string;
 }
 
-withDefaults(defineProps<TagAppendSwitchProps>(), {
-	label: "是否追加到已有打标文件中"
+withDefaults(defineProps<TagAddGlobalPromptSwitchProps>(), {
+	label: "是否把触发词输出到打标文件中"
 });
 
 const value = defineModel({ type: Boolean, required: true });

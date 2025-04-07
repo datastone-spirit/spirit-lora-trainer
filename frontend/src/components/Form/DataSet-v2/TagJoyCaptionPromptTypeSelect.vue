@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 11:21:29
- * @LastEditTime: 2025-03-26 11:32:08
+ * @LastEditTime: 2025-04-07 16:28:18
  * @LastEditors: mulingyuer
  * @Description: joy-caption-alpha-two的具体prompt类型选择
  * @FilePath: \frontend\src\components\Form\DataSet-v2\TagJoyCaptionPromptTypeSelect.vue
@@ -24,7 +24,7 @@
 import type { FormItemProps } from "element-plus";
 
 export interface FluxNetworkModuleSelectProps {
-	label: FormItemProps["label"];
+	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
 	popoverContent?: string;
 	placeholder?: string;

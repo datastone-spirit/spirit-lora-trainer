@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-04-02 15:30:56
+ * @LastEditTime: 2025-04-08 09:52:56
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -22,39 +22,16 @@
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo :form="ruleForm" />
 					</Collapse>
-					<Collapse v-model="openStep2" title="第2步：训练用的数据">
-						<Dataset
-							v-model:dataset-path="ruleForm.directory_path"
-							dataset-path-prop="directory_path"
-							dataset-path-popover-content="directory_path"
-							v-model:tagger-model="ruleForm.tagger_model"
-							tagger-model-prop="tagger_model"
-							tagger-model-popover-content="tagger_model"
-							v-model:joy-caption-prompt-type="ruleForm.prompt_type"
-							joy-caption-prop="prompt_type"
-							joy-caption-popover-content="prompt_type"
-							v-model:output-trigger-words="ruleForm.output_trigger_words"
-							output-trigger-words-prop="output_trigger_words"
-							output-trigger-words-popover-content="output_trigger_words"
-							:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
-							@tagger-click="onTaggerClick"
-						/>
-						<DatasetAdvanced
-							:tagger-model="ruleForm.tagger_model"
-							v-model:advanced="ruleForm.tagger_advanced_settings"
-							v-model:tagger-prompt="ruleForm.tagger_global_prompt"
-							tagger-prompt-prop="tagger_global_prompt"
-							tagger-prompt-popover-content="tagger_global_prompt"
-							v-model:tagger-append-file="ruleForm.tagger_is_append"
-							tagger-append-file-prop="tagger_is_append"
-							tagger-append-file-popover-content="tagger_is_append"
-						/>
+					<Collapse v-model="openStep2" title="第2步：AI数据集">
+						<HYDataset v-model:form="ruleForm" />
+					</Collapse>
+					<Collapse v-model="openStep3" title="第3步：训练数据配置">
 						<TrainingData :form="ruleForm" />
 					</Collapse>
-					<Collapse v-show="isExpert" v-model="openStep3" title="模型参数调教">
+					<Collapse v-show="isExpert" v-model="openStep4" title="模型参数调教">
 						<ModelParameters v-model:form="ruleForm" />
 					</Collapse>
-					<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
+					<SimpleCollapse v-show="isExpert" v-model="openStep5" title="其它：高级设置">
 						<AdvancedSettings v-model:form="ruleForm" />
 					</SimpleCollapse>
 				</el-form>
@@ -81,7 +58,6 @@
 import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useHYLora } from "@/hooks/useHYLora";
-import { useTag } from "@/hooks/useTag";
 import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { checkData, checkDirectory, checkHYData, recoveryTaskFormData } from "@/utils/lora.helper";
@@ -94,12 +70,12 @@ import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData } from "./hunyuan.helper";
 import type { RuleForm } from "./types";
+import HYDataset from "./components/HYDataset/index.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const modelManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
 const {
 	monitorHYLoraData,
 	queryHYTaskInfo,
@@ -242,8 +218,6 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-/** 是否已经恢复训练配置 */
-const isRestored = ref(false);
 
 /** toml */
 const toml = ref("");
@@ -257,38 +231,11 @@ const openStep1 = ref(true);
 const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
+const openStep5 = ref(true);
 
 /** 重置表单 */
 function onResetData() {
 	if (ruleFormRef.value) ruleFormRef.value.resetFields();
-}
-
-/** 打标 */
-const taggerBtnLoading = ref(false);
-async function onTaggerClick() {
-	try {
-		taggerBtnLoading.value = true;
-
-		const tagResult = await tag({
-			tagDir: ruleForm.value.directory_path,
-			tagModel: ruleForm.value.tagger_model,
-			joyCaptionPromptType: ruleForm.value.prompt_type,
-			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
-			globalPrompt: ruleForm.value.class_tokens,
-			tagPrompt: ruleForm.value.tagger_global_prompt,
-			isAppend: ruleForm.value.tagger_is_append,
-			showTaskStartPrompt: true
-		});
-
-		// 触发查询打标任务
-		startQueryTagTask(tagResult.task_id);
-		taggerBtnLoading.value = false;
-	} catch (error) {
-		taggerBtnLoading.value = false;
-		stopQueryTagTask();
-
-		console.error("打标任务创建失败", error);
-	}
 }
 
 /** 提交表单 */

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-04-03 09:40:15
+ * @LastEditTime: 2025-04-08 10:10:06
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -23,42 +23,19 @@
 						<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 							<BasicInfo v-model:form="ruleForm" />
 						</Collapse>
-						<Collapse v-model="openStep2" title="第2步：训练用的数据">
-							<Dataset
-								v-model:dataset-path="ruleForm.image_dir"
-								dataset-path-prop="image_dir"
-								dataset-path-popover-content="image_dir"
-								v-model:tagger-model="ruleForm.tagger_model"
-								tagger-model-prop="tagger_model"
-								tagger-model-popover-content="tagger_model"
-								v-model:joy-caption-prompt-type="ruleForm.prompt_type"
-								joy-caption-prop="prompt_type"
-								joy-caption-popover-content="prompt_type"
-								v-model:output-trigger-words="ruleForm.output_trigger_words"
-								output-trigger-words-prop="output_trigger_words"
-								output-trigger-words-popover-content="output_trigger_words"
-								:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
-								@tagger-click="onTaggerClick"
-							/>
-							<DatasetAdvanced
-								:tagger-model="ruleForm.tagger_model"
-								v-model:advanced="ruleForm.tagger_advanced_settings"
-								v-model:tagger-prompt="ruleForm.tagger_global_prompt"
-								tagger-prompt-prop="tagger_global_prompt"
-								tagger-prompt-popover-content="tagger_global_prompt"
-								v-model:tagger-append-file="ruleForm.tagger_is_append"
-								tagger-append-file-prop="tagger_is_append"
-								tagger-append-file-popover-content="tagger_is_append"
-							/>
+						<Collapse v-model="openStep2" title="第2步：AI数据集">
+							<FluxDataset v-model:form="ruleForm" />
+						</Collapse>
+						<Collapse v-model="openStep3" title="第3步：训练数据配置">
 							<TrainingData v-model:form="ruleForm" />
 						</Collapse>
-						<Collapse v-model="openStep3" title="第3步：模型参数调教">
+						<Collapse v-model="openStep4" title="第4步：模型参数调教">
 							<ModelParameters v-model:form="ruleForm" />
 						</Collapse>
-						<Collapse v-model="openStep3" title="第4步：训练采样">
+						<Collapse v-model="openStep5" title="第5步：训练采样">
 							<TrainingSamples v-model:form="ruleForm" />
 						</Collapse>
-						<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
+						<SimpleCollapse v-show="isExpert" v-model="openStep6" title="其它：高级设置">
 							<AdvancedSettings v-model:form="ruleForm" />
 						</SimpleCollapse>
 					</el-form>
@@ -96,7 +73,6 @@ import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useFluxLora } from "@/hooks/useFluxLora";
-import { useTag } from "@/hooks/useTag";
 import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
@@ -110,11 +86,11 @@ import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormData } from "./flux.helper";
 import { validateForm } from "./flux.validate";
 import type { RuleForm } from "./types";
+import FluxDataset from "./components/FluxDataset/index.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const modalManagerStore = useModalManagerStore();
-const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
 const {
 	monitorFluxLoraData,
 	startQueryFluxTask,
@@ -495,6 +471,8 @@ const openStep1 = ref(true);
 const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
+const openStep5 = ref(true);
+const openStep6 = ref(true);
 
 /** toml */
 const toml = ref("");
@@ -506,34 +484,6 @@ watch(ruleForm, generateToml, { deep: true, immediate: true });
 /** 重置表单 */
 function onResetData() {
 	if (ruleFormRef.value) ruleFormRef.value.resetFields();
-}
-
-/** 打标 */
-const taggerBtnLoading = ref(false);
-async function onTaggerClick() {
-	try {
-		taggerBtnLoading.value = true;
-
-		const tagResult = await tag({
-			tagDir: ruleForm.value.image_dir,
-			tagModel: ruleForm.value.tagger_model,
-			joyCaptionPromptType: ruleForm.value.prompt_type,
-			isAddGlobalPrompt: ruleForm.value.output_trigger_words,
-			globalPrompt: ruleForm.value.class_tokens,
-			tagPrompt: ruleForm.value.tagger_global_prompt,
-			isAppend: ruleForm.value.tagger_is_append,
-			showTaskStartPrompt: true
-		});
-
-		// 触发查询打标任务
-		startQueryTagTask(tagResult.task_id);
-		taggerBtnLoading.value = false;
-	} catch (error) {
-		taggerBtnLoading.value = false;
-		stopQueryTagTask();
-
-		console.log("打标任务创建失败", error);
-	}
 }
 
 /** 提交表单 */

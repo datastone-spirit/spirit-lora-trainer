@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-08 11:45:29
+ * @LastEditTime: 2025-04-08 14:07:10
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -143,7 +143,7 @@ const defaultForm: RuleForm = {
 		save_last_n_epochs_state: undefined,
 		save_last_n_steps: undefined,
 		save_last_n_steps_state: undefined,
-		save_state: false,
+		save_state: true,
 		save_state_on_train_end: false,
 		resume: "",
 		scale_weight_norms: undefined,

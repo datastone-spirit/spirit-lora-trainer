@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-07 15:17:52
+ * @LastEditTime: 2025-04-08 15:58:30
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -429,7 +429,7 @@ export interface StartWanVideoTrainingData {
 		save_last_n_steps: number | undefined;
 		/** 专门控制state步数保留（覆盖save_last_n_steps），默认：undefined */
 		save_last_n_steps_state: number | undefined;
-		/** 保存训练状态 配合 resume 参数可以继续从某个状态训练，默认：false */
+		/** 保存训练状态 配合 resume 参数可以继续从某个状态训练，默认：true */
 		save_state: boolean;
 		/** 训练结束时强制保存state（即使未启用save_state），默认：false */
 		save_state_on_train_end: boolean;
@@ -557,7 +557,7 @@ export interface StartWanVideoTrainingData {
 	};
 	dataset: {
 		general: {
-			/** 图片尺寸，默认：[960, 544] */
+			/** 图片尺寸，默认：[720, 480] */
 			resolution: [number, number];
 			/** 批次大小，默认：1 */
 			batch_size: number;

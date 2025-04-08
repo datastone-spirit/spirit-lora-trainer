@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-07 15:18:03
+ * @LastEditTime: 2025-04-08 11:45:29
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -152,7 +152,7 @@ const defaultForm: RuleForm = {
 		ddp_static_graph: false,
 		ddp_timeout: undefined,
 		sample_at_first: false,
-		sample_every_n_epochs: 4,
+		sample_every_n_epochs: undefined,
 		sample_every_n_steps: undefined,
 		sample_prompts: "",
 		guidance_scale: undefined,

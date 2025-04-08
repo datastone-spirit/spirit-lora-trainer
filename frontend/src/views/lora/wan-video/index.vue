@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-08 14:28:31
+ * @LastEditTime: 2025-04-08 15:58:24
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -179,7 +179,7 @@ const defaultForm: RuleForm = {
 	data_mode: "image",
 	dataset: {
 		general: {
-			resolution: [720, 640],
+			resolution: [720, 480],
 			batch_size: 1,
 			enable_bucket: true,
 			bucket_no_upscale: false,

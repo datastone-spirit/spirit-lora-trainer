@@ -131,6 +131,8 @@ class Task:
         task.start_time = time.time()
         task.status = TaskStatus.CREATED
         task.stdout_lines = []
+        if task.is_sampling:
+            task.sampling_path = os.path.join(parameter.config.output_dir, "sample")
         return task
 
 

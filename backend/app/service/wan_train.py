@@ -32,4 +32,5 @@ class WanTrainingService():
 
     @task_decorator 
     def run_train(self, training_paramters: WanTrainingParameter, task_id: str=None, module_path:str = None):
-        return Task.wrap_wan_training(training_paramters, task_id, module_path)    
+        return Task.wrap_wan_training(training_paramters, task_id, module_path,
+                                      is_sampling = True if os.path.exists(training_paramters.config.sample_prompts) else False)

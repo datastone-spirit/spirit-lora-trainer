@@ -1345,6 +1345,14 @@ wan_training_api_config = {
                     "frontend_config": {
                         "type": "string",
                         "example": "frontend_config"
+                    },
+                    "skip_cache_text_encoder_latent": {
+                        "type": "bool",
+                        "example": False
+                    },
+                    "skip_cache_latent": {
+                        "type": "bool",
+                        "example": False
                     }
                 }
             }

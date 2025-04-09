@@ -596,6 +596,9 @@ class WanCacheLatentSubTask(SubTask):
     
     def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
         logger.info("beginning to run cache latent sub task")
+        if task.wan_parameter.skip_cache_latent:
+            logger.warning("Cache latent sub task is skipped due to skip_cache_latent is set to True")
+            return 
         
         args = [
             self.executable, 
@@ -619,6 +622,9 @@ class WanTextEncoderOutputCacheSubTask(SubTask):
     
     def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
         logger.info("beginning to run text encoder output cache sub task")
+        if task.wan_parameter.skip_cache_text_encoder_latent:
+            logger.warning("Cache text encoder latent sub task is skipped due to skip_text_encoder_latent is set to True")
+            return 
         args = [
             self.executable, 
             self.script,

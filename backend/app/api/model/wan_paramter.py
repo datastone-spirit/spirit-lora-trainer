@@ -402,6 +402,8 @@ class WanTrainingParameter:
     dataset: Optional[WanDataSetConfig] = None
     config: Optional[WanTrainingConfig] = None
     frontend_config: Optional[str] = None
+    skip_cache_text_encoder_latent: Optional[bool] = False
+    skip_cache_latent: Optional[bool] = False
 
     @classmethod
     def from_dict(cls, dikt) -> 'WanTrainingParameter':

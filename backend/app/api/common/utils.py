@@ -447,9 +447,14 @@ def generate_sample_prompt_file(sample_prompts: str) -> str:
     # Try to parse as JSON first (more structured and reliable to detect)
     try:
         parsed_json = json.loads(sample_content)
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.json')
-        with open(temp_file.name, 'w', encoding='utf-8') as f:
-            json.dump(parsed_json, f, ensure_ascii=False, indent=2)
+        if not isinstance(parsed_json, dict): # sample file must be a dict
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
+            with open(temp_file.name, 'w', encoding='utf-8') as f:
+                f.write(sample_content)
+        else:
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.json')
+            with open(temp_file.name, 'w', encoding='utf-8') as f:
+                json.dump(parsed_json, f, ensure_ascii=False, indent=2)
         logger.info(f"Sample prompts detected as JSON and saved to: {temp_file.name}")
     except json.JSONDecodeError:
         # Not valid JSON, try TOML

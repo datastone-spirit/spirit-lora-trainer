@@ -379,6 +379,11 @@ class WanTrainingConfig:
             else:
                 config.sample_prompts = generate_sample_prompt_file(config.sample_prompts)  
         
+        if not is_blank(config.sample_prompts):
+            if (config.sample_every_n_epochs is None or config.sample_every_n_epochs <=0) and \
+                (config.sample_every_n_steps is None or config.sample_every_n_steps <=0):
+                logger.warning("sample_prompts requires sample_every_n_steps or sample_every_n_steps.")
+                raise ValueError("sample_prompts requires sample_every_n_steps or sample_every_n_steps.")
 
         if is_blank(config.output_dir):
             raise ValueError("Output directory is required.")

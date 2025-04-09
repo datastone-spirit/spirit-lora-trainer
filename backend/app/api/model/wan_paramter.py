@@ -375,7 +375,7 @@ class WanTrainingConfig:
             config.save_every_n_epochs = None
         
         if (config.sample_every_n_steps and config.sample_every_n_steps > 0 or  \
-            config.sample_every_n_epochs and config.sample_every_n_epoch > 0): 
+            config.sample_every_n_epochs and config.sample_every_n_epochs > 0): 
             if is_blank(config.sample_prompts):
                 logger.warning("Do sampling requires sample_prompts.")
                 raise ValueError("Do sampling requires sample_prompts.")

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-09 09:02:17
+ * @LastEditTime: 2025-04-09 11:58:39
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -115,6 +115,7 @@ const defaultForm: RuleForm = {
 		mixed_precision: "bf16",
 		persistent_data_loader_workers: false,
 		max_data_loader_n_workers: 8,
+		save_every_n_epochs: 4,
 		optimizer_type: "adamw8bit",
 		optimizer_args: "",
 		learning_rate: "2e-4",
@@ -137,7 +138,6 @@ const defaultForm: RuleForm = {
 		blocks_to_swap: 36,
 		fp8_base: true,
 		fp8_scaled: false,
-		save_every_n_epochs: undefined,
 		save_every_n_steps: undefined,
 		save_last_n_epochs: undefined,
 		save_last_n_epochs_state: undefined,
@@ -164,8 +164,8 @@ const defaultForm: RuleForm = {
 		flash_attn: false,
 		sage_attn: false,
 		sdpa: true,
-		split_attn: false,
-		xformers: false,
+		split_attn: true,
+		xformers: true,
 		discrete_flow_shift: 3,
 		min_timestep: undefined,
 		max_timestep: undefined,
@@ -197,7 +197,8 @@ const defaultForm: RuleForm = {
 					{ key: generateUUID(), value: 25 }
 				],
 				frame_stride: 10,
-				frame_sample: 1
+				frame_sample: 1,
+				max_frames: 129
 			}
 		]
 	},
@@ -207,7 +208,9 @@ const defaultForm: RuleForm = {
 		tag_advanced_settings: false,
 		tag_global_prompt: "",
 		tag_is_append: false
-	}
+	},
+	skip_cache_latent: false,
+	skip_cache_text_encoder_latent: false
 };
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
 const rules = reactive<FormRules<RuleForm>>({
@@ -424,6 +427,17 @@ const rules = reactive<FormRules<RuleForm>>({
 				callback();
 			},
 			trigger: ["blur", "change"]
+		}
+	],
+	"dataset.datasets.0.max_frames": [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				if (isWhiteCheck && value > Number(env.VITE_APP_WAN_VIDEO_MAX_FRAMES)) {
+					return callback(new Error(`最大帧数不能超过${env.VITE_APP_WAN_VIDEO_MAX_FRAMES}`));
+				}
+				callback();
+			},
+			trigger: "change"
 		}
 	]
 });

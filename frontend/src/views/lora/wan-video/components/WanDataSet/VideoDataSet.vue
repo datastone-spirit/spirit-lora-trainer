@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-31 10:42:26
- * @LastEditTime: 2025-04-07 10:32:47
+ * @LastEditTime: 2025-04-09 11:42:43
  * @LastEditors: mulingyuer
  * @Description: 视频数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\VideoDataSet.vue
@@ -50,6 +50,7 @@
 		</div>
 	</el-form-item>
 	<PopoverFormItem
+		v-show="frameExtraction !== 'full'"
 		label="指定了从视频中提取的帧的数量"
 		prop="dataset.datasets.0.target_frames"
 		popover-content="target_frames"
@@ -83,6 +84,7 @@
 		</div>
 	</PopoverFormItem>
 	<PopoverFormItem
+		v-show="frameExtraction === 'slide'"
 		label="提取帧时的步长，仅在 frame_extraction 为 slide 时有效"
 		prop="dataset.datasets.0.frame_stride"
 		popover-content="frame_stride"
@@ -95,12 +97,26 @@
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
+		v-show="frameExtraction === 'uniform'"
 		label="从视频中均匀提取的样本数量，仅在 frame_extraction 为 uniform 时有效"
 		prop="dataset.datasets.0.frame_sample"
 		popover-content="frame_sample"
 	>
 		<el-input-number
 			v-model.number="ruleForm.dataset.datasets[0].frame_sample"
+			:step="1"
+			step-strictly
+			:min="1"
+		/>
+	</PopoverFormItem>
+	<PopoverFormItem
+		v-show="frameExtraction === 'full'"
+		label="最大视频帧数，仅在 frame_extraction 为 full 时有效"
+		prop="dataset.datasets.0.max_frames"
+		popover-content="max_frames"
+	>
+		<el-input-number
+			v-model.number="ruleForm.dataset.datasets[0].max_frames"
 			:step="1"
 			step-strictly
 			:min="1"
@@ -155,6 +171,7 @@ const RiDeleteBin_7Line = useIcon({ name: "ri-delete-bin-7-line" });
 const RiAddCircleLine = useIcon({ name: "ri-add-circle-line" });
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 /** 提取首帧方式 */
+const frameExtraction = computed(() => ruleForm.value.dataset.datasets[0].frame_extraction);
 const frameExtractionOptions = ref<ElOptions>([
 	{
 		label: "head：从视频的开头提取前 N 帧",
@@ -171,6 +188,10 @@ const frameExtractionOptions = ref<ElOptions>([
 	{
 		label: "uniform：从视频中均匀地提取 frame_sample 个 N 帧",
 		value: "uniform"
+	},
+	{
+		label: "full：提取视频的全部帧",
+		value: "full"
 	}
 ]);
 /** 提取帧的解释 */
@@ -200,6 +221,12 @@ const frameExtractionExplain = ref<FrameExtractionExplain>([
 		code: "frame_extraction=uniform; target_frames=[1, 13, 25]; frame_sample=4;",
 		content:
 			"<div>frame_sample表示每次帧提取的切片次数，这里是4次，假设总帧为40帧，每次提取都会从开头提取一次，以设置的1帧为例，开头取了1帧后还剩39帧，且用了1次切片次数，剩余3次切片，用39除以3得到均分的向下取整值13，每13帧间隔取一帧，取3次，然后切换到下一个提取配置：13，开头取13帧为1个切片，剩余的除以3得到均分的向下取整值9，间隔9取13帧的切片取3次，依次类推。</div>"
+	},
+	{
+		id: "full",
+		title: "提取视频的全部帧",
+		code: "无",
+		content: "<div>表示将视频的每一帧都作为一个切片，无限循环，直到视频结束。</div>"
 	}
 ]);
 /** 当前提取帧的解释 */
@@ -264,6 +291,7 @@ function onGetCalcVideoImageCount() {
 @use "sass:math";
 
 .frame-extraction-explain {
+	width: 100%;
 	background-color: var(--zl-frame-extraction-explain-bg);
 	border-radius: math.div($zl-border-radius, 2);
 	padding: $zl-padding;

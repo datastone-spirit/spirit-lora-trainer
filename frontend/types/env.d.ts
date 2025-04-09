@@ -15,6 +15,8 @@ interface ImportMetaEnv {
 	VITE_APP_WHITE_CHECK: string;
 	/** lora输出路径前缀要求 */
 	VITE_APP_LORA_OUTPUT_PARENT_PATH: string;
+	/** wan视频训练max_frames */
+	VITE_APP_WAN_VIDEO_MAX_FRAMES: string;
 }
 
 interface ImportMeta {

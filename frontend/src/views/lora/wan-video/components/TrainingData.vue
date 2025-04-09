@@ -1,13 +1,45 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 14:42:11
- * @LastEditTime: 2025-03-28 16:07:09
+ * @LastEditTime: 2025-04-09 14:17:07
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\wan-video\components\TrainingData.vue
  * 怎么可能会有bug！！！
 -->
 <template>
+	<PopoverFormItem
+		label="跳过Text 编码潜空间缓存阶段"
+		prop="skip_cache_text_encoder_latent"
+		popover-content="skip_cache_text_encoder_latent"
+	>
+		<el-switch class="no-select" v-model="ruleForm.skip_cache_text_encoder_latent" />
+	</PopoverFormItem>
+	<PopoverFormItem v-show="ruleForm.skip_cache_text_encoder_latent">
+		<el-alert
+			title="确保你之前使用相同的数据集的并保证数据集路径不变的情况已经做过一次训练"
+			type="warning"
+			:closable="false"
+			show-icon
+			effect="dark"
+		/>
+	</PopoverFormItem>
+	<PopoverFormItem
+		label="跳过图像潜空间缓存阶段"
+		prop="skip_cache_latent"
+		popover-content="skip_cache_latent"
+	>
+		<el-switch class="no-select" v-model="ruleForm.skip_cache_latent" />
+	</PopoverFormItem>
+	<PopoverFormItem v-show="ruleForm.skip_cache_latent">
+		<el-alert
+			title="确保你之前使用相同的数据集的并保证数据集路径不变的情况已经做过一次训练"
+			type="warning"
+			:closable="false"
+			show-icon
+			effect="dark"
+		/>
+	</PopoverFormItem>
 	<el-row :gutter="16">
 		<el-col :span="12">
 			<PopoverFormItem
@@ -89,6 +121,25 @@
 				/>
 			</PopoverFormItem>
 		</el-col>
+		<el-col :span="12">
+			<PopoverFormItem label="随机种子" prop="config.seed" popover-content="seed">
+				<el-input-number v-model.number="ruleForm.config.seed" :step="1" step-strictly />
+			</PopoverFormItem>
+		</el-col>
+		<el-col :span="12">
+			<PopoverFormItem
+				label="每N epoch保存模型"
+				prop="config.save_every_n_epochs"
+				popover-content="save_every_n_epochs"
+			>
+				<el-input-number
+					v-model.number="ruleForm.config.save_every_n_epochs"
+					:step="1"
+					step-strictly
+					:min="0"
+				/>
+			</PopoverFormItem>
+		</el-col>
 	</el-row>
 	<PopoverFormItem
 		v-show="isExpert"
@@ -116,9 +167,6 @@
 			v-model="ruleForm.dataset.general.caption_extension"
 			placeholder="请输入描述文件扩展名"
 		/>
-	</PopoverFormItem>
-	<PopoverFormItem label="随机种子" prop="config.seed" popover-content="seed">
-		<el-input-number v-model.number="ruleForm.config.seed" :step="1" step-strictly />
 	</PopoverFormItem>
 	<BaseSelector
 		v-show="isExpert"

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-08 15:58:30
+ * @LastEditTime: 2025-04-09 11:57:12
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -370,6 +370,8 @@ export interface StartWanVideoTrainingData {
 		persistent_data_loader_workers: boolean;
 		/** 控制数据加载并行进程数，4-16（根据CPU核心数调整），默认：8 */
 		max_data_loader_n_workers: number;
+		/** 每N epoch保存模型，默认：undefined */
+		save_every_n_epochs: number | undefined;
 		// -------	优化器与学习率	-------
 		/** 训练使用的优化器类型，默认："" */
 		optimizer_type: string;
@@ -417,8 +419,6 @@ export interface StartWanVideoTrainingData {
 		/** 启用FP8缩放模式，云端不支持，默认：false */
 		fp8_scaled: boolean;
 		// -------	训练过程控制	-------
-		/** 每N epoch保存模型，默认：undefined */
-		save_every_n_epochs: number | undefined;
 		/** 每N步保存模型，默认：undefined */
 		save_every_n_steps: number | undefined;
 		/** 保留最近N个epoch的检查点，默认：undefined */
@@ -474,9 +474,9 @@ export interface StartWanVideoTrainingData {
 		sage_attn: boolean;
 		/** 使用PyTorch原生注意力，默认：true */
 		sdpa: boolean;
-		/** 是否使用split attention优化（需要XFORMERS），默认：false */
+		/** 是否使用split attention优化（需要XFORMERS），默认：true */
 		split_attn: boolean;
-		/** 启用xformers优化库（需要安装xformers），用于CrossAttention层的显存优化，默认：false */
+		/** 启用xformers优化库（需要安装xformers），用于CrossAttention层的显存优化，默认：true */
 		xformers: boolean;
 		// -------	扩散模型参数	-------
 		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：3.0 */
@@ -574,6 +574,10 @@ export interface StartWanVideoTrainingData {
 	};
 	/** 训练器的训练配置 */
 	frontend_config: string;
+	/** 跳过图像潜空间缓存阶段，默认：false */
+	skip_cache_latent: boolean;
+	/** 跳过Text 编码潜空间缓存阶段，默认：false */
+	skip_cache_text_encoder_latent: boolean;
 }
 
 /** 启动wan视频训练参数-图片训练数据集 */
@@ -601,7 +605,7 @@ export interface StartWanVideoTrainingVideoDataset {
 	/** 视频描述文件路径，前端不需要展示和传递给后端 */
 	// video_jsonl_file: string;
 	/** 视频帧最大数量，前端不需要展示和传递给后端，默认最大129帧 */
-	// max_frames?: number;
+	max_frames: number;
 }
 
 /** 视频目录 */

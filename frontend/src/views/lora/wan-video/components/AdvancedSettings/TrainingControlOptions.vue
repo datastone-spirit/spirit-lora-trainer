@@ -1,26 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:46:13
- * @LastEditTime: 2025-03-26 15:53:43
+ * @LastEditTime: 2025-04-09 11:17:27
  * @LastEditors: mulingyuer
  * @Description: 训练过程控制选项
- * @FilePath: \frontend\src\views\lora\wan\components\AdvancedSettings\TrainingControlOptions.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\TrainingControlOptions.vue
  * 怎么可能会有bug！！！
 -->
 <template>
 	<FieldSetWrapper title="训练过程控制">
-		<PopoverFormItem
-			label="每N epoch保存模型"
-			prop="config.save_every_n_epochs"
-			popover-content="save_every_n_epochs"
-		>
-			<el-input-number
-				v-model.number="ruleForm.config.save_every_n_epochs"
-				:step="1"
-				step-strictly
-				:min="0"
-			/>
-		</PopoverFormItem>
 		<PopoverFormItem
 			label="每N步保存模型"
 			prop="config.save_every_n_steps"

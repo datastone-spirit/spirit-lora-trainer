@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-07 10:34:40
+ * @LastEditTime: 2025-04-09 14:28:44
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -24,7 +24,9 @@ export class WanHelper {
 		return {
 			config: this.formatConfig(deepCloneForm),
 			dataset: this.formatDataset(deepCloneForm),
-			frontend_config: tomlStringify(deepCloneForm)
+			frontend_config: tomlStringify(deepCloneForm),
+			skip_cache_latent: data.skip_cache_latent,
+			skip_cache_text_encoder_latent: data.skip_cache_text_encoder_latent
 		};
 	}
 
@@ -169,7 +171,8 @@ export class WanHelper {
 					frame_extraction: datasets[0].frame_extraction,
 					target_frames: this.formatTargetFrames(datasets[0].target_frames),
 					frame_stride: datasets[0].frame_stride,
-					frame_sample: datasets[0].frame_sample
+					frame_sample: datasets[0].frame_sample,
+					max_frames: datasets[0].max_frames
 				};
 				break;
 		}
@@ -193,20 +196,6 @@ export class WanHelper {
 		}
 
 		return result;
-	}
-
-	/** 将对象合并到表单对象上 */
-	public mergeToForm(data: Record<string, any>, form: RuleForm): RuleForm {
-		const dataKeysSet = new Set(Object.keys(data));
-		const formKeys = Object.keys(form) as (keyof RuleForm)[];
-		// 求交集
-		const keys = formKeys.filter((key) => dataKeysSet.has(key));
-
-		keys.forEach((key) => {
-			form[key] = data[key];
-		});
-
-		return form;
 	}
 
 	/** 将target_frames格式化成数组 */

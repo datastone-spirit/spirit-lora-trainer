@@ -118,9 +118,12 @@ class DatasetConfig:
             if config.frame_extraction == FrameExtractionMethod.SLIDE and config.frame_stride is None:
                 raise ValueError("frame_stride must be specified when using 'slide' frame extraction method.")
 
-        if config.frame_extraction and not config.max_frames:
-            logger.warning("max_frames is not specified, using default value of 129.")
-            config.max_frames = 129
+        if config.frame_extraction == FrameExtractionMethod.FULL:
+            if not config.max_frames:
+                config.max_frames = 129
+            elif config.max_frames <= 0 and config.max_frames > 130:
+                config.max_frames = 129
+
 
         config.image_jsonl_file = None
         config.video_jsonl_file = None

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-31 10:42:26
- * @LastEditTime: 2025-04-09 11:42:43
+ * @LastEditTime: 2025-04-10 11:12:04
  * @LastEditors: mulingyuer
  * @Description: 视频数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\VideoDataSet.vue
@@ -19,7 +19,7 @@
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
-		label="提取首帧方式"
+		label="提取帧的方式"
 		prop="dataset.datasets.0.frame_extraction"
 		popover-content="frame_extraction"
 	>

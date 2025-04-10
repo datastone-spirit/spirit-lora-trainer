@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-10 09:32:03
+ * @LastEditTime: 2025-04-10 11:12:33
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -594,7 +594,7 @@ export interface StartWanVideoTrainingImageDataset {
 export interface StartWanVideoTrainingVideoDataset {
 	/** 视频目录 */
 	video_directory: string;
-	/** 提取首帧，head|chunk|slide|uniform，默认："head" */
+	/** 提取帧的方式，head|chunk|slide|uniform，默认："head" */
 	frame_extraction: string;
 	/** 是一个列表，指定了从视频中提取的帧的数量，例：[1,13,25] */
 	target_frames: Array<number>;

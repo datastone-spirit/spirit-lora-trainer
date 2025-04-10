@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-10 10:44:10
+ * @LastEditTime: 2025-04-10 11:25:27
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -154,7 +154,7 @@ const defaultForm: RuleForm = {
 		sample_at_first: false,
 		sample_every_n_epochs: undefined,
 		sample_every_n_steps: undefined,
-		i2v_sample_image_path: "/root",
+		i2v_sample_image_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 		sample_prompts: "",
 		guidance_scale: undefined,
 		show_timesteps: "",
@@ -189,8 +189,8 @@ const defaultForm: RuleForm = {
 		},
 		datasets: [
 			{
-				image_directory: "/root",
-				video_directory: "/root",
+				image_directory: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+				video_directory: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 				frame_extraction: "head",
 				target_frames: [
 					{ key: generateUUID(), value: 1 },

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-04-08 09:52:56
+ * @LastEditTime: 2025-04-10 11:25:02
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -100,7 +100,7 @@ const defaultForm = readonly<RuleForm>({
 	model_transformer_dtype: "float8",
 	model_timestep_sample_method: "logit_normal",
 	output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
-	directory_path: "/root",
+	directory_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 	directory_num_repeats: 10,
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",

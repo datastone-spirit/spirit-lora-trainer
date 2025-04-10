@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-04-08 10:10:06
+ * @LastEditTime: 2025-04-10 11:24:44
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -120,7 +120,7 @@ const defaultForm = readonly<RuleForm>({
 	save_state: true,
 	blocks_to_swap: undefined,
 	// -----
-	image_dir: "/root",
+	image_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
 	output_trigger_words: true,

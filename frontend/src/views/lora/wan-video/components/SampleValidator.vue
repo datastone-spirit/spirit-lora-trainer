@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:58:45
- * @LastEditTime: 2025-04-02 10:29:06
+ * @LastEditTime: 2025-04-10 10:19:46
  * @LastEditors: mulingyuer
  * @Description: 采样与验证选项
  * @FilePath: \frontend\src\views\lora\wan-video\components\SampleValidator.vue
@@ -37,6 +37,17 @@
 			:step="1"
 			step-strictly
 			:min="1"
+		/>
+	</PopoverFormItem>
+	<PopoverFormItem
+		v-show="isI2V"
+		label="I2V采样使用的底图"
+		prop="config.i2v_sample_image_path"
+		popover-content="i2v_sample_image_path"
+	>
+		<FileSelector
+			v-model="ruleForm.config.i2v_sample_image_path"
+			placeholder="请选择I2V采样使用的底图"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
@@ -98,6 +109,8 @@ const showTimeStepsOptions = ref<ElOptions>([
 		value: "console"
 	}
 ]);
+/** 是否i2v任务 */
+const isI2V = computed(() => ruleForm.value.config.task === "i2v-14B");
 </script>
 
 <style scoped></style>

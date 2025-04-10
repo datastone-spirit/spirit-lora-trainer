@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-09 11:57:12
+ * @LastEditTime: 2025-04-10 09:32:03
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -453,7 +453,7 @@ export interface StartWanVideoTrainingData {
 		sample_every_n_epochs: number | undefined;
 		/** 每N步生成样本，默认：undefined */
 		sample_every_n_steps: number | undefined;
-		/** 采样使用的提示词，默认："" */
+		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
 		sample_prompts: string;
 		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
 		guidance_scale: number | undefined;

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-09 14:28:44
+ * @LastEditTime: 2025-04-10 10:30:15
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -125,8 +125,15 @@ export class WanHelper {
 		const wanDitKeys = ["dit", "i2v_dit", "t2v_dit"];
 		config.dit = data.config.task === "i2v-14B" ? data.config.i2v_dit : data.config.t2v_dit;
 
+		// 采样处理
+		const sampleKeys = ["i2v_sample_image_path", "sample_prompts"];
+		config.sample_prompts = JSON.stringify({
+			image_path: data.config.i2v_sample_image_path,
+			prompt: data.config.sample_prompts
+		});
+
 		// 其它数据直接赋值
-		const excludeKeys = [...scientificNumberKeys, ...wanDitKeys];
+		const excludeKeys = [...scientificNumberKeys, ...wanDitKeys, ...sampleKeys];
 		const otherKeys = Object.keys(config).filter(
 			(key) => !excludeKeys.includes(key) && Object.hasOwn(data.config, key)
 		);

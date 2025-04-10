@@ -16,7 +16,7 @@ import {
 	showResponseErrorMessage
 } from "./helper";
 
-const isDev = import.meta.env.MODE === "development";
+// const isDev = import.meta.env.MODE === "development";
 
 const instance = axios.create({
 	// baseURL: isDev ? "/api" : import.meta.env.VITE_APP_API_BASE_URL,

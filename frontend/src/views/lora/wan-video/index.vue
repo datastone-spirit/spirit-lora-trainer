@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-09 11:58:39
+ * @LastEditTime: 2025-04-10 10:44:10
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -77,7 +77,7 @@ import WanDataSet from "./components/WanDataSet/index.vue";
 import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
 import { WanValidate } from "./wan.validate";
-import { generateUUID } from "@/utils/tools";
+import { generateUUID, isImageFile } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();
@@ -154,6 +154,7 @@ const defaultForm: RuleForm = {
 		sample_at_first: false,
 		sample_every_n_epochs: undefined,
 		sample_every_n_steps: undefined,
+		i2v_sample_image_path: "/root",
 		sample_prompts: "",
 		guidance_scale: undefined,
 		show_timesteps: "",
@@ -289,6 +290,7 @@ const rules = reactive<FormRules<RuleForm>>({
 				if (!value) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
+				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
 				callback();
 			},
 			trigger: "change"
@@ -300,6 +302,7 @@ const rules = reactive<FormRules<RuleForm>>({
 				if (typeof value !== "number" || value <= 0) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
+				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
 				callback();
 			},
 			trigger: "change"
@@ -311,6 +314,35 @@ const rules = reactive<FormRules<RuleForm>>({
 				if (typeof value !== "number" || value <= 0) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
+				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.i2v_sample_image_path": [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				const { task, sample_at_first, sample_every_n_epochs, sample_every_n_steps } =
+					ruleForm.value.config;
+				const isValidSample =
+					sample_at_first || Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
+				if (task === "i2v-14B" && isValidSample) {
+					if (typeof value !== "string" || value.trim().length === 0) {
+						return callback(new Error("请选择一张图片进行采样"));
+					}
+
+					if (isWhiteCheck && !value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) {
+						return callback(
+							new Error(`采样图片路径必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`)
+						);
+					}
+
+					if (!isImageFile(value)) {
+						return callback(new Error("请选择一张图片底图进行采样生成"));
+					}
+				}
+
 				callback();
 			},
 			trigger: "change"
@@ -491,7 +523,7 @@ async function onSubmit() {
 		// 开始训练
 		const data: StartWanVideoTrainingData = wanHelper.formatData(ruleForm.value);
 		const { task_id } = await startWanVideoTraining(data);
-		// // 监听训练数据
+		// 监听训练数据
 		startQueryWanTask(task_id);
 
 		submitLoading.value = false;

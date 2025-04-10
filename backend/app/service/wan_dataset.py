@@ -25,7 +25,7 @@ class WanDatasetService:
                                                                  dataset.target_frames,
                                                                  dataset.frame_stride,
                                                                  dataset.frame_sample,
-                                                                 dataset.max_frames)
+                                                                 max_frames=dataset.max_frames if dataset.max_frames is not None and dataset.max_frames > 0 else 129)
                 total_images += images
                 total_batches += batches
         return (total_images, total_batches)

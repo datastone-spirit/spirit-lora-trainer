@@ -447,7 +447,7 @@ def generate_sample_prompt_file(sample_prompts: str) -> str:
     # Try to parse as JSON first (more structured and reliable to detect)
     try:
         parsed_json = json.loads(sample_content)
-        if not isinstance(parsed_json, dict): # sample file must be a dict
+        if not isinstance(parsed_json, list): # sample file must be a list
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
             with open(temp_file.name, 'w', encoding='utf-8') as f:
                 f.write(sample_content)

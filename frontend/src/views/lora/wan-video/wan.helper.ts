@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-11 15:43:25
+ * @LastEditTime: 2025-04-11 15:57:22
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -136,7 +136,7 @@ export class WanHelper {
 						prompt: data.config.sample_prompts
 					}
 				])
-			: "";
+			: undefined;
 
 		// 其它数据直接赋值
 		const excludeKeys = [...scientificNumberKeys, ...wanDitKeys, ...sampleKeys];

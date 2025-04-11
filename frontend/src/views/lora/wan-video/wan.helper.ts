@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-10 11:35:00
+ * @LastEditTime: 2025-04-10 18:35:34
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -127,12 +127,17 @@ export class WanHelper {
 
 		// 采样处理
 		const sampleKeys = ["i2v_sample_image_path", "sample_prompts"];
-		config.sample_prompts = JSON.stringify([
-			{
-				image_path: data.config.i2v_sample_image_path,
-				prompt: data.config.sample_prompts
-			}
-		]);
+		const { sample_at_first, sample_every_n_epochs, sample_every_n_steps } = data.config;
+		const isSample =
+			sample_at_first || Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
+		config.sample_prompts = isSample
+			? JSON.stringify([
+					{
+						image_path: data.config.i2v_sample_image_path,
+						prompt: data.config.sample_prompts
+					}
+				])
+			: undefined;
 
 		// 其它数据直接赋值
 		const excludeKeys = [...scientificNumberKeys, ...wanDitKeys, ...sampleKeys];

@@ -145,7 +145,7 @@ total optimization steps / 学習ステップ数: 100
             detail[key] = int(match.group(1))
 
 def parse_kohya_progress_line(line: str, detail: dict):
-     """Parse elements from progress bar output
+    """Parse elements from progress bar output
      Examples:
         >>> parse_progress_line("steps: 100%|██████████| 40/40 [00:42<00:00,  1.07s/it, avr_loss=0.145]")
         {
@@ -158,23 +158,24 @@ def parse_kohya_progress_line(line: str, detail: dict):
             'loss': 0.145
         }
     """
-     if not ('|' in line and '%' in line and 'steps' in line and '/' in line ):
-          return
-            
-     patterns = {
-          'steps': r'\|?\s*(\d+)/(\d+)',
-          'time': r'\[(.*?)(?=<)<(.*?)(?=,)',  # Using lookahead to exclude < and ,
-          'speed': r'([\d.]+)s/it',
-          'loss': r'avr_loss=([\d.]+)'
-     }
-        
-     for key, pattern in patterns.items():
-          match = re.search(pattern, line)
-          if match:
-               if key == 'steps' and detail.get('total') is None:
-                   detail['total'] = int(match.group(2))
-               elif key == 'time':
-                   detail['elapsed'] = match.group(1)
-                   detail['remaining'] = match.group(2)
-               elif key == 'speed':
-                   detail[key] = float(match.group(1))
+    
+    if not ('|' in line and '%' in line and 'steps:' in line and '/' in line ):
+         return
+           
+    patterns = {
+         'steps': r'\|?\s*(\d+)/(\d+)',
+         'time': r'\[(.*?)(?=<)<(.*?)(?=,)',  # Using lookahead to exclude < and ,
+         'speed': r'([\d.]+)s/it',
+         'loss': r'avr_loss=([\d.]+)'
+    }
+       
+    for key, pattern in patterns.items():
+         match = re.search(pattern, line)
+         if match:
+              if key == 'steps' and detail.get('total') is None:
+                  detail['total'] = int(match.group(2))
+              elif key == 'time':
+                  detail['elapsed'] = match.group(1)
+                  detail['remaining'] = match.group(2)
+              elif key == 'speed':
+                  detail[key] = float(match.group(1))

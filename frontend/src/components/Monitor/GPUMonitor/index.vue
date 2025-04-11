@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 14:52:03
- * @LastEditTime: 2025-03-28 15:20:42
+ * @LastEditTime: 2025-04-10 09:06:18
  * @LastEditors: mulingyuer
  * @Description: 系统监控：gpu、训练轮数
  * @FilePath: \frontend\src\components\Monitor\GPUMonitor\index.vue
@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { useGPU } from "@/hooks/useGPU";
+import { useGPU } from "@/hooks/task/useGPU";
 import { useTrainingStore } from "@/stores";
 
 const trainingStore = useTrainingStore();

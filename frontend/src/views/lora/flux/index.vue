@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-04-10 11:24:44
+ * @LastEditTime: 2025-04-11 14:43:24
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -72,7 +72,7 @@
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useFluxLora } from "@/hooks/useFluxLora";
+import { useFluxLora } from "@/hooks/task/useFluxLora";
 import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
@@ -91,14 +91,7 @@ import FluxDataset from "./components/FluxDataset/index.vue";
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const modalManagerStore = useModalManagerStore();
-const {
-	monitorFluxLoraData,
-	startQueryFluxTask,
-	stopQueryFluxTask,
-	resumeQueryFluxTask,
-	pauseQueryFluxTask,
-	queryFluxTaskInfo
-} = useFluxLora();
+const { monitorFluxLoraData, fluxLoraMonitor } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const env = getEnv();
@@ -506,7 +499,7 @@ async function onSubmit() {
 		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startFluxTraining(data);
 		// 监听训练数据
-		startQueryFluxTask(task_id);
+		fluxLoraMonitor.setTaskId(task_id).start();
 
 		submitLoading.value = false;
 		isRestored.value = true;
@@ -514,7 +507,7 @@ async function onSubmit() {
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
-		stopQueryFluxTask();
+		fluxLoraMonitor.stop();
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
@@ -530,17 +523,17 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
-	resumeQueryFluxTask();
+	fluxLoraMonitor.resume();
 	// 恢复表单数据
 	recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
 		isListen: monitorFluxLoraData.value.isListen,
-		taskId: queryFluxTaskInfo.value.taskId,
+		taskId: fluxLoraMonitor.getTaskId(),
 		formData: ruleForm.value
 	});
 });
 onUnmounted(() => {
-	pauseQueryFluxTask();
+	fluxLoraMonitor.pause();
 });
 </script>
 

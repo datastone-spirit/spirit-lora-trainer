@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-04-10 11:25:02
+ * @LastEditTime: 2025-04-11 14:56:01
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useHYLora } from "@/hooks/useHYLora";
+import { useHYLora } from "@/hooks/task/useHYLora";
 import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { checkData, checkDirectory, checkHYData, recoveryTaskFormData } from "@/utils/lora.helper";
@@ -76,14 +76,7 @@ const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const modelManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const {
-	monitorHYLoraData,
-	queryHYTaskInfo,
-	startQueryHYTask,
-	stopQueryHYTask,
-	resumeQueryHYTask,
-	pauseQueryHYTask
-} = useHYLora();
+const { monitorHYLoraData, hyLoraMonitor } = useHYLora();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -321,14 +314,14 @@ async function onSubmit() {
 		const data: StartHyVideoTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startHyVideoTraining(data);
 		// 监听训练数据
-		startQueryHYTask(task_id);
+		hyLoraMonitor.setTaskId(task_id).start();
 
 		submitLoading.value = false;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控训练数据
-		stopQueryHYTask();
+		hyLoraMonitor.stop();
 
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
@@ -346,17 +339,17 @@ function confirmLoRASaveDir() {
 
 // 组件生命周期
 onMounted(() => {
-	resumeQueryHYTask();
+	hyLoraMonitor.resume();
 	// 恢复表单数据
 	recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
 		isListen: monitorHYLoraData.value.isListen,
-		taskId: queryHYTaskInfo.value.taskId,
+		taskId: hyLoraMonitor.getTaskId(),
 		formData: ruleForm.value
 	});
 });
 onUnmounted(() => {
-	pauseQueryHYTask();
+	hyLoraMonitor.pause();
 });
 </script>
 

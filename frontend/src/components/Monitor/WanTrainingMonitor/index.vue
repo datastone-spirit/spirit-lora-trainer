@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-27 15:14:43
- * @LastEditTime: 2025-04-11 10:23:28
+ * @LastEditTime: 2025-04-11 15:46:39
  * @LastEditors: mulingyuer
  * @Description: wan训练进度条
  * @FilePath: \frontend\src\components\Monitor\WanTrainingMonitor\index.vue
@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { useWanLora } from "@/hooks/useWanLora";
+import { useWanLora } from "@/hooks/task/useWanLora";
 import { isEmptyObject, objectHasKeys } from "@/utils/tools";
 
 const { monitorWanLoraData } = useWanLora();

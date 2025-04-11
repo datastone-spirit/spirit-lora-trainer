@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-11 10:24:33
+ * @LastEditTime: 2025-04-11 15:41:37
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -608,7 +608,7 @@ export interface StartWanVideoTrainingVideoDataset {
 	max_frames: number;
 }
 
-/** 视频目录 */
+/** 视频训练结果 */
 export interface StartWanVideoTrainingResult {
 	msg: string;
 	success: boolean;

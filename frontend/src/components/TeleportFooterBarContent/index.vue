@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-04-01 10:50:10
+ * @LastEditTime: 2025-04-11 15:10:56
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -73,10 +73,10 @@ import { genFileId } from "element-plus";
 import type { UploadInstance, UploadProps, UploadRawFile, UploadUserFile } from "element-plus";
 import type { TeleportProps } from "vue";
 import { downloadTomlFile, readTomlFile, tomlParse, tomlStringify } from "@/utils/toml";
-import { useGPU } from "@/hooks/useGPU";
+import { useGPU } from "@/hooks/task/useGPU";
 import { useTrainingStore } from "@/stores";
-import { useTag } from "@/hooks/useTag";
-import { getRunLoraTask, mergeTrainingFormData } from "@/utils/lora.helper";
+import { useTag } from "@/hooks/task/useTag";
+import { mergeTrainingFormData } from "@/utils/lora.helper";
 
 export interface ConfigProps {
 	/** 左按钮组teleport节点 */
@@ -117,11 +117,13 @@ const taskMismatchWarning = ref("");
 
 const route = useRoute();
 const trainingStore = useTrainingStore();
-const { startQueryGPUInfo, stopQueryGPUInfo } = useGPU();
-const { resumeQueryTagTask, pauseQueryTagTask } = useTag();
+const { gpuMonitor } = useGPU();
+const { tagMonitor } = useTag();
 
 /** 当前路由的训练类型 */
 const routeTrainingType = computed(() => route.meta.loRATaskType ?? "none");
+/** 当前任务信息 */
+const currentTaskInfo = computed(() => trainingStore.currentTaskInfo);
 
 // 配置导入
 const uploadRef = ref<UploadInstance>();
@@ -203,12 +205,10 @@ function onStopTraining() {
 (function init() {
 	if (routeTrainingType.value && routeTrainingType.value !== "none") {
 		taskMismatchWarning.value = ""; // 先重置警告信息
-		const currentRunTaskResult = getRunLoraTask(trainingStore);
-		if (
-			currentRunTaskResult.type !== "none" &&
-			currentRunTaskResult.type !== routeTrainingType.value
-		) {
-			taskMismatchWarning.value = `请切换到 ${currentRunTaskResult.taskName} 训练页面查看训练进度`;
+		const { type, name } = currentTaskInfo.value;
+		const blackList: Array<TaskType> = ["none", "tag"];
+		if (!blackList.includes(type) && type !== routeTrainingType.value) {
+			taskMismatchWarning.value = `请切换到 ${name} 训练页面查看训练进度`;
 		}
 	}
 })();
@@ -218,9 +218,9 @@ watch(
 	() => trainingStore.useGPU,
 	(newVal) => {
 		if (newVal) {
-			startQueryGPUInfo();
+			gpuMonitor.start();
 		} else {
-			stopQueryGPUInfo();
+			gpuMonitor.pause();
 		}
 	},
 	{ immediate: true }
@@ -229,12 +229,12 @@ watch(
 // 组件生命周期
 onMounted(() => {
 	// 恢复打标查询任务
-	resumeQueryTagTask();
+	tagMonitor.resume();
 });
 onUnmounted(() => {
 	// 暂停打标查询任务
-	pauseQueryTagTask();
-	stopQueryGPUInfo();
+	tagMonitor.pause();
+	gpuMonitor.pause();
 });
 </script>
 

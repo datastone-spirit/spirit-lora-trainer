@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-11 10:24:56
+ * @LastEditTime: 2025-04-11 15:42:57
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -63,7 +63,6 @@
 import type { StartWanVideoTrainingData } from "@/api/lora";
 import { startWanVideoTraining } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useWanLora } from "@/hooks/useWanLora";
 import { useSettingsStore, useModalManagerStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
@@ -78,18 +77,12 @@ import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
 import { WanValidate } from "./wan.validate";
 import { generateUUID, isImageFile } from "@/utils/tools";
+import { useWanLora } from "@/hooks/task/useWanLora";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const {
-	startQueryWanTask,
-	pauseQueryWanTask,
-	resumeQueryWanTask,
-	stopQueryWanTask,
-	monitorWanLoraData,
-	queryWanTaskInfo
-} = useWanLora();
+const { wanLoraMonitor, monitorWanLoraData } = useWanLora();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -523,14 +516,14 @@ async function onSubmit() {
 		const data: StartWanVideoTrainingData = wanHelper.formatData(ruleForm.value);
 		const { task_id } = await startWanVideoTraining(data);
 		// 监听训练数据
-		startQueryWanTask(task_id);
+		wanLoraMonitor.setTaskId(task_id).start();
 
 		submitLoading.value = false;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
-		stopQueryWanTask();
+		wanLoraMonitor.stop();
 
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
@@ -547,17 +540,17 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
-	resumeQueryWanTask();
+	wanLoraMonitor.resume();
 	// 恢复表单数据
 	recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
 		isListen: monitorWanLoraData.value.isListen,
-		taskId: queryWanTaskInfo.value.taskId,
+		taskId: wanLoraMonitor.getTaskId(),
 		formData: ruleForm.value
 	});
 });
 onUnmounted(() => {
-	pauseQueryWanTask();
+	wanLoraMonitor.pause();
 });
 </script>
 

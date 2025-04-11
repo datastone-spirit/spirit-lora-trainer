@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 11:04:52
- * @LastEditTime: 2025-03-31 10:39:39
+ * @LastEditTime: 2025-04-11 11:52:05
  * @LastEditors: mulingyuer
  * @Description: wan数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\ImageDataSet.vue
@@ -62,12 +62,12 @@
 <script setup lang="ts">
 import { useTrainingStore } from "@/stores";
 import type { RuleForm } from "../../types";
-import { useTag } from "@/hooks/useTag";
+import { useTag } from "@/hooks/task/useTag";
 
 const trainingStore = useTrainingStore();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 // hooks
-const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
+const { monitorTagData, tag, tagMonitor } = useTag();
 
 const loading = ref(false);
 const disabled = computed(() => loading.value || trainingStore.useGPU);
@@ -95,11 +95,11 @@ async function onTagClick() {
 		});
 
 		// 触发查询打标任务
-		startQueryTagTask(tagResult.task_id);
+		tagMonitor.setTaskId(tagResult.task_id).start();
 		loading.value = false;
 	} catch (error) {
 		loading.value = false;
-		stopQueryTagTask();
+		tagMonitor.stop();
 
 		console.log("打标任务创建失败", error);
 	}

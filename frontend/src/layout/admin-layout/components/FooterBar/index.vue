@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2025-03-28 10:39:20
+ * @LastEditTime: 2025-04-11 15:23:32
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
@@ -37,17 +37,16 @@
 import { useAppStore } from "@/stores";
 import { useSettingsStore } from "@/stores";
 import { ComplexityEnum } from "@/enums/complexity.enum";
-import { useTag } from "@/hooks/useTag";
 import { useTrainingStore } from "@/stores";
-import { getRunLoraTask } from "@/utils/lora.helper";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const route = useRoute();
-const { monitorTagData } = useTag();
 /** 当前路由的训练类型 */
 const routeTrainingType = computed(() => route.meta.loRATaskType ?? "none");
+/** 当前任务信息 */
+const currentTaskInfo = computed(() => trainingStore.currentTaskInfo);
 
 /** 难度切换 */
 const openComplexity = ref(settingsStore.complexity === ComplexityEnum.EXPERT);
@@ -60,22 +59,15 @@ function onComplexityChange(val: boolean) {
 const showProgress = computed(() => {
 	const open = settingsStore.trainerSettings.openFooterBarProgress;
 	if (!open) return false;
-	// tag任务是否正在运行
-	if (monitorTagData.value.isListen) return true;
-	// 模型训练任务是否正在运行，如果当前页面的训练类型和当前任务类型不一致，则不进行显示
-	if (trainingStore.currentTaskType === "none") return false;
-	if (trainingStore.currentTaskType !== routeTrainingType.value) return false;
+	const { type } = currentTaskInfo.value;
+	if (type === "none") return false;
+	if (type === "tag") return true;
+	if (type !== routeTrainingType.value) return false;
 	return true;
 });
 const progress = computed(() => {
 	if (!showProgress.value) return 0;
-	// tag任务的进度条
-	if (monitorTagData.value.isListen) {
-		return monitorTagData.value.data.progress;
-	}
-	// 模型训练任务的进度条
-	const currentTask = getRunLoraTask(trainingStore);
-	return currentTask.taskData?.progress ?? 0;
+	return currentTaskInfo.value.progress ?? 0;
 });
 </script>
 

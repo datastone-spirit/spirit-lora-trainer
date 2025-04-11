@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-08 09:58:29
- * @LastEditTime: 2025-04-08 10:09:28
+ * @LastEditTime: 2025-04-11 11:51:12
  * @LastEditors: mulingyuer
  * @Description: flux数据集组件
  * @FilePath: \frontend\src\views\lora\flux\components\FluxDataset\index.vue
@@ -67,13 +67,13 @@
 
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
-import { useTag } from "@/hooks/useTag";
+import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
 
 const trainingStore = useTrainingStore();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 // hooks
-const { monitorTagData, tag, startQueryTagTask, stopQueryTagTask } = useTag();
+const { monitorTagData, tag, tagMonitor } = useTag();
 
 const loading = ref(false);
 const disabled = computed(() => loading.value || trainingStore.useGPU);
@@ -99,11 +99,11 @@ async function onTagClick() {
 		});
 
 		// 触发查询打标任务
-		startQueryTagTask(tagResult.task_id);
+		tagMonitor.setTaskId(tagResult.task_id).start();
 		loading.value = false;
 	} catch (error) {
 		loading.value = false;
-		stopQueryTagTask();
+		tagMonitor.stop();
 
 		console.log("打标任务创建失败", error);
 	}

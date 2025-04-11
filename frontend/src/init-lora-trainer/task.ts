@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-04-02 15:27:16
+ * @LastEditTime: 2025-04-11 14:55:42
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
@@ -16,11 +16,11 @@ import type {
 import type { CurrentTaskResult } from "@/api/task";
 import { currentTask } from "@/api/task";
 import { TaskType } from "@/api/types";
-import { useFluxLora } from "@/hooks/useFluxLora";
-import { useHYLora } from "@/hooks/useHYLora";
-import { useTag } from "@/hooks/useTag";
+import { useFluxLora } from "@/hooks/task/useFluxLora";
+import { useHYLora } from "@/hooks/task/useHYLora";
+import { useTag } from "@/hooks/task/useTag";
 import type { AxiosError } from "axios";
-import { useWanLora } from "@/hooks/useWanLora";
+import { useWanLora } from "@/hooks/task/useWanLora";
 
 class TaskInitializer {
 	constructor(private readonly taskData: CurrentTaskResult) {}
@@ -52,41 +52,47 @@ class TaskInitializer {
 
 	/** 打标初始化 */
 	private async initTag() {
-		const { initQueryTagTask } = useTag();
+		const { status } = this.taskData as ManualTagInfoResult;
+		if (status === "complete" || status === "failed") return;
 
-		return initQueryTagTask({
-			tagTaskData: this.taskData as ManualTagInfoResult,
-			showTaskStartPrompt: true
+		const { tagMonitor } = useTag();
+
+		return tagMonitor.setInitData({
+			taskId: this.taskData.id
 		});
 	}
 
 	/** flux 训练初始化 */
 	private async initFluxTraining() {
-		const { initQueryFluxTask } = useFluxLora();
+		const { status } = this.taskData as LoRATrainingInfoResult;
+		if (status === "complete" || status === "failed") return;
+		const { fluxLoraMonitor } = useFluxLora();
 
-		return initQueryFluxTask({
-			taskData: this.taskData as LoRATrainingInfoResult,
-			showTaskStartPrompt: true
+		return fluxLoraMonitor.setInitData({
+			taskId: this.taskData.id
 		});
 	}
 
 	/** 混元视频训练初始化 */
 	private async initHyVideoTraining() {
-		const { initQueryHYTask } = useHYLora();
+		const { status } = this.taskData as HyVideoTrainingInfoResult;
+		if (status === "complete" || status === "failed") return;
+		const { hyLoraMonitor } = useHYLora();
 
-		return initQueryHYTask({
-			wanTaskData: this.taskData as HyVideoTrainingInfoResult,
-			showTaskStartPrompt: true
+		return hyLoraMonitor.setInitData({
+			taskId: this.taskData.id
 		});
 	}
 
 	/** wan 训练初始化 */
 	private async initWanTraining() {
-		const { initQueryWanTask } = useWanLora();
+		const { status } = this.taskData as WanVideoTrainingInfoResult;
+		if (status === "complete" || status === "failed") return;
 
-		return initQueryWanTask({
-			wanTaskData: this.taskData as WanVideoTrainingInfoResult,
-			showTaskStartPrompt: true
+		const { wanLoraMonitor } = useWanLora();
+
+		return wanLoraMonitor.setInitData({
+			taskId: this.taskData.id
 		});
 	}
 }

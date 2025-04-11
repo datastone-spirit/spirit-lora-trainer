@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-04-07 17:40:10
+ * @LastEditTime: 2025-04-11 15:26:00
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -72,7 +72,7 @@
 					:loading="submitLoading || monitorTagData.isListen"
 					:disabled="trainingStore.useGPU"
 					:is-bottom-margin="false"
-					@click="onSubmit"
+					@submit="onSubmit"
 				/>
 				<TagResetButton @reset="onReset" />
 			</el-form>
@@ -101,8 +101,8 @@
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useGPU } from "@/hooks/useGPU";
-import { useTag } from "@/hooks/useTag";
+import { useGPU } from "@/hooks/task/useGPU";
+import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
 import { checkDirectory } from "@/utils/lora.helper";
 import type { FormInstance, FormRules } from "element-plus";
@@ -127,15 +127,8 @@ interface RuleForm {
 }
 
 const trainingStore = useTrainingStore();
-const {
-	monitorTagData,
-	tag,
-	startQueryTagTask,
-	stopQueryTagTask,
-	pauseQueryTagTask,
-	resumeQueryTagTask
-} = useTag();
-const { startQueryGPUInfo, pauseQueryGPUInfo } = useGPU();
+const { monitorTagData, tag, tagMonitor } = useTag();
+const { gpuMonitor } = useGPU();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
@@ -210,11 +203,11 @@ async function onSubmit() {
 		});
 
 		// 触发查询打标任务
-		startQueryTagTask(tagResult.task_id);
+		tagMonitor.setTaskId(tagResult.task_id).start();
 		submitLoading.value = false;
 	} catch (error) {
 		submitLoading.value = false;
-		stopQueryTagTask();
+		tagMonitor.stop();
 		console.log("打标任务创建失败", error);
 	}
 }
@@ -232,9 +225,9 @@ watch(
 	() => trainingStore.useGPU,
 	(newVal) => {
 		if (newVal) {
-			startQueryGPUInfo();
+			gpuMonitor.start();
 		} else {
-			pauseQueryGPUInfo();
+			gpuMonitor.pause();
 		}
 	},
 	{ immediate: true }
@@ -242,12 +235,12 @@ watch(
 
 onMounted(() => {
 	// 组件挂载时，开始监听
-	resumeQueryTagTask();
+	tagMonitor.resume();
 });
 onUnmounted(() => {
 	// 组件销毁时，停止监听
-	pauseQueryTagTask();
-	pauseQueryGPUInfo();
+	tagMonitor.pause();
+	gpuMonitor.pause();
 });
 </script>
 

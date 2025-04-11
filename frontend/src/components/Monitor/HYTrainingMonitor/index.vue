@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2025-03-27 17:22:40
+ * @LastEditTime: 2025-04-11 14:54:59
  * @LastEditors: mulingyuer
  * @Description: 混元训练监控
  * @FilePath: \frontend\src\components\Monitor\HYTrainingMonitor\index.vue
@@ -67,7 +67,7 @@
 
 <script setup lang="ts">
 import { isEmptyObject, objectHasKeys, secondsToHHMMSS } from "@/utils/tools";
-import { useHYLora } from "@/hooks/useHYLora";
+import { useHYLora } from "@/hooks/task/useHYLora";
 
 const { monitorHYLoraData } = useHYLora();
 const loraData = computed(() => monitorHYLoraData.value.data);

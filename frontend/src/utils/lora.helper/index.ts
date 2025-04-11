@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 15:38:33
- * @LastEditTime: 2025-04-01 10:43:57
+ * @LastEditTime: 2025-04-11 15:32:22
  * @LastEditors: mulingyuer
  * @Description: lora helper
  * @FilePath: \frontend\src\utils\lora.helper\index.ts
@@ -9,9 +9,8 @@
  */
 import { checkDirectoryExists, hyCheckDirectoryExists } from "@/api/common";
 import { currentTaskFormConfig } from "@/api/task";
-import type { UseTrainingStore } from "@/stores";
 import { tomlParse } from "@/utils/toml";
-import type { RecoveryTaskFormDataOptions, RunLoraTaskResult } from "./types";
+import type { RecoveryTaskFormDataOptions } from "./types";
 export type * from "./types";
 
 /** 检测目录是否存在 */
@@ -89,39 +88,6 @@ export function mergeTrainingFormData(form: Record<string, any>, data: Record<st
 	});
 
 	return form;
-}
-
-/** 获取当前训练的任务数据 */
-export function getRunLoraTask(store: UseTrainingStore): RunLoraTaskResult {
-	const { currentTaskType, monitorFluxLoraData, monitorHYLoraData, monitorWanLoraData } =
-		storeToRefs(store);
-	const result: RunLoraTaskResult = {
-		type: "none",
-		taskName: "",
-		taskData: {
-			progress: 0
-		}
-	};
-
-	switch (currentTaskType.value) {
-		case "flux":
-			result.type = "flux";
-			result.taskName = "Flux";
-			result.taskData.progress = monitorFluxLoraData.value.data.progress;
-			break;
-		case "hunyuan-video":
-			result.type = "hunyuan-video";
-			result.taskName = "混元视频";
-			result.taskData.progress = monitorHYLoraData.value.data.progress;
-			break;
-		case "wan-video":
-			result.type = "wan-video";
-			result.taskName = "wan视频";
-			result.taskData.progress = monitorWanLoraData.value.data.progress;
-			break;
-	}
-
-	return result;
 }
 
 /** 恢复表单数据，只有在任务正在进行中时才恢复表单数据 */

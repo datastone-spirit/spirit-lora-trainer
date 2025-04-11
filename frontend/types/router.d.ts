@@ -31,7 +31,7 @@ declare module "vue-router" {
 		/** 外链地址 */
 		iframeLink?: string;
 		/** 当前页面的任务类型 */
-		loRATaskType?: LoRATaskType;
+		loRATaskType?: TaskType;
 	}
 }
 

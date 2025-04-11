@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-04-11 10:22:49
+ * @LastEditTime: 2025-04-11 15:42:34
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -151,4 +151,16 @@ export interface MonitorWanLoraData {
 	isListen: boolean;
 	/** 打标数据 */
 	data: WanLoraData;
+}
+
+/** 当前任务信息 */
+export interface CurrentTaskInfo {
+	/** 任务id */
+	id: string;
+	/** 任务类型 */
+	type: TaskType;
+	/** 任务名称 */
+	name: string;
+	/** 任务进度百分比，例：20 */
+	progress: number;
 }

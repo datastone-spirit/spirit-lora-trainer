@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-04-11 10:22:57
+ * @LastEditTime: 2025-04-11 15:42:05
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -9,6 +9,7 @@
  */
 import { defineStore } from "pinia";
 import type {
+	CurrentTaskInfo,
 	GPUData,
 	MonitorFluxLoraData,
 	MonitorGPUData,
@@ -190,10 +191,23 @@ export const useTrainingStore = defineStore("training", () => {
 		);
 	});
 
-	/** 当前训练的任务类型 */
-	const currentTaskType = ref<LoRATaskType>("none");
-	function setCurrentTaskType(type: LoRATaskType) {
-		currentTaskType.value = type;
+	/** 当前任务信息 */
+	const currentTaskInfo = ref<CurrentTaskInfo>({
+		type: "none",
+		id: "",
+		name: "",
+		progress: 0
+	});
+	function setCurrentTaskInfo(info: CurrentTaskInfo) {
+		currentTaskInfo.value = info;
+	}
+	function resetCurrentTaskInfo() {
+		currentTaskInfo.value = {
+			type: "none",
+			id: "",
+			name: "",
+			progress: 0
+		};
 	}
 
 	return {
@@ -214,12 +228,13 @@ export const useTrainingStore = defineStore("training", () => {
 		setHYLoraData,
 		resetHYLoraData,
 		useGPU,
-		currentTaskType,
-		setCurrentTaskType,
 		monitorWanLoraData,
 		setWanLoraIsListen,
 		setWanLoraData,
-		resetWanLoraData
+		resetWanLoraData,
+		currentTaskInfo,
+		setCurrentTaskInfo,
+		resetCurrentTaskInfo
 	};
 });
 

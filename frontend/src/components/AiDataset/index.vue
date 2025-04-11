@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-04-07 15:10:35
+ * @LastEditTime: 2025-04-11 11:45:01
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -97,7 +97,7 @@ import { directoryFiles, uploadFiles } from "@/api/common";
 import { deleteFile, manualTag } from "@/api/tag";
 import { FileItemMap } from "@/components/FileManager";
 import { useImageViewer } from "@/hooks/useImageViewer";
-import { useTag } from "@/hooks/useTag";
+import { useTag } from "@/hooks/task/useTag";
 import { useVideoPreview } from "@/hooks/useVideoPreview";
 import type { FileItem, FileList } from "@/utils/file-manager";
 import { FileManager, FileType } from "@/utils/file-manager";
@@ -127,7 +127,7 @@ const props = withDefaults(defineProps<AiDatasetProps>(), {
 });
 const { previewImages } = useImageViewer();
 const { previewVideo } = useVideoPreview();
-const { tagEvents } = useTag();
+const { tagMonitor } = useTag();
 const fileManager = new FileManager();
 const aiDatasetHelper = new AiDatasetHelper();
 
@@ -385,9 +385,9 @@ watch(
 );
 
 getList();
-tagEvents.on("complete", getList);
+tagMonitor.events.on("complete", getList);
 onUnmounted(() => {
-	tagEvents.off("complete", getList);
+	tagMonitor.events.off("complete", getList);
 });
 
 defineExpose({

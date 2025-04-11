@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2025-03-27 17:43:50
+ * @LastEditTime: 2025-04-11 11:45:15
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTag } from "@/hooks/useTag";
+import { useTag } from "@/hooks/task/useTag";
 
 export interface TagMonitorData {
 	/** 当前第几个 */

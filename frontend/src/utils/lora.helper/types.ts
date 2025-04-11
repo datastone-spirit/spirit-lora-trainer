@@ -12,7 +12,7 @@ import type { BaseMonitorData } from "@/stores";
 
 /** 获取当前训练的任务数据结果 */
 export interface RunLoraTaskResult {
-	type: LoRATaskType;
+	type: TaskType;
 	taskName: string;
 	taskData: BaseMonitorData;
 }

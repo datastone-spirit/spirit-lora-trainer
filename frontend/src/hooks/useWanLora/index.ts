@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-28 10:45:50
- * @LastEditTime: 2025-04-02 17:05:12
+ * @LastEditTime: 2025-04-11 10:23:24
  * @LastEditors: mulingyuer
  * @Description: 训练wan lora的hooks
  * @FilePath: \frontend\src\hooks\useWanLora\index.ts
@@ -237,7 +237,6 @@ function formatWanTaskData(res: WanVideoTrainingInfoResult): WanLoraData {
 		remaining: detail.remaining ?? "00:00",
 		current_loss: detail.current_loss ?? 0,
 		average_loss: detail.average_loss ?? 0,
-		current_epoch: detail.num_epochs ?? 0,
 		total_epoch: detail.total_epoch ?? 0,
 		showSampling: res.is_sampling ?? false,
 		samplingPath: res.sampling_path ?? "",

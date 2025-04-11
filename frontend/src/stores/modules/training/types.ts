@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-04-02 15:31:20
+ * @LastEditTime: 2025-04-11 10:22:49
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -133,8 +133,6 @@ export interface WanLoraData extends BaseMonitorData {
 	current_loss: number;
 	/** 平均loss */
 	average_loss: number;
-	/** 当前轮 */
-	current_epoch: number | string;
 	/** 总轮数 */
 	total_epoch: number | string;
 	/** 是否显示查看采样 */

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 14:42:11
- * @LastEditTime: 2025-04-09 14:17:07
+ * @LastEditTime: 2025-04-11 10:25:23
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\wan-video\components\TrainingData.vue
@@ -101,20 +101,6 @@
 			>
 				<el-input-number
 					v-model.number="ruleForm.config.max_train_epochs"
-					:step="1"
-					step-strictly
-					:min="1"
-				/>
-			</PopoverFormItem>
-		</el-col>
-		<el-col :span="12">
-			<PopoverFormItem
-				label="总训练步数"
-				prop="config.max_train_steps"
-				popover-content="max_train_steps"
-			>
-				<el-input-number
-					v-model.number="ruleForm.config.max_train_steps"
 					:step="1"
 					step-strictly
 					:min="1"

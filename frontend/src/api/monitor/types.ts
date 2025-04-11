@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-04-01 15:36:04
+ * @LastEditTime: 2025-04-11 08:58:06
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -223,7 +223,7 @@ export interface WanVideoTrainingInfoResult {
 				total: number;
 				/** 每轮的总批次数 num_train_images × 批次计算， 因为是批次为1, 所以这里是120 */
 				num_batches_per_epoch: number;
-				/** 训练轮数 */
+				/** 总训练轮数 */
 				num_epochs: number;
 				/** 每个设备上的批次数 总为1, 没有启用分布式训练 */
 				batch_size_per_device: number;

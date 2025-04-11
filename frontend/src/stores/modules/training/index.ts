@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-04-02 15:32:09
+ * @LastEditTime: 2025-04-11 10:22:57
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -77,7 +77,6 @@ export const useTrainingStore = defineStore("training", () => {
 			remaining: 0,
 			current_loss: 0,
 			average_loss: 0,
-			current_epoch: "",
 			total_epoch: "",
 			showSampling: false,
 			samplingPath: "",
@@ -99,7 +98,6 @@ export const useTrainingStore = defineStore("training", () => {
 			remaining: 0,
 			current_loss: 0,
 			average_loss: 0,
-			current_epoch: "",
 			total_epoch: "",
 			showSampling: false,
 			samplingPath: "",

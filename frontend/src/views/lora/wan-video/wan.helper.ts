@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-10 18:35:34
+ * @LastEditTime: 2025-04-11 10:24:51
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -49,7 +49,6 @@ export class WanHelper {
 			vae_dtype: "",
 			output_dir: "",
 			max_train_epochs: 0,
-			max_train_steps: undefined,
 			seed: undefined,
 			mixed_precision: "",
 			persistent_data_loader_workers: false,

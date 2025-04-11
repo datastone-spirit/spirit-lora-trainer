@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-10 18:24:55
+ * @LastEditTime: 2025-04-11 10:24:33
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -360,8 +360,8 @@ export interface StartWanVideoTrainingData {
 		// -------	数据集配置	-------
 		/** 总训练轮数，默认：1 */
 		max_train_epochs: number;
-		/** 总训练步数，默认：undefined */
-		max_train_steps: number | undefined;
+		/** 总训练步数，默认：undefined 【不展示】 */
+		// max_train_steps: number | undefined;
 		/** 随机种子，用于复现训练结果，默认：undefined */
 		seed: number | undefined;
 		/** 混合精度训练模式，"no", "fp16", "bf16"，默认："bf16" */

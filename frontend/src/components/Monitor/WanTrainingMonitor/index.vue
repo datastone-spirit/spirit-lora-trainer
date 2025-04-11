@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-27 15:14:43
- * @LastEditTime: 2025-04-01 14:33:53
+ * @LastEditTime: 2025-04-11 10:23:28
  * @LastEditors: mulingyuer
  * @Description: wan训练进度条
  * @FilePath: \frontend\src\components\Monitor\WanTrainingMonitor\index.vue
@@ -48,12 +48,6 @@
 					<div class="wan-training-monitor-item-label">当前loss</div>
 					<div class="wan-training-monitor-item-value">
 						{{ toFixed(monitorWanLoraData.data.current_loss) }}
-					</div>
-				</div>
-				<div class="wan-training-monitor-item">
-					<div class="wan-training-monitor-item-label">当前轮</div>
-					<div class="wan-training-monitor-item-value">
-						{{ monitorWanLoraData.data.current_epoch }}
 					</div>
 				</div>
 				<div class="wan-training-monitor-item">

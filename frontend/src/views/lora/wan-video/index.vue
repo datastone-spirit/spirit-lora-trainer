@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-10 11:25:27
+ * @LastEditTime: 2025-04-11 10:24:56
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -110,7 +110,6 @@ const defaultForm: RuleForm = {
 		vae_dtype: "float16",
 		output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 		max_train_epochs: 10,
-		max_train_steps: undefined,
 		seed: undefined,
 		mixed_precision: "bf16",
 		persistent_data_loader_workers: false,

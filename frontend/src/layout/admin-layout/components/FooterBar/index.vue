@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2025-01-14 11:04:42
+ * @LastEditTime: 2025-04-11 15:23:32
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
@@ -19,9 +19,9 @@
 						@change="onComplexityChange"
 					/>
 				</div>
-				<div class="footer-bar-body">
-					<div id="footer-bar-left" class="footer-bar-body-left"></div>
-					<div id="footer-bar-center" class="footer-bar-body-center"></div>
+				<div class="footer-bar-right">
+					<div id="footer-bar-teleport-left" class="footer-bar-teleport-left"></div>
+					<div id="footer-bar-teleport-right" class="footer-bar-teleport-right"></div>
 				</div>
 			</div>
 			<div
@@ -37,16 +37,18 @@
 import { useAppStore } from "@/stores";
 import { useSettingsStore } from "@/stores";
 import { ComplexityEnum } from "@/enums/complexity.enum";
-import { useTag } from "@/hooks/useTag";
-import { useFluxLora } from "@/hooks/useFluxLora";
-import { useHYLora } from "@/hooks/useHYLora";
+import { useTrainingStore } from "@/stores";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
-const { monitorTagData } = useTag();
-const { monitorFluxLoraData } = useFluxLora();
-const { monitorHYLoraData } = useHYLora();
+const trainingStore = useTrainingStore();
+const route = useRoute();
+/** 当前路由的训练类型 */
+const routeTrainingType = computed(() => route.meta.loRATaskType ?? "none");
+/** 当前任务信息 */
+const currentTaskInfo = computed(() => trainingStore.currentTaskInfo);
 
+/** 难度切换 */
 const openComplexity = ref(settingsStore.complexity === ComplexityEnum.EXPERT);
 function onComplexityChange(val: boolean) {
 	const value = val ? ComplexityEnum.EXPERT : ComplexityEnum.BEGINNER;
@@ -57,23 +59,15 @@ function onComplexityChange(val: boolean) {
 const showProgress = computed(() => {
 	const open = settingsStore.trainerSettings.openFooterBarProgress;
 	if (!open) return false;
-	return (
-		monitorTagData.value.isListen ||
-		monitorFluxLoraData.value.isListen ||
-		monitorHYLoraData.value.isListen
-	);
+	const { type } = currentTaskInfo.value;
+	if (type === "none") return false;
+	if (type === "tag") return true;
+	if (type !== routeTrainingType.value) return false;
+	return true;
 });
 const progress = computed(() => {
-	if (monitorTagData.value.isListen) {
-		return monitorTagData.value.data.percentage;
-	}
-	if (monitorFluxLoraData.value.isListen) {
-		return monitorFluxLoraData.value.data.progress;
-	}
-	if (monitorHYLoraData.value.isListen) {
-		return monitorHYLoraData.value.data.progress;
-	}
-	return 0;
+	if (!showProgress.value) return 0;
+	return currentTaskInfo.value.progress ?? 0;
 });
 </script>
 
@@ -93,32 +87,29 @@ const progress = computed(() => {
 	height: 100%;
 	display: flex;
 }
+.footer-bar-left,
+.footer-bar-right {
+	height: 100%;
+}
 .footer-bar-left {
 	width: $zl-aside-width;
-	margin-right: $zl-padding;
-	padding: 0 $zl-padding;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
-.footer-bar-body {
+.footer-bar-right {
 	flex-grow: 1;
 	min-width: 0;
 	display: flex;
+	justify-content: space-between;
+	padding: 0 $zl-padding;
 }
-// .footer-bar-content-left,
-// .footer-bar-content-center {
-// 	display: flex;
-// 	align-items: center;
-// 	justify-content: center;
-// }
-.footer-bar-body-left {
+.footer-bar-teleport-left {
 	flex-shrink: 0;
 }
-.footer-bar-body-center {
+.footer-bar-teleport-right {
 	flex-grow: 1;
 	min-width: 0;
-	padding: 0 $zl-padding;
 }
 .footer-bar-progress-bar {
 	position: absolute;

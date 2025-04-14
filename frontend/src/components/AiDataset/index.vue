@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-02-19 10:45:13
+ * @LastEditTime: 2025-04-11 11:45:01
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -17,7 +17,7 @@
 						<component
 							v-for="(item, index) in list"
 							:key="item.value"
-							:is="componentMap[item.type]"
+							:is="FileItemMap[item.type]"
 							:data="item"
 							:selected="activeItemIndex !== null && activeItemIndex === index"
 							@contextmenu.prevent="onContextMenu($event, item)"
@@ -79,7 +79,7 @@
 				<el-upload
 					ref="uploadRef"
 					v-model:file-list="uploadFileList"
-					accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,text/plain"
+					:accept="accept"
 					multiple
 					:show-file-list="false"
 					:auto-upload="false"
@@ -95,20 +95,19 @@
 // import DatasetPagination from "./DatasetPagination.vue";
 import { directoryFiles, uploadFiles } from "@/api/common";
 import { deleteFile, manualTag } from "@/api/tag";
+import { FileItemMap } from "@/components/FileManager";
 import { useImageViewer } from "@/hooks/useImageViewer";
-import { useTag } from "@/hooks/useTag";
-import { checkDirectory } from "@/utils/lora.helper";
+import { useTag } from "@/hooks/task/useTag";
+import { useVideoPreview } from "@/hooks/useVideoPreview";
+import type { FileItem, FileList } from "@/utils/file-manager";
+import { FileManager, FileType } from "@/utils/file-manager";
 import { generateUUID, sleep } from "@/utils/tools";
 import type { AxiosProgressEvent } from "axios";
 import type { UploadInstance, UploadUserFile } from "element-plus";
-import { formatDirectoryFiles } from "./ai-dataset.helper";
+import { AiDatasetHelper } from "./ai-dataset.helper";
 import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
 import ContextMenu from "./ContextMenu.vue";
-import ImageFile from "./ImageFile.vue";
 import TagEdit from "./TagEdit.vue";
-import TextFile from "./TextFile.vue";
-import type { FileItem, FileList } from "./types";
-import { FileType } from "./types";
 
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
@@ -117,19 +116,20 @@ export interface AiDatasetProps {
 	showTeleportBtn?: boolean;
 	/** 目录路径 */
 	dir: string;
+	/** 上传文件MIME类型 */
+	accept?: string;
 }
 
-/** 组件map */
-const componentMap = {
-	[FileType.IMAGE]: ImageFile,
-	[FileType.TEXT]: TextFile
-};
-
 const props = withDefaults(defineProps<AiDatasetProps>(), {
-	showTeleportBtn: true
+	showTeleportBtn: true,
+	accept:
+		"image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,text/plain,video/mp4, video/quicktime, video/x-msvideo, video/webm"
 });
 const { previewImages } = useImageViewer();
-const { tagEvents } = useTag();
+const { previewVideo } = useVideoPreview();
+const { tagMonitor } = useTag();
+const fileManager = new FileManager();
+const aiDatasetHelper = new AiDatasetHelper();
 
 const tagEditRef = ref<InstanceType<typeof TagEdit>>();
 const list = ref<FileList>([]);
@@ -145,7 +145,7 @@ async function getList() {
 
 		// api
 		const fileList = await directoryFiles({ path: props.dir });
-		list.value = formatDirectoryFiles(fileList);
+		list.value = fileManager.formatDirectoryFiles(fileList);
 
 		loading.value = false;
 	} catch (error) {
@@ -166,7 +166,7 @@ async function getList() {
 // }
 
 // 预览图片
-function onPreview(data: FileItem) {
+function onImagePreview(data: FileItem) {
 	const imgList = list.value.filter((item) => item.type === FileType.IMAGE);
 	let initialIndex = imgList.findIndex((item) => item === data);
 	if (initialIndex === -1) initialIndex = 0;
@@ -177,16 +177,28 @@ function onPreview(data: FileItem) {
 	});
 }
 
+// 视频预览
+function onVideoPreview(data: FileItem) {
+	return previewVideo({
+		src: `${data.value}?compress=false`,
+		title: data.name
+	});
+}
+
 // 双击
 function onDoubleClick(data: FileItem, index: number) {
 	activeItemIndex.value = index;
 	switch (data.type) {
 		case FileType.IMAGE:
 			onQuitEdit();
-			onPreview(data);
+			onImagePreview(data);
 			break;
 		case FileType.TEXT:
 			onEdit(data);
+			break;
+		case FileType.VIDEO:
+			onQuitEdit();
+			onVideoPreview(data);
 			break;
 	}
 }
@@ -196,6 +208,7 @@ function onItemClick(data: FileItem, index: number) {
 	activeItemIndex.value = index;
 	switch (data.type) {
 		case FileType.IMAGE:
+		case FileType.VIDEO:
 			onQuitEdit();
 			break;
 		case FileType.TEXT:
@@ -239,7 +252,7 @@ const editTagTextLoading = ref(false);
 function onEdit(data: FileItem) {
 	editData.value = data;
 	// 如果是图片需要判断是否存在text文件
-	if (data.type === FileType.IMAGE) {
+	if (data.type !== FileType.TEXT) {
 		tagText.value = data.hasTagText ? data.raw.txt_content : "";
 	} else {
 		tagText.value = data.value;
@@ -322,15 +335,12 @@ function onCancelUpload() {
 async function onConfirmUpload() {
 	try {
 		// 检测目录是否存在
-		if (typeof props.dir === "string" && props.dir.trim() === "") {
-			ElMessage.error("请先选择目录");
-			return;
-		}
-		const exists = await checkDirectory(props.dir);
-		if (!exists) {
-			ElMessage.error("目录不存在");
-			return;
-		}
+		const isValidPath = await aiDatasetHelper.validateUploadPath(props.dir);
+		if (!isValidPath) return;
+		// 过滤视频文件
+		uploadFileList.value = await aiDatasetHelper.filterVideoFiles(uploadFileList.value);
+		if (uploadFileList.value.length <= 0) return;
+
 		uploadSubmitLoading.value = true;
 		uploadId.value = generateUUID();
 		// 生成formdata
@@ -339,7 +349,7 @@ async function onConfirmUpload() {
 			formData.append("files", file.raw!, file.name);
 		});
 		// 上传
-		const _result = await uploadFiles(
+		await uploadFiles(
 			{
 				upload_path: props.dir,
 				upload_id: uploadId.value
@@ -348,8 +358,8 @@ async function onConfirmUpload() {
 			onUploadProgress
 		);
 		await sleep(500);
+
 		// 上传成功
-		// list.value.push(...result);
 		onConfirmUploadSuccess();
 	} catch (error) {
 		uploadSubmitLoading.value = false;
@@ -375,9 +385,9 @@ watch(
 );
 
 getList();
-tagEvents.on("complete", getList);
+tagMonitor.events.on("complete", getList);
 onUnmounted(() => {
-	tagEvents.off("complete", getList);
+	tagMonitor.events.off("complete", getList);
 });
 
 defineExpose({

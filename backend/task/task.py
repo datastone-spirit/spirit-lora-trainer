@@ -1,17 +1,18 @@
 from enum import Enum
 from typing import Optional, Callable, List
-from subprocess import Popen
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from app.api.model.training_paramter import TrainingParameter
+from app.api.model.wan_paramter import WanTrainingParameter, is_i2v
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.model.captioning_model import CaptioningModelInfo
-from app.api.common.utils import is_flux_sampling
-from subprocess import Popen, TimeoutExpired
+from app.api.common.utils import is_flux_sampling, dataset2toml, get_dataset_contents
+from subprocess import Popen, TimeoutExpired, PIPE, STDOUT
+from utils.util import parse_kohya_stdout, parse_kohya_progress_line
 import uuid
-import re
 from tbparse import SummaryReader
 import time
 import os
+import tempfile
 
 
 from utils.util import setup_logging
@@ -23,6 +24,7 @@ class TaskType(Enum):
     NONE = "none"
     TRAINING = "training"
     HUNYUAN_TRAINING = "hunyuan_training"
+    WAN_TRAINING = "wan_training"
     CAPTIONING = "captioning"
 
 class TaskStatus(Enum):
@@ -46,6 +48,7 @@ class Task:
     end_time: float = None
     id: str = None
     detail: Optional[dict] = None
+    stdout_lines: Optional[List] = field(default_factory=list)
 
     @staticmethod
     def wrap_training(proc : Popen, training_paramter: TrainingParameter, task_id: str) -> 'Task':
@@ -69,6 +72,7 @@ class Task:
         task.is_sampling = is_flux_sampling(training_paramter.config)
         if task.is_sampling:
             task.sampling_path = os.path.join(training_paramter.config.output_dir, "sample")
+        task.stdout_lines = []
         return task
 
     @staticmethod
@@ -87,6 +91,7 @@ class Task:
         }
         task.task_type = TaskType.HUNYUAN_TRAINING
         task.start_time = time.time()
+        task.stdout_lines = []
         return task
 
     @staticmethod
@@ -108,7 +113,27 @@ class Task:
         task.captioning = cap_model.captioning
         task.global_prompt = global_prompt
         task.is_append = is_append
+        task.stdout_lines = []
         return task    
+
+    @staticmethod
+    def wrap_wan_training(parameter: WanTrainingParameter, task_id: str, model_path :str, is_sampling: bool = False) -> 'Task':
+        task = WanTrainingTask(parameter, model_path, is_sampling)
+        if not task_id:
+            task.id = uuid.uuid4().hex
+        else:
+            task.id = task_id
+        task.detail = {
+            #total': caculate_image_steps([(dir.path, dir.num_repeats) for dir in training_paramter.dataset.directory]) * training_paramter.config.epochs,
+            'current': 0
+        }
+        task.task_type = TaskType.WAN_TRAINING
+        task.start_time = time.time()
+        task.status = TaskStatus.CREATED
+        task.stdout_lines = []
+        if task.is_sampling:
+            task.sampling_path = os.path.join(parameter.config.output_dir, "sample")
+        return task
 
 
     def run(self):
@@ -130,6 +155,11 @@ class Task:
     def to_dict(self, verbose: bool = False, show_config: bool = False):
         raise NotImplementedError 
     
+    def get_log(self) -> List:
+        if self.stdout_lines:
+            return self.stdout_lines
+        return []    
+
     def __str__(self):
         return f"{self.to_dict(verbose=True)}"
 
@@ -153,7 +183,6 @@ class TrainingTask(Task):
         try:
             logger.info("beginning to run proc communication with training process")
             #self.proc = subprocess.Popen(self.proc.args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            stdout_lines = []
             linestr = ''
             line = bytearray()
             while True:
@@ -165,7 +194,7 @@ class TrainingTask(Task):
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
                     self.parse_progress_line(linestr) 
-                    stdout_lines.append(linestr)
+                    self.stdout_lines.append(linestr)
                     self.parse_stdout(linestr)
                     line = bytearray()  #
             stdout, stderr = self.proc.communicate()
@@ -191,6 +220,7 @@ class TrainingTask(Task):
         d = dict(self.__dict__)
         d.pop('training_parameters') 
         d.pop('proc') 
+        d.pop('stdout_lines', None)
         # Replace proc with safe dict
         if verbose is True and self.proc:
             d['proc'] = self._get_proc_info()
@@ -207,71 +237,11 @@ class TrainingTask(Task):
         return d
 
     def parse_stdout(self, stdout):
-        """_summary_
-
-        Args:
-            stdout (_type_): _description_
-
-need to parse the following information, include number of train images, number of reg images, number of batches per epoch, number of epochs, batch size per device, gradient accumulation steps, total optimization steps
-running training / 学習開始
-num train images * repeats / 学習画像の数×繰り返し回数: 10
-num reg images / 正則化画像の数: 0
-num batches per epoch / 1epochのバッチ数: 10
-num epochs / epoch数: 10
-batch size per device / バッチサイズ: 1
-gradient accumulation steps / 勾配を合計するステップ数 = 1
-total optimization steps / 学習ステップ数: 100
-        """
-        pattern = {
-             "num_train_images": r"num train images \* repeats .*?: (\d+)",
-             "num_reg_images": r"num reg images .*?: (\d+)",
-             "num_batches_per_epoch": r"num batches per epoch .*?: (\d+)",
-             "num_epochs": r"num epochs .*?: (\d+)",
-             "batch_size_per_device": r"batch size per device .*?: (\d+)",
-             "gradient_accumulation_steps": r"gradient accumulation steps .*?=? (\d+)",
-             "total_optimization_steps": r"total optimization steps .*?: (\d+)"
-         }
-         
-        for key, regex in pattern.items():
-            match = re.search(regex, stdout)
-            if match:
-                self.detail[key] = int(match.group(1))
+        parse_kohya_stdout(stdout, self.detail)
 
     def parse_progress_line(self, line):
-        """Parse elements from progress bar output
-        
-        Examples:
-            >>> parse_progress_line("steps: 100%|██████████| 40/40 [00:42<00:00,  1.07s/it, avr_loss=0.145]")
-            {
-                'progress': 100,
-                'current': 40,
-                'total': 40,
-                'elapsed': '00:42',
-                'remaining': '00:00',
-                'speed': 1.07,
-                'loss': 0.145
-            }
-        """
-        if not ('|' in line and '%' in line and 'steps' in line and '/' in line ):
-            return
-            
-        patterns = {
-            'steps': r'\|?\s*(\d+)/(\d+)',
-            'time': r'\[(.*?)(?=<)<(.*?)(?=,)',  # Using lookahead to exclude < and ,
-            'speed': r'([\d.]+)s/it',
-            'loss': r'avr_loss=([\d.]+)'
-        }
-        
-        for key, pattern in patterns.items():
-            match = re.search(pattern, line)
-            if match:
-                if key == 'steps' and self.detail.get('total') is None:
-                    self.detail['total'] = int(match.group(2))
-                elif key == 'time':
-                    self.detail['elapsed'] = match.group(1)
-                    self.detail['remaining'] = match.group(2)
-                elif key == 'speed':
-                    self.detail[key] = float(match.group(1))
+        parse_kohya_progress_line(line, self.detail)
+
 
     def update_detail_with_tb(self):
         import os
@@ -358,7 +328,6 @@ class HunyuanTrainingTask(Task):
     def _run(self):
         try:
             logger.info("beginning to run proc communication with hunyuan training process")
-            stdout_lines = []
             linestr = ''
             line = bytearray()
             while True:
@@ -369,7 +338,7 @@ class HunyuanTrainingTask(Task):
                 if ch == b'\n':
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
-                    stdout_lines.append(linestr)
+                    self.stdout_lines.append(linestr)
                     line = bytearray()  #
             stdout, stderr = self.proc.communicate()
         except TimeoutExpired as exc:
@@ -398,6 +367,7 @@ class HunyuanTrainingTask(Task):
         d['task_type'] = self.task_type.value
         d.pop('hunyuan_parameters') 
         d.pop('proc') 
+        d.pop('stdout_lines', None)
         if show_config is True and self.hunyuan_parameters:
             d['frontend_config'] = self.hunyuan_parameters.frontend_config
         return d
@@ -418,8 +388,8 @@ class HunyuanTrainingTask(Task):
                 return 0
 
         self.detail['current'] = current_step
-        self.detail['loss'] = get_value(step=current_step, tag="train/loss")
         self.detail['elapsed'] = time.time() - self.start_time
+        self.detail['loss'] = get_value(step=current_step, tag="train/loss")
         self.detail['total_epoch'] = self.hunyuan_parameters.config.epochs
 
         epoch_seq = df.query('tag=="train/epoch_loss"').get('step', None)
@@ -431,3 +401,260 @@ class HunyuanTrainingTask(Task):
             self.detail['estimate_steps_per_epoch'] = current_step
         self.detail['epoch_loss']=get_value(step=current_epoch, tag="train/epoch_loss")
         
+@dataclass
+class WanTrainingTask(Task):
+    wan_parameter: WanTrainingParameter = None 
+    is_sampling :bool = False
+    phase: str = None
+    model_path: str = None
+
+    def __init__(self, parameter: WanTrainingParameter, module_path: str, is_sampling: bool):
+        self.wan_parameter = parameter
+        self.is_sampling = is_sampling
+        self.task_chain = TaskChian(self, [
+            WanPrepareJsonlFileSubTask(module_path),
+            WanCacheLatentSubTask(module_path), 
+            WanTextEncoderOutputCacheSubTask(module_path), 
+            WanTrainingSubTask(module_path)])
+    
+    def _run(self):
+        logger.info("beginning to run all subtasks")
+        self.task_chain.excute()
+        return
+    
+    def to_dict(self, verbose: bool = False, show_config: bool = False):
+        """Override to_dict to enum """
+        # Create shallow copy of self.__dict__
+        d = dict(self.__dict__)
+        # Convert status enum
+        d['status'] = self.status.value
+        # Convert task_type enum 
+        d['task_type'] = self.task_type.value
+        d.pop('wan_parameter') 
+        d.pop('task_chain')
+        d.pop('stdout_lines', None)
+        if show_config is True and self.wan_parameter:
+            d['frontend_config'] = self.wan_parameter.frontend_config
+        return d
+
+    def update_detail_with_tb(self):
+        logdir = self.wan_parameter.config.logging_dir
+        reader = SummaryReader(logdir)
+        df=reader.scalars
+        current_step = max(df.get('step', [0]))
+        if current_step == 0:
+            return 
+
+        def get_value(step=None, tag=None):
+            try:
+                return df.query('step==@step and tag==@tag')['value'].iloc[0]
+            except Exception as e:
+                logger.warning(f"get value failed with step {step} and tag {tag}, error: {e}")
+                return 0
+
+        self.detail['current'] = current_step
+        self.detail['loss'] = get_value(step=current_step, tag="loss/current")
+        self.detail['total_epoch'] = self.wan_parameter.config.max_train_epochs
+        self.detail['current_loss'] = get_value(step=current_step, tag="loss/current")
+        self.detail['average_loss'] = get_value(step=current_step, tag="loss/average")
+        self.detail['lr_unet'] = get_value(step=current_step, tag="lr/unet")
+        self.detail['lr_group0'] = get_value(step=current_step, tag="lr/group0")
+        return
+
+    
+
+
+class TaskChian:
+
+    def __init__(self, task: WanTrainingTask, sub_tasks: List['SubTask']):
+        self.task = task
+        self.sub_tasks = sub_tasks
+        self.current = 0
+    
+    def excute(self):
+        if self.current == len(self.sub_tasks):
+            return
+        sub_task = self.sub_tasks[self.current]
+        self.current += 1
+        self.task.phase = type(sub_task).__name__
+        sub_task.do_task(self.task, self)
+
+
+class SubTask:
+
+    def __init__(self, module_path: str):
+        self.module_path = module_path
+        self.executable = os.path.join(module_path, "venv", "bin", "python")
+        self.customize_env = os.environ.copy()
+        self.customize_env["ACCELERATE_DISABLE_RICH"] = "1"
+        self.customize_env["PYTHONUNBUFFERED"] = "1"
+        self.customize_env["PYTHONWARNINGS"] = "ignore::FutureWarning,ignore::UserWarning"
+        self.customize_env["NCCL_P2P_DISABLE"]="1" # For flux training, we disable NCCL P2P and IB
+        self.customize_env["NCCL_IB_DISABLE"]="1"        
+        self.customize_env["PATHONPATH"]=self.module_path
+    
+    def wait(self, proc: Popen, task: WanTrainingTask = None, detail: dict = None):
+        try:
+            logger.info("beginning to run proc communication with task training process")
+            linestr = ''
+            line = bytearray()
+            while True:
+                ch = proc.stdout.read(1)
+                if ch == b'' and proc.poll() is not None:
+                    break
+                line.extend(ch)
+                if ch == b'\n':
+                    linestr = line.decode('utf-8', errors='ignore')
+                    print(linestr, end='')
+                    if task is not None:
+                        task.stdout_lines.append(linestr)
+                    if detail is not None:
+                        parse_kohya_progress_line(linestr, detail)
+                        parse_kohya_stdout(linestr, detail)
+                    line = bytearray()  #
+
+            stdout, stderr = proc.communicate()
+        except TimeoutExpired as exc:
+            proc.kill()
+            proc.wait()
+            raise
+        except:
+            proc.kill()
+            raise
+
+        retcode = proc.poll()
+        if retcode != 0:
+            logger.error(f"training subprocess {self.__class__.__name__} run failed, retcode is {retcode}")
+            raise Exception(f"training subprocess {self.__class__.__name__}run failed, retcode is {retcode}")
+
+        logger.info(f"training subprocess {self.__class__.__name__} run complete successfully, retcode is {retcode}")
+        return          
+    
+class WanPrepareJsonlFileSubTask(SubTask):
+    def __init__(self, module_path: str):
+        super().__init__(module_path)
+    
+    def _gen_jsonl_file(self, data_dir: str, is_video: bool = False):
+        import json
+        json_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl")
+        exts = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".tif", ".gif"]
+        if is_video:
+            exts = [".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv"]
+
+        with open(json_file.name, 'w+', encoding='utf-8') as f:
+            for path, caption, _ in get_dataset_contents(data_dir, exts):
+                if is_video:
+                    entry = {
+                        "video_path": path,
+                        "caption": caption,
+                    }
+                else:
+                    entry = {
+                        "image_path": path,
+                        "caption": caption,
+                        "init_frame_weight": 0.8
+                    }
+                f.write(json.dumps(entry, ensure_ascii=False))
+                f.write("\n")
+        return json_file.name 
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        logger.info("beginning to run prepare wan jsonl file sub task")
+        for i in range(len(task.wan_parameter.dataset.datasets)):
+            ds = task.wan_parameter.dataset.datasets[i] 
+            video_data = True
+            if ds.video_directory and os.path.exists(ds.video_directory):
+                task.wan_parameter.dataset.datasets[i].video_jsonl_file = self._gen_jsonl_file(ds.video_directory, is_video=True)
+            elif ds.image_directory and os.path.exists(ds.image_directory):
+                video_data = False
+                task.wan_parameter.dataset.datasets[i].image_jsonl_file= self._gen_jsonl_file(ds.image_directory)
+            else:
+                logger.warning(f"dataset {i} video_directory {ds.video_directory} and image_directory {ds.image_directory} are both not exists")
+                raise Exception(f"dataset {i} video_directory {ds.video_directory} and image_directory {ds.image_directory} are both not exists")
+
+            if video_data and os.path.getsize(task.wan_parameter.dataset.datasets[i].video_jsonl_file) == 0:
+                logger.warning(f"dataset {i} video jsonl exists but empty, "
+                               f"there are no valid data file in the directory {ds.video_directory} ")
+                raise Exception(f"dataset {i} video jsonl file are both empty,"
+                                f" there are no valid data files in the directory {ds.video_directory}")
+
+            if not video_data and os.path.getsize(task.wan_parameter.dataset.datasets[i].image_jsonl_file) == 0:
+                logger.warning(f"dataset {i} image jsonl file is empty, "
+                               f"there is no valid data file in the directory {ds.image_directory} ")
+                raise Exception(f"dataset {i} image jsonl file is empty,"
+                               f"there is no valid data file in the directory {ds.image_directory} ")
+
+            logger.info(f"Dataset {i}: video_jsonl_file={task.wan_parameter.dataset.datasets[i].video_jsonl_file}, "
+                        f"image_jsonl_file={task.wan_parameter.dataset.datasets[i].image_jsonl_file}")
+        return task_chain.excute()
+
+class WanCacheLatentSubTask(SubTask):
+
+    def __init__(self, module_path: str):
+        super().__init__(module_path)
+        self.script = os.path.join(module_path, "wan_cache_latents.py")
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        logger.info("beginning to run cache latent sub task")
+        if task.wan_parameter.skip_cache_latent:
+            logger.warning("Cache latent sub task is skipped due to skip_cache_latent is set to True")
+            return task_chain.excute()
+        
+        args = [
+            self.executable, 
+            self.script,
+            "--dataset_config", 
+            dataset2toml(task.wan_parameter.dataset),
+            "--vae",
+            task.wan_parameter.config.vae,
+        ]
+        if is_i2v(task.wan_parameter.config.task):
+            args.append("--clip")
+            args.append(task.wan_parameter.config.clip)
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
+        return task_chain.excute()
+
+class WanTextEncoderOutputCacheSubTask(SubTask):
+    
+    def __init__(self, module_path: str):
+        super().__init__(module_path)
+        self.script = os.path.join(module_path, "wan_cache_text_encoder_outputs.py")
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        logger.info("beginning to run text encoder output cache sub task")
+        if task.wan_parameter.skip_cache_text_encoder_latent:
+            logger.warning("Cache text encoder latent sub task is skipped due to skip_text_encoder_latent is set to True")
+            return task_chain.excute()
+
+        args = [
+            self.executable, 
+            self.script,
+            "--dataset_config",
+            dataset2toml(task.wan_parameter.dataset),
+            "--batch_size", 
+            "16",
+            "--t5", 
+            task.wan_parameter.config.t5,
+        ]
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
+        return task_chain.excute()
+
+class WanTrainingSubTask(SubTask):
+    def __init__(self, module_path: str):
+        super().__init__(module_path)
+        self.executable = os.path.join(module_path, "venv", "bin","accelerate")
+        self.script = os.path.join(module_path, "wan_train_network.py")
+    
+    def do_task(self, task: WanTrainingTask, task_chain: TaskChian):
+        #task.wan_parameter.config.dataset_config = dataset2toml(task.wan_parameter.dataset)
+        args = [
+            self.executable,
+            "launch",
+            "--num_processes", "4",
+            "--mixed_precision", "bf16",
+            self.script,
+            "--config", dataset2toml(task.wan_parameter.config),
+            "--dataset_config", dataset2toml(task.wan_parameter.dataset),
+        ]
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task, detail=task.detail)
+        return task_chain.excute()

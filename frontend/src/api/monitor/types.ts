@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-02-18 10:41:04
+ * @LastEditTime: 2025-04-11 08:58:06
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -176,4 +176,77 @@ export interface HyVideoTrainingInfoResult {
 		| string;
 	/** 训练器的训练配置 */
 	frontend_config: string;
+}
+
+/** 监听wan视频训练信息参数 */
+export interface WanVideoTrainingInfoParams {
+	/** 任务id */
+	task_id: string;
+}
+
+/** wan视频训练的阶段 */
+export type WanVideoTrainingPhase =
+	| "none"
+	/** 准备训练数据，将图像或视频数据集转换为JSONL格式的文件 */
+	| "WanPrepareJsonlFileSubTask"
+	/** 缓存潜在特征，使用VAE模型将图像或视频编码为潜在空间表示，并缓存这些特征以加速训练 */
+	| "WanCacheLatentSubTask"
+	/** 缓存文本编码器输出，使用T5文本编码器处理描述文本，并缓存编码结果 */
+	| "WanTextEncoderOutputCacheSubTask"
+	/** 实际训练，使用前面阶段生成的缓存文件，训练WAN模型 */
+	| "WanTrainingSubTask";
+
+/** 监听wan视频训练信息结果 */
+export interface WanVideoTrainingInfoResult {
+	/** 任务 ID */
+	id: string;
+	/** 任务状态 */
+	status: TaskStatus;
+	/** 任务类型 */
+	task_type: TaskType.CAPTIONING;
+	/** 开始时间 */
+	start_time: number;
+	/** 结束时间 */
+	end_time: number | null;
+	/** 是否显示查看采样 */
+	is_sampling?: boolean;
+	/** 采样文件路径，只有开启了采样才会有 */
+	sampling_path?: string;
+	/** 阶段 */
+	phase: WanVideoTrainingPhase;
+	/** 详情，没数据的时候是空对象，任务失败的时候是字符串 */
+	detail:
+		| {
+				/** 当前第几个 */
+				current: number;
+				/** 总图片数量 */
+				total: number;
+				/** 每轮的总批次数 num_train_images × 批次计算， 因为是批次为1, 所以这里是120 */
+				num_batches_per_epoch: number;
+				/** 总训练轮数 */
+				num_epochs: number;
+				/** 每个设备上的批次数 总为1, 没有启用分布式训练 */
+				batch_size_per_device: number;
+				/**  多少步累计梯度， 这里是1, 就是每一步的梯度都不累计 */
+				gradient_accumulation_steps: number;
+				/** 总共优化步数，应该是 total / gradient_accumulation_steps 计算得出 */
+				total_optimization_steps: number;
+				/** 已经耗时 */
+				elapsed: string;
+				/** 剩余时间 */
+				remaining: string;
+				/** 损失当前 */
+				loss: number;
+				/** 总轮数 */
+				total_epoch: number;
+				/** 当前损失 */
+				current_loss: number;
+				/** 平均损失 */
+				average_loss: number;
+				/** unet学习率 */
+				lr_unet: number;
+				/** 不知道 */
+				lr_group0: number;
+		  }
+		| string;
 }

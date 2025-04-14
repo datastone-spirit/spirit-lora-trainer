@@ -1,23 +1,26 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-01-13 17:01:32
+ * @LastEditTime: 2025-04-11 14:55:42
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
  * 怎么可能会有bug！！！
  */
-import { currentTask } from "@/api/task";
-import type { CurrentTaskResult } from "@/api/task";
-import { useTag } from "@/hooks/useTag";
-import { useFluxLora } from "@/hooks/useFluxLora";
-import { useHYLora } from "@/hooks/useHYLora";
-import type { AxiosError } from "axios";
 import type {
 	HyVideoTrainingInfoResult,
 	LoRATrainingInfoResult,
-	ManualTagInfoResult
+	ManualTagInfoResult,
+	WanVideoTrainingInfoResult
 } from "@/api/monitor";
+import type { CurrentTaskResult } from "@/api/task";
+import { currentTask } from "@/api/task";
+import { TaskType } from "@/api/types";
+import { useFluxLora } from "@/hooks/task/useFluxLora";
+import { useHYLora } from "@/hooks/task/useHYLora";
+import { useTag } from "@/hooks/task/useTag";
+import type { AxiosError } from "axios";
+import { useWanLora } from "@/hooks/task/useWanLora";
 
 class TaskInitializer {
 	constructor(private readonly taskData: CurrentTaskResult) {}
@@ -27,14 +30,17 @@ class TaskInitializer {
 		let initPromise: Promise<void>;
 
 		switch (this.taskData.task_type) {
-			case "captioning": // 打标
+			case TaskType.CAPTIONING: // 打标
 				initPromise = this.initTag();
 				break;
-			case "training": // flux 训练
+			case TaskType.TRAINING: // flux 训练
 				initPromise = this.initFluxTraining();
 				break;
-			case "hunyuan_training": // 混元视频训练
+			case TaskType.HUNYUAN_TRAINING: // 混元视频训练
 				initPromise = this.initHyVideoTraining();
+				break;
+			case TaskType.WAN_TRAINING: // wan训练
+				initPromise = this.initWanTraining();
 				break;
 			default:
 				console.warn("未知任务类型", this.taskData.task_type);
@@ -46,52 +52,47 @@ class TaskInitializer {
 
 	/** 打标初始化 */
 	private async initTag() {
-		const { id, status } = this.taskData;
-		const { isTagTaskEnd, setTagTaskId, updateTagData } = useTag();
+		const { status } = this.taskData as ManualTagInfoResult;
+		if (status === "complete" || status === "failed") return;
 
-		// 如果当前任务已经完成或者失败，不做任何操作
-		if (isTagTaskEnd(status)) return;
-		// 未完成只更新状态数据，轮询请求由页面来控制
-		setTagTaskId(id);
-		updateTagData(this.taskData as ManualTagInfoResult);
+		const { tagMonitor } = useTag();
 
-		ElMessage({
-			message: "当前正在打标...",
-			type: "info"
+		return tagMonitor.setInitData({
+			taskId: this.taskData.id
 		});
 	}
 
 	/** flux 训练初始化 */
 	private async initFluxTraining() {
-		const { id, status } = this.taskData;
-		const { isFluxLoraTaskEnd, setFluxTaskId, updateFluxLoraData } = useFluxLora();
+		const { status } = this.taskData as LoRATrainingInfoResult;
+		if (status === "complete" || status === "failed") return;
+		const { fluxLoraMonitor } = useFluxLora();
 
-		// 如果已经完成或者失败，不做任何操作
-		if (isFluxLoraTaskEnd(status)) return;
-		// 未完成只更新状态数据，轮询请求由页面来控制
-		setFluxTaskId(id);
-		updateFluxLoraData(this.taskData as LoRATrainingInfoResult);
-
-		ElMessage({
-			message: "当前正在训练LoRA...",
-			type: "info"
+		return fluxLoraMonitor.setInitData({
+			taskId: this.taskData.id
 		});
 	}
 
 	/** 混元视频训练初始化 */
 	private async initHyVideoTraining() {
-		const { id, status } = this.taskData;
-		const { isHYLoraTaskEnd, setHYLoraTaskId, updateHYLoraData } = useHYLora();
+		const { status } = this.taskData as HyVideoTrainingInfoResult;
+		if (status === "complete" || status === "failed") return;
+		const { hyLoraMonitor } = useHYLora();
 
-		// 如果已经完成或者失败，不做任何操作
-		if (isHYLoraTaskEnd(status)) return;
-		// 未完成只更新状态数据，轮询请求由页面来控制
-		setHYLoraTaskId(id);
-		updateHYLoraData(this.taskData as HyVideoTrainingInfoResult);
+		return hyLoraMonitor.setInitData({
+			taskId: this.taskData.id
+		});
+	}
 
-		ElMessage({
-			message: "当前正在训练混元视频LoRA...",
-			type: "info"
+	/** wan 训练初始化 */
+	private async initWanTraining() {
+		const { status } = this.taskData as WanVideoTrainingInfoResult;
+		if (status === "complete" || status === "failed") return;
+
+		const { wanLoraMonitor } = useWanLora();
+
+		return wanLoraMonitor.setInitData({
+			taskId: this.taskData.id
 		});
 	}
 }

@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 14:52:03
- * @LastEditTime: 2025-02-20 10:41:00
+ * @LastEditTime: 2025-04-10 09:06:18
  * @LastEditors: mulingyuer
  * @Description: 系统监控：gpu、训练轮数
  * @FilePath: \frontend\src\components\Monitor\GPUMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="gpu-monitor">
+	<div v-if="isUseGpu" class="gpu-monitor">
 		<div class="gpu-monitor-more">
 			<el-popover placement="top" width="auto" trigger="click">
 				<template #reference>
@@ -55,14 +55,20 @@
 </template>
 
 <script setup lang="ts">
-import { useGPU } from "@/hooks/useGPU";
+import { useGPU } from "@/hooks/task/useGPU";
+import { useTrainingStore } from "@/stores";
 
+const trainingStore = useTrainingStore();
 const { monitorGPUData } = useGPU();
+/** gpu数据 */
 const gpuData = computed(() => monitorGPUData.value.data);
+/** 是否使用gpu */
+const isUseGpu = computed(() => trainingStore.useGPU);
 </script>
 
 <style lang="scss" scoped>
 .gpu-monitor {
+	height: 100%;
 	display: flex;
 	align-items: center;
 }

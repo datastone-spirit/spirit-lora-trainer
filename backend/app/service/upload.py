@@ -5,7 +5,7 @@ from ..api.common.utils import res
 
 class UploadService:
     # 定义允许的文件扩展名
-    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp", "txt"}
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp", "txt", "mp4", "mov", "avi", "mkv", "flv", "wmv"}
 
     # 生成唯一的文件名，避免文件名重复
     def generate_unique_filename(self, filename, upload_path):

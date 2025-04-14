@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-03-10 16:19:13
+ * @LastEditTime: 2025-04-11 15:42:05
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -9,12 +9,15 @@
  */
 import { defineStore } from "pinia";
 import type {
+	CurrentTaskInfo,
 	GPUData,
 	MonitorFluxLoraData,
 	MonitorGPUData,
 	MonitorHYLoraData,
 	MonitorTagData,
-	TagData
+	MonitorWanLoraData,
+	TagData,
+	WanLoraData
 } from "./types";
 export type * from "./types";
 
@@ -22,8 +25,6 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听GPU相关数据 */
 	const monitorGPUData = ref<MonitorGPUData>({
 		isListen: false,
-		sleepTime: 15000,
-		isPolling: false,
 		data: {
 			gpuPower: 0,
 			gpuMemory: 0,
@@ -32,9 +33,6 @@ export const useTrainingStore = defineStore("training", () => {
 	});
 	function setGPUIsListen(val: boolean) {
 		monitorGPUData.value.isListen = val;
-	}
-	function setGPUIsPolling(val: boolean) {
-		monitorGPUData.value.isPolling = val;
 	}
 	function setGPUData(data: GPUData) {
 		monitorGPUData.value.data = data;
@@ -50,31 +48,14 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听打标数据 */
 	const monitorTagData = ref<MonitorTagData>({
 		isListen: false,
-		taskId: "",
-		taskStatus: "none",
-		sleepTime: 3000,
-		isPolling: false,
 		data: {
 			current: 0,
 			total: 0,
-			percentage: 0
+			progress: 0
 		}
 	});
 	function setTagIsListen(val: boolean) {
 		monitorTagData.value.isListen = val;
-	}
-	function setTagTaskId(taskId: string) {
-		monitorTagData.value.taskId = taskId;
-	}
-	function setTagTaskStatus(status: MonitorTagData["taskStatus"]) {
-		monitorTagData.value.taskStatus = status;
-	}
-	function isTagTaskEnd(status?: MonitorTagData["taskStatus"]) {
-		status = status ?? monitorTagData.value.taskStatus;
-		return ["complete", "failed", "none"].includes(status);
-	}
-	function setTagIsPolling(val: boolean) {
-		monitorTagData.value.isPolling = val;
 	}
 	function setTagData(data: TagData) {
 		monitorTagData.value.data = data;
@@ -83,17 +64,52 @@ export const useTrainingStore = defineStore("training", () => {
 		monitorTagData.value.data = {
 			current: 0,
 			total: 0,
-			percentage: 0
+			progress: 0
+		};
+	}
+
+	/** 监听wan lora训练 */
+	const monitorWanLoraData = ref<MonitorWanLoraData>({
+		isListen: false,
+		data: {
+			current: 0,
+			total: 0,
+			elapsed: "",
+			remaining: 0,
+			current_loss: 0,
+			average_loss: 0,
+			total_epoch: "",
+			showSampling: false,
+			samplingPath: "",
+			phase: "none",
+			progress: 0
+		}
+	});
+	function setWanLoraIsListen(val: boolean) {
+		monitorWanLoraData.value.isListen = val;
+	}
+	function setWanLoraData(data: WanLoraData) {
+		monitorWanLoraData.value.data = data;
+	}
+	function resetWanLoraData() {
+		monitorWanLoraData.value.data = {
+			current: 0,
+			total: 0,
+			elapsed: "",
+			remaining: 0,
+			current_loss: 0,
+			average_loss: 0,
+			total_epoch: "",
+			showSampling: false,
+			samplingPath: "",
+			phase: "none",
+			progress: 0
 		};
 	}
 
 	/** 监听flux lora训练 */
 	const monitorFluxLoraData = ref<MonitorFluxLoraData>({
 		isListen: false,
-		taskId: "",
-		taskStatus: "none",
-		sleepTime: 15000,
-		isPolling: false,
 		data: {
 			current: 0,
 			elapsed: "",
@@ -109,19 +125,6 @@ export const useTrainingStore = defineStore("training", () => {
 	});
 	function setFluxLoraIsListen(val: boolean) {
 		monitorFluxLoraData.value.isListen = val;
-	}
-	function setFluxLoraTaskId(taskId: string) {
-		monitorFluxLoraData.value.taskId = taskId;
-	}
-	function setFluxLoraTaskStatus(status: MonitorFluxLoraData["taskStatus"]) {
-		monitorFluxLoraData.value.taskStatus = status;
-	}
-	function isFluxLoraTaskEnd(status?: MonitorFluxLoraData["taskStatus"]) {
-		status = status ?? monitorFluxLoraData.value.taskStatus;
-		return ["complete", "failed", "none"].includes(status);
-	}
-	function setFluxLoraIsPolling(val: boolean) {
-		monitorFluxLoraData.value.isPolling = val;
 	}
 	function setFluxLoraData(data: MonitorFluxLoraData["data"]) {
 		monitorFluxLoraData.value.data = data;
@@ -144,10 +147,6 @@ export const useTrainingStore = defineStore("training", () => {
 	/** 监听混元视频 lora训练 */
 	const monitorHYLoraData = ref<MonitorHYLoraData>({
 		isListen: false,
-		taskId: "",
-		taskStatus: "none",
-		sleepTime: 15000,
-		isPolling: false,
 		data: {
 			current: 0,
 			total: 0,
@@ -163,19 +162,6 @@ export const useTrainingStore = defineStore("training", () => {
 	});
 	function setHYLoraIsListen(val: boolean) {
 		monitorHYLoraData.value.isListen = val;
-	}
-	function setHYLoraTaskId(taskId: string) {
-		monitorHYLoraData.value.taskId = taskId;
-	}
-	function setHYLoraTaskStatus(status: MonitorHYLoraData["taskStatus"]) {
-		monitorHYLoraData.value.taskStatus = status;
-	}
-	function isHYLoraTaskEnd(status?: MonitorHYLoraData["taskStatus"]) {
-		status = status ?? monitorHYLoraData.value.taskStatus;
-		return ["complete", "failed", "none"].includes(status);
-	}
-	function setHYLoraIsPolling(val: boolean) {
-		monitorHYLoraData.value.isPolling = val;
 	}
 	function setHYLoraData(data: MonitorHYLoraData["data"]) {
 		monitorHYLoraData.value.data = data;
@@ -197,13 +183,31 @@ export const useTrainingStore = defineStore("training", () => {
 
 	/** gpu是否在使用中 */
 	const useGPU = computed(() => {
-		return !isTagTaskEnd() || !isFluxLoraTaskEnd() || !isHYLoraTaskEnd();
+		return (
+			monitorTagData.value.isListen ||
+			monitorFluxLoraData.value.isListen ||
+			monitorHYLoraData.value.isListen ||
+			monitorWanLoraData.value.isListen
+		);
 	});
 
-	/** 训练中是否断网了 */
-	const isOffline = ref(false);
-	function setIsOffline(val: boolean) {
-		isOffline.value = val;
+	/** 当前任务信息 */
+	const currentTaskInfo = ref<CurrentTaskInfo>({
+		type: "none",
+		id: "",
+		name: "",
+		progress: 0
+	});
+	function setCurrentTaskInfo(info: CurrentTaskInfo) {
+		currentTaskInfo.value = info;
+	}
+	function resetCurrentTaskInfo() {
+		currentTaskInfo.value = {
+			type: "none",
+			id: "",
+			name: "",
+			progress: 0
+		};
 	}
 
 	return {
@@ -211,33 +215,27 @@ export const useTrainingStore = defineStore("training", () => {
 		setGPUIsListen,
 		setGPUData,
 		resetGPUData,
-		setGPUIsPolling,
 		monitorTagData,
 		setTagIsListen,
-		setTagTaskId,
-		setTagTaskStatus,
-		isTagTaskEnd,
-		setTagIsPolling,
 		setTagData,
 		resetTagData,
 		monitorFluxLoraData,
 		setFluxLoraIsListen,
-		setFluxLoraTaskId,
-		setFluxLoraTaskStatus,
-		isFluxLoraTaskEnd,
-		setFluxLoraIsPolling,
 		setFluxLoraData,
 		resetFluxLoraData,
 		monitorHYLoraData,
 		setHYLoraIsListen,
-		setHYLoraTaskId,
-		setHYLoraTaskStatus,
-		isHYLoraTaskEnd,
-		setHYLoraIsPolling,
 		setHYLoraData,
 		resetHYLoraData,
 		useGPU,
-		isOffline,
-		setIsOffline
+		monitorWanLoraData,
+		setWanLoraIsListen,
+		setWanLoraData,
+		resetWanLoraData,
+		currentTaskInfo,
+		setCurrentTaskInfo,
+		resetCurrentTaskInfo
 	};
 });
+
+export type UseTrainingStore = ReturnType<typeof useTrainingStore>;

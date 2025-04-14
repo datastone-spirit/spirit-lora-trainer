@@ -1,55 +1,102 @@
 /*
  * @Author: mulingyuer
- * @Date: 2024-12-19 17:05:19
- * @LastEditTime: 2024-12-23 16:30:08
+ * @Date: 2025-04-07 14:26:10
+ * @LastEditTime: 2025-04-07 15:06:32
  * @LastEditors: mulingyuer
- * @Description: 数据集帮助工具
+ * @Description: 数据集帮助
  * @FilePath: \frontend\src\components\AiDataset\ai-dataset.helper.ts
  * 怎么可能会有bug！！！
  */
-import type { DirectoryFilesResult } from "@/api/common";
-import { type FileList, FileType, type ImageFileItem } from "./types";
+import { checkDirectory } from "@/utils/lora.helper";
+import type { UploadUserFile } from "element-plus";
 
-/** 是否存在text文件 */
-function hasText(item: DirectoryFilesResult[number]): boolean {
-	const { txt_path } = item;
-	return !!txt_path;
-}
+export class AiDatasetHelper {
+	/** 最大视频时长 */
+	public readonly MAX_VIDEO_DURATION = 2 * 60; // 2分钟
 
-/** 拼接图片url */
-function joinImageUrl(imagePath: string): string {
-	return `${import.meta.env.VITE_APP_API_BASE_URL}/image${imagePath}`;
-}
+	/** 校验上传的目录 */
+	public async validateUploadPath(path: string) {
+		try {
+			// 检测目录是否存在
+			if (typeof path === "string" && path.trim() === "") {
+				ElMessage.error("请先选择目录");
+				return false;
+			}
+			const exists = await checkDirectory(path);
+			if (!exists) {
+				ElMessage.error("目录不存在");
+				return false;
+			}
 
-/** 格式化api目录下的列表数据 */
-export function formatDirectoryFiles(data: DirectoryFilesResult): FileList {
-	const list: FileList = [];
+			return true;
+		} catch (error) {
+			ElMessage.error(`"校验上传的目录失败：${(error as Error)?.message}`);
+			console.error("校验上传的目录失败：", error);
 
-	// HACK: 接口有时候返回的不是数组
-	if (!Array.isArray(data)) return list;
-
-	data.forEach((item) => {
-		const imgItem: ImageFileItem = {
-			type: FileType.IMAGE,
-			name: item.image_name,
-			path: item.image_path,
-			value: joinImageUrl(item.image_path),
-			raw: item,
-			hasTagText: false
-		};
-		list.push(imgItem);
-		// 打标文件
-		if (hasText(item)) {
-			imgItem.hasTagText = true;
-			list.push({
-				type: FileType.TEXT,
-				name: item.txt_name,
-				path: item.txt_path,
-				value: item.txt_content,
-				raw: item
-			});
+			return false;
 		}
-	});
+	}
 
-	return list;
+	/** 过滤不合规的视频文件 */
+	public async filterVideoFiles(fileList: UploadUserFile[]): Promise<UploadUserFile[]> {
+		const videoList = fileList.filter((file) => file.raw?.type?.startsWith("video/"));
+		if (videoList.length === 0) return fileList;
+
+		const filterResult = await this.filterVideoDuration(videoList);
+		if (filterResult.failList.length <= 0) return fileList;
+
+		if (filterResult.failList.length > 0) {
+			ElMessage.error(`视频时长超过${this.MAX_VIDEO_DURATION}秒的视频文件已被过滤，请重新选择`);
+		}
+
+		return fileList.filter((file) => !filterResult.failList.includes(file));
+	}
+
+	/** 根据视频时长过滤文件列表 */
+	public async filterVideoDuration(fileList: UploadUserFile[]) {
+		const successList: UploadUserFile[] = [];
+		const failList: UploadUserFile[] = [];
+
+		for (const file of fileList) {
+			const duration = await this.getVideoDuration(file.raw!);
+			if (duration > this.MAX_VIDEO_DURATION) {
+				failList.push(file);
+			} else {
+				successList.push(file);
+			}
+		}
+
+		return { successList, failList };
+	}
+
+	/** 获取视频的时长，单位：s */
+	public getVideoDuration(file: File) {
+		return new Promise<number>((resolve, reject) => {
+			const videoElement = document.createElement("video");
+			videoElement.preload = "metadata";
+
+			// 2. 监听 loadedmetadata 事件
+			videoElement.onloadedmetadata = function () {
+				// 5. 读取时长
+				const duration = videoElement.duration;
+
+				URL.revokeObjectURL(videoElement.src);
+				videoElement.remove();
+
+				return resolve(duration);
+			};
+
+			// 3. 监听 error 事件
+			videoElement.onerror = function (event) {
+				URL.revokeObjectURL(videoElement.src);
+				videoElement.remove();
+
+				console.error(`计算视频时长失败：`, event);
+				return reject(new Error(`计算视频时长失败：${file.name}`));
+			};
+
+			const objectURL = URL.createObjectURL(file);
+			videoElement.src = objectURL;
+		});
+	}
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 11:22:25
- * @LastEditTime: 2024-12-18 09:17:49
+ * @LastEditTime: 2025-03-27 16:23:58
  * @LastEditors: mulingyuer
  * @Description: 应用配置
  * @FilePath: \frontend\src\stores\modules\app\index.ts
@@ -124,3 +124,5 @@ export const useAppStore = defineStore(
 		}
 	}
 );
+
+export type UseAppStore = ReturnType<typeof useAppStore>;

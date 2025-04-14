@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-03-10 17:04:37
+ * @LastEditTime: 2025-04-11 14:43:24
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -23,42 +23,19 @@
 						<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 							<BasicInfo v-model:form="ruleForm" />
 						</Collapse>
-						<Collapse v-model="openStep2" title="第2步：训练用的数据">
-							<Dataset
-								v-model:dataset-path="ruleForm.image_dir"
-								dataset-path-prop="image_dir"
-								dataset-path-popover-content="image_dir"
-								v-model:tagger-model="ruleForm.tagger_model"
-								tagger-model-prop="tagger_model"
-								tagger-model-popover-content="tagger_model"
-								v-model:joy-caption-prompt-type="ruleForm.prompt_type"
-								joy-caption-prop="prompt_type"
-								joy-caption-popover-content="prompt_type"
-								v-model:output-trigger-words="ruleForm.output_trigger_words"
-								output-trigger-words-prop="output_trigger_words"
-								output-trigger-words-popover-content="output_trigger_words"
-								:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
-								@tagger-click="onTaggerClick"
-							/>
-							<DatasetAdvanced
-								:tagger-model="ruleForm.tagger_model"
-								v-model:advanced="ruleForm.tagger_advanced_settings"
-								v-model:tagger-prompt="ruleForm.tagger_global_prompt"
-								tagger-prompt-prop="tagger_global_prompt"
-								tagger-prompt-popover-content="tagger_global_prompt"
-								v-model:tagger-append-file="ruleForm.tagger_is_append"
-								tagger-append-file-prop="tagger_is_append"
-								tagger-append-file-popover-content="tagger_is_append"
-							/>
+						<Collapse v-model="openStep2" title="第2步：AI数据集">
+							<FluxDataset v-model:form="ruleForm" />
+						</Collapse>
+						<Collapse v-model="openStep3" title="第3步：训练数据配置">
 							<TrainingData v-model:form="ruleForm" />
 						</Collapse>
-						<Collapse v-model="openStep3" title="第3步：模型参数调教">
+						<Collapse v-model="openStep4" title="第4步：模型参数调教">
 							<ModelParameters v-model:form="ruleForm" />
 						</Collapse>
-						<Collapse v-model="openStep3" title="第4步：训练采样">
+						<Collapse v-model="openStep5" title="第5步：训练采样">
 							<TrainingSamples v-model:form="ruleForm" />
 						</Collapse>
-						<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
+						<SimpleCollapse v-show="isExpert" v-model="openStep6" title="其它：高级设置">
 							<AdvancedSettings v-model:form="ruleForm" />
 						</SimpleCollapse>
 					</el-form>
@@ -68,16 +45,16 @@
 				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
 			</template>
 		</TwoSplit>
-		<FooterButtonGroup
-			left-to="#footer-bar-left"
-			:getExportConfig="onExportConfig"
-			export-config-prefix="flux"
-			@load-config="onLoadConfig"
-			@reset-data="onResetData"
-			right-to="#footer-bar-center"
+		<TeleportFooterBarContent
+			v-model:merge-data="ruleForm"
+			:reset-data="defaultForm"
 			:submit-loading="submitLoading"
+			@reset-data="onResetData"
 			@submit="onSubmit"
 		>
+			<template #monitor-progress-bar>
+				<LoRATrainingMonitor />
+			</template>
 			<template #right-btn-group>
 				<el-button
 					v-if="monitorFluxLoraData.data.showSampling"
@@ -87,43 +64,34 @@
 					查看采样
 				</el-button>
 			</template>
-		</FooterButtonGroup>
-		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
-		<SavePathWarningDialog v-model="openSavePathWarningDialog" />
+		</TeleportFooterBarContent>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
-import type { LoRATrainingInfoResult } from "@/api/monitor";
-import { batchTag } from "@/api/tag";
-import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
-import ViewSampling from "@/components/ViewSampling/index.vue";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useFluxLora } from "@/hooks/useFluxLora";
-import { useTag } from "@/hooks/useTag";
-import { useSettingsStore, useTrainingStore } from "@/stores";
-import { checkDirectory } from "@/utils/lora.helper";
-import { tomlParse, tomlStringify } from "@/utils/toml";
+import { useFluxLora } from "@/hooks/task/useFluxLora";
+import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
+import { getEnv } from "@/utils/env";
+import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
+import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
-import { formatFormData, mergeDataToForm } from "./flux.helper";
+import { formatFormData } from "./flux.helper";
 import { validateForm } from "./flux.validate";
 import type { RuleForm } from "./types";
-import { getEnv } from "@/utils/env";
+import FluxDataset from "./components/FluxDataset/index.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
-const { startTagListen, stopTagListen, monitorTagData } = useTag();
-const { startFluxLoraListen, stopFluxLoraListen, monitorFluxLoraData } = useFluxLora({
-	isFirstGetConfig: true,
-	firstGetConfigCallback: firstResetFormConfig
-});
+const modalManagerStore = useModalManagerStore();
+const { monitorFluxLoraData, fluxLoraMonitor } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const env = getEnv();
@@ -145,7 +113,7 @@ const defaultForm = readonly<RuleForm>({
 	save_state: true,
 	blocks_to_swap: undefined,
 	// -----
-	image_dir: "/root",
+	image_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
 	output_trigger_words: true,
@@ -490,14 +458,14 @@ const rules = reactive<FormRules<RuleForm>>({
 const isExpert = computed(() => settingsStore.isExpert);
 /** 是否已经恢复训练配置 */
 const isRestored = ref(false);
-/** lora保存警告弹窗 */
-const openSavePathWarningDialog = ref(false);
 
 // 折叠
 const openStep1 = ref(true);
 const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
+const openStep5 = ref(true);
+const openStep6 = ref(true);
 
 /** toml */
 const toml = ref("");
@@ -506,99 +474,9 @@ const generateToml = useDebounceFn(() => {
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
-/** 导入配置 */
-function onLoadConfig(toml: RuleForm) {
-	try {
-		mergeDataToForm(toml, ruleForm.value);
-		ElMessage.success("配置导入成功");
-	} catch (error) {
-		ElMessage.error((error as Error)?.message ?? "配置导入失败");
-		console.error(error);
-	}
-}
-/** 导出配置 */
-function onExportConfig() {
-	return ruleForm.value;
-}
-
 /** 重置表单 */
 function onResetData() {
-	// 重置数据
-	ruleForm.value = structuredClone(toRaw(defaultForm) as RuleForm);
-	// 重置表单
-	if (ruleFormRef.value) {
-		ruleFormRef.value.resetFields();
-	}
-
-	ElMessage.success("重置成功");
-}
-
-/** 打标 */
-const taggerBtnLoading = ref(false);
-async function onTaggerClick() {
-	try {
-		taggerBtnLoading.value = true;
-		const { image_dir, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
-		// 校验
-		const validations = [
-			{
-				condition: () => trainingStore.useGPU,
-				message: "GPU已经被占用，请等待对应任务完成再执行打标"
-			},
-			{
-				condition: () => typeof image_dir !== "string" || image_dir.trim() === "",
-				message: "请先选择训练用的数据集目录"
-			},
-			{
-				condition: async () => !(await checkDirectory(image_dir)),
-				message: "数据集目录不存在"
-			},
-			{
-				condition: () => typeof tagger_model !== "string" || tagger_model.trim() === "",
-				message: "请先选择打标模型"
-			},
-			{
-				condition: () => output_trigger_words && class_tokens.trim() === "",
-				message: "请填写触发词"
-			}
-		];
-
-		for (const validation of validations) {
-			if (await validation.condition()) {
-				taggerBtnLoading.value = false;
-				ElMessage({
-					message: validation.message,
-					type: "error"
-				});
-				return;
-			}
-		}
-
-		// api
-		const result = await batchTag({
-			image_path: image_dir,
-			model_name: tagger_model,
-			class_token: output_trigger_words ? class_tokens : undefined,
-			prompt_type: ruleForm.value.prompt_type,
-			global_prompt:
-				ruleForm.value.tagger_model === "joy-caption-alpha-two"
-					? ruleForm.value.tagger_global_prompt
-					: "",
-			is_append: ruleForm.value.tagger_is_append
-		});
-		startTagListen(result.task_id);
-		taggerBtnLoading.value = false;
-
-		ElMessage({
-			message: "正在打标...",
-			type: "success"
-		});
-	} catch (error) {
-		taggerBtnLoading.value = false;
-		stopTagListen(true);
-
-		console.log("打标任务创建失败", error);
-	}
+	if (ruleFormRef.value) ruleFormRef.value.resetFields();
 }
 
 /** 提交表单 */
@@ -610,8 +488,7 @@ async function onSubmit() {
 		const valid = await validateForm({
 			formRef: ruleFormRef,
 			formData: ruleForm,
-			trainingStore: trainingStore,
-			openSavePathWarningDialog: openSavePathWarningDialog
+			trainingStore: trainingStore
 		});
 		if (!valid) {
 			submitLoading.value = false;
@@ -622,7 +499,7 @@ async function onSubmit() {
 		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startFluxTraining(data);
 		// 监听训练数据
-		startFluxLoraListen(task_id);
+		fluxLoraMonitor.setTaskId(task_id).start();
 
 		submitLoading.value = false;
 		isRestored.value = true;
@@ -630,29 +507,34 @@ async function onSubmit() {
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控LoRA训练数据
-		stopFluxLoraListen(true);
+		fluxLoraMonitor.stop();
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
 }
 
 /** 查看采样 */
-const openViewSampling = ref(false);
-const samplingPath = computed(() => {
-	return monitorFluxLoraData.value.data.samplingPath ?? "";
-});
 function onViewSampling() {
-	openViewSampling.value = true;
+	modalManagerStore.setViewSamplingDrawerModal({
+		open: true,
+		filePath: monitorFluxLoraData.value.data.samplingPath
+	});
 }
 
-/** 如果存在运行的任务，则在每次第一次更新任务时恢复表单配置为训练时的配置 */
-function firstResetFormConfig(taskData: LoRATrainingInfoResult) {
-	if (!taskData.frontend_config || isRestored.value) return;
-	isRestored.value = true;
-	const tomlData = tomlParse(taskData.frontend_config);
-	mergeDataToForm(tomlData, ruleForm.value);
-	ElMessage.success("训练配置已恢复");
-}
+// 组件生命周期
+onMounted(() => {
+	fluxLoraMonitor.resume();
+	// 恢复表单数据
+	recoveryTaskFormData({
+		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
+		isListen: monitorFluxLoraData.value.isListen,
+		taskId: fluxLoraMonitor.getTaskId(),
+		formData: ruleForm.value
+	});
+});
+onUnmounted(() => {
+	fluxLoraMonitor.pause();
+});
 </script>
 
 <style lang="scss" scoped>

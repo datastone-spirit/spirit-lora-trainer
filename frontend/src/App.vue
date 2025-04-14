@@ -1,7 +1,7 @@
 <template>
 	<el-config-provider :locale="locale">
 		<router-view></router-view>
-		<NetworkRetryDialog />
+		<GlobalModalManager />
 	</el-config-provider>
 </template>
 
@@ -10,7 +10,7 @@ import { useAppStore } from "@/stores";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import en from "element-plus/es/locale/lang/en";
 import { breakpointsTailwind } from "@vueuse/core";
-import NetworkRetryDialog from "@/components/Dialog/NetworkRetryDialog.vue";
+import GlobalModalManager from "@/components/GlobalModalManager/index.vue";
 
 const appStore = useAppStore();
 const locale = computed(() => (appStore.language === "zh-CN" ? zhCn : en));

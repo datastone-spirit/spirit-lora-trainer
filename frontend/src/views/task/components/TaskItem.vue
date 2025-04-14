@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:10:54
- * @LastEditTime: 2025-01-10 11:41:45
+ * @LastEditTime: 2025-04-02 09:28:44
  * @LastEditors: mulingyuer
  * @Description: 打标任务
  * @FilePath: \frontend\src\views\task\components\TaskItem.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="task-item" :class="[data.task_type, active ? 'active' : '']">
+	<div class="task-item" :class="[taskTypeToClass(data.task_type), active ? 'active' : '']">
 		<div class="task-item-head">
 			<span class="task-item-tag">{{ taskTypeToName(data.task_type) }}</span>
 		</div>
@@ -25,11 +25,13 @@
 
 <script setup lang="ts">
 import type { TaskListResult } from "@/api/task";
-import { taskTypeToName, unixFormat, taskStatusToName } from "../task.helper";
+import { taskTypeToName, unixFormat, taskStatusToName, taskTypeToClass } from "../task.helper";
 
 export interface TaskItemProps {
 	data: TaskListResult[number];
 	active?: boolean;
+	/** 下标顺序 */
+	index?: number;
 }
 
 withDefaults(defineProps<TaskItemProps>(), {
@@ -38,6 +40,8 @@ withDefaults(defineProps<TaskItemProps>(), {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:map";
+
 .task-item {
 	padding: 24px;
 	background-color: var(--zl-page-bg);
@@ -92,39 +96,84 @@ withDefaults(defineProps<TaskItemProps>(), {
 	}
 }
 // 颜色
-.task-item.captioning {
-	.task-item-tag {
-		color: #a78c1c;
-		background-color: rgba(211, 179, 45, 0.2);
-		border-color: #d3b32d;
-	}
-	&.active,
-	&:active {
-		background-color: rgba(211, 179, 45, 0.2);
+$task-item-colors: (
+	item0: (
+		text: #a78c1c,
+		bg: rgba(211, 179, 45, 0.2),
+		border: #d3b32d
+	),
+	item1: (
+		text: #1a8a6f,
+		bg: rgba(32, 189, 160, 0.2),
+		border: #20bda0
+	),
+	item2: (
+		text: #2188c8,
+		bg: rgba(26, 164, 250, 0.2),
+		border: #1aa4fa
+	),
+	item3: (
+		text: #651afa,
+		bg: rgba(101, 26, 250, 0.2),
+		border: #8347fa
+	),
+	item4: (
+		text: #c7561a,
+		bg: rgba(199, 86, 26, 0.2),
+		border: #f16b22
+	),
+	item5: (
+		text: #f3377c,
+		bg: rgba(243, 55, 124, 0.2),
+		border: #fa6ca0
+	)
+);
+@each $type, $colors in $task-item-colors {
+	.task-item.#{$type} {
+		.task-item-tag {
+			color: map.get($colors, text);
+			background-color: map.get($colors, bg);
+			border-color: map.get($colors, border);
+		}
+		&.active,
+		&:active {
+			background-color: map.get($colors, bg);
+		}
 	}
 }
-.task-item.training {
-	.task-item-tag {
-		color: #1a8a6f;
-		background-color: rgba(32, 189, 160, 0.2);
-		border-color: #20bda0;
-	}
-	&.active,
-	&:active {
-		background-color: rgba(32, 189, 160, 0.2);
-	}
-}
-.task-item.hunyuan_training {
-	.task-item-tag {
-		color: #2188c8;
-		background-color: rgba(26, 164, 250, 0.2);
-		border-color: #1aa4fa;
-	}
-	&.active,
-	&:active {
-		background-color: rgba(26, 164, 250, 0.2);
-	}
-}
+// .task-item.captioning {
+// 	.task-item-tag {
+// 		color: #a78c1c;
+// 		background-color: rgba(211, 179, 45, 0.2);
+// 		border-color: #d3b32d;
+// 	}
+// 	&.active,
+// 	&:active {
+// 		background-color: rgba(211, 179, 45, 0.2);
+// 	}
+// }
+// .task-item.training {
+// 	.task-item-tag {
+// 		color: #1a8a6f;
+// 		background-color: rgba(32, 189, 160, 0.2);
+// 		border-color: #20bda0;
+// 	}
+// 	&.active,
+// 	&:active {
+// 		background-color: rgba(32, 189, 160, 0.2);
+// 	}
+// }
+// .task-item.hunyuan_training {
+// 	.task-item-tag {
+// 		color: #2188c8;
+// 		background-color: rgba(26, 164, 250, 0.2);
+// 		border-color: #1aa4fa;
+// 	}
+// 	&.active,
+// 	&:active {
+// 		background-color: rgba(26, 164, 250, 0.2);
+// 	}
+// }
 .task-item-status.running::before {
 	background-color: #35ba61;
 }

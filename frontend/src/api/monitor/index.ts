@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:03
- * @LastEditTime: 2025-01-13 09:02:21
+ * @LastEditTime: 2025-03-28 11:23:15
  * @LastEditors: mulingyuer
  * @Description: 监控api
  * @FilePath: \frontend\src\api\monitor\index.ts
@@ -15,7 +15,9 @@ import type {
 	LoRATrainingInfoParams,
 	LoRATrainingInfoResult,
 	ManualTagInfoParams,
-	ManualTagInfoResult
+	ManualTagInfoResult,
+	WanVideoTrainingInfoParams,
+	WanVideoTrainingInfoResult
 } from "./types";
 export type * from "./types";
 
@@ -53,6 +55,16 @@ export function manualTagInfo(params: ManualTagInfoParams) {
 /** 监听混元视频训练信息 */
 export function hyVideoTrainingInfo(params: HyVideoTrainingInfoParams) {
 	return request<HyVideoTrainingInfoResult>({
+		url: "/tasks/history",
+		method: "GET",
+		params,
+		showErrorMessage: false
+	});
+}
+
+/** 监听wan视频训练信息 */
+export function wanVideoTrainingInfo(params: WanVideoTrainingInfoParams) {
+	return request<WanVideoTrainingInfoResult>({
 		url: "/tasks/history",
 		method: "GET",
 		params,

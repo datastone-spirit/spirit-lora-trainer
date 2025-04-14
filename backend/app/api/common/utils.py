@@ -4,6 +4,7 @@ from dataclasses import asdict, fields
 from app.api.model.training_paramter import TrainingConfig, TrainingParameter, Dataset, Subset
 from typing import List, Tuple, Any
 from utils.util import getmodelpath, getprojectpath
+from enum import Enum
 import tempfile
 import toml
 import mimetypes
@@ -146,7 +147,8 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
     if not os.path.isdir(image_dir):
         return False, f"{image_dir} is not a valid directory"
 
-    valid_image_extensions = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff", ".gif", ".tif"}
+    valid_data_extensions = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff", ".gif", ".tif", 
+                              ".mp4", ".mov", ".avi", ".mkv", ".webm", ".flv", ".wmv", ".mpg", ".mpeg"}
     valid_images = []
     valid_captions = []
 
@@ -159,7 +161,7 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
                 continue
 
             file_ext = file[1].lower()
-            if file_ext in valid_image_extensions:
+            if file_ext in valid_data_extensions:
                 valid_images.append(file_name)
                 caption_file = file[0] + caption_ext
                 caption_path = os.path.join(image_dir, caption_file)
@@ -167,11 +169,11 @@ def validate_training_data(image_dir: str, caption_ext: str = ".txt") -> 'Tuple[
                     valid_captions.append(caption_file)
 
     if len(valid_images) < 1 or len(valid_captions) < 1:
-        return False, f"No valid images found in the directory {image_dir}"
+        return False, f"No valid images (or videos) found in the directory {image_dir}"
 
     if len(valid_images) != len(valid_captions):
-        logger.warning(f"Mismatch between images:{len(valid_images)} and caption files {len(valid_captions)}")
-        return True, f"Mismatch between images {len(valid_images)} and caption files {len(valid_captions)}"
+        logger.warning(f"Mismatch between images (or videos):{len(valid_images)} and caption files {len(valid_captions)}")
+        return True, f"Mismatch between images (or videos) {len(valid_images)} and caption files {len(valid_captions)}"
 
     return True, "OK" 
 
@@ -347,12 +349,23 @@ def validate_parameter(parameter :TrainingParameter) -> 'Tuple[bool, str]':
     return validated, reason
 
 
+def convert_enum_to_dict(obj):
+    """Helper function to convert Enum values to strings during dict conversion"""
+    if isinstance(obj, Enum):
+        return obj.value
+    elif isinstance(obj, dict):
+        return {k: convert_enum_to_dict(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_enum_to_dict(x) for x in obj]
+    return obj
+
 def config2toml(config: TrainingConfig, dataset_path: str) -> str:
     config.dataset_config = dataset_path
     # whole number write to toml file will parse as integer which could cause the sd-script thrown exception
     # force whole number convert to float, e.g. 1 -> 1.0
     force_float_fields(config)
-    configdikt = asdict(config)
+    configdikt = asdict(config, 
+                        dict_factory=lambda x: {k: convert_enum_to_dict(v) for k, v in x})
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
     temp_file_path = temp_file.name
@@ -365,11 +378,18 @@ def config2toml(config: TrainingConfig, dataset_path: str) -> str:
     return temp_file_path
 
 
-def dataset2toml(dataset :Any) -> str:
-    # accroding to the value of feild to generate a toml format file 
-    # in the temporary directory and return the path
-    # Convert the TrainingDataset instance to a dictionary
-    data = asdict(dataset)
+def dataset2toml(dataset: Any) -> str:
+    """
+    Convert dataset configuration to TOML format, handling Enum values properly.
+    
+    Args:
+        dataset: Dataset configuration object
+    
+    Returns:
+        str: Path to generated TOML file
+    """
+    # Convert the dataset instance to a dictionary with enum handling
+    data = asdict(dataset, dict_factory=lambda x: {k: convert_enum_to_dict(v) for k, v in x})
 
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".toml")
@@ -394,3 +414,65 @@ def write_caption_file(image_path: str, output_dir: str, caption_text: str, clas
         txt_file.write(caption_text)    
     return True, cap_file_path
 
+def get_dataset_contents(dataset_dir: str, extensions: List[str]):
+    """
+    Get the contents of the image file.
+    """
+    for filename in os.listdir(dataset_dir):
+        file_path = os.path.join(dataset_dir, filename)
+        ext = os.path.splitext(filename)[1].lower() 
+        if not os.path.isfile(file_path) or not ext in extensions:
+            continue
+
+        # Get the base filename without extension
+        base_name = os.path.splitext(filename)[0]
+        # Construct full image path
+        txt_path = os.path.join(dataset_dir, f"{base_name}.txt")
+        caption = ""
+        if not os.path.exists(txt_path):
+            continue
+        try:
+            with open(txt_path, 'r', encoding='utf-8') as txt_file:
+                caption = txt_file.read().strip()
+        except Exception as e:
+                logger.warning(f"Error reading caption from {txt_path}", exc_info=e)
+        yield file_path, caption, ext
+
+
+def generate_sample_prompt_file(sample_prompts: str) -> str:
+    import json
+    sample_content = sample_prompts.strip()
+    temp_file = None
+    
+    # Try to parse as JSON first (more structured and reliable to detect)
+    try:
+        parsed_json = json.loads(sample_content)
+        if not isinstance(parsed_json, list): # sample file must be a list
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
+            with open(temp_file.name, 'w', encoding='utf-8') as f:
+                f.write(sample_content)
+        else:
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.json')
+            with open(temp_file.name, 'w', encoding='utf-8') as f:
+                json.dump(parsed_json, f, ensure_ascii=False, indent=2)
+        logger.info(f"Sample prompts detected as JSON and saved to: {temp_file.name}")
+    except json.JSONDecodeError:
+        # Not valid JSON, try TOML
+        try:
+            parsed_toml = toml.loads(sample_content)
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.toml')
+            with open(temp_file.name, 'w', encoding='utf-8') as f:
+                toml.dump(parsed_toml, f)
+            logger.info(f"Sample prompts detected as TOML and saved to: {temp_file.name}")
+        except Exception:
+            # Neither JSON nor TOML, treat as plain text
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
+            with open(temp_file.name, 'w', encoding='utf-8') as f:
+                f.write(sample_content)
+            logger.info(f"Sample prompts saved as plain text to: {temp_file.name}")
+    
+    # Assign the temporary file path to sample_prompts
+    if temp_file:
+        return temp_file.name    
+    else:
+        raise ValueError("Failed to generate sample prompt {sample_prompts} to file.")

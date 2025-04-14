@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-10 11:47:24
- * @LastEditTime: 2025-02-24 17:04:32
+ * @LastEditTime: 2025-04-02 17:01:29
  * @LastEditors: mulingyuer
  * @Description: 混元视频任务详情
  * @FilePath: \frontend\src\views\task\components\HYDetail.vue
@@ -51,7 +51,13 @@
 					{{ data.detail.epoch_loss }}
 				</el-descriptions-item>
 			</template>
+			<el-descriptions-item label="查看日志" :span="2">
+				<el-button type="info" @click="onShowLog"> 查看日志 </el-button>
+			</el-descriptions-item>
 		</el-descriptions>
+		<div v-if="showLog" class="task-log">
+			<TaskLog :task-id="data.id" />
+		</div>
 	</div>
 </template>
 
@@ -110,6 +116,12 @@ const elapsed = computed(() => {
 
 	return timeDiffString;
 });
+
+/** 查看日志 */
+const showLog = ref(false);
+function onShowLog() {
+	showLog.value = true;
+}
 </script>
 
 <style lang="scss" scoped>
@@ -120,5 +132,8 @@ const elapsed = computed(() => {
 	:deep(.task-detail-json) {
 		white-space: pre-wrap;
 	}
+}
+.task-log {
+	margin-top: 20px;
 }
 </style>

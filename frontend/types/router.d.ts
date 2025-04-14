@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 14:55:57
- * @LastEditTime: 2025-02-08 15:13:16
+ * @LastEditTime: 2025-03-28 10:17:02
  * @LastEditors: mulingyuer
  * @Description: 路由类型
  * @FilePath: \frontend\types\router.d.ts
@@ -30,6 +30,8 @@ declare module "vue-router" {
 		showFooter?: boolean;
 		/** 外链地址 */
 		iframeLink?: string;
+		/** 当前页面的任务类型 */
+		loRATaskType?: TaskType;
 	}
 }
 

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-03-07 14:56:34
+ * @LastEditTime: 2025-04-11 14:56:01
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -22,39 +22,16 @@
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo :form="ruleForm" />
 					</Collapse>
-					<Collapse v-model="openStep2" title="第2步：训练用的数据">
-						<Dataset
-							v-model:dataset-path="ruleForm.directory_path"
-							dataset-path-prop="directory_path"
-							dataset-path-popover-content="directory_path"
-							v-model:tagger-model="ruleForm.tagger_model"
-							tagger-model-prop="tagger_model"
-							tagger-model-popover-content="tagger_model"
-							v-model:joy-caption-prompt-type="ruleForm.prompt_type"
-							joy-caption-prop="prompt_type"
-							joy-caption-popover-content="prompt_type"
-							v-model:output-trigger-words="ruleForm.output_trigger_words"
-							output-trigger-words-prop="output_trigger_words"
-							output-trigger-words-popover-content="output_trigger_words"
-							:tagger-btn-loading="taggerBtnLoading || monitorTagData.isListen"
-							@tagger-click="onTaggerClick"
-						/>
-						<DatasetAdvanced
-							:tagger-model="ruleForm.tagger_model"
-							v-model:advanced="ruleForm.tagger_advanced_settings"
-							v-model:tagger-prompt="ruleForm.tagger_global_prompt"
-							tagger-prompt-prop="tagger_global_prompt"
-							tagger-prompt-popover-content="tagger_global_prompt"
-							v-model:tagger-append-file="ruleForm.tagger_is_append"
-							tagger-append-file-prop="tagger_is_append"
-							tagger-append-file-popover-content="tagger_is_append"
-						/>
+					<Collapse v-model="openStep2" title="第2步：AI数据集">
+						<HYDataset v-model:form="ruleForm" />
+					</Collapse>
+					<Collapse v-model="openStep3" title="第3步：训练数据配置">
 						<TrainingData :form="ruleForm" />
 					</Collapse>
-					<Collapse v-show="isExpert" v-model="openStep3" title="模型参数调教">
+					<Collapse v-show="isExpert" v-model="openStep4" title="模型参数调教">
 						<ModelParameters v-model:form="ruleForm" />
 					</Collapse>
-					<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
+					<SimpleCollapse v-show="isExpert" v-model="openStep5" title="其它：高级设置">
 						<AdvancedSettings v-model:form="ruleForm" />
 					</SimpleCollapse>
 				</el-form>
@@ -63,49 +40,43 @@
 				<SplitRightPanel :toml="toml" :dir="ruleForm.directory_path" />
 			</template>
 		</TwoSplit>
-		<FooterButtonGroup
-			left-to="#footer-bar-left"
-			:getExportConfig="onExportConfig"
-			export-config-prefix="hunyuan-video"
-			@load-config="onLoadConfig"
-			@reset-data="onResetData"
-			right-to="#footer-bar-center"
+		<TeleportFooterBarContent
+			v-model:merge-data="ruleForm"
+			:reset-data="defaultForm"
 			:submit-loading="submitLoading"
+			@reset-data="onResetData"
 			@submit="onSubmit"
-		></FooterButtonGroup>
-		<SavePathWarningDialog v-model="openSavePathWarningDialog" />
+		>
+			<template #monitor-progress-bar>
+				<HYTrainingMonitor />
+			</template>
+		</TeleportFooterBarContent>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
-import { batchTag } from "@/api/tag";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useTag } from "@/hooks/useTag";
-import { useSettingsStore, useTrainingStore } from "@/stores";
-import { checkData, checkDirectory, checkHYData } from "@/utils/lora.helper";
-import { tomlParse, tomlStringify } from "@/utils/toml";
+import { useHYLora } from "@/hooks/task/useHYLora";
+import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
+import { getEnv } from "@/utils/env";
+import { checkData, checkDirectory, checkHYData, recoveryTaskFormData } from "@/utils/lora.helper";
+import { tomlStringify } from "@/utils/toml";
+import { formatFormValidateMessage } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
-import { formatFormData, mergeDataToForm } from "./hunyuan.helper";
+import { formatFormData } from "./hunyuan.helper";
 import type { RuleForm } from "./types";
-import { useHYLora } from "@/hooks/useHYLora";
-import { formatFormValidateMessage } from "@/utils/tools";
-import type { HyVideoTrainingInfoResult } from "@/api/monitor";
-import SavePathWarningDialog from "@/components/Dialog/SavePathWarningDialog.vue";
-import { getEnv } from "@/utils/env";
+import HYDataset from "./components/HYDataset/index.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
+const modelManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const { startTagListen, stopTagListen, monitorTagData } = useTag();
-const { startHYLoraListen, stopHYLoraListen } = useHYLora({
-	isFirstGetConfig: true,
-	firstGetConfigCallback: firstResetFormConfig
-});
+const { monitorHYLoraData, hyLoraMonitor } = useHYLora();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -122,7 +93,7 @@ const defaultForm = readonly<RuleForm>({
 	model_transformer_dtype: "float8",
 	model_timestep_sample_method: "logit_normal",
 	output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
-	directory_path: "/root",
+	directory_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 	directory_num_repeats: 10,
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
@@ -240,10 +211,6 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-/** 是否已经恢复训练配置 */
-const isRestored = ref(false);
-/** lora保存警告弹窗 */
-const openSavePathWarningDialog = ref(false);
 
 /** toml */
 const toml = ref("");
@@ -257,99 +224,11 @@ const openStep1 = ref(true);
 const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
-
-/** 导入配置 */
-function onLoadConfig(toml: RuleForm) {
-	try {
-		mergeDataToForm(toml, ruleForm.value);
-		ElMessage.success("配置导入成功");
-	} catch (error) {
-		ElMessage.error((error as Error)?.message ?? "配置导入失败");
-		console.error(error);
-	}
-}
-/** 导出配置 */
-function onExportConfig() {
-	return ruleForm.value;
-}
+const openStep5 = ref(true);
 
 /** 重置表单 */
 function onResetData() {
-	// 重置数据
-	ruleForm.value = structuredClone(toRaw(defaultForm) as RuleForm);
-	// 重置表单
-	if (ruleFormRef.value) {
-		ruleFormRef.value.resetFields();
-	}
-
-	ElMessage.success("重置成功");
-}
-
-/** 打标 */
-const taggerBtnLoading = ref(false);
-async function onTaggerClick() {
-	try {
-		taggerBtnLoading.value = true;
-		const { directory_path, tagger_model, output_trigger_words, class_tokens } = ruleForm.value;
-		// 校验
-		const validations = [
-			{
-				condition: () => trainingStore.useGPU,
-				message: "GPU已经被占用，请等待对应任务完成再执行打标"
-			},
-			{
-				condition: () => typeof directory_path !== "string" || directory_path.trim() === "",
-				message: "请先选择训练用的数据集目录"
-			},
-			{
-				condition: async () => !(await checkDirectory(directory_path)),
-				message: "数据集目录不存在"
-			},
-			{
-				condition: () => typeof tagger_model !== "string" || tagger_model.trim() === "",
-				message: "请先选择打标模型"
-			},
-			{
-				condition: () => output_trigger_words && class_tokens.trim() === "",
-				message: "请填写触发词"
-			}
-		];
-
-		for (const validation of validations) {
-			if (await validation.condition()) {
-				taggerBtnLoading.value = false;
-				ElMessage({
-					message: validation.message,
-					type: "error"
-				});
-				return;
-			}
-		}
-
-		// api
-		const result = await batchTag({
-			image_path: directory_path,
-			model_name: tagger_model,
-			class_token: output_trigger_words ? class_tokens : undefined,
-			prompt_type: ruleForm.value.prompt_type,
-			global_prompt:
-				ruleForm.value.tagger_model === "joy-caption-alpha-two"
-					? ruleForm.value.tagger_global_prompt
-					: "",
-			is_append: ruleForm.value.tagger_is_append
-		});
-		startTagListen(result.task_id);
-		taggerBtnLoading.value = false;
-
-		ElMessage({
-			message: "正在打标...",
-			type: "success"
-		});
-	} catch (error) {
-		taggerBtnLoading.value = false;
-		stopTagListen(true);
-		console.error("打标任务创建失败", error);
-	}
+	if (ruleFormRef.value) ruleFormRef.value.resetFields();
 }
 
 /** 提交表单 */
@@ -419,7 +298,6 @@ function onEpochsConfirm() {
 		}
 	});
 }
-
 async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
@@ -436,36 +314,43 @@ async function onSubmit() {
 		const data: StartHyVideoTrainingData = formatFormData(ruleForm.value);
 		const { task_id } = await startHyVideoTraining(data);
 		// 监听训练数据
-		startHYLoraListen(task_id);
+		hyLoraMonitor.setTaskId(task_id).start();
 
 		submitLoading.value = false;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {
 		// 停止监控训练数据
-		stopHYLoraListen(true);
+		hyLoraMonitor.stop();
 
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
 }
 
-/** 如果存在运行的任务，则在每次第一次更新任务时恢复表单配置为训练时的配置 */
-function firstResetFormConfig(taskData: HyVideoTrainingInfoResult) {
-	if (!taskData.frontend_config || isRestored.value) return;
-	isRestored.value = true;
-	const tomlData = tomlParse(taskData.frontend_config);
-	mergeDataToForm(tomlData, ruleForm.value);
-	ElMessage.success("训练配置已恢复");
-}
-
 /** lora保存目录非/root确认弹窗 */
 function confirmLoRASaveDir() {
 	if (!isWhiteCheck) return true;
 	if (ruleForm.value.output_dir.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return true;
-	openSavePathWarningDialog.value = true;
+	// 展示警告弹窗
+	modelManagerStore.setLoraSavePathWarningModal(true);
 	return false;
 }
+
+// 组件生命周期
+onMounted(() => {
+	hyLoraMonitor.resume();
+	// 恢复表单数据
+	recoveryTaskFormData({
+		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
+		isListen: monitorHYLoraData.value.isListen,
+		taskId: hyLoraMonitor.getTaskId(),
+		formData: ruleForm.value
+	});
+});
+onUnmounted(() => {
+	hyLoraMonitor.pause();
+});
 </script>
 
 <style lang="scss" scoped>

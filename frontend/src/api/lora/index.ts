@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 09:32:40
- * @LastEditTime: 2025-01-09 15:39:37
+ * @LastEditTime: 2025-04-07 10:01:11
  * @LastEditors: mulingyuer
  * @Description: lora api
  * @FilePath: \frontend\src\api\lora\index.ts
@@ -13,7 +13,11 @@ import type {
 	StartFluxTrainingData,
 	StartFluxTrainingResult,
 	StartHyVideoTrainingData,
-	StartHyVideoTrainingResult
+	StartHyVideoTrainingResult,
+	StartWanVideoTrainingData,
+	StartWanVideoTrainingResult,
+	WanVideoVideoDatasetEstimateData,
+	WanVideoVideoDatasetEstimateResult
 } from "./types";
 export type * from "./types";
 
@@ -30,6 +34,24 @@ export function startFluxTraining(data: StartFluxTrainingData) {
 export function startHyVideoTraining(data: StartHyVideoTrainingData) {
 	return request<StartHyVideoTrainingResult>({
 		url: "/training/hunyuan/start",
+		method: "POST",
+		data
+	});
+}
+
+/** 启动wan视频训练 */
+export function startWanVideoTraining(data: StartWanVideoTrainingData) {
+	return request<StartWanVideoTrainingResult>({
+		url: "/training/wan/start",
+		method: "POST",
+		data
+	});
+}
+
+/** 获取wan视频素材训练集提取的图片帧数量 */
+export function wanVideoVideoDatasetEstimate(data: WanVideoVideoDatasetEstimateData) {
+	return request<WanVideoVideoDatasetEstimateResult>({
+		url: "/training/wan/datasets/estimate",
 		method: "POST",
 		data
 	});

@@ -34,6 +34,24 @@ class TaskService:
                 )
 
         raise FileNotFoundError(f"task id {task_id} not found")
+    
+    def get_log(self, task_id: str = None):
+        if task_id == None or task_id == "":
+            raise ValueError(f"task_id is required")
+
+        current_task = tm.current_task
+        if current_task != None and current_task.id == task_id:
+            return res(
+                data=current_task.stdout_lines
+            )
+
+        for task in tm.history:
+            if task.id == task_id:
+                return res(
+                    data=task.get_log()
+                )
+
+        raise FileNotFoundError(f"task id {task_id} not found")
 
     def all(self):
         data=[task.to_dict() for task in tm.history]

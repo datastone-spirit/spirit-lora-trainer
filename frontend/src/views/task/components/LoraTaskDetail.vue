@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:31:23
- * @LastEditTime: 2025-02-24 16:42:47
+ * @LastEditTime: 2025-04-03 09:44:51
  * @LastEditors: mulingyuer
  * @Description: LoRA任务详情
  * @FilePath: \frontend\src\views\task\components\LoraTaskDetail.vue
@@ -74,24 +74,31 @@
 				<el-descriptions-item label="每秒速度">
 					{{ data.detail.speed }}
 				</el-descriptions-item>
-				<el-descriptions-item v-if="showSampling" label="训练采样">
+				<el-descriptions-item v-show="showSampling" label="训练采样" :span="2">
 					<el-button type="info" @click="onViewSampling"> 查看采样 </el-button>
 				</el-descriptions-item>
 			</template>
+			<el-descriptions-item label="查看日志" :span="2">
+				<el-button type="info" @click="onShowLog"> 查看日志 </el-button>
+			</el-descriptions-item>
 		</el-descriptions>
-		<ViewSampling v-model:open="openViewSampling" :sampling-path="samplingPath" />
+		<div v-if="showLog" class="task-log">
+			<TaskLog :task-id="data.id" />
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { LoRATrainingInfoResult } from "@/api/monitor/types";
 import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
-import ViewSampling from "@/components/ViewSampling/index.vue";
 import dayjs from "@/utils/dayjs";
+import { useModalManagerStore } from "@/stores";
 
 export interface TaskDetailProps {
 	data: LoRATrainingInfoResult;
 }
+
+const modalManagerStore = useModalManagerStore();
 
 const props = defineProps<TaskDetailProps>();
 
@@ -142,12 +149,17 @@ const progress = computed(() => {
 const showSampling = computed(() => {
 	return props.data.is_sampling ?? false;
 });
-const openViewSampling = ref(false);
-const samplingPath = computed(() => {
-	return props.data.sampling_path ?? "";
-});
 function onViewSampling() {
-	openViewSampling.value = true;
+	modalManagerStore.setViewSamplingDrawerModal({
+		open: true,
+		filePath: props.data.sampling_path ?? ""
+	});
+}
+
+/** 查看日志 */
+const showLog = ref(false);
+function onShowLog() {
+	showLog.value = true;
 }
 </script>
 
@@ -159,5 +171,8 @@ function onViewSampling() {
 	:deep(.task-detail-json) {
 		white-space: pre-wrap;
 	}
+}
+.task-log {
+	margin-top: 20px;
 }
 </style>

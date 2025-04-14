@@ -21,6 +21,7 @@ python-slugify
 toml
 huggingface_hub==0.25.0
 peft==0.14.0
+av==14.0.1
 #bitsandbytes==0.44.0
 
 

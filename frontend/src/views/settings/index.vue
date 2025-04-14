@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 10:01:07
- * @LastEditTime: 2025-01-09 15:32:00
+ * @LastEditTime: 2025-03-28 14:47:32
  * @LastEditors: mulingyuer
  * @Description: 设置页面
  * @FilePath: \frontend\src\views\settings\index.vue
@@ -30,6 +30,13 @@
 					<el-switch v-model="ruleForm.openFooterBarProgress"></el-switch>
 				</el-form-item>
 				<div class="form-item-info">开启后可以更明显的看到打标和训练进度</div>
+				<el-form-item
+					label="是否开启恢复训练中的任务表单数据"
+					prop="enableTrainingTaskDataRecovery"
+				>
+					<el-switch v-model="ruleForm.enableTrainingTaskDataRecovery"></el-switch>
+				</el-form-item>
+				<div class="form-item-info">启用后，可以在页面首次加载时恢复正在训练的任务表单数据</div>
 			</el-form>
 		</div>
 	</div>

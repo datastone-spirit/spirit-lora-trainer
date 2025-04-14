@@ -15,6 +15,7 @@
 		"Axios",
 		"dotdotdot",
 		"friframeder",
+		"huggingface",
 		"hunyuan",
 		"logit",
 		"mulingyuer",
@@ -27,6 +28,6 @@
 	],
 	"editor.wordWrap": "on",
 	"[typescript]": {
-		"editor.defaultFormatter": "vscode.typescript-language-features"
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }

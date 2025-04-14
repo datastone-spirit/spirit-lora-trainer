@@ -8,3 +8,5 @@ sd-scripts/
 venv/
 nohup.out
 diffusion-pipe/
+musubi-tuner/
+.venv/

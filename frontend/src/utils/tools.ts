@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-02-10 15:03:13
+ * @LastEditTime: 2025-04-10 10:25:40
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -106,4 +106,21 @@ export function formatFormValidateMessage(invalidFields: FormValidateFailure["fi
 	});
 
 	return message;
+}
+
+/** 计算百分比 */
+export function calculatePercentage(num: number, total: number): number {
+	if (total <= 0) return 0;
+	if (num <= 0) return 0;
+	const value = Math.floor((num / total) * 100);
+	return value > 100 ? 100 : value;
+}
+
+/** 通过文件后缀来判断是不是图片文件 */
+export function isImageFile(filename: string): boolean {
+	const extension = filename.split(".").pop()?.toLowerCase() ?? "";
+	if (extension.trim() === "") return false;
+
+	const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico", "tif", "tiff"];
+	return imageExtensions.includes(extension);
 }

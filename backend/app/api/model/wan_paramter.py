@@ -467,20 +467,11 @@ class WanTrainingParameter:
             if dataset.video_directory and not path.exists(dataset.video_directory):
                 raise ValueError(f"Video directory does not exist: {dataset.video_directory}")
 
-            if dataset.frame_extraction and not isinstance(dataset.frame_extraction, FrameExtractionMethod):
-                raise ValueError(f"Invalid frame extraction method: {dataset.frame_extraction}. Valid values are: {FrameExtractionMethod.values()}")
-            
-            if dataset.frame_extraction != FrameExtractionMethod.FULL:
-                if dataset.target_frames is None:
-                    raise ValueError("target_frames must be specified when using 'head, chunk, slide, uniform' frame extraction method.")
-                if dataset.frame_extraction == FrameExtractionMethod.SLIDE and dataset.frame_stride is None:
-                    raise ValueError("frame_stride must be specified when using 'slide' frame extraction method.")
-                
-                if dataset.frame_extraction == FrameExtractionMethod.UNIFORM and dataset.frame_sample is None:
-                    raise ValueError("frame_sample must be specified when using 'uniform' frame extraction method.")
-                
+            if dataset.video_directory and path.exists(dataset.video_directory):
+                if dataset.frame_extraction and not isinstance(dataset.frame_extraction, FrameExtractionMethod):
+                    raise ValueError(f"Invalid frame extraction method: {dataset.frame_extraction}. Valid values are: {FrameExtractionMethod.values()}")
+
                 if dataset.frame_extraction == FrameExtractionMethod.CHUNK:
-                    
                     for i in range(len(dataset.target_frames)):
                         if dataset.target_frames[i] <= 0:
                             raise ValueError("target_frames must be positive integers when using 'chunk' frame extraction method.")

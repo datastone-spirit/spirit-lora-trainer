@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-11 15:42:57
+ * @LastEditTime: 2025-04-15 10:37:24
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -198,6 +198,8 @@ const defaultForm: RuleForm = {
 	tagConfig: {
 		tag_model: "joy-caption-alpha-two",
 		joy_caption_prompt_type: "Training Prompt",
+		is_add_global_prompt: false,
+		global_prompt: "",
 		tag_advanced_settings: false,
 		tag_global_prompt: "",
 		tag_is_append: false

@@ -1,15 +1,20 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-07 16:56:46
- * @LastEditTime: 2025-04-07 16:56:46
+ * @LastEditTime: 2025-04-15 10:41:30
  * @LastEditors: mulingyuer
  * @Description: 是否把触发词输出到打标文件中
  * @FilePath: \frontend\src\components\Form\DataSet-v2\TagAddGlobalPromptSwitch.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem :label="label" :prop="prop" :popover-content="popoverContent">
-		<el-switch v-model="value" />
+	<PopoverFormItem
+		class="tag-add-global-prompt-switch"
+		:label="label"
+		:prop="prop"
+		:popover-content="popoverContent"
+	>
+		<el-switch class="tag-add-global-prompt-switch-input" v-model="value" />
 	</PopoverFormItem>
 </template>
 
@@ -29,4 +34,8 @@ withDefaults(defineProps<TagAddGlobalPromptSwitchProps>(), {
 const value = defineModel({ type: Boolean, required: true });
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.tag-add-global-prompt-switch-input {
+	@include no-select();
+}
+</style>

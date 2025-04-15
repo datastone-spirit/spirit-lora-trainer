@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 11:04:52
- * @LastEditTime: 2025-04-11 11:52:05
+ * @LastEditTime: 2025-04-15 10:44:09
  * @LastEditors: mulingyuer
  * @Description: wan数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\ImageDataSet.vue
@@ -30,6 +30,26 @@
 		popover-content="joy_caption_prompt_type"
 		placeholder="请选择Joy Caption 提示词类型"
 	/>
+	<TagJoyCaptionPrompt
+		v-if="isJoyCaption2Model"
+		v-model="ruleForm.tagConfig.tag_global_prompt"
+		label="打标提示词"
+		prop="tagConfig.tag_global_prompt"
+		popover-content="tag_global_prompt"
+		placeholder="请输入打标提示词"
+	/>
+	<TagAddGlobalPromptSwitch
+		v-model="ruleForm.tagConfig.is_add_global_prompt"
+		label="是否把触发词输出到打标文件中"
+		prop="tagConfig.is_add_global_prompt"
+	/>
+	<TagGlobalPrompt
+		v-show="ruleForm.tagConfig.is_add_global_prompt"
+		v-model="ruleForm.tagConfig.global_prompt"
+		label="原样保留的打标提示词"
+		prop="tagConfig.global_prompt"
+		placeholder="请输入原样保留的打标提示词"
+	/>
 	<TagAdvancedSwitch
 		v-model="ruleForm.tagConfig.tag_advanced_settings"
 		label="打标高级设置"
@@ -37,14 +57,6 @@
 		popover-content="tag_advanced_settings"
 	/>
 	<template v-if="isAdvancedSetting">
-		<TagJoyCaptionPrompt
-			v-if="isJoyCaption2Model"
-			v-model="ruleForm.tagConfig.tag_global_prompt"
-			label="打标提示词"
-			prop="tagConfig.tag_global_prompt"
-			popover-content="tag_global_prompt"
-			placeholder="请输入打标提示词"
-		/>
 		<TagAppendSwitch
 			v-model="ruleForm.tagConfig.tag_is_append"
 			label="是否追加到已有打标文件中"
@@ -88,7 +100,8 @@ async function onTagClick() {
 			tagDir: dataset.datasets[0].image_directory,
 			tagModel: tagConfig.tag_model,
 			joyCaptionPromptType: tagConfig.joy_caption_prompt_type,
-			isAddGlobalPrompt: false,
+			isAddGlobalPrompt: tagConfig.is_add_global_prompt,
+			globalPrompt: tagConfig.global_prompt,
 			tagPrompt: tagConfig.tag_global_prompt,
 			isAppend: tagConfig.tag_is_append,
 			showTaskStartPrompt: true

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 09:30:27
- * @LastEditTime: 2025-04-10 10:13:43
+ * @LastEditTime: 2025-04-15 10:37:03
  * @LastEditors: mulingyuer
  * @Description: wan类型
  * @FilePath: \frontend\src\views\lora\wan-video\types.ts
@@ -48,6 +48,10 @@ export interface RuleForm
 		tag_model: string;
 		/** joy-caption-alpha-two打标模型的提示词类型 */
 		joy_caption_prompt_type: string;
+		/** 是否添加原封不动输出到打标内容中 */
+		is_add_global_prompt: boolean;
+		/** 原封不动输出到打标内容 */
+		global_prompt: string;
 		/** 打标高级设置 */
 		tag_advanced_settings: boolean;
 		/** 打标提示词 */

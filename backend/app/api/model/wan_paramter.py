@@ -105,29 +105,32 @@ class DatasetConfig:
         if not has_image_dir and not has_video_dir:
             logger.warning("Image_directory or video_directory can't be both empty or not exist.")
             raise ValueError("Image directory or video_directory can't be both empty or not exist")
+        
+        if has_video_dir and has_image_dir:
+            logger.warning("Image_directory and video_directory can't be both exist.")
+            raise ValueError("Image directory and video_directory can't be both exist")
 
-        if config.frame_extraction and not isinstance(config.frame_extraction, FrameExtractionMethod):
-            try:
-                config.frame_extraction = FrameExtractionMethod(config.frame_extraction)
-            except ValueError:
-                raise ValueError(f"Invalid frame extraction method: {config.frame_extraction}. Valid values are: {FrameExtractionMethod.values()}")
+        if has_video_dir:
+            if config.frame_extraction and not isinstance(config.frame_extraction, FrameExtractionMethod):
+                try:
+                    config.frame_extraction = FrameExtractionMethod(config.frame_extraction)
+                except ValueError:
+                    raise ValueError(f"Invalid frame extraction method: {config.frame_extraction}. Valid values are: {FrameExtractionMethod.values()}")
 
-        if config.frame_extraction and config.frame_extraction != FrameExtractionMethod.FULL:
-            if config.target_frames is None:
-                raise ValueError("target_frames must be specified when using 'head, chunk, slide, uniform' frame extraction method.")
-            if config.frame_extraction == FrameExtractionMethod.SLIDE and config.frame_stride is None:
-                raise ValueError("frame_stride must be specified when using 'slide' frame extraction method.")
+            if config.frame_extraction and config.frame_extraction != FrameExtractionMethod.FULL:
+                if config.target_frames is None:
+                    raise ValueError("target_frames must be specified when using 'head, chunk, slide, uniform' frame extraction method.")
+                if config.frame_extraction == FrameExtractionMethod.SLIDE and config.frame_stride is None:
+                    raise ValueError("frame_stride must be specified when using 'slide' frame extraction method.")
 
-        if config.frame_extraction == FrameExtractionMethod.FULL:
-            if not config.max_frames:
-                config.max_frames = 129
-            elif config.max_frames <= 0 and config.max_frames > 130:
-                config.max_frames = 129
-
+            if config.frame_extraction == FrameExtractionMethod.FULL:
+                if not config.max_frames:
+                    config.max_frames = 129
+                elif config.max_frames <= 0 and config.max_frames > 130:
+                    config.max_frames = 129
 
         config.image_jsonl_file = None
         config.video_jsonl_file = None
-        
         
         if has_image_dir:
             config.cache_directory = path.join(config.image_directory, f"{task}-cache") 
@@ -464,20 +467,11 @@ class WanTrainingParameter:
             if dataset.video_directory and not path.exists(dataset.video_directory):
                 raise ValueError(f"Video directory does not exist: {dataset.video_directory}")
 
-            if dataset.frame_extraction and not isinstance(dataset.frame_extraction, FrameExtractionMethod):
-                raise ValueError(f"Invalid frame extraction method: {dataset.frame_extraction}. Valid values are: {FrameExtractionMethod.values()}")
-            
-            if dataset.frame_extraction != FrameExtractionMethod.FULL:
-                if dataset.target_frames is None:
-                    raise ValueError("target_frames must be specified when using 'head, chunk, slide, uniform' frame extraction method.")
-                if dataset.frame_extraction == FrameExtractionMethod.SLIDE and dataset.frame_stride is None:
-                    raise ValueError("frame_stride must be specified when using 'slide' frame extraction method.")
-                
-                if dataset.frame_extraction == FrameExtractionMethod.UNIFORM and dataset.frame_sample is None:
-                    raise ValueError("frame_sample must be specified when using 'uniform' frame extraction method.")
-                
+            if dataset.video_directory and path.exists(dataset.video_directory):
+                if dataset.frame_extraction and not isinstance(dataset.frame_extraction, FrameExtractionMethod):
+                    raise ValueError(f"Invalid frame extraction method: {dataset.frame_extraction}. Valid values are: {FrameExtractionMethod.values()}")
+
                 if dataset.frame_extraction == FrameExtractionMethod.CHUNK:
-                    
                     for i in range(len(dataset.target_frames)):
                         if dataset.target_frames[i] <= 0:
                             raise ValueError("target_frames must be positive integers when using 'chunk' frame extraction method.")

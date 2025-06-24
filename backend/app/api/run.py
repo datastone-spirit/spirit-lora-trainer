@@ -17,6 +17,7 @@ from .resources.gpu_log import GpuLog
 from .resources.current_task import CurrentTask
 from .resources.task_history import TaskHistory, TaskRunLog
 from .resources.wan_dataset import WanDatasets
+from .resources.gpu_info import GPUInfo, GPUValidation, GPUOptimalSelection, MemoryEstimation, GPUMonitoring
 from flasgger import Swagger
 from utils.util import getprojectpath
 
@@ -64,6 +65,13 @@ api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
 api.add_resource(CurrentTask, "/tasks/current") # gpu功耗、显存信息
 api.add_resource(TaskHistory, "/tasks/history") # gpu功耗、显存信息
 api.add_resource(TaskRunLog, "/tasks/logs") # gpu功耗、显存信息
+
+# Multi-GPU support endpoints
+api.add_resource(GPUInfo, "/gpu/info") # GPU information and detection
+api.add_resource(GPUValidation, "/gpu/validate") # GPU configuration validation
+api.add_resource(GPUOptimalSelection, "/gpu/optimal_selection") # Optimal GPU selection
+api.add_resource(MemoryEstimation, "/gpu/memory_estimation") # Memory requirement estimation
+api.add_resource(GPUMonitoring, "/gpu/monitoring") # GPU usage monitoring
 
 
 

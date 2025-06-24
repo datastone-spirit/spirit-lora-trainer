@@ -1,9 +1,11 @@
 import os
-from typing import Optional
+from typing import Optional, List
 import sys
 from ..api.model.training_paramter import TrainingParameter
 from ..api.common.utils import validate_parameter, dataset2toml, config2toml, is_flux_sampling, StateError
 from utils.util import getprojectpath 
+from utils.accelerate_config import accelerate_manager, AccelerateConfig
+from utils.gpu_utils import gpu_manager
 import uuid
 import logging
 import subprocess
@@ -34,6 +36,14 @@ class TrainingService:
         if not valid:
             logger.warning(f"valid parameters error: {parameters}")
             raise ValueError(f"valid reqest failed, reason: {reason}")
+
+        # Validate multi-GPU configuration if enabled
+        if parameters.config.multi_gpu_enabled:
+            is_valid, gpu_error, validation_details = self._validate_multi_gpu_config(parameters.config)
+            if not is_valid:
+                logger.error(f"Multi-GPU validation failed: {gpu_error}")
+                raise ValueError(f"Multi-GPU configuration invalid: {gpu_error}")
+            logger.info(f"Multi-GPU validation passed: {validation_details}")
 
         if is_flux_sampling(parameters.config):
             os.makedirs(f"{parameters.config.output_dir}/sample", exist_ok=True)
@@ -86,22 +96,131 @@ class TrainingService:
               cpu_threads: Optional[int] = 2,
               task_id: str=None):
 
-        args = [
-            sys.executable, "-m", "accelerate.commands.launch",
-            "--num_cpu_threads_per_process", str(cpu_threads),
-            "--quiet",
-            script,
-            "--config_file", config_file,
-        ]
+        # Generate accelerate launch arguments based on configuration
+        if training_paramters.config.multi_gpu_enabled:
+            args = self._generate_multi_gpu_args(training_paramters.config, script, config_file)
+        else:
+            # Single GPU training (original behavior)
+            args = [
+                sys.executable, "-m", "accelerate.commands.launch",
+                "--num_cpu_threads_per_process", str(cpu_threads),
+                "--quiet",
+                script,
+                "--config_file", config_file,
+            ]
 
+        customize_env = self._prepare_training_environment(training_paramters.config)
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env)
+        return Task.wrap_training(proc, training_paramters, task_id)
+
+    def _validate_multi_gpu_config(self, config) -> tuple[bool, str, dict]:
+        """Validate multi-GPU configuration"""
+        try:
+            # Determine GPU IDs to use
+            gpu_ids = config.gpu_ids
+            if config.auto_gpu_selection or not gpu_ids:
+                gpu_ids = gpu_manager.get_optimal_gpu_selection(
+                    num_gpus=config.num_gpus,
+                    memory_requirement_mb=config.memory_requirement_mb
+                )
+                # Update config with selected GPUs
+                config.gpu_ids = gpu_ids
+                logger.info(f"Auto-selected GPUs: {gpu_ids}")
+            
+            # Validate GPU configuration
+            batch_size_per_gpu = getattr(config, 'train_batch_size', 1)
+            is_valid, error_msg, validation_details = gpu_manager.validate_gpu_configuration(
+                gpu_ids=gpu_ids,
+                batch_size_per_gpu=batch_size_per_gpu,
+                memory_requirement_mb=config.memory_requirement_mb
+            )
+            
+            return is_valid, error_msg, validation_details
+            
+        except Exception as e:
+            logger.error(f"Multi-GPU validation error: {e}")
+            return False, f"Validation error: {str(e)}", {}
+
+    def _generate_multi_gpu_args(self, config, script: str, config_file: str) -> List[str]:
+        """Generate accelerate launch arguments for multi-GPU training"""
+        
+        # Create accelerate configuration
+        accelerate_config = accelerate_manager.create_config(
+            num_gpus=config.num_gpus,
+            gpu_ids=config.gpu_ids,
+            mixed_precision=getattr(config, 'mixed_precision', 'bf16'),
+            gradient_accumulation_steps=getattr(config, 'gradient_accumulation_steps', 1),
+            memory_requirement_mb=config.memory_requirement_mb
+        )
+        
+        # Generate launch arguments
+        script_args = ["--config_file", config_file]
+        args = accelerate_manager.generate_launch_args(accelerate_config, script, script_args)
+        
+        logger.info(f"Generated multi-GPU launch command with {config.num_gpus} GPUs: {config.gpu_ids}")
+        return args
+
+    def _prepare_training_environment(self, config) -> dict:
+        """Prepare environment variables for training"""
         customize_env = os.environ.copy()
         customize_env["ACCELERATE_DISABLE_RICH"] = "1"
         customize_env["PYTHONUNBUFFERED"] = "1"
         customize_env["PYTHONWARNINGS"] = "ignore::FutureWarning,ignore::UserWarning"
-        customize_env["NCCL_P2P_DISABLE"]="1" # For flux training, we disable NCCL P2P and IB
-        customize_env["NCCL_IB_DISABLE"]="1"
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env)
-        return Task.wrap_training(proc, training_paramters, task_id)
+        
+        # Multi-GPU specific environment settings
+        if config.multi_gpu_enabled:
+            # Use configured backend, fallback to nccl for multi-GPU
+            backend = getattr(config, 'distributed_backend', 'nccl')
+            if backend == 'nccl':
+                # NCCL optimizations for multi-GPU training
+                customize_env["NCCL_TIMEOUT"] = "1800"  # 30 minutes timeout
+                customize_env["NCCL_DEBUG"] = "WARN"    # Reduce NCCL verbosity
+                
+                # Only disable P2P/IB if explicitly configured or for stability
+                if getattr(config, 'disable_nccl_p2p', False):
+                    customize_env["NCCL_P2P_DISABLE"] = "1"
+                if getattr(config, 'disable_nccl_ib', False):
+                    customize_env["NCCL_IB_DISABLE"] = "1"
+            
+            # Set GPU visibility
+            if config.gpu_ids:
+                customize_env["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, config.gpu_ids))
+                logger.info(f"Set CUDA_VISIBLE_DEVICES={customize_env['CUDA_VISIBLE_DEVICES']}")
+        else:
+            # Single GPU training - keep original settings for compatibility
+            customize_env["NCCL_P2P_DISABLE"] = "1"
+            customize_env["NCCL_IB_DISABLE"] = "1"
+        
+        return customize_env
+
+    def get_available_gpus(self):
+        """Get available GPUs for training configuration"""
+        return [gpu.to_dict() for gpu in gpu_manager.get_available_gpus()]
+    
+    def validate_gpu_selection(self, gpu_ids: List[int], memory_requirement_mb: int = 8000):
+        """Validate specific GPU selection"""
+        is_valid, error_msg, details = gpu_manager.validate_gpu_configuration(
+            gpu_ids=gpu_ids,
+            memory_requirement_mb=memory_requirement_mb
+        )
+        return {
+            "is_valid": is_valid,
+            "error_message": error_msg,
+            "validation_details": details
+        }
+    
+    def estimate_training_memory(self, batch_size: int, num_gpus: int = 1):
+        """Estimate memory requirements for training configuration"""
+        memory_per_gpu = accelerate_manager.estimate_memory_usage(
+            batch_size=batch_size,
+            model_size="flux-dev"
+        )
+        
+        return {
+            "per_gpu_memory_mb": memory_per_gpu,
+            "total_memory_mb": memory_per_gpu["total_memory_mb"] * num_gpus,
+            "recommended_memory_mb": memory_per_gpu["recommended_memory_mb"] * num_gpus
+        }
 
     def get_gpu_info(self):
         try:

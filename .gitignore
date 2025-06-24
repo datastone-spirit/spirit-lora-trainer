@@ -36,3 +36,5 @@ upload/
 
 # frontend
 /frontend/.env.development
+CLAUDE.md
+.claude

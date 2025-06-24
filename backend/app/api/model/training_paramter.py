@@ -117,6 +117,15 @@ class TrainingConfig:
     dim_from_weights: bool = False
     discrete_flow_shift: float = 3.0
     disable_mmap_load_safetensors: bool = False
+    
+    # Multi-GPU Training Configuration
+    multi_gpu_enabled: bool = False
+    num_gpus: int = 1
+    gpu_ids: Optional[List[int]] = None
+    distributed_backend: str = "nccl"  # nccl, gloo, mpi
+    auto_gpu_selection: bool = True
+    memory_requirement_mb: int = 8000
+    gradient_sync_every_n_steps: int = 1
     dynamo_backend: str  = "inductor"
     enable_bucket: bool = False
     enable_wildcard: bool = False

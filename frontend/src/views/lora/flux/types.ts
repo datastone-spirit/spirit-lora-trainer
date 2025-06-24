@@ -244,6 +244,20 @@ export interface RuleForm {
 	ddp_timeout: number | undefined;
 	/** 为 DDP 启用 gradient_as_bucket_view  */
 	ddp_gradient_as_bucket_view: boolean;
+	/** 启用多GPU训练 */
+	multi_gpu_enabled: boolean;
+	/** GPU数量 */
+	num_gpus: number;
+	/** 指定使用的GPU ID列表 */
+	gpu_ids: number[] | undefined;
+	/** 分布式后端 */
+	distributed_backend: string;
+	/** 自动选择最优GPU */
+	auto_gpu_selection: boolean;
+	/** 内存需求（MB） */
+	memory_requirement_mb: number;
+	/** 梯度同步间隔步数 */
+	gradient_sync_every_n_steps: number;
 	// ---------
 	/** 采样间隔步数 */
 	sample_every_n_steps: number | undefined;

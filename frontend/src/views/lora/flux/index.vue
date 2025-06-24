@@ -219,6 +219,13 @@ const defaultForm = readonly<RuleForm>({
 	// -----
 	ddp_timeout: undefined,
 	ddp_gradient_as_bucket_view: false,
+	multi_gpu_enabled: false,
+	num_gpus: 1,
+	gpu_ids: undefined,
+	distributed_backend: "nccl",
+	auto_gpu_selection: true,
+	memory_requirement_mb: 8000,
+	gradient_sync_every_n_steps: 1,
 	// -----
 	sample_every_n_steps: undefined,
 	sample_prompts: ""

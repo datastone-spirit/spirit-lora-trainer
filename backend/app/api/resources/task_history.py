@@ -30,9 +30,6 @@ class TaskHistory(Resource):
                 'msg': f"Internal server error: {e}"
             }, 500
 
-
-
-
 class TaskRunLog(Resource):
     @use_swagger_config(task_run_log)
     def get(self):

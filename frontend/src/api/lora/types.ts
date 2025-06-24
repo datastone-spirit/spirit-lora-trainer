@@ -216,6 +216,20 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		split_mode: boolean;
 		/** 文本编码器的批次大小，影响文本处理效率 */
 		text_encoder_batch_size: number | undefined;
+		/** 启用多GPU训练 */
+		multi_gpu_enabled: boolean;
+		/** GPU数量 */
+		num_gpus: number;
+		/** 指定使用的GPU ID列表 */
+		gpu_ids: number[] | undefined;
+		/** 分布式后端 */
+		distributed_backend: string;
+		/** 自动选择最优GPU */
+		auto_gpu_selection: boolean;
+		/** 内存需求（MB） */
+		memory_requirement_mb: number;
+		/** 梯度同步间隔步数 */
+		gradient_sync_every_n_steps: number;
 	};
 	dataset: {
 		datasets: [

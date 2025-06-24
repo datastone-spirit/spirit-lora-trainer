@@ -7,6 +7,7 @@
 		"dev": "vite",
 		"build": "run-p type-check \"build-only {@}\" --",
 		"build:check": "cross-env VITE_APP_WHITE_CHECK=true run-p type-check \"build-only {@}\" --",
+		"build:deploy": "pnpm run build && cp -r dist/* ../backend/dist/",
 		"preview": "vite preview",
 		"build-only": "vite build",
 		"type-check": "vue-tsc --build",

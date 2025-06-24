@@ -55,7 +55,8 @@ class GPUValidation(Resource):
         {
             "gpu_ids": [0, 1, 2],
             "memory_requirement_mb": 8000,
-            "batch_size_per_gpu": 1
+            "batch_size_per_gpu": 1,
+            "force_override": false
         }
         """
         try:
@@ -71,6 +72,7 @@ class GPUValidation(Resource):
             gpu_ids = data.get('gpu_ids', [])
             memory_requirement_mb = data.get('memory_requirement_mb', 8000)
             batch_size_per_gpu = data.get('batch_size_per_gpu', 1)
+            force_override = data.get('force_override', False)
             
             if not gpu_ids:
                 return res(
@@ -83,14 +85,16 @@ class GPUValidation(Resource):
             is_valid, error_msg, validation_details = gpu_manager.validate_gpu_configuration(
                 gpu_ids=gpu_ids,
                 batch_size_per_gpu=batch_size_per_gpu,
-                memory_requirement_mb=memory_requirement_mb
+                memory_requirement_mb=memory_requirement_mb,
+                force_override=force_override
             )
             
             return res(
                 data={
                     "is_valid": is_valid,
                     "error_message": error_msg if not is_valid else None,
-                    "validation_details": validation_details
+                    "validation_details": validation_details,
+                    "force_override": force_override
                 },
                 message="GPU configuration validated"
             )
@@ -188,7 +192,9 @@ class MemoryEstimation(Resource):
             "num_gpus": 2,
             "sequence_length": 512,
             "model_size": "flux-dev",
-            "precision": "bf16"
+            "precision": "bf16",
+            "training_type": "lora",
+            "use_flux_optimizations": true
         }
         """
         try:
@@ -206,6 +212,8 @@ class MemoryEstimation(Resource):
             sequence_length = data.get('sequence_length', 512)
             model_size = data.get('model_size', 'flux-dev')
             precision = data.get('precision', 'bf16')
+            training_type = data.get('training_type', 'lora')
+            use_flux_optimizations = data.get('use_flux_optimizations', True)
             
             # Get memory estimation from accelerate manager
             from utils.accelerate_config import accelerate_manager
@@ -213,12 +221,19 @@ class MemoryEstimation(Resource):
                 batch_size=batch_size,
                 sequence_length=sequence_length,
                 model_size=model_size,
-                precision=precision
+                precision=precision,
+                training_type=training_type,
+                use_flux_optimizations=use_flux_optimizations
             )
             
             # Calculate total requirements for all GPUs
             total_memory_mb = memory_estimate["total_memory_mb"] * num_gpus
             recommended_memory_mb = memory_estimate["recommended_memory_mb"] * num_gpus
+            
+            # For Flux LoRA training, use minimum requirement instead of scaled total
+            if use_flux_optimizations and training_type.lower() == "lora":
+                total_memory_mb = memory_estimate["minimum_requirement_mb"]
+                recommended_memory_mb = memory_estimate["minimum_requirement_mb"] + 2000
             
             return res(
                 data={
@@ -230,7 +245,9 @@ class MemoryEstimation(Resource):
                         "num_gpus": num_gpus,
                         "sequence_length": sequence_length,
                         "model_size": model_size,
-                        "precision": precision
+                        "precision": precision,
+                        "training_type": training_type,
+                        "use_flux_optimizations": use_flux_optimizations
                     }
                 },
                 message="Memory estimation completed"

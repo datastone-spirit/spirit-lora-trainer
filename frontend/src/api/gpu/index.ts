@@ -4,7 +4,7 @@
  * @Description: GPU API client for multi-GPU training support
  */
 
-import { requestInstance } from "../common";
+import { request } from "@/request";
 import type {
 	GPUInfoResponse,
 	GPUValidationRequest,
@@ -24,7 +24,10 @@ export const gpuApi = {
 	 * @returns Promise with GPU info and system details
 	 */
 	getGPUInfo(): Promise<GPUInfoResponse> {
-		return requestInstance.get("/gpu/info");
+		return request<GPUInfoResponse>({
+			url: "/gpu/info",
+			method: "GET"
+		});
 	},
 
 	/**
@@ -33,7 +36,11 @@ export const gpuApi = {
 	 * @returns Promise with validation results
 	 */
 	validateGPUConfig(data: GPUValidationRequest): Promise<GPUValidationResponse> {
-		return requestInstance.post("/gpu/validate", data);
+		return request<GPUValidationResponse>({
+			url: "/gpu/validate",
+			method: "POST",
+			data
+		});
 	},
 
 	/**
@@ -42,7 +49,11 @@ export const gpuApi = {
 	 * @returns Promise with optimal GPU selection
 	 */
 	getOptimalGPUSelection(data: OptimalGPUSelectionRequest): Promise<OptimalGPUSelectionResponse> {
-		return requestInstance.post("/gpu/optimal_selection", data);
+		return request<OptimalGPUSelectionResponse>({
+			url: "/gpu/optimal_selection",
+			method: "POST",
+			data
+		});
 	},
 
 	/**
@@ -51,7 +62,11 @@ export const gpuApi = {
 	 * @returns Promise with memory estimation
 	 */
 	estimateMemoryRequirements(data: MemoryEstimationRequest): Promise<MemoryEstimationResponse> {
-		return requestInstance.post("/gpu/memory_estimation", data);
+		return request<MemoryEstimationResponse>({
+			url: "/gpu/memory_estimation",
+			method: "POST",
+			data
+		});
 	},
 
 	/**
@@ -60,7 +75,11 @@ export const gpuApi = {
 	 * @returns Promise with monitoring data
 	 */
 	monitorGPUUsage(data: GPUMonitoringRequest): Promise<GPUMonitoringResponse> {
-		return requestInstance.post("/gpu/monitoring", data);
+		return request<GPUMonitoringResponse>({
+			url: "/gpu/monitoring",
+			method: "POST",
+			data
+		});
 	}
 };
 

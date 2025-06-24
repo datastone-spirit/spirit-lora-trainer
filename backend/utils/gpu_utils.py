@@ -182,7 +182,8 @@ class GPUManager:
     def validate_gpu_configuration(self, 
                                  gpu_ids: List[int], 
                                  batch_size_per_gpu: int = 1,
-                                 memory_requirement_mb: int = 8000) -> Tuple[bool, str, Dict[str, Any]]:
+                                 memory_requirement_mb: int = 8000,
+                                 force_override: bool = False) -> Tuple[bool, str, Dict[str, Any]]:
         """
         Validate GPU configuration for training
         
@@ -190,6 +191,7 @@ class GPUManager:
             gpu_ids: List of GPU indices to use
             batch_size_per_gpu: Batch size per GPU
             memory_requirement_mb: Base memory requirement per GPU
+            force_override: If True, skip memory validation and allow user override
             
         Returns:
             Tuple of (is_valid, error_message, validation_details)
@@ -202,7 +204,8 @@ class GPUManager:
         validation_details = {
             "total_gpus_detected": len(all_gpus),
             "requested_gpus": len(gpu_ids),
-            "gpu_validations": []
+            "gpu_validations": [],
+            "force_override": force_override
         }
         
         available_indices = [gpu.index for gpu in all_gpus]
@@ -222,7 +225,23 @@ class GPUManager:
             # Calculate memory requirement including batch size scaling
             adjusted_memory_requirement = memory_requirement_mb + (batch_size_per_gpu * 2000)  # 2GB per batch estimate
             
-            is_suitable, reason = gpu.is_suitable_for_training(adjusted_memory_requirement)
+            # Check suitability - skip memory check if force override is enabled
+            if force_override:
+                # Only check temperature and utilization, skip memory check
+                is_suitable = True
+                reason = "GPU available (memory check overridden)"
+                
+                if gpu.temperature_celsius and gpu.temperature_celsius > 85:
+                    is_suitable = False
+                    reason = f"Temperature too high: {gpu.temperature_celsius}°C (max 85°C)"
+                elif gpu.utilization_percent and gpu.utilization_percent > 95:
+                    is_suitable = False
+                    reason = f"GPU utilization too high: {gpu.utilization_percent}%"
+                elif gpu.memory_free_mb < 2000:  # Minimum 2GB free memory
+                    is_suitable = False
+                    reason = f"Critical memory shortage: {gpu.memory_free_mb}MB free (need at least 2GB)"
+            else:
+                is_suitable, reason = gpu.is_suitable_for_training(adjusted_memory_requirement)
             
             gpu_validation = {
                 "gpu_id": gpu_id,
@@ -233,7 +252,8 @@ class GPUManager:
                 "is_suitable": is_suitable,
                 "reason": reason,
                 "temperature_celsius": gpu.temperature_celsius,
-                "utilization_percent": gpu.utilization_percent
+                "utilization_percent": gpu.utilization_percent,
+                "memory_check_overridden": force_override
             }
             
             validation_details["gpu_validations"].append(gpu_validation)
@@ -247,7 +267,10 @@ class GPUManager:
             error_details = []
             for gpu_info in insufficient_gpus:
                 error_details.append(f"GPU {gpu_info['gpu_id']}: {gpu_info['reason']}")
-            return False, f"GPU validation failed:\n" + "\n".join(error_details), validation_details
+            error_msg = f"GPU validation failed:\n" + "\n".join(error_details)
+            if not force_override:
+                error_msg += "\n\nNote: You can override memory checks for Flux LoRA training by enabling 'force_override'."
+            return False, error_msg, validation_details
         
         # Check for GPU topology (optional warning)
         topology_warning = self._check_gpu_topology(gpu_ids)

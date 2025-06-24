@@ -6,25 +6,25 @@
 <template>
 	<div class="multi-gpu-config">
 		<!-- GPU Information Panel -->
-		<div v-if="gpuInfo" class="gpu-info-panel mb-4">
+		<div v-if="gpuInfo && gpuInfo.system_info" class="gpu-info-panel mb-4">
 			<div class="system-info mb-3">
 				<h4 class="text-sm font-medium text-gray-700 mb-2">System Information</h4>
 				<div class="grid grid-cols-2 gap-4 text-sm">
 					<div>
 						<span class="text-gray-500">Driver:</span>
-						<span class="ml-1 font-medium">{{ gpuInfo.system_info.driver_version }}</span>
+						<span class="ml-1 font-medium">{{ gpuInfo.system_info?.driver_version || 'N/A' }}</span>
 					</div>
 					<div>
 						<span class="text-gray-500">CUDA:</span>
-						<span class="ml-1 font-medium">{{ gpuInfo.system_info.cuda_version }}</span>
+						<span class="ml-1 font-medium">{{ gpuInfo.system_info?.cuda_version || 'N/A' }}</span>
 					</div>
 					<div>
 						<span class="text-gray-500">Total GPUs:</span>
-						<span class="ml-1 font-medium">{{ gpuInfo.total_gpus }}</span>
+						<span class="ml-1 font-medium">{{ gpuInfo.total_gpus || 0 }}</span>
 					</div>
 					<div>
 						<span class="text-gray-500">Total Memory:</span>
-						<span class="ml-1 font-medium">{{ formatMemory(gpuInfo.system_info.total_gpu_memory_mb) }}</span>
+						<span class="ml-1 font-medium">{{ formatMemory(gpuInfo.system_info?.total_gpu_memory_mb || 0) }}</span>
 					</div>
 				</div>
 			</div>
@@ -39,8 +39,9 @@
 						class="gpu-card p-3 border rounded-lg"
 						:class="{
 							'border-blue-500 bg-blue-50': selectedGPUs.includes(gpu.index),
-							'border-gray-200': !selectedGPUs.includes(gpu.index),
-							'border-red-200 bg-red-50': !isGPUSuitable(gpu)
+							'border-gray-200': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu),
+							'border-yellow-200 bg-yellow-50': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu) && !isGPUSuitable(gpu) && forceMemoryOverride,
+							'border-red-200 bg-red-50': !isGPUSelectable(gpu)
 						}"
 					>
 						<div class="flex items-center justify-between">
@@ -48,25 +49,25 @@
 								<el-checkbox
 									:model-value="selectedGPUs.includes(gpu.index)"
 									@change="toggleGPU(gpu.index)"
-									:disabled="!isGPUSuitable(gpu) && !selectedGPUs.includes(gpu.index)"
+									:disabled="!isGPUSelectable(gpu) && !selectedGPUs.includes(gpu.index)"
 								>
 									<span class="font-medium">GPU {{ gpu.index }}</span>
 								</el-checkbox>
-								<el-tag :type="getGPUStatusType(gpu)" size="small">
+								<el-tag :type="getGPUStatusType(gpu) as any" size="small">
 									{{ getGPUStatus(gpu) }}
 								</el-tag>
 							</div>
 							<div class="text-sm text-gray-500">
-								{{ formatMemory(gpu.memory_free_mb) }} / {{ formatMemory(gpu.memory_total_mb) }} free
+								{{ formatMemory(gpu.memory_free_mb || 0) }} / {{ formatMemory(gpu.memory_total_mb || 0) }} free
 							</div>
 						</div>
 						
 						<div class="mt-2 text-sm text-gray-600">
 							<div class="flex justify-between items-center">
-								<span>{{ gpu.name }}</span>
+								<span>{{ gpu.name || 'Unknown GPU' }}</span>
 								<div class="flex space-x-4">
 									<span v-if="gpu.temperature_celsius">{{ gpu.temperature_celsius }}°C</span>
-									<span v-if="gpu.utilization_percent">{{ gpu.utilization_percent }}% Load</span>
+									<span v-if="gpu.utilization_percent !== undefined && gpu.utilization_percent !== null">{{ gpu.utilization_percent }}% Load</span>
 								</div>
 							</div>
 							
@@ -77,20 +78,20 @@
 									<div class="flex-1 bg-gray-200 rounded-full h-2">
 										<div
 											class="bg-blue-500 h-2 rounded-full transition-all"
-											:style="{ width: `${gpu.memory_utilization_percent}%` }"
+											:style="{ width: `${gpu.memory_utilization_percent || 0}%` }"
 										></div>
 									</div>
-									<span class="text-xs">{{ Math.round(gpu.memory_utilization_percent) }}%</span>
+									<span class="text-xs">{{ Math.round(gpu.memory_utilization_percent || 0) }}%</span>
 								</div>
-								<div v-if="gpu.power_limit_watts > 0" class="flex items-center space-x-2">
+								<div v-if="(gpu.power_limit_watts || 0) > 0" class="flex items-center space-x-2">
 									<span class="text-xs w-12">Power:</span>
 									<div class="flex-1 bg-gray-200 rounded-full h-2">
 										<div
 											class="bg-green-500 h-2 rounded-full transition-all"
-											:style="{ width: `${gpu.power_utilization_percent}%` }"
+											:style="{ width: `${gpu.power_utilization_percent || 0}%` }"
 										></div>
 									</div>
-									<span class="text-xs">{{ Math.round(gpu.power_utilization_percent) }}%</span>
+									<span class="text-xs">{{ Math.round(gpu.power_utilization_percent || 0) }}%</span>
 								</div>
 							</div>
 						</div>
@@ -121,11 +122,10 @@
 		<div class="config-options space-y-4">
 			<!-- Auto GPU Selection -->
 			<div class="flex items-center justify-between">
-				<label class="text-sm font-medium">Auto-select optimal GPUs</label>
-				<el-switch 
-					v-model="ruleForm.auto_gpu_selection"
-					@change="handleAutoSelectionChange"
-				/>
+				<label class="text-sm font-medium">Auto-select optimal GPUs</label>			<el-switch 
+				v-model="ruleForm.auto_gpu_selection"
+				@change="handleAutoSelectionChange"
+			/>
 			</div>
 
 			<!-- Manual GPU Selection -->
@@ -133,7 +133,7 @@
 				<label class="text-sm font-medium block mb-2">Selected GPUs: {{ selectedGPUs.length }}</label>
 				<div v-if="validationResult && !validationResult.is_valid" class="validation-error mb-3">
 					<el-alert
-						:title="validationResult.error_message"
+						:title="validationResult.error_message || 'Validation failed'"
 						type="error"
 						show-icon
 						:closable="false"
@@ -162,11 +162,30 @@
 					:step="1000"
 					@change="validateCurrentSelection"
 				/>
+				<div class="mt-2">
+					<el-checkbox 
+						v-model="forceMemoryOverride" 
+						@change="validateCurrentSelection"
+					>
+						Override memory checks for Flux LoRA training
+					</el-checkbox>
+					<div v-if="forceMemoryOverride" class="text-xs text-amber-600 mt-1">
+						⚠️ Memory validation will be bypassed. Flux LoRA training uses optimized memory management but may still require sufficient GPU memory.
+					</div>
+					<div v-else-if="memoryEstimation?.per_gpu_estimate?.flux_lora_optimized" class="text-xs text-green-600 mt-1">
+						✅ Using optimized memory estimates for Flux LoRA training (~{{ formatMemory(getEffectiveMemoryRequirement()) }} per GPU)
+					</div>
+				</div>
 			</div>
 
 			<!-- Memory Estimation -->
 			<div v-if="memoryEstimation" class="memory-estimation p-3 bg-blue-50 border border-blue-200 rounded-lg">
-				<h5 class="text-sm font-medium text-blue-700 mb-2">Memory Estimation</h5>
+				<h5 class="text-sm font-medium text-blue-700 mb-2">
+					Memory Estimation
+					<span v-if="memoryEstimation.per_gpu_estimate.flux_lora_optimized" class="ml-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+						Flux LoRA Optimized
+					</span>
+				</h5>
 				<div class="grid grid-cols-2 gap-2 text-sm">
 					<div>
 						<span class="text-blue-600">Per GPU:</span>
@@ -184,6 +203,14 @@
 						<span class="text-blue-600">Model Size:</span>
 						<span class="ml-1 font-medium">{{ memoryEstimation.configuration.model_size }}</span>
 					</div>
+					<div v-if="memoryEstimation.per_gpu_estimate.minimum_requirement_mb" class="col-span-2">
+						<span class="text-blue-600">Minimum Required:</span>
+						<span class="ml-1 font-medium">{{ formatMemory(memoryEstimation.per_gpu_estimate.minimum_requirement_mb) }}</span>
+						<span class="ml-2 text-xs text-gray-500">(with Flux optimizations)</span>
+					</div>
+				</div>
+				<div v-if="memoryEstimation.per_gpu_estimate.flux_lora_optimized" class="mt-2 text-xs text-green-700">
+					✅ Using Flux LoRA optimizations: fp8 quantization, gradient checkpointing, and memory-efficient attention
 				</div>
 			</div>
 
@@ -227,7 +254,7 @@
 				@click="selectOptimalGPUs"
 				:loading="optimizing"
 			>
-				<el-icon><Magic /></el-icon>
+				<el-icon><StarFilled /></el-icon>
 				Select Optimal GPUs
 			</el-button>
 		</div>
@@ -236,8 +263,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import type { PropType } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Loading, Warning, Refresh, Check, Magic } from '@element-plus/icons-vue';
+import { Loading, Warning, Refresh, Check, StarFilled } from '@element-plus/icons-vue';
 import { gpuApi } from '@/api/gpu';
 import type { 
 	GPUInfo, 
@@ -259,6 +287,37 @@ const validating = ref(false);
 const optimizing = ref(false);
 const validationResult = ref<GPUValidationResponse | null>(null);
 const memoryEstimation = ref<MemoryEstimationResponse | null>(null);
+const forceMemoryOverride = ref(false);
+
+// Fallback GPU info when API is not available
+const getFallbackGPUInfo = () => {
+	return {
+		total_gpus: 1,
+		system_info: {
+			driver_version: 'Not Available',
+			cuda_version: 'Not Available',
+			gpu_count: 1,
+			total_gpu_memory_mb: 8192
+		},
+		gpus: [
+			{
+				index: 0,
+				name: 'GPU (API not available)',
+				memory_total_mb: 8192,
+				memory_free_mb: 4096,
+				memory_used_mb: 4096,
+				memory_utilization_percent: 50,
+				power_draw_watts: 0,
+				power_limit_watts: 0,
+				power_utilization_percent: 0,
+				temperature_celsius: null,
+				utilization_percent: null,
+				uuid: null,
+				driver_version: null
+			}
+		]
+	};
+};
 
 // Computed
 const selectedGPUs = computed({
@@ -271,37 +330,109 @@ const selectedGPUs = computed({
 
 // Methods
 const formatMemory = (mb: number): string => {
+	if (!mb || isNaN(mb)) return '0 MB';
 	if (mb >= 1024) {
 		return `${(mb / 1024).toFixed(1)} GB`;
 	}
-	return `${mb} MB`;
+	return `${Math.round(mb)} MB`;
+};
+
+const getEffectiveMemoryRequirement = (): number => {
+	// Use the actual estimated memory requirement if available, otherwise fallback to form value
+	if (memoryEstimation.value?.per_gpu_estimate?.flux_lora_optimized) {
+		return memoryEstimation.value.per_gpu_estimate.minimum_requirement_mb || 
+			   memoryEstimation.value.per_gpu_estimate.total_memory_mb;
+	}
+	return ruleForm.value.memory_requirement_mb || 8000;
 };
 
 const isGPUSuitable = (gpu: GPUInfo): boolean => {
-	const memoryRequired = ruleForm.value.memory_requirement_mb || 8000;
-	return gpu.memory_free_mb >= memoryRequired && 
-		   (!gpu.temperature_celsius || gpu.temperature_celsius < 85) &&
-		   (!gpu.utilization_percent || gpu.utilization_percent < 90);
+	if (!gpu) return false;
+	
+	const memoryRequired = getEffectiveMemoryRequirement();
+	const memoryFree = gpu.memory_free_mb || 0;
+	const temperature = gpu.temperature_celsius;
+	const utilization = gpu.utilization_percent;
+	
+	// If force override is enabled, only check critical constraints
+	if (forceMemoryOverride.value) {
+		return memoryFree >= 2000 && // Minimum 2GB
+			   (temperature === undefined || temperature === null || temperature < 85) &&
+			   (utilization === undefined || utilization === null || utilization < 95);
+	}
+	
+	return memoryFree >= memoryRequired && 
+		   (temperature === undefined || temperature === null || temperature < 85) &&
+		   (utilization === undefined || utilization === null || utilization < 90);
+};
+
+const isGPUSelectable = (gpu: GPUInfo): boolean => {
+	if (!gpu) return false;
+	
+	const memoryFree = gpu.memory_free_mb || 0;
+	const temperature = gpu.temperature_celsius;
+	const utilization = gpu.utilization_percent;
+	
+	// Always allow selection if force override is enabled (with minimal safety checks)
+	if (forceMemoryOverride.value) {
+		return memoryFree >= 2000 && // Minimum 2GB  
+			   (temperature === undefined || temperature === null || temperature < 90) &&
+			   (utilization === undefined || utilization === null || utilization < 98);
+	}
+	
+	// Otherwise use the normal suitability check
+	return isGPUSuitable(gpu);
 };
 
 const getGPUStatus = (gpu: GPUInfo): string => {
-	if (!isGPUSuitable(gpu)) {
-		if (gpu.memory_free_mb < (ruleForm.value.memory_requirement_mb || 8000)) {
-			return 'Insufficient Memory';
+	if (!gpu) return 'Unknown';
+	
+	const memoryFree = gpu.memory_free_mb || 0;
+	const memoryRequired = getEffectiveMemoryRequirement();
+	
+	// Check if GPU is selectable first
+	if (!isGPUSelectable(gpu)) {
+		if (memoryFree < 2000) {
+			return 'Critical Memory Shortage';
 		}
-		if (gpu.temperature_celsius && gpu.temperature_celsius >= 85) {
+		if (gpu.temperature_celsius && gpu.temperature_celsius >= 90) {
 			return 'High Temperature';
 		}
-		if (gpu.utilization_percent && gpu.utilization_percent >= 90) {
+		if (gpu.utilization_percent && gpu.utilization_percent >= 98) {
 			return 'High Utilization';
 		}
-		return 'Not Suitable';
+		return 'Not Available';
 	}
+	
+	// If selectable but not suitable under normal conditions
+	if (!isGPUSuitable(gpu)) {
+		if (forceMemoryOverride.value) {
+			return 'Available (Override)';
+		} else {
+			if (memoryFree < memoryRequired) {
+				return 'Insufficient Memory';
+			}
+			if (gpu.temperature_celsius && gpu.temperature_celsius >= 85) {
+				return 'High Temperature';
+			}
+			if (gpu.utilization_percent && gpu.utilization_percent >= 90) {
+				return 'High Utilization';
+			}
+			return 'Not Suitable';
+		}
+	}
+	
 	return 'Available';
 };
 
 const getGPUStatusType = (gpu: GPUInfo): string => {
-	return isGPUSuitable(gpu) ? 'success' : 'danger';
+	if (isGPUSuitable(gpu)) {
+		return 'success';
+	}
+	if (isGPUSelectable(gpu)) {
+		return forceMemoryOverride.value ? 'warning' : 'danger';
+	}
+	return 'danger';
 };
 
 const toggleGPU = (gpuIndex: number) => {
@@ -323,7 +454,34 @@ const loadGPUInfo = async () => {
 	error.value = null;
 	
 	try {
-		gpuInfo.value = await gpuApi.getGPUInfo();
+		const response = await gpuApi.getGPUInfo();
+		
+		// Validate response structure
+		if (!response || typeof response !== 'object') {
+			throw new Error('Invalid GPU info response');
+		}
+		
+		// Ensure minimum required properties exist
+		if (!response.gpus || !Array.isArray(response.gpus)) {
+			throw new Error('Invalid GPU list in response');
+		}
+		
+		// Set default values for missing system_info
+		if (!response.system_info) {
+			response.system_info = {
+				driver_version: 'Unknown',
+				cuda_version: 'Unknown',
+				gpu_count: response.gpus?.length || 0,
+				total_gpu_memory_mb: 0
+			};
+		}
+		
+		// Set default total_gpus if missing
+		if (!response.total_gpus) {
+			response.total_gpus = response.gpus.length;
+		}
+		
+		gpuInfo.value = response;
 		
 		// Initialize form values if not set
 		if (!ruleForm.value.memory_requirement_mb) {
@@ -343,8 +501,19 @@ const loadGPUInfo = async () => {
 		
 		estimateMemory();
 	} catch (err: any) {
-		error.value = err.message || 'Failed to load GPU information';
-		ElMessage.error('Failed to load GPU information');
+		console.error('GPU info loading error:', err);
+		
+		// Use fallback GPU info when API is not available
+		gpuInfo.value = getFallbackGPUInfo();
+		
+		// Set user-friendly error messages
+		if (err.message?.includes('fetch') || err.message?.includes('Network') || err.code === 'ECONNREFUSED') {
+			error.value = 'GPU monitoring service is not available. Using default configuration.';
+			ElMessage.warning('GPU monitoring service is not available. You can still configure multi-GPU training.');
+		} else {
+			error.value = 'Could not load real-time GPU information. Using default configuration.';
+			ElMessage.warning('Could not load real-time GPU information. Using default configuration.');
+		}
 	} finally {
 		loading.value = false;
 	}
@@ -366,11 +535,15 @@ const validateConfiguration = async () => {
 		validationResult.value = await gpuApi.validateGPUConfig({
 			gpu_ids: selectedGPUs.value,
 			memory_requirement_mb: ruleForm.value.memory_requirement_mb || 8000,
-			batch_size_per_gpu: ruleForm.value.train_batch_size || 1
+			batch_size_per_gpu: ruleForm.value.train_batch_size || 1,
+			force_override: forceMemoryOverride.value
 		});
 		
 		if (validationResult.value.is_valid) {
-			ElMessage.success('GPU configuration is valid');
+			const message = forceMemoryOverride.value 
+				? 'GPU configuration is valid (memory checks overridden)'
+				: 'GPU configuration is valid';
+			ElMessage.success(message);
 		} else {
 			ElMessage.error(validationResult.value.error_message || 'GPU configuration is invalid');
 		}
@@ -417,19 +590,28 @@ const estimateMemory = async () => {
 			batch_size: ruleForm.value.train_batch_size || 1,
 			num_gpus: ruleForm.value.num_gpus || 1,
 			model_size: 'flux-dev',
-			precision: ruleForm.value.mixed_precision || 'bf16'
+			precision: ruleForm.value.mixed_precision || 'bf16',
+			training_type: 'lora',
+			use_flux_optimizations: true
 		});
 		
-		// Update memory requirement based on estimation
-		if (memoryEstimation.value.per_gpu_estimate.recommended_memory_mb > ruleForm.value.memory_requirement_mb) {
-			ruleForm.value.memory_requirement_mb = memoryEstimation.value.per_gpu_estimate.recommended_memory_mb;
-		}
+		// Update memory requirement based on estimation, but use minimum for Flux LoRA
+		const targetMemory = memoryEstimation.value.per_gpu_estimate.flux_lora_optimized 
+			? (memoryEstimation.value.per_gpu_estimate.minimum_requirement_mb || memoryEstimation.value.per_gpu_estimate.total_memory_mb)
+			: memoryEstimation.value.per_gpu_estimate.recommended_memory_mb;
+			
+		// Always update to use the optimized estimate for Flux LoRA
+		ruleForm.value.memory_requirement_mb = targetMemory;
+		
+		// Re-validate current selection with new memory estimates
+		validateCurrentSelection();
 	} catch (err: any) {
 		console.warn('Failed to estimate memory requirements:', err);
 	}
 };
 
-const handleAutoSelectionChange = (enabled: boolean) => {
+const handleAutoSelectionChange = (val: string | number | boolean) => {
+	const enabled = Boolean(val);
 	if (enabled && gpuInfo.value) {
 		selectOptimalGPUs();
 	}
@@ -445,6 +627,15 @@ const handleGPUCountChange = () => {
 // Watchers
 watch(() => ruleForm.value.train_batch_size, estimateMemory);
 watch(() => ruleForm.value.mixed_precision, estimateMemory);
+watch(() => forceMemoryOverride.value, () => {
+	validateCurrentSelection();
+});
+watch(() => memoryEstimation.value, () => {
+	// Force reactivity update when memory estimation changes
+	if (gpuInfo.value) {
+		gpuInfo.value = { ...gpuInfo.value };
+	}
+});
 
 // Lifecycle
 onMounted(() => {

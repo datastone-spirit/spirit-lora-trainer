@@ -41,6 +41,7 @@ export interface GPUValidationRequest {
 	gpu_ids: number[];
 	memory_requirement_mb?: number;
 	batch_size_per_gpu?: number;
+	force_override?: boolean;
 }
 
 /** GPU validation details */
@@ -57,10 +58,12 @@ export interface GPUValidationDetails {
 		reason: string;
 		temperature_celsius: number | null;
 		utilization_percent: number | null;
+		memory_check_overridden?: boolean;
 	}>;
 	topology_warning?: string;
 	total_memory_available_mb: number;
 	estimated_memory_usage_mb: number;
+	force_override?: boolean;
 }
 
 /** GPU validation response */
@@ -68,6 +71,7 @@ export interface GPUValidationResponse {
 	is_valid: boolean;
 	error_message: string | null;
 	validation_details: GPUValidationDetails;
+	force_override?: boolean;
 }
 
 /** Optimal GPU selection request */
@@ -92,6 +96,8 @@ export interface MemoryEstimationRequest {
 	sequence_length?: number;
 	model_size?: string;
 	precision?: string;
+	training_type?: string;
+	use_flux_optimizations?: boolean;
 }
 
 /** Memory estimation per GPU */
@@ -101,6 +107,8 @@ export interface MemoryEstimationPerGPU {
 	optimizer_memory_mb: number;
 	total_memory_mb: number;
 	recommended_memory_mb: number;
+	flux_lora_optimized?: boolean;
+	minimum_requirement_mb?: number;
 }
 
 /** Memory estimation response */
@@ -114,6 +122,8 @@ export interface MemoryEstimationResponse {
 		sequence_length: number;
 		model_size: string;
 		precision: string;
+		training_type?: string;
+		use_flux_optimizations?: boolean;
 	};
 }
 

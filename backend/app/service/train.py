@@ -98,8 +98,10 @@ class TrainingService:
 
         # Generate accelerate launch arguments based on configuration
         if training_paramters.config.multi_gpu_enabled:
+            logger.info("Using multi-GPU training configuration")
             args = self._generate_multi_gpu_args(training_paramters.config, script, config_file)
         else:
+            logger.info("Using single GPU training configuration")
             # Single GPU training (original behavior)
             args = [
                 sys.executable, "-m", "accelerate.commands.launch",

@@ -148,7 +148,7 @@
 					v-for="alert in alerts"
 					:key="alert.id"
 					:title="alert.title"
-					:type="alert.type"
+					:type="alert.type as any"
 					:description="alert.description"
 					:closable="false"
 					show-icon
@@ -159,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { ArrowDown, ArrowUp, Refresh } from '@element-plus/icons-vue';
 import { gpuApi } from '@/api/gpu';
@@ -185,7 +185,7 @@ const props = withDefaults(defineProps<Props>(), {
 const expandedView = ref(false);
 const refreshing = ref(false);
 const gpuData = ref<GPUInfo[]>([]);
-const refreshTimer = ref<NodeJS.Timeout | null>(null);
+const refreshTimer = ref<ReturnType<typeof setInterval> | null>(null);
 const trainingStartTime = ref<Date | null>(null);
 
 // Store
@@ -197,7 +197,7 @@ const isMultiGPUTraining = computed(() => {
 });
 
 const isTraining = computed(() => {
-	return trainingStore.currentTaskId !== null;
+	return trainingStore.currentTaskInfo.id !== null;
 });
 
 const activeGPUs = computed(() => {

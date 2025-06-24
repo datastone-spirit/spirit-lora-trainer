@@ -157,7 +157,15 @@ function formatConfig(form: RuleForm): Config {
 		validation_split: undefined,
 		weighting_scheme: "uniform",
 		split_mode: false,
-		text_encoder_batch_size: undefined
+		text_encoder_batch_size: undefined,
+		// Multi-GPU configuration
+		multi_gpu_enabled: false,
+		num_gpus: 1,
+		gpu_ids: undefined,
+		distributed_backend: "nccl",
+		auto_gpu_selection: true,
+		memory_requirement_mb: 8000,
+		gradient_sync_every_n_steps: 1
 	};
 
 	convertScientificToNumber(form, config);

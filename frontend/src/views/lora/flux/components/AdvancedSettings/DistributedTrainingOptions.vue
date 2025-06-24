@@ -64,8 +64,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { PropType } from 'vue';
 import { ElMessage } from 'element-plus';
 import MultiGPUConfiguration from './MultiGPUConfiguration.vue';
+import PopoverFormItem from '@/components/Form/PopoverFormItem.vue';
+import FieldSetWrapper from '@/components/FieldSetWrapper/FieldSetWrapper.vue';
 import type { RuleForm } from "../../types";
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
@@ -74,7 +77,8 @@ const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, requi
 const showAdvancedDDP = ref(false);
 
 // Methods
-const handleMultiGPUToggle = (enabled: boolean) => {
+const handleMultiGPUToggle = (val: string | number | boolean) => {
+	const enabled = Boolean(val);
 	if (enabled) {
 		// Initialize multi-GPU defaults
 		if (!ruleForm.value.num_gpus) {

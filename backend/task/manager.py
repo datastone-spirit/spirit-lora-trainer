@@ -73,6 +73,8 @@ class TaskManager:
                     if task is not None and task.status == TaskStatus.RUNNING:
                         #logger.info(f"task id {task.id} is running, update stats with tensorboard log")
                         task.update_detail_with_tb()
+            except KeyError:
+                logger.warning(f"TensorBoard log not found for task {self.current_task.id}, ignored")
             except Exception as e:
                 logger.warning(f"TaskManager tensor_board_run_loop error {self.current_task}, ignored", exc_info=e)
             sleep(5)

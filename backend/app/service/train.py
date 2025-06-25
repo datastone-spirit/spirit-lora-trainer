@@ -105,11 +105,13 @@ class TrainingService:
             # Single GPU training (original behavior)
             args = [
                 sys.executable, "-m", "accelerate.commands.launch",
+                "--num_processes", "1",  # Explicitly force single process to prevent auto multi-GPU detection
                 "--num_cpu_threads_per_process", str(cpu_threads),
                 "--quiet",
                 script,
                 "--config_file", config_file,
             ]
+            logger.info(f"Single GPU launch command: {' '.join(args)}")
 
         customize_env = self._prepare_training_environment(training_paramters.config)
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env)
@@ -192,6 +194,12 @@ class TrainingService:
             # Single GPU training - keep original settings for compatibility
             customize_env["NCCL_P2P_DISABLE"] = "1"
             customize_env["NCCL_IB_DISABLE"] = "1"
+            
+            # For single GPU training, explicitly limit to GPU 0 to prevent accidental multi-GPU usage
+            # unless a specific GPU is configured
+            if not customize_env.get("CUDA_VISIBLE_DEVICES"):
+                customize_env["CUDA_VISIBLE_DEVICES"] = "0"
+                logger.info("Single GPU training: Set CUDA_VISIBLE_DEVICES=0")
         
         return customize_env
 

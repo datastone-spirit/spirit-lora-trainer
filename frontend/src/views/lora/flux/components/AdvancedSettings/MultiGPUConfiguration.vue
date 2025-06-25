@@ -6,93 +6,176 @@
 <template>
 	<div class="multi-gpu-config">
 		<!-- GPU Information Panel -->
-		<div v-if="gpuInfo && gpuInfo.system_info" class="gpu-info-panel mb-4">
-			<div class="system-info mb-3">
-				<h4 class="text-sm font-medium text-gray-700 mb-2">System Information</h4>
-				<div class="grid grid-cols-2 gap-4 text-sm">
-					<div>
-						<span class="text-gray-500">Driver:</span>
-						<span class="ml-1 font-medium">{{ gpuInfo.system_info?.driver_version || 'N/A' }}</span>
-					</div>
-					<div>
-						<span class="text-gray-500">CUDA:</span>
-						<span class="ml-1 font-medium">{{ gpuInfo.system_info?.cuda_version || 'N/A' }}</span>
-					</div>
-					<div>
-						<span class="text-gray-500">Total GPUs:</span>
-						<span class="ml-1 font-medium">{{ gpuInfo.total_gpus || 0 }}</span>
-					</div>
-					<div>
-						<span class="text-gray-500">Total Memory:</span>
-						<span class="ml-1 font-medium">{{ formatMemory(gpuInfo.system_info?.total_gpu_memory_mb || 0) }}</span>
-					</div>
-				</div>
-			</div>
-
+		<div v-if="gpuInfo" class="gpu-info-panel mb-4">
 			<!-- GPU List -->
 			<div class="gpu-list">
-				<h4 class="text-sm font-medium text-gray-700 mb-2">Available GPUs</h4>
-				<div class="space-y-2">
+				<h4 class="text-sm font-medium text-gray-700 mb-3">Available GPUs</h4>
+				<div class="space-y-1">
 					<div
 						v-for="gpu in gpuInfo.gpus"
 						:key="gpu.index"
-						class="gpu-card p-3 border rounded-lg"
+						class="gpu-card p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md"
 						:class="{
-							'border-blue-500 bg-blue-50': selectedGPUs.includes(gpu.index),
-							'border-gray-200': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu),
-							'border-yellow-200 bg-yellow-50': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu) && !isGPUSuitable(gpu) && forceMemoryOverride,
-							'border-red-200 bg-red-50': !isGPUSelectable(gpu)
+							'border-blue-500 bg-blue-50 ring-1 ring-blue-200': selectedGPUs.includes(gpu.index),
+							'border-gray-200 hover:border-gray-300': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu),
+							'border-yellow-300 bg-yellow-50 hover:border-yellow-400': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu) && !isGPUSuitable(gpu) && forceMemoryOverride,
+							'border-red-200 bg-red-50 opacity-60 cursor-not-allowed': !isGPUSelectable(gpu)
 						}"
+						@click="isGPUSelectable(gpu) && toggleGPU(gpu.index)"
 					>
-						<div class="flex items-center justify-between">
-							<div class="flex items-center space-x-3">
-								<el-checkbox
+						<div style="display: flex; align-items: center; width: 100%; gap: 16px; padding: 8px 0;">
+							<!-- Checkbox -->
+							<div style="flex-shrink: 0;">
+								<el-checkbox 
 									:model-value="selectedGPUs.includes(gpu.index)"
-									@change="toggleGPU(gpu.index)"
-									:disabled="!isGPUSelectable(gpu) && !selectedGPUs.includes(gpu.index)"
+									:disabled="!isGPUSelectable(gpu)"
+									@click.stop
+									@change="() => toggleGPU(gpu.index)"
+								/>
+							</div>
+
+							<!-- GPU Index & Name -->
+							<div style="flex: 1; min-width: 160px; display: flex; align-items: center; gap: 8px;">
+								<el-tooltip content="GPU Index" placement="top">
+									<el-tag size="small" type="info" style="font-family: monospace; font-size: 12px;">
+										GPU {{ gpu.index }}
+									</el-tag>
+								</el-tooltip>
+								<el-tooltip :content="gpu.name || 'Unknown GPU'" placement="top">
+									<span style="font-size: 14px; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+										{{ (gpu.name || 'Unknown').replace('NVIDIA GeForce ', '').replace('NVIDIA ', '') }}
+									</span>
+								</el-tooltip>
+							</div>
+
+							<!-- Status -->
+							<div style="flex: 0 0 80px; text-align: center;">
+								<el-tag 
+									:type="getGPUStatusType(gpu)" 
+									size="small"
+									style="font-size: 12px;"
 								>
-									<span class="font-medium">GPU {{ gpu.index }}</span>
-								</el-checkbox>
-								<el-tag :type="getGPUStatusType(gpu) as any" size="small">
 									{{ getGPUStatus(gpu) }}
 								</el-tag>
 							</div>
-							<div class="text-sm text-gray-500">
-								{{ formatMemory(gpu.memory_free_mb || 0) }} / {{ formatMemory(gpu.memory_total_mb || 0) }} free
+
+							<!-- Memory -->
+							<div style="flex: 0 0 100px; text-align: center;">
+								<el-tooltip 
+									:content="`Memory: ${formatMemory(gpu.memory_used_mb || 0)} / ${formatMemory(gpu.memory_total_mb || 0)} used`" 
+									placement="top"
+								>
+									<div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+										<el-icon style="color: #3b82f6; font-size: 14px;">
+											<Monitor />
+										</el-icon>
+										<span style="font-size: 12px; color: #6b7280;">{{ formatMemory(gpu.memory_free_mb || 0) }}</span>
+									</div>
+								</el-tooltip>
 							</div>
-						</div>
-						
-						<div class="mt-2 text-sm text-gray-600">
-							<div class="flex justify-between items-center">
-								<span>{{ gpu.name || 'Unknown GPU' }}</span>
-								<div class="flex space-x-4">
-									<span v-if="gpu.temperature_celsius">{{ gpu.temperature_celsius }}°C</span>
-									<span v-if="gpu.utilization_percent !== undefined && gpu.utilization_percent !== null">{{ gpu.utilization_percent }}% Load</span>
-								</div>
+
+							<!-- Temperature -->
+							<div style="flex: 0 0 70px; text-align: center;">
+								<el-tooltip 
+									:content="gpu.temperature_celsius ? `Temperature: ${gpu.temperature_celsius}°C` : 'Temperature not available'" 
+									placement="top"
+								>
+									<div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+										<el-icon 
+											style="font-size: 14px;"
+											:style="{
+												color: !gpu.temperature_celsius || gpu.temperature_celsius < 70 ? '#10b981' : 
+												       gpu.temperature_celsius >= 70 && gpu.temperature_celsius < 85 ? '#f59e0b' : 
+												       gpu.temperature_celsius >= 85 ? '#ef4444' : '#9ca3af'
+											}"
+										>
+											<Star />
+										</el-icon>
+										<span style="font-size: 12px; color: #6b7280;">
+											{{ gpu.temperature_celsius ? `${gpu.temperature_celsius}°C` : 'N/A' }}
+										</span>
+									</div>
+								</el-tooltip>
 							</div>
-							
-							<!-- Memory and Power Usage Bars -->
-							<div class="mt-2 space-y-1">
-								<div class="flex items-center space-x-2">
-									<span class="text-xs w-12">Memory:</span>
-									<div class="flex-1 bg-gray-200 rounded-full h-2">
-										<div
-											class="bg-blue-500 h-2 rounded-full transition-all"
-											:style="{ width: `${gpu.memory_utilization_percent || 0}%` }"
+
+							<!-- Utilization -->
+							<div style="flex: 0 0 70px; text-align: center;">
+								<el-tooltip 
+									:content="gpu.utilization_percent !== null ? `GPU Utilization: ${gpu.utilization_percent}%` : 'Utilization not available'" 
+									placement="top"
+								>
+									<div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+										<el-icon 
+											style="font-size: 14px;"
+											:style="{
+												color: gpu.utilization_percent !== null && gpu.utilization_percent < 50 ? '#10b981' :
+												       gpu.utilization_percent !== null && gpu.utilization_percent >= 50 && gpu.utilization_percent < 90 ? '#f59e0b' :
+												       gpu.utilization_percent !== null && gpu.utilization_percent >= 90 ? '#ef4444' : '#9ca3af'
+											}"
+										>
+											<TrendCharts />
+										</el-icon>
+										<span style="font-size: 12px; color: #6b7280;">
+											{{ gpu.utilization_percent !== null ? `${gpu.utilization_percent}%` : 'N/A' }}
+										</span>
+									</div>
+								</el-tooltip>
+							</div>
+
+							<!-- Power -->
+							<div style="flex: 0 0 70px; text-align: center;">
+								<el-tooltip 
+									:content="gpu.power_draw_watts ? `Power: ${gpu.power_draw_watts}W / ${gpu.power_limit_watts || 'Unknown'}W` : 'Power info not available'" 
+									placement="top"
+								>
+									<div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+										<el-icon style="color: #f97316; font-size: 14px;">
+											<Lightning />
+										</el-icon>
+										<span style="font-size: 12px; color: #6b7280;">
+											{{ gpu.power_draw_watts ? `${gpu.power_draw_watts}W` : 'N/A' }}
+										</span>
+									</div>
+								</el-tooltip>
+							</div>
+
+							<!-- Memory Usage Bar -->
+							<div style="flex: 0 0 60px; display: flex; justify-content: center;">
+								<el-tooltip 
+									:content="`Memory Usage: ${((gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1) * 100).toFixed(1)}%`" 
+									placement="top"
+								>
+									<div style="width: 50px; height: 8px; background-color: #e5e7eb; border-radius: 4px; overflow: hidden;">
+										<div 
+											style="height: 100%; border-radius: 4px; transition: all 0.3s;"
+											:style="{ 
+												width: `${Math.min(100, (gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1) * 100)}%`,
+												backgroundColor: (gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1) < 0.5 ? '#10b981' :
+												                (gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1) >= 0.5 && (gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1) < 0.8 ? '#f59e0b' : '#ef4444'
+											}"
 										></div>
 									</div>
-									<span class="text-xs">{{ Math.round(gpu.memory_utilization_percent || 0) }}%</span>
-								</div>
-								<div v-if="(gpu.power_limit_watts || 0) > 0" class="flex items-center space-x-2">
-									<span class="text-xs w-12">Power:</span>
-									<div class="flex-1 bg-gray-200 rounded-full h-2">
-										<div
-											class="bg-green-500 h-2 rounded-full transition-all"
-											:style="{ width: `${gpu.power_utilization_percent || 0}%` }"
-										></div>
-									</div>
-									<span class="text-xs">{{ Math.round(gpu.power_utilization_percent || 0) }}%</span>
-								</div>
+								</el-tooltip>
+							</div>
+
+							<!-- Compatibility Check -->
+							<div style="flex-shrink: 0;">
+								<el-tooltip 
+									:content="`Required: ${formatMemory(getEffectiveMemoryRequirement())} | Available: ${formatMemory(gpu.memory_free_mb || 0)}`" 
+									placement="top"
+								>
+									<el-icon 
+										style="font-size: 18px;"
+										:style="{
+											color: isGPUSuitable(gpu) ? '#10b981' :
+											       !isGPUSuitable(gpu) && isGPUSelectable(gpu) && forceMemoryOverride ? '#f59e0b' : '#ef4444'
+										}"
+									>
+										<CircleCheck v-if="isGPUSuitable(gpu)" />
+										<Warning v-else-if="isGPUSelectable(gpu)" />
+										<CircleClose v-else />
+									</el-icon>
+								</el-tooltip>
 							</div>
 						</div>
 					</div>
@@ -265,7 +348,19 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import type { PropType } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Loading, Warning, Refresh, Check, StarFilled } from '@element-plus/icons-vue';
+import { 
+	Loading, 
+	Warning, 
+	Refresh, 
+	Check, 
+	StarFilled,
+	Monitor,
+	Star,
+	TrendCharts,
+	Lightning,
+	CircleCheck,
+	CircleClose
+} from '@element-plus/icons-vue';
 import { gpuApi } from '@/api/gpu';
 import type { 
 	GPUInfo, 
@@ -425,7 +520,7 @@ const getGPUStatus = (gpu: GPUInfo): string => {
 	return 'Available';
 };
 
-const getGPUStatusType = (gpu: GPUInfo): string => {
+const getGPUStatusType = (gpu: GPUInfo): 'success' | 'warning' | 'danger' => {
 	if (isGPUSuitable(gpu)) {
 		return 'success';
 	}
@@ -650,10 +745,17 @@ onMounted(() => {
 
 .gpu-card {
 	transition: all 0.2s ease;
+	position: relative;
 }
 
 .gpu-card:hover {
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	transform: translateY(-1px);
+}
+
+.gpu-card.cursor-not-allowed:hover {
+	transform: none;
+	box-shadow: none;
 }
 
 .error-panel {
@@ -671,5 +773,83 @@ onMounted(() => {
 
 .config-options > div:last-child {
 	border-bottom: none;
+}
+
+/* Custom tooltip styles */
+.el-tooltip__trigger {
+	display: inline-flex;
+	align-items: center;
+}
+
+/* Custom checkbox alignment */
+.el-checkbox {
+	align-items: center;
+}
+
+/* GPU card selected state animation */
+.gpu-card.border-blue-500 {
+	animation: pulse-blue 2s ease-in-out infinite;
+}
+
+@keyframes pulse-blue {
+	0%, 100% {
+		box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+	}
+}
+
+/* Progress bar animation */
+.gpu-card .bg-gray-200 > div {
+	transition: width 0.5s ease-in-out;
+}
+
+/* Icon hover effects */
+.el-icon:hover {
+	transform: scale(1.1);
+	transition: transform 0.2s ease;
+}
+
+/* Compact status tags */
+.el-tag.text-xs {
+	padding: 2px 6px;
+	font-size: 10px;
+	line-height: 1.2;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+	.gpu-card .flex {
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	
+	.gpu-card .space-x-4 > * + * {
+		margin-left: 8px;
+	}
+	
+	.gpu-card .space-x-3 > * + * {
+		margin-left: 6px;
+	}
+}
+
+/* System info card styling */
+.system-info .bg-gray-50 {
+	background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+	border: 1px solid #e2e8f0;
+}
+
+/* Memory usage bar gradient */
+.bg-green-500 {
+	background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.bg-yellow-500 {
+	background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.bg-red-500 {
+	background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 </style>

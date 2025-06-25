@@ -53,6 +53,7 @@ declare module 'vue' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTag: typeof import('element-plus/es')['ElTag']
     ElText: typeof import('element-plus/es')['ElText']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
     ElUpload: typeof import('element-plus/es')['ElUpload']
     FieldSetWrapper: typeof import('./../src/components/FieldSetWrapper/FieldSetWrapper.vue')['default']
     FileManager: typeof import('./../src/components/Form/FileManager.vue')['default']

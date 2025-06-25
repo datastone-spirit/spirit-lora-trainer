@@ -23,10 +23,6 @@
 
 		<!-- Multi-GPU Configuration Panel -->
 		<div v-if="ruleForm.multi_gpu_enabled" class="multi-gpu-panel mt-4">
-			<el-divider content-position="left">
-				<span class="text-sm text-gray-600">Multi-GPU Configuration</span>
-			</el-divider>
-			
 			<MultiGPUConfiguration v-model:form="ruleForm" />
 		</div>
 

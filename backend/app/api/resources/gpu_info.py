@@ -20,11 +20,12 @@ logger = logging.getLogger(__name__)
 class GPUInfo(Resource):
     def get(self):
         """
-        Get detailed information about all available GPUs
+        Get detailed information about all GPUs (without filtering)
+        Returns all detected GPUs regardless of memory requirements or training suitability
         """
         try:
             training_service = TrainingService()
-            gpus = training_service.get_available_gpus()
+            gpus = training_service.get_all_gpus()
             
             # Get system information
             system_info = gpu_manager.get_system_info()

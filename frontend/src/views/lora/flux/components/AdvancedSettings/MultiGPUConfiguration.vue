@@ -264,7 +264,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import type { PropType } from 'vue';
 import { ElMessage } from 'element-plus';
 import { 
@@ -289,9 +289,14 @@ import type {
 	OptimalGPUSelectionResponse 
 } from '@/api/gpu/types';
 import type { RuleForm } from '../../types';
+import { useTrainingStore } from '@/stores';
+import { useFluxLora } from '@/hooks/task/useFluxLora';
 
 // Props
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
+
+// Training store for checking current task status
+const trainingStore = useTrainingStore();
 
 // State
 const gpuInfo = ref<GPUInfoResponse | null>(null);
@@ -302,6 +307,11 @@ const optimizing = ref(false);
 const validationResult = ref<GPUValidationResponse | null>(null);
 const memoryEstimation = ref<MemoryEstimationResponse | null>(null);
 const forceMemoryOverride = ref(false);
+
+// Training status computed properties
+const isTraining = computed(() => trainingStore.hasRunningTask);
+const isFluxTraining = computed(() => trainingStore.isFluxTraining);
+const shouldDisableValidation = computed(() => isTraining.value && isFluxTraining.value);
 
 // Fallback GPU info when API is not available
 const getFallbackGPUInfo = () => {
@@ -382,6 +392,11 @@ const isGPUSuitable = (gpu: GPUInfo): boolean => {
 
 const isGPUSelectable = (gpu: GPUInfo): boolean => {
 	if (!gpu) return false;
+	
+	// During training, disable GPU selection entirely
+	if (shouldDisableValidation.value) {
+		return false;
+	}
 	
 	const memoryFree = gpu.memory_free_mb || 0;
 	const temperature = gpu.temperature_celsius;
@@ -477,6 +492,11 @@ const getGPUStatusType = (gpu: GPUInfo): 'success' | 'warning' | 'danger' => {
 };
 
 const toggleGPU = (gpuIndex: number) => {
+	// During training, don't allow changing GPU selection
+	if (shouldDisableValidation.value) {
+		return;
+	}
+	
 	const currentSelected = [...selectedGPUs.value];
 	const index = currentSelected.indexOf(gpuIndex);
 	
@@ -565,6 +585,12 @@ const refreshGPUInfo = () => {
 };
 
 const validateConfiguration = async () => {
+	// Skip validation during training
+	if (shouldDisableValidation.value) {
+		ElMessage.info('GPU validation is disabled during training');
+		return;
+	}
+	
 	if (!selectedGPUs.value.length) {
 		ElMessage.warning('Please select at least one GPU');
 		return;
@@ -596,6 +622,11 @@ const validateConfiguration = async () => {
 };
 
 const validateCurrentSelection = () => {
+	// Skip validation during training
+	if (shouldDisableValidation.value) {
+		return;
+	}
+	
 	if (selectedGPUs.value.length > 0) {
 		validateConfiguration();
 	}
@@ -681,6 +712,26 @@ watch(() => memoryEstimation.value, () => {
 // Lifecycle
 onMounted(() => {
 	loadGPUInfo();
+	
+	// Listen for restore config events from flux monitor
+	const { fluxLoraMonitor } = useFluxLora();
+	
+	const handleRestoreConfig = (config: any) => {
+		if (config && config.multi_gpu_enabled) {
+			// Restore GPU selection from config
+			if (config.gpu_ids && Array.isArray(config.gpu_ids)) {
+				selectedGPUs.value = config.gpu_ids;
+			}
+		}
+	};
+	
+	// Add event listener
+	fluxLoraMonitor.events.on('restoreConfig', handleRestoreConfig);
+	
+	// Clean up on unmount
+	onUnmounted(() => {
+		fluxLoraMonitor.events.off('restoreConfig', handleRestoreConfig);
+	});
 });
 </script>
 

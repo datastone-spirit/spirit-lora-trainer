@@ -191,6 +191,16 @@ export const useTrainingStore = defineStore("training", () => {
 		);
 	});
 
+	/** 是否有训练任务在运行 */
+	const hasRunningTask = computed(() => {
+		return currentTaskInfo.value.type !== "none" && currentTaskInfo.value.id !== "";
+	});
+
+	/** 当前是否为 Flux 训练任务 */
+	const isFluxTraining = computed(() => {
+		return currentTaskInfo.value.type === "flux";
+	});
+
 	/** 当前任务信息 */
 	const currentTaskInfo = ref<CurrentTaskInfo>({
 		type: "none",
@@ -228,6 +238,8 @@ export const useTrainingStore = defineStore("training", () => {
 		setHYLoraData,
 		resetHYLoraData,
 		useGPU,
+		hasRunningTask,
+		isFluxTraining,
 		monitorWanLoraData,
 		setWanLoraIsListen,
 		setWanLoraData,

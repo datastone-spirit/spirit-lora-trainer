@@ -21,6 +21,7 @@ export type TaskEvents = {
 	update: void;
 	complete: void;
 	failed: void;
+	restoreConfig: any;
 };
 
 /** 任务实现接口 */

@@ -203,9 +203,9 @@ class TrainingService:
         
         return customize_env
 
-    def get_available_gpus(self):
-        """Get available GPUs for training configuration"""
-        return [gpu.to_dict() for gpu in gpu_manager.get_available_gpus()]
+    def get_all_gpus(self):
+        """Get all GPUs without filtering - returns complete GPU information"""
+        return [gpu.to_dict() for gpu in gpu_manager.get_gpu_info()]
     
     def validate_gpu_selection(self, gpu_ids: List[int], memory_requirement_mb: int = 8000):
         """Validate specific GPU selection"""

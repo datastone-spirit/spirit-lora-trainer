@@ -143,6 +143,17 @@ class FluxLoraMonitor implements TaskImplementation {
 		}
 	}
 
+	/** 设置初始数据并恢复配置 */
+	public setInitDataWithConfig(initData: InitData & { config?: any }) {
+		// 基础初始化
+		this.setInitData(initData);
+		
+		// 如果有配置信息，触发配置恢复事件
+		if (initData.config) {
+			this.events.emit("restoreConfig", initData.config);
+		}
+	}
+
 	/** 设置任务id */
 	public setTaskId(taskId: string) {
 		this.taskId = taskId;

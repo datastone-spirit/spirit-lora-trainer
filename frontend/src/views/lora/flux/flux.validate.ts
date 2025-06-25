@@ -8,6 +8,7 @@
  * 怎么可能会有bug！！！
  */
 import type { FormInstance, MessageOptions } from "element-plus";
+import { ElMessage } from "element-plus";
 import type { RuleForm } from "./types";
 import type { Ref } from "vue";
 import { formatFormValidateMessage } from "@/utils/tools";
@@ -136,6 +137,23 @@ export function validateLoRASaveDir(formData: Ref<RuleForm>): boolean {
 // 	};
 // })();
 
+/** Multi-GPU configuration validation */
+function validateMultiGPUConfig(formData: Ref<RuleForm>): boolean {
+	const { multi_gpu_enabled, gpu_ids } = formData.value;
+	
+	// If multi-GPU is enabled but no GPUs are selected, show warning
+	if (multi_gpu_enabled && (!gpu_ids || gpu_ids.length === 0)) {
+		showError({ 
+			message: "多GPU训练已启用但未选择任何GPU。请在高级设置中选择GPU或关闭多GPU训练。", 
+			type: "warning",
+			duration: 5000
+		});
+		return false;
+	}
+	
+	return true;
+}
+
 /** 主校验函数 */
 export async function validateForm(data: ValidateFormData): Promise<boolean> {
 	const { formRef, formData, trainingStore } = data;
@@ -144,7 +162,8 @@ export async function validateForm(data: ValidateFormData): Promise<boolean> {
 		() => validateLoRASaveDir(formData),
 		() => validateFormFields(formRef),
 		() => validateGPU(trainingStore),
-		() => validateDataset(formData.value.image_dir)
+		() => validateDataset(formData.value.image_dir),
+		() => validateMultiGPUConfig(formData)
 		// () => validateBatchSizeRules(formData.value)
 	];
 

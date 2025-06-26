@@ -9,7 +9,7 @@
 		<div v-if="gpuInfo" class="gpu-info-panel mb-4">
 			<!-- GPU List -->
 			<div class="gpu-list">
-				<h4 class="text-sm font-medium text-gray-700 mb-3">Available GPUs</h4>
+				<h4 class="gpu-list-title">可用GPU 列表</h4>
 				<div class="gpu-list-container">
 					<div
 						v-for="gpu in gpuInfo.gpus"
@@ -17,18 +17,18 @@
 						class="gpu-card"
 						:class="{
 							'gpu-card--selected': selectedGPUs.includes(gpu.index),
-							'gpu-card--selectable': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu),
-							'gpu-card--override': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu) && !isGPUSuitable(gpu) && forceMemoryOverride,
-							'gpu-card--disabled': !isGPUSelectable(gpu)
+							'gpu-card--selectable': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu, false),
+							'gpu-card--override': !selectedGPUs.includes(gpu.index) && isGPUSelectable(gpu, false) && !isGPUSuitable(gpu) && forceMemoryOverride,
+							'gpu-card--disabled': !isGPUSelectable(gpu, false)
 						}"
-						@click="isGPUSelectable(gpu) && toggleGPU(gpu.index)"
+						@click="isGPUSelectable(gpu, false) && toggleGPU(gpu.index)"
 					>
 						<div class="gpu-card-content">
 							<!-- Checkbox -->
 							<div class="gpu-checkbox">
 								<el-checkbox 
 									:model-value="selectedGPUs.includes(gpu.index)"
-									:disabled="!isGPUSelectable(gpu)"
+									:disabled="!isGPUSelectable(gpu, false)"
 									@click.stop
 									@change="() => toggleGPU(gpu.index)"
 								/>
@@ -36,12 +36,12 @@
 
 							<!-- GPU Index & Name -->
 							<div class="gpu-info">
-								<el-tooltip content="GPU Index" placement="top">
+								<el-tooltip content="GPU索引" placement="top">
 									<el-tag size="small" type="info" class="gpu-index-tag">
 										GPU {{ gpu.index }}
 									</el-tag>
 								</el-tooltip>
-								<el-tooltip :content="gpu.name || 'Unknown GPU'" placement="top">
+								<el-tooltip :content="gpu.name || '未知GPU'" placement="top">
 									<span class="gpu-name">
 										{{ (gpu.name || 'Unknown').replace('NVIDIA GeForce ', '').replace('NVIDIA ', '') }}
 									</span>
@@ -62,7 +62,7 @@
 							<!-- Memory -->
 							<div class="gpu-memory">
 								<el-tooltip 
-									:content="`Memory: ${formatMemory(gpu.memory_used_mb || 0)} / ${formatMemory(gpu.memory_total_mb || 0)} used`" 
+									:content="`内存: ${formatMemory(gpu.memory_used_mb || 0)} / ${formatMemory(gpu.memory_total_mb || 0)} 已使用`" 
 									placement="top"
 								>
 									<div class="metric-display">
@@ -77,7 +77,7 @@
 							<!-- Temperature -->
 							<div class="gpu-temperature">
 								<el-tooltip 
-									:content="gpu.temperature_celsius ? `Temperature: ${gpu.temperature_celsius}°C` : 'Temperature not available'" 
+									:content="gpu.temperature_celsius ? `温度: ${gpu.temperature_celsius}°C` : '温度不可用'" 
 									placement="top"
 								>
 									<div class="metric-display">
@@ -97,7 +97,7 @@
 							<!-- Utilization -->
 							<div class="gpu-utilization">
 								<el-tooltip 
-									:content="gpu.utilization_percent !== null ? `GPU Utilization: ${gpu.utilization_percent}%` : 'Utilization not available'" 
+									:content="gpu.utilization_percent !== null ? `GPU使用率: ${gpu.utilization_percent}%` : '使用率不可用'" 
 									placement="top"
 								>
 									<div class="metric-display">
@@ -117,7 +117,7 @@
 							<!-- Power -->
 							<div class="gpu-power">
 								<el-tooltip 
-									:content="gpu.power_draw_watts ? `Power: ${gpu.power_draw_watts}W / ${gpu.power_limit_watts || 'Unknown'}W` : 'Power info not available'" 
+									:content="gpu.power_draw_watts ? `功耗: ${gpu.power_draw_watts}W / ${gpu.power_limit_watts || '未知'}W` : '功耗信息不可用'" 
 									placement="top"
 								>
 									<div class="metric-display">
@@ -134,7 +134,7 @@
 							<!-- Memory Usage Bar -->
 							<div class="gpu-memory-bar">
 								<el-tooltip 
-									:content="`Memory Usage: ${((gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1) * 100).toFixed(1)}%`" 
+									:content="`内存使用率: ${((gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1) * 100).toFixed(1)}%`" 
 									placement="top"
 								>
 									<div class="memory-bar">
@@ -152,15 +152,15 @@
 							<!-- Compatibility Check -->
 							<div class="gpu-compatibility">
 								<el-tooltip 
-									:content="`Required: ${formatMemory(getEffectiveMemoryRequirement())} | Available: ${formatMemory(gpu.memory_free_mb || 0)}`" 
+									:content="shouldDisableValidation ? '训练状态' : `需要: ${formatMemory(getEffectiveMemoryRequirement())} | 可用: ${formatMemory(gpu.memory_free_mb || 0)}`" 
 									placement="top"
 								>
 									<el-icon 
 										class="compatibility-icon"
 										:class="getCompatibilityIconClass(gpu)"
 									>
-										<CircleCheck v-if="isGPUSuitable(gpu)" />
-										<Warning v-else-if="isGPUSelectable(gpu)" />
+										<CircleCheck v-if="shouldDisableValidation ? selectedGPUs.includes(gpu.index) : isGPUSuitable(gpu)" />
+										<Warning v-else-if="shouldDisableValidation ? !selectedGPUs.includes(gpu.index) : isGPUSelectable(gpu, false)" />
 										<CircleClose v-else />
 									</el-icon>
 								</el-tooltip>
@@ -172,76 +172,96 @@
 		</div>
 
 		<!-- Loading State -->
-		<div v-else-if="loading" class="text-center py-8">
-			<el-icon class="is-loading mb-2">
+		<div v-else-if="loading" class="loading-state">
+			<el-icon class="is-loading loading-icon">
 				<Loading />
 			</el-icon>
-			<div class="text-gray-500">Loading GPU information...</div>
+			<div class="loading-text">正在加载GPU信息...</div>
 		</div>
 
 		<!-- Error State -->
-		<div v-else-if="error" class="error-panel p-4 bg-red-50 border border-red-200 rounded-lg">
-			<div class="flex items-center space-x-2 text-red-700 mb-2">
+		<div v-else-if="error" class="error-panel">
+			<div class="error-header">
 				<el-icon><Warning /></el-icon>
-				<span class="font-medium">Failed to load GPU information</span>
+				<span class="error-title">加载GPU信息失败</span>
 			</div>
-			<div class="text-red-600 text-sm mb-3">{{ error }}</div>
-			<el-button size="small" @click="loadGPUInfo">Retry</el-button>
+			<div class="error-message">{{ error }}</div>
+			<el-button size="small" @click="loadGPUInfo">重试</el-button>
 		</div>
 
 		<!-- Configuration Options -->
-		<div class="config-options space-y-4">
+		<div class="config-options">
 
 			<!-- Manual GPU Selection -->
 			<div v-if="!ruleForm.auto_gpu_selection && gpuInfo" class="manual-selection">
-				<label class="text-sm font-medium block mb-2">Selected GPUs: {{ selectedGPUs.length }}</label>
-				<div v-if="validationResult && !validationResult.is_valid" class="validation-error mb-3">
-					<el-alert
-						:title="validationResult.error_message || 'Validation failed'"
-						type="error"
-						show-icon
-						:closable="false"
-					/>
-				</div>
+				<PopoverFormItem 
+					:label="`已选择GPU: ${selectedGPUs.length}`"
+					prop="gpu_ids"
+				>
+					<div v-if="shouldDisableValidation" class="training-notice">
+						<el-alert
+							title="训练进行中，GPU配置已从训练任务中恢复"
+							type="info"
+							show-icon
+							:closable="false"
+						/>
+					</div>
+					<div v-if="validationResult && !validationResult.is_valid && !shouldDisableValidation" class="validation-error">
+						<el-alert
+							:title="validationResult.error_message || '验证失败'"
+							type="error"
+							show-icon
+							:closable="false"
+						/>
+					</div>
+				</PopoverFormItem>
 			</div>
 
 			<!-- GPU Count (for auto selection) -->
 			<div v-if="ruleForm.auto_gpu_selection" class="gpu-count">
-				<label class="text-sm font-medium block mb-2">Number of GPUs</label>
-				<el-input-number
-					v-model="ruleForm.num_gpus"
-					:min="1"
-					:max="gpuInfo ? gpuInfo.total_gpus : 8"
-					@change="handleGPUCountChange"
-				/>
+				<PopoverFormItem 
+					label="GPU数量"
+					prop="num_gpus"
+				>
+					<el-input-number
+						v-model="ruleForm.num_gpus"
+						:min="1"
+						:max="gpuInfo ? gpuInfo.total_gpus : 8"
+						@change="handleGPUCountChange"
+					/>
+				</PopoverFormItem>
 			</div>
 
 			<!-- Distributed Backend -->
-			<div class="distributed-backend">
-				<label class="text-sm font-medium block mb-2">Distributed Backend</label>
-				<el-select v-model="ruleForm.distributed_backend" style="width: 100%">
-					<el-option label="NCCL (Recommended for NVIDIA GPUs)" value="nccl" />
-					<el-option label="Gloo (CPU and GPU)" value="gloo" />
+			<PopoverFormItem
+				label="分布式后端"
+				prop="distributed_backend"
+			>
+				<el-select v-model="ruleForm.distributed_backend">
+					<el-option label="NCCL (推荐NVIDIA GPU使用)" value="nccl" />
+					<el-option label="Gloo (CPU和GPU)" value="gloo" />
 					<el-option label="MPI" value="mpi" />
 				</el-select>
-			</div>
+			</PopoverFormItem>
 
 			<!-- Gradient Sync Interval -->
-			<div class="gradient-sync">
-				<label class="text-sm font-medium block mb-2">Gradient Sync Every N Steps</label>
+			<PopoverFormItem
+				label="每N步进行梯度同步"
+				prop="gradient_sync_every_n_steps"
+			>
 				<el-input-number
 					v-model="ruleForm.gradient_sync_every_n_steps"
 					:min="1"
 					:max="100"
 				/>
-			</div>
+			</PopoverFormItem>
 		</div>
 
 		<!-- Actions -->
-		<div class="actions mt-6 flex space-x-3">
+		<div class="actions">
 			<el-button @click="refreshGPUInfo" :loading="loading">
 				<el-icon><Refresh /></el-icon>
-				Refresh GPU Info
+				刷新GPU信息
 			</el-button>
 			<el-button
 				v-if="gpuInfo && selectedGPUs.length > 0"
@@ -249,7 +269,7 @@
 				:loading="validating"
 			>
 				<el-icon><Check /></el-icon>
-				Validate Configuration
+				验证配置
 			</el-button>
 			<el-button
 				v-if="gpuInfo && ruleForm.auto_gpu_selection"
@@ -257,7 +277,7 @@
 				:loading="optimizing"
 			>
 				<el-icon><StarFilled /></el-icon>
-				Select Optimal GPUs
+				选择最佳GPU
 			</el-button>
 		</div>
 	</div>
@@ -291,9 +311,16 @@ import type {
 import type { RuleForm } from '../../types';
 import { useTrainingStore } from '@/stores';
 import { useFluxLora } from '@/hooks/task/useFluxLora';
+import PopoverFormItem from '@/components/Form/PopoverFormItem.vue';
 
 // Props
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
+
+// Emits
+const emit = defineEmits<{
+	gpuSelectionChanged: [gpuIds: number[]];
+	configurationRestored: [config: any];
+}>();
 
 // Training store for checking current task status
 const trainingStore = useTrainingStore();
@@ -318,15 +345,15 @@ const getFallbackGPUInfo = () => {
 	return {
 		total_gpus: 1,
 		system_info: {
-			driver_version: 'Not Available',
-			cuda_version: 'Not Available',
+			driver_version: '不可用',
+			cuda_version: '不可用',
 			gpu_count: 1,
 			total_gpu_memory_mb: 8192
 		},
 		gpus: [
 			{
 				index: 0,
-				name: 'GPU (API not available)',
+				name: 'GPU (接口不可用)',
 				memory_total_mb: 8192,
 				memory_free_mb: 4096,
 				memory_used_mb: 4096,
@@ -390,11 +417,11 @@ const isGPUSuitable = (gpu: GPUInfo): boolean => {
 		   (utilization === undefined || utilization === null || utilization < 90);
 };
 
-const isGPUSelectable = (gpu: GPUInfo): boolean => {
+const isGPUSelectable = (gpu: GPUInfo, forceAllow: boolean = false): boolean => {
 	if (!gpu) return false;
 	
-	// During training, disable GPU selection entirely
-	if (shouldDisableValidation.value) {
+	// During training, disable manual GPU selection but allow programmatic selection for restoration
+	if (shouldDisableValidation.value && !forceAllow) {
 		return false;
 	}
 	
@@ -409,49 +436,62 @@ const isGPUSelectable = (gpu: GPUInfo): boolean => {
 			   (utilization === undefined || utilization === null || utilization < 98);
 	}
 	
+	// If forceAllow is true (during training restoration), skip resource constraints
+	if (forceAllow) {
+		return true;
+	}
+	
 	// Otherwise use the normal suitability check
 	return isGPUSuitable(gpu);
 };
 
 const getGPUStatus = (gpu: GPUInfo): string => {
-	if (!gpu) return 'Unknown';
+	if (!gpu) return '未知';
 	
 	const memoryFree = gpu.memory_free_mb || 0;
 	const memoryRequired = getEffectiveMemoryRequirement();
 	
+	// During training, show special status for selected GPUs
+	if (shouldDisableValidation.value) {
+		if (selectedGPUs.value.includes(gpu.index)) {
+			return '训练中';
+		}
+		return '不可用 (训练中)';
+	}
+	
 	// Check if GPU is selectable first
-	if (!isGPUSelectable(gpu)) {
+	if (!isGPUSelectable(gpu, false)) {
 		if (memoryFree < 2000) {
-			return 'Critical Memory Shortage';
+			return '内存严重不足';
 		}
 		if (gpu.temperature_celsius && gpu.temperature_celsius >= 90) {
-			return 'High Temperature';
+			return '温度过高';
 		}
 		if (gpu.utilization_percent && gpu.utilization_percent >= 98) {
-			return 'High Utilization';
+			return '使用率过高';
 		}
-		return 'Not Available';
+		return '不可用';
 	}
 	
 	// If selectable but not suitable under normal conditions
 	if (!isGPUSuitable(gpu)) {
 		if (forceMemoryOverride.value) {
-			return 'Available (Override)';
+			return '可用 (强制覆盖)';
 		} else {
 			if (memoryFree < memoryRequired) {
-				return 'Insufficient Memory';
+				return '内存不足';
 			}
 			if (gpu.temperature_celsius && gpu.temperature_celsius >= 85) {
-				return 'High Temperature';
+				return '温度过高';
 			}
 			if (gpu.utilization_percent && gpu.utilization_percent >= 90) {
-				return 'High Utilization';
+				return '使用率过高';
 			}
-			return 'Not Suitable';
+			return '不适合';
 		}
 	}
 	
-	return 'Available';
+	return '可用';
 };
 
 const getTemperatureIconClass = (temperature: number | null): string => {
@@ -476,16 +516,26 @@ const getMemoryBarClass = (gpu: GPUInfo): string => {
 };
 
 const getCompatibilityIconClass = (gpu: GPUInfo): string => {
+	// During training, show as compatible if selected, warning if not selected
+	if (shouldDisableValidation.value) {
+		return selectedGPUs.value.includes(gpu.index) ? 'compatibility-good' : 'compatibility-warning';
+	}
+	
 	if (isGPUSuitable(gpu)) return 'compatibility-good';
-	if (isGPUSelectable(gpu) && forceMemoryOverride.value) return 'compatibility-warning';
+	if (isGPUSelectable(gpu, false) && forceMemoryOverride.value) return 'compatibility-warning';
 	return 'compatibility-danger';
 };
 
 const getGPUStatusType = (gpu: GPUInfo): 'success' | 'warning' | 'danger' => {
+	// During training, show success for selected GPUs, warning for others
+	if (shouldDisableValidation.value) {
+		return selectedGPUs.value.includes(gpu.index) ? 'success' : 'warning';
+	}
+	
 	if (isGPUSuitable(gpu)) {
 		return 'success';
 	}
-	if (isGPUSelectable(gpu)) {
+	if (isGPUSelectable(gpu, false)) {
 		return forceMemoryOverride.value ? 'warning' : 'danger';
 	}
 	return 'danger';
@@ -508,6 +558,9 @@ const toggleGPU = (gpuIndex: number) => {
 	
 	selectedGPUs.value = currentSelected.sort((a, b) => a - b);
 	validateCurrentSelection();
+	
+	// Emit GPU selection change
+	emit('gpuSelectionChanged', selectedGPUs.value);
 };
 
 const loadGPUInfo = async () => {
@@ -530,8 +583,8 @@ const loadGPUInfo = async () => {
 		// Set default values for missing system_info
 		if (!response.system_info) {
 			response.system_info = {
-				driver_version: 'Unknown',
-				cuda_version: 'Unknown',
+				driver_version: '未知',
+				cuda_version: '未知',
 				gpu_count: response.gpus?.length || 0,
 				total_gpu_memory_mb: 0
 			};
@@ -569,11 +622,11 @@ const loadGPUInfo = async () => {
 		
 		// Set user-friendly error messages
 		if (err.message?.includes('fetch') || err.message?.includes('Network') || err.code === 'ECONNREFUSED') {
-			error.value = 'GPU monitoring service is not available. Using default configuration.';
-			ElMessage.warning('GPU monitoring service is not available. You can still configure multi-GPU training.');
+			error.value = 'GPU监控服务不可用。使用默认配置。';
+			ElMessage.warning('GPU监控服务不可用。您仍可以配置多GPU训练。');
 		} else {
-			error.value = 'Could not load real-time GPU information. Using default configuration.';
-			ElMessage.warning('Could not load real-time GPU information. Using default configuration.');
+			error.value = '无法加载实时GPU信息。使用默认配置。';
+			ElMessage.warning('无法加载实时GPU信息。使用默认配置。');
 		}
 	} finally {
 		loading.value = false;
@@ -587,12 +640,12 @@ const refreshGPUInfo = () => {
 const validateConfiguration = async () => {
 	// Skip validation during training
 	if (shouldDisableValidation.value) {
-		ElMessage.info('GPU validation is disabled during training');
+		ElMessage.info('训练期间禁用GPU验证');
 		return;
 	}
 	
 	if (!selectedGPUs.value.length) {
-		ElMessage.warning('Please select at least one GPU');
+		ElMessage.warning('请至少选择一个GPU');
 		return;
 	}
 	
@@ -608,14 +661,14 @@ const validateConfiguration = async () => {
 		
 		if (validationResult.value.is_valid) {
 			const message = forceMemoryOverride.value 
-				? 'GPU configuration is valid (memory checks overridden)'
-				: 'GPU configuration is valid';
+				? 'GPU配置有效 (内存检查已覆盖)'
+				: 'GPU配置有效';
 			ElMessage.success(message);
 		} else {
-			ElMessage.error(validationResult.value.error_message || 'GPU configuration is invalid');
+			ElMessage.error(validationResult.value.error_message || 'GPU配置无效');
 		}
 	} catch (err: any) {
-		ElMessage.error('Failed to validate GPU configuration');
+		ElMessage.error('验证GPU配置失败');
 	} finally {
 		validating.value = false;
 	}
@@ -644,13 +697,16 @@ const selectOptimalGPUs = async () => {
 			prefer_low_utilization: true
 		});
 		
-		selectedGPUs.value = response.optimal_gpu_ids;
-		ElMessage.success(`Selected optimal GPUs: ${response.optimal_gpu_ids.join(', ')}`);
-		
-		// Validate the selection
-		validateCurrentSelection();
+	selectedGPUs.value = response.optimal_gpu_ids;
+	ElMessage.success(`已选择最佳GPU: ${response.optimal_gpu_ids.join(', ')}`);
+	
+	// Emit GPU selection change
+	emit('gpuSelectionChanged', selectedGPUs.value);
+	
+	// Validate the selection
+	validateCurrentSelection();
 	} catch (err: any) {
-		ElMessage.error('Failed to select optimal GPUs: ' + err.message);
+		ElMessage.error('选择最佳GPU失败: ' + err.message);
 	} finally {
 		optimizing.value = false;
 	}
@@ -678,9 +734,130 @@ const estimateMemory = async () => {
 		// Re-validate current selection with new memory estimates
 		validateCurrentSelection();
 	} catch (err: any) {
-		console.warn('Failed to estimate memory requirements:', err);
+		console.warn('估计内存需求失败:', err);
 	}
 };
+
+const selectAllSuitableGPUs = async () => {
+	if (!gpuInfo.value || !gpuInfo.value.gpus) return;
+	
+	try {
+		let suitableGPUs: any[];
+		
+		// During training, try to detect which GPUs are actually being used
+		if (shouldDisableValidation.value) {
+			// First, try to detect GPUs that are actively being used for training
+			// Look for GPUs with high utilization or significant memory usage
+			const activeGPUs = gpuInfo.value.gpus.filter(gpu => {
+				const utilization = gpu.utilization_percent || 0;
+				const memoryUsage = (gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1);
+				
+				// Consider a GPU active if it has high utilization OR significant memory usage
+				return utilization > 30 || memoryUsage > 0.3;
+			});
+			
+			if (activeGPUs.length > 0) {
+				// Use the actively used GPUs
+				suitableGPUs = activeGPUs;
+				ElMessage.success(`训练期间检测到正在使用的GPU，已选择: ${activeGPUs.map(gpu => gpu.index).join(', ')}`);
+			} else {
+				// Fallback: if no GPUs show high usage, try to detect GPUs with any usage
+				const anyUsageGPUs = gpuInfo.value.gpus.filter(gpu => {
+					const utilization = gpu.utilization_percent || 0;
+					const memoryUsage = (gpu.memory_used_mb || 0) / (gpu.memory_total_mb || 1);
+					
+					// Consider a GPU if it has any utilization OR any significant memory usage
+					return utilization > 0 || memoryUsage > 0.1;
+				});
+				
+				if (anyUsageGPUs.length > 0) {
+					suitableGPUs = anyUsageGPUs;
+					ElMessage.success(`训练期间检测到有使用痕迹的GPU，已选择: ${anyUsageGPUs.map(gpu => gpu.index).join(', ')}`);
+				} else {
+					// Final fallback: select GPU 0 as a conservative choice
+					suitableGPUs = [gpuInfo.value.gpus[0]];
+					ElMessage.info('训练期间未检测到活跃GPU，已选择GPU 0作为默认选择');
+				}
+			}
+		} else {
+			// Normal operation: filter suitable GPUs based on memory and status
+			suitableGPUs = gpuInfo.value.gpus.filter(gpu => isGPUSuitable(gpu));
+		}
+		
+		if (suitableGPUs.length === 0) {
+			ElMessage.warning('未找到符合条件的GPU');
+			return;
+		}
+		
+		// Select all suitable GPUs
+		const selectedGPUIDs = suitableGPUs.map(gpu => gpu.index).sort((a, b) => a - b);
+		selectedGPUs.value = selectedGPUIDs;
+		
+		// Emit GPU selection change
+		emit('gpuSelectionChanged', selectedGPUs.value);
+		
+		if (!shouldDisableValidation.value) {
+			ElMessage.success(`已选择 ${selectedGPUIDs.length} 个符合条件的GPU: ${selectedGPUIDs.join(', ')}`);
+			// Validate the selection only when not in training
+			validateCurrentSelection();
+		}
+	} catch (error: any) {
+		console.error('Failed to select suitable GPUs:', error);
+		ElMessage.error('选择适合的GPU失败: ' + (error.message || '未知错误'));
+	}
+};
+
+const restoreGPUConfiguration = (config: any) => {
+	if (!config) return;
+	
+	try {
+		// Restore GPU-related configuration
+		if (config.gpu_ids && Array.isArray(config.gpu_ids)) {
+			// During training, we need to bypass normal GPU selection constraints
+			// and directly set the GPU IDs from the configuration
+			selectedGPUs.value = config.gpu_ids;
+		}
+		if (config.num_gpus) {
+			ruleForm.value.num_gpus = config.num_gpus;
+		}
+		if (config.distributed_backend) {
+			ruleForm.value.distributed_backend = config.distributed_backend;
+		}
+		if (config.memory_requirement_mb) {
+			ruleForm.value.memory_requirement_mb = config.memory_requirement_mb;
+		}
+		if (config.gradient_sync_every_n_steps) {
+			ruleForm.value.gradient_sync_every_n_steps = config.gradient_sync_every_n_steps;
+		}
+		if (config.auto_gpu_selection !== undefined) {
+			ruleForm.value.auto_gpu_selection = config.auto_gpu_selection;
+		}
+		
+		// Emit configuration restored event
+		emit('configurationRestored', config);
+		
+		// Skip validation during training since GPUs are already in use
+		// and won't meet the normal availability criteria
+		if (!shouldDisableValidation.value) {
+			validateCurrentSelection();
+		} else {
+			// During training, just show success message without validation
+			ElMessage.success(`已恢复GPU配置: ${config.gpu_ids ? config.gpu_ids.join(', ') : '未指定'}`);
+		}
+	} catch (error: any) {
+		console.error('Failed to restore GPU configuration:', error);
+		ElMessage.error('恢复GPU配置失败: ' + (error.message || '未知错误'));
+	}
+};
+
+// Expose methods to parent component
+defineExpose({
+	selectAllSuitableGPUs,
+	restoreGPUConfiguration,
+	selectOptimalGPUs,
+	validateConfiguration,
+	loadGPUInfo
+});
 
 const handleAutoSelectionChange = (val: string | number | boolean) => {
 	const enabled = Boolean(val);
@@ -735,9 +912,80 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .multi-gpu-config {
 	max-width: 100%;
+}
+
+/* GPU List Title */
+.gpu-list-title {
+	font-size: 14px;
+	font-weight: 500;
+	color: #374151;
+	margin-bottom: 24px;
+}
+
+/* Loading State */
+.loading-state {
+	text-align: center;
+	padding: 32px 0;
+}
+
+.loading-icon {
+	margin-bottom: 8px;
+}
+
+.loading-text {
+	color: #6b7280;
+}
+
+/* Error Panel */
+.error-panel {
+	padding: 16px;
+	background-color: #fef2f2;
+	border: 1px solid #fecaca;
+	border-radius: 8px;
+}
+
+.error-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: #b91c1c;
+	margin-bottom: 8px;
+}
+
+.error-title {
+	font-weight: 500;
+}
+
+.error-message {
+	color: #dc2626;
+	font-size: 14px;
+	margin-bottom: 12px;
+}
+
+/* Actions */
+.actions {
+	margin-top: 24px;
+	display: flex;
+	gap: 12px;
+}
+
+/* Configuration Options */
+.config-options {
+	.manual-selection,
+	.gpu-count {
+		margin-bottom: 16px;
+	}
+	
+	.training-notice {
+		margin-bottom: 8px;
+	}
+	
+	.validation-error {
+		margin-top: 8px;
+	}
 }
 
 /* GPU List Container */
@@ -944,24 +1192,9 @@ onMounted(() => {
 	color: #ef4444;
 }
 
-/* Error Panel */
-.error-panel {
-	background-color: #fef2f2;
-}
-
 /* Memory Estimation */
 .memory-estimation {
 	background-color: #eff6ff;
-}
-
-/* Configuration Options */
-.config-options > div {
-	padding: 16px 0;
-	border-bottom: 1px solid #f3f4f6;
-}
-
-.config-options > div:last-child {
-	border-bottom: none;
 }
 
 /* Responsive Design */

@@ -127,6 +127,7 @@ class TrainingConfig:
     memory_requirement_mb: int = 8000
     gradient_sync_every_n_steps: int = 1
     dynamo_backend: str  = "inductor"
+
     enable_bucket: bool = False
     enable_wildcard: bool = False
     face_crop_aug_range: str  = None

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-11 15:41:37
+ * @LastEditTime: 2025-07-02 10:12:31
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -224,12 +224,12 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		gpu_ids: number[] | undefined;
 		/** 分布式后端 */
 		distributed_backend: string;
-		/** 自动选择最优GPU */
-		auto_gpu_selection: boolean;
 		/** 内存需求（MB） */
 		memory_requirement_mb: number;
 		/** 梯度同步间隔步数 */
 		gradient_sync_every_n_steps: number;
+		/** 自动选择最优GPU （取消了该表单配置，但是后端代码里还是有相关逻辑，所以还需要提供，默认写死true） */
+		auto_gpu_selection: boolean;
 	};
 	dataset: {
 		datasets: [

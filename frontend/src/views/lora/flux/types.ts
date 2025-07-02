@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2025-03-06 14:57:18
+ * @LastEditTime: 2025-07-01 11:23:15
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
@@ -249,11 +249,9 @@ export interface RuleForm {
 	/** GPU数量 */
 	num_gpus: number;
 	/** 指定使用的GPU ID列表 */
-	gpu_ids: number[] | undefined;
+	gpu_ids: number[];
 	/** 分布式后端 */
 	distributed_backend: string;
-	/** 自动选择最优GPU */
-	auto_gpu_selection: boolean;
 	/** 内存需求（MB） */
 	memory_requirement_mb: number;
 	/** 梯度同步间隔步数 */

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-04-11 14:43:24
+ * @LastEditTime: 2025-07-02 10:30:39
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -87,12 +87,14 @@ import { formatFormData } from "./flux.helper";
 import { validateForm } from "./flux.validate";
 import type { RuleForm } from "./types";
 import FluxDataset from "./components/FluxDataset/index.vue";
+import { useMultiGPU } from "./composables/useMultiGPU";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const modalManagerStore = useModalManagerStore();
 const { monitorFluxLoraData, fluxLoraMonitor } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
+const { startPollingGPUInfo, stopPollingGPUInfo } = useMultiGPU();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -221,9 +223,8 @@ const defaultForm = readonly<RuleForm>({
 	ddp_gradient_as_bucket_view: false,
 	multi_gpu_enabled: false,
 	num_gpus: 1,
-	gpu_ids: undefined,
+	gpu_ids: [],
 	distributed_backend: "nccl",
-	auto_gpu_selection: true,
 	memory_requirement_mb: 8000,
 	gradient_sync_every_n_steps: 1,
 	// -----
@@ -507,6 +508,10 @@ async function onSubmit() {
 		const { task_id } = await startFluxTraining(data);
 		// 监听训练数据
 		fluxLoraMonitor.setTaskId(task_id).start();
+		// 轮询gpu信息
+		if (ruleForm.value.multi_gpu_enabled) {
+			startPollingGPUInfo();
+		}
 
 		submitLoading.value = false;
 		isRestored.value = true;
@@ -515,6 +520,8 @@ async function onSubmit() {
 	} catch (error) {
 		// 停止监控LoRA训练数据
 		fluxLoraMonitor.stop();
+		// 停止轮询gpu信息
+		stopPollingGPUInfo();
 		submitLoading.value = false;
 		console.error("创建训练任务失败", error);
 	}
@@ -537,10 +544,16 @@ onMounted(() => {
 		isListen: monitorFluxLoraData.value.isListen,
 		taskId: fluxLoraMonitor.getTaskId(),
 		formData: ruleForm.value
+	}).finally(() => {
+		// 轮询gpu信息
+		if (ruleForm.value.multi_gpu_enabled) {
+			startPollingGPUInfo();
+		}
 	});
 });
 onUnmounted(() => {
 	fluxLoraMonitor.pause();
+	stopPollingGPUInfo();
 });
 </script>
 

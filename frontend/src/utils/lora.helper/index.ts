@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-19 15:38:33
- * @LastEditTime: 2025-04-11 15:32:22
+ * @LastEditTime: 2025-07-02 10:31:06
  * @LastEditors: mulingyuer
  * @Description: lora helper
  * @FilePath: \frontend\src\utils\lora.helper\index.ts
@@ -91,13 +91,13 @@ export function mergeTrainingFormData(form: Record<string, any>, data: Record<st
 }
 
 /** 恢复表单数据，只有在任务正在进行中时才恢复表单数据 */
-export function recoveryTaskFormData(options: RecoveryTaskFormDataOptions) {
+export async function recoveryTaskFormData(options: RecoveryTaskFormDataOptions) {
 	if (!options.enableTrainingTaskDataRecovery || !options.isListen) return;
 	const { taskId, showRecoverySuccessTip = true } = options;
 	if (!taskId || taskId.trim() === "") return;
 
 	// api
-	currentTaskFormConfig({ task_id: taskId, show_config: true }).then((res) => {
+	return currentTaskFormConfig({ task_id: taskId, show_config: true }).then((res) => {
 		if (!res.frontend_config) return;
 		const tomlData = tomlParse(res.frontend_config);
 		// 合并数据

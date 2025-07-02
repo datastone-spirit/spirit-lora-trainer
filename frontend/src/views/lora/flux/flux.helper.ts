@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-03-10 17:04:53
+ * @LastEditTime: 2025-07-02 10:11:57
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -163,9 +163,9 @@ function formatConfig(form: RuleForm): Config {
 		num_gpus: 1,
 		gpu_ids: undefined,
 		distributed_backend: "nccl",
-		auto_gpu_selection: true,
 		memory_requirement_mb: 8000,
-		gradient_sync_every_n_steps: 1
+		gradient_sync_every_n_steps: 1,
+		auto_gpu_selection: true
 	};
 
 	convertScientificToNumber(form, config);

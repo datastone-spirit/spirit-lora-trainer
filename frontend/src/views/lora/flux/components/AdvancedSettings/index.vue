@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 09:35:29
- * @LastEditTime: 2025-02-10 09:54:15
+ * @LastEditTime: 2025-06-30 09:59:08
  * @LastEditors: mulingyuer
  * @Description: 高级设置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\index.vue
@@ -33,7 +33,7 @@ import CaptionOptions from "./CaptionOptions.vue";
 import DataEnhancerOptions from "./DataEnhancerOptions.vue";
 import AdvancedOptions from "./AdvancedOptions.vue";
 import SpeedOptimizationOptions from "./SpeedOptimizationOptions.vue";
-import DistributedTrainingOptions from "./DistributedTrainingOptions.vue";
+import DistributedTrainingOptions from "./DistributedTrainingOptions/index.vue";
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 </script>

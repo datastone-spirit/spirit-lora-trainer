@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 10:06:22
- * @LastEditTime: 2025-04-11 15:45:45
+ * @LastEditTime: 2025-07-01 10:47:29
  * @LastEditors: mulingyuer
  * @Description: 监听公共类型
  * @FilePath: \frontend\src\hooks\task\types.ts
@@ -21,7 +21,6 @@ export type TaskEvents = {
 	update: void;
 	complete: void;
 	failed: void;
-	restoreConfig: any;
 };
 
 /** 任务实现接口 */

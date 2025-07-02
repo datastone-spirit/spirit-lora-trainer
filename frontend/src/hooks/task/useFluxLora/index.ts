@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 11:52:55
- * @LastEditTime: 2025-04-11 14:42:48
+ * @LastEditTime: 2025-07-01 10:47:20
  * @LastEditors: mulingyuer
  * @Description: flux lora hooks
- * @FilePath: \frontend\src\hooks\v2\useFluxLora\index.ts
+ * @FilePath: \frontend\src\hooks\task\useFluxLora\index.ts
  * 怎么可能会有bug！！！
  */
 import type { LoRATrainingInfoResult } from "@/api/monitor";
@@ -147,11 +147,6 @@ class FluxLoraMonitor implements TaskImplementation {
 	public setInitDataWithConfig(initData: InitData & { config?: any }) {
 		// 基础初始化
 		this.setInitData(initData);
-		
-		// 如果有配置信息，触发配置恢复事件
-		if (initData.config) {
-			this.events.emit("restoreConfig", initData.config);
-		}
 	}
 
 	/** 设置任务id */

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-07-02 10:30:39
+ * @LastEditTime: 2025-07-02 17:19:58
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="lora-flux-page">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2 local-key-prefix="lora-flux">
 			<template #left>
 				<div class="lora-flux-content">
 					<el-form
@@ -44,7 +44,7 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"

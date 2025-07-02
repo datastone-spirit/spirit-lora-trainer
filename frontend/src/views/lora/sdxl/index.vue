@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:50:40
- * @LastEditTime: 2025-01-10 11:27:58
+ * @LastEditTime: 2025-07-02 17:22:33
  * @LastEditors: mulingyuer
  * @Description: sdxl 模型训练页面
  * @FilePath: \frontend\src\views\lora\sdxl\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<TwoSplit class="lora-sdxl-page" direction="horizontal" :sizes="[50, 50]">
+	<TwoSplit2 class="lora-sdxl-page" local-key-prefix="sdxl">
 		<template #left>
 			<div class="lora-sdxl-content">
 				<el-form
@@ -37,7 +37,7 @@
 		<template #right>
 			<div style="height: 100%">AI 数据集</div>
 		</template>
-	</TwoSplit>
+	</TwoSplit2>
 </template>
 
 <script setup lang="ts">

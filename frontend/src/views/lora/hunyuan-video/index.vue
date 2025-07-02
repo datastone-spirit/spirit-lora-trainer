@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-04-11 14:56:01
+ * @LastEditTime: 2025-07-02 17:21:17
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="hunyuan-video">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2 local-key-prefix="lora-hunyuan-video">
 			<template #left>
 				<el-form
 					ref="ruleFormRef"
@@ -39,7 +39,7 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="ruleForm.directory_path" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"

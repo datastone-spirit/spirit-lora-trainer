@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-15 10:37:24
+ * @LastEditTime: 2025-07-02 17:21:55
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="wan-page">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2 local-key-prefix="lora-wan-video">
 			<template #left>
 				<el-form
 					ref="ruleFormRef"
@@ -39,7 +39,7 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="wanDatasetPath" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"

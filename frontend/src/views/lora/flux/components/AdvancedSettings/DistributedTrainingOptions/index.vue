@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 15:39:43
- * @LastEditTime: 2025-07-01 17:14:42
+ * @LastEditTime: 2025-07-02 11:31:06
  * @LastEditors: mulingyuer
  * @Description: 分布式训练和多GPU配置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\DistributedTrainingOptions\index.vue
@@ -67,13 +67,20 @@ import PopoverFormItem from "@/components/Form/PopoverFormItem.vue";
 import { useMultiGPU } from "../../../composables/useMultiGPU";
 import type { RuleForm } from "../../../types";
 import MultiGPUConfiguration from "./MultiGPUConfiguration.vue";
+import { isGPUSelectable } from "./distributed-training.helper";
+import { useTrainingStore } from "@/stores";
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 
+const trainingStore = useTrainingStore();
 const { getGPUInfo, gpuInfo, estimateMemory } = useMultiGPU();
 
 // State
 const loading = ref(false);
+// Training status computed properties
+const isTraining = computed(() => trainingStore.hasRunningTask);
+const isFluxTraining = computed(() => trainingStore.isFluxTraining);
+const shouldDisableValidation = computed(() => isTraining.value && isFluxTraining.value);
 
 /** 启动多GPU开关前 */
 async function onMultiGPUToggleBeforeChange() {
@@ -91,8 +98,19 @@ async function onMultiGPUToggleBeforeChange() {
 function onMultiGPUToggle() {
 	const enabled = ruleForm.value.multi_gpu_enabled;
 	// 如果开启时没有选中过gpu，则默认全选
+	// 且符合训练条件的gpu数量
 	if (enabled && gpuInfo.value && ruleForm.value.gpu_ids.length === 0) {
-		ruleForm.value.gpu_ids = gpuInfo.value.gpus.map((item) => item.index).sort((a, b) => a - b);
+		ruleForm.value.gpu_ids = gpuInfo.value.gpus
+			.filter((item) => {
+				return isGPUSelectable({
+					gpuInfo: item,
+					memoryRequired: ruleForm.value.memory_requirement_mb,
+					forceMemoryOverride: false,
+					shouldDisableValidation: shouldDisableValidation.value
+				});
+			})
+			.map((item) => item.index)
+			.sort((a, b) => a - b);
 	}
 }
 

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-04-11 15:41:37
+ * @LastEditTime: 2025-07-22 10:56:56
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -625,4 +625,148 @@ export interface WanVideoVideoDatasetEstimateResult {
 	total_batches: number;
 	/** 预估图片数量 */
 	total_images: number;
+}
+
+/** 启动flux kontext 训练参数 */
+export interface StartFluxKontextTrainingData {
+	config: {
+		/** lora名称 */
+		name: string;
+		/** lora触发词 */
+		trigger_word: string;
+		/** lora保存路径 */
+		training_folder: string;
+		/** 目标配置 */
+		network: {
+			type: "lora";
+			/** LoRA 层的“秩”（rank），也称为 r 值，默认：32 */
+			linear: number;
+			/** 不需要UI展示，与linear值保持一致 */
+			linear_alpha: number;
+		};
+		/** 保存配置 */
+		save: {
+			/** 保存lora的浮点精度，默认fp16 */
+			dtype: string;
+			/** 多少步骤（steps）保存一次模型，默认250 */
+			save_every: number;
+			/** 训练过程中最多保留多少个检查点，默认4 */
+			max_step_saves_to_keep: number;
+		};
+		/** 训练配置 */
+		train: {
+			/** 批量大小，默认1 */
+			batch_size: number;
+			/** 训练步数，默认3000 */
+			steps: number;
+			/** 梯度累积，在job任务中使用的key为gradient_accumulation，默认1 */
+			gradient_accumulation_steps: number;
+			/** 无需UI，训练过程中是否更新 UNet 模型的权重，默认true */
+			train_unet: true;
+			/** 无需UI，训练过程中是否更新 Text Encoder 模型的权重，默认false */
+			train_text_encoder: false;
+			/** 无需UI，显存优化技术，启用梯度检查点，可以减少显存使用，但是增加训练时间，默认true */
+			gradient_checkpointing: true;
+			/** 噪声调度器，默认flowmatch */
+			noise_scheduler: string;
+			/** 优化器，默认adamw8bit */
+			optimizer: string;
+			/** 时间步类型，默认weighted */
+			timestep_type: string;
+			/** 时间步长偏差，默认balanced */
+			content_or_style: string;
+			optimizer_params: {
+				/** 权重衰减，默认0.0001 */
+				weight_decay: number;
+			};
+			/** 卸载文本编码器，默认false */
+			unload_text_encoder: boolean;
+			/** 学习率，默认0.0001 */
+			lr: number;
+			/** EMA */
+			ema_config: {
+				/** 是否使用EMA，默认false */
+				use_ema: boolean;
+				/** EMA 衰减，默认0.99 */
+				ema_decay: number;
+			};
+			/** 跳过第一个样本，默认false */
+			skip_first_sample: boolean;
+			/** 禁用采样，默认false */
+			disable_sampling: boolean;
+			/** 差分输出保留，默认false */
+			diff_output_preservation: boolean;
+			/** DOP 损失乘数，默认1 */
+			diff_output_preservation_multiplier: number;
+			/** DOP 保护类，默认person */
+			diff_output_preservation_class: string;
+			/** 无需UI，默认bf16 */
+			dtype: "bf16";
+		};
+		/** 模型配置 */
+		model: {
+			/** 底模路径 */
+			name_or_path: string;
+			/** 是否开启Transformer量化转换器，默认true */
+			quantize: boolean;
+			/** 是否开启Text Encoder量化转换器，默认使用model_quantize的值 */
+			quantize_te: boolean;
+			/** 模型架构，固定为flux_kontext */
+			arch: "flux_kontext";
+		};
+		/** 采样配置 */
+		sample: {
+			/** 采样器，默认flowmatch */
+			sampler: string;
+			/** 每隔多少步进行一次采样，默认250 */
+			sample_every: number;
+			/** 宽度 */
+			width: number;
+			/** 高度 */
+			height: number;
+			/** 样本提示 */
+			samples: Array<{
+				/** 采样提示词 */
+				prompt: string;
+				/** 采样图片路径（原图路径） */
+				ctrl_img: string;
+			}>;
+			/** 种子，默认42 */
+			seed: number;
+			/** 是否在采样过程中逐步改变随机种子，默认true */
+			walk_seed: boolean;
+			/** 指导尺度，默认4 */
+			guidance_scale: number;
+			/** 采样步骤数 */
+			sample_steps: number;
+		};
+	};
+	dataset: Array<{
+		/** 数据集目录，结果图片+打标文件 */
+		folder_path: string;
+		/** 原图目录，是生成结果图片的源文件，图片名必须与folder_path相同 */
+		control_path: string;
+		/** 标题 Dropout Rate，默认0.05 */
+		caption_dropout_rate: number;
+		/** 是否打乱标题顺序，以逗号分隔，默认false */
+		shuffle_tokens: boolean;
+		/** 是否将图像的潜在表示（latents）缓存到磁盘，默认false */
+		cache_latents_to_disk: boolean;
+		/** 是否正则化，默认false */
+		is_reg: boolean;
+		/** LoRA 权重，默认1 */
+		network_weight: number;
+		/** 分辨率，默认[512, 768] */
+		resolution: Array<number>;
+	}>;
+	/** 训练器的训练配置 */
+	frontend_config: string;
+}
+
+/** 启动flux kontext 训练结果 */
+export interface StartFluxKontextTrainingResult {
+	msg: string;
+	success: boolean;
+	/** 任务id */
+	task_id: string;
 }

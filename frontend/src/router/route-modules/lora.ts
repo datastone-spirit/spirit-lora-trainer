@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2025-03-28 10:18:03
+ * @LastEditTime: 2025-07-22 15:06:44
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
@@ -35,6 +35,15 @@ export default {
 			meta: {
 				title: "Flux",
 				loRATaskType: "flux"
+			}
+		},
+		{
+			path: "/lora/flux-kontext",
+			name: "LoRA-FluxKontext",
+			component: () => import("@/views/lora/flux-kontext/index.vue"),
+			meta: {
+				title: "Flux Kontext",
+				loRATaskType: "flux-kontext"
 			}
 		},
 		{

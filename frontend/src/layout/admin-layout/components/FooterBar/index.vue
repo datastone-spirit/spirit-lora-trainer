@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2025-04-11 15:23:32
+ * @LastEditTime: 2025-07-22 16:08:34
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
@@ -81,7 +81,7 @@ const progress = computed(() => {
 	background-color: var(--zl-footer-bar-bg);
 	border-top-left-radius: $zl-border-radius;
 	border-top-right-radius: $zl-border-radius;
-	z-index: 1;
+	z-index: 2;
 }
 .footer-bar-content {
 	height: 100%;

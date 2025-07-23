@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-07-22 10:56:56
+ * @LastEditTime: 2025-07-22 14:49:19
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -720,9 +720,9 @@ export interface StartFluxKontextTrainingData {
 			sampler: string;
 			/** 每隔多少步进行一次采样，默认250 */
 			sample_every: number;
-			/** 宽度 */
+			/** 宽度，默认1024 */
 			width: number;
-			/** 高度 */
+			/** 高度，默认1024 */
 			height: number;
 			/** 样本提示 */
 			samples: Array<{
@@ -737,7 +737,7 @@ export interface StartFluxKontextTrainingData {
 			walk_seed: boolean;
 			/** 指导尺度，默认4 */
 			guidance_scale: number;
-			/** 采样步骤数 */
+			/** 采样步骤数，默认25 */
 			sample_steps: number;
 		};
 	};

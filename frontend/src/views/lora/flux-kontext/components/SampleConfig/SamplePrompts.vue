@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 16:32:59
- * @LastEditTime: 2025-07-22 17:26:56
+ * @LastEditTime: 2025-07-23 17:38:06
  * @LastEditors: mulingyuer
  * @Description: 样本提示组件
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\SampleConfig\SamplePrompts.vue
@@ -11,7 +11,7 @@
 	<div class="sample-prompts">
 		<div class="sample-prompts-list">
 			<div
-				v-for="(item, index) in ruleForm.config.sample.samples"
+				v-for="(item, index) in ruleForm.sample.prompts"
 				:key="item.id"
 				class="sample-prompts-item"
 			>
@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
 import { useIcon } from "@/hooks/useIcon";
-import { useId } from "vue";
+import { generateUUID } from "@/utils/tools";
 
 // icon
 const AddIcon = useIcon({ name: "ri-add-line" });
@@ -56,8 +56,8 @@ const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, requi
 
 // 新增样本提示
 function onAdd() {
-	ruleForm.value.config.sample.samples.push({
-		id: useId(),
+	ruleForm.value.sample.prompts.push({
+		id: generateUUID(),
 		prompt: "",
 		ctrl_img: ""
 	});
@@ -65,7 +65,7 @@ function onAdd() {
 
 // 删除样本提示
 function deleteSample(_item: unknown, index: number) {
-	ruleForm.value.config.sample.samples.splice(index, 1);
+	ruleForm.value.sample.prompts.splice(index, 1);
 }
 </script>
 

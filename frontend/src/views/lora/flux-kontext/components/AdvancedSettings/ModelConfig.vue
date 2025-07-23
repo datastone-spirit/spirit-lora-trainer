@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 09:05:48
- * @LastEditTime: 2025-07-23 09:10:14
+ * @LastEditTime: 2025-07-23 17:25:06
  * @LastEditors: mulingyuer
  * @Description: 模型设置
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\AdvancedSettings\ModelConfig.vue
@@ -11,17 +11,17 @@
 	<FieldSetWrapper title="模型设置">
 		<PopoverFormItem
 			label="是否开启Transformer量化转换器"
-			prop="config.model.quantize"
+			prop="model.quantize"
 			popover-content="quantize"
 		>
-			<el-switch v-model="ruleForm.config.model.quantize" />
+			<el-switch v-model="ruleForm.model.quantize" />
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="是否开启Text Encoder量化转换器"
-			prop="config.model.quantize_te"
+			prop="model.quantize_te"
 			popover-content="quantize_te"
 		>
-			<el-switch v-model="ruleForm.config.model.quantize_te" />
+			<el-switch v-model="ruleForm.model.quantize_te" />
 		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>

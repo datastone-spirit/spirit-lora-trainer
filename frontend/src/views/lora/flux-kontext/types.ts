@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:55:18
- * @LastEditTime: 2025-07-23 17:41:19
+ * @LastEditTime: 2025-07-23 18:11:02
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 类型
  * @FilePath: \frontend\src\views\lora\flux-kontext\types.ts
@@ -45,10 +45,16 @@ export type RuleForm = Prettify<
 		>;
 		/** 数据集 */
 		datasets: Array<
-			ProcessType["datasets"][0] & {
-				id: string;
-				name: string;
-			}
+			Prettify<
+				ProcessType["datasets"][0] & {
+					id: string;
+					name: string;
+				}
+			>
 		>;
 	}
 >;
+
+export type SamplePrompts = RuleForm["sample"]["prompts"];
+
+export type Datasets = RuleForm["datasets"];

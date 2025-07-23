@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 16:32:59
- * @LastEditTime: 2025-07-23 17:38:06
+ * @LastEditTime: 2025-07-23 18:10:20
  * @LastEditors: mulingyuer
  * @Description: 样本提示组件
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\SampleConfig\SamplePrompts.vue
@@ -44,9 +44,9 @@
 </template>
 
 <script setup lang="ts">
-import type { RuleForm } from "../../types";
 import { useIcon } from "@/hooks/useIcon";
-import { generateUUID } from "@/utils/tools";
+import { generateDefaultSamplePrompt } from "../../flex-kontext.helper";
+import type { RuleForm } from "../../types";
 
 // icon
 const AddIcon = useIcon({ name: "ri-add-line" });
@@ -56,11 +56,7 @@ const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, requi
 
 // 新增样本提示
 function onAdd() {
-	ruleForm.value.sample.prompts.push({
-		id: generateUUID(),
-		prompt: "",
-		ctrl_img: ""
-	});
+	ruleForm.value.sample.prompts.push(generateDefaultSamplePrompt());
 }
 
 // 删除样本提示

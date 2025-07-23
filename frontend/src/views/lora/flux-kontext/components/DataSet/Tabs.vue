@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 11:39:51
- * @LastEditTime: 2025-07-23 17:35:15
+ * @LastEditTime: 2025-07-23 18:14:17
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\Tabs.vue
@@ -86,11 +86,9 @@
 
 <script setup lang="ts">
 import type { TabPaneName } from "element-plus";
+import { generateDefaultDataset } from "../../flex-kontext.helper";
 import type { RuleForm } from "../../types";
-import { getEnv } from "@/utils/env";
-import { generateUUID } from "@/utils/tools";
 
-const env = getEnv();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 const activeTabName = defineModel({ type: String as PropType<TabPaneName>, required: true });
 
@@ -109,21 +107,9 @@ function onTabEdit(paneName: TabPaneName | undefined, action: "remove" | "add") 
 // 新增数据集
 function onAddDataSet() {
 	const index = ruleForm.value.datasets.length + 1;
-	const id = generateUUID();
-	ruleForm.value.datasets.push({
-		id: id,
-		name: `数据集${index}`,
-		folder_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
-		control_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
-		caption_dropout_rate: 0.05,
-		shuffle_tokens: false,
-		cache_latents_to_disk: false,
-		is_reg: false,
-		network_weight: 1,
-		resolution: [512, 768],
-		caption_ext: "txt"
-	});
-	activeTabName.value = id;
+	const data = generateDefaultDataset(index);
+	ruleForm.value.datasets.push(data);
+	activeTabName.value = data.id;
 }
 
 // 删除数据集

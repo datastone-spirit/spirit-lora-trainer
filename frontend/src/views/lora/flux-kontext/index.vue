@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-23 17:41:28
+ * @LastEditTime: 2025-07-23 18:18:16
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -79,6 +79,7 @@ import SampleConfig from "./components/SampleConfig/index.vue";
 import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
 import type { RuleForm } from "./types";
+import { generateDefaultDataset } from "./flex-kontext.helper";
 
 const settingsStore = useSettingsStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
@@ -182,14 +183,28 @@ const generateToml = useDebounceFn(() => {
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
+// 初始化数据集
+function initDataset() {
+	if (ruleForm.value.datasets.length > 0) return;
+	const data = generateDefaultDataset(1);
+	ruleForm.value.datasets.push(data);
+	activeTabName.value = data.id;
+}
+
 // 重置表单
 function onResetData() {
 	if (ruleFormRef.value) ruleFormRef.value.resetFields();
 	ruleForm.value = structuredClone(defaultForm);
+	initDataset();
 }
 
 // 提交表单
 function onSubmit() {}
+
+// 初始化
+(function init() {
+	initDataset();
+})();
 </script>
 
 <style lang="scss" scoped>

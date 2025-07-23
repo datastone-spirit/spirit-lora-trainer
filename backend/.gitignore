@@ -10,3 +10,5 @@ nohup.out
 diffusion-pipe/
 musubi-tuner/
 .venv/
+KONTEXT_IMPLEMENTATION_SUMMARY.md
+ai-toolkit/

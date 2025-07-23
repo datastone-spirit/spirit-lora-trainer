@@ -509,7 +509,7 @@ class KontextTrainingTask(Task):
                 if ch == b'' and self.proc.poll() is not None:
                     break
                 line.extend(ch)
-                if ch == b'\n':
+                if ch == b'\n' or ch == b'\r':
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
                     self.parse_kontext_progress_line(linestr)

@@ -12,13 +12,15 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class DatasetConfig:
-    cache_latents_to_disk: bool = True
+    cache_latents_to_disk: bool = False
     caption_dropout_rate: float = 0.05
     caption_ext: str = "txt"
     control_path: str = None
     folder_path: str = None
     resolution: List[int] = field(default_factory=lambda: [512, 768])
     shuffle_tokens: bool = False
+    is_reg: bool = False
+    network_weight: float = 1.0
 
     @staticmethod
     def validate(config: 'DatasetConfig') -> 'Tuple[bool, str]':
@@ -41,6 +43,14 @@ class DatasetConfig:
             logger.warning("resolution must be a list of 2 integers, setting to default [512, 768]")
             config.resolution = [512, 768]
         
+        if config.caption_dropout_rate is not None and (config.caption_dropout_rate < 0 or config.caption_dropout_rate > 1):
+            logger.warning("caption_dropout_rate must be between 0 and 1, set to 0.05")
+            config.caption_dropout_rate = 0.05
+        
+        if config.network_weight is not None and config.network_weight <= 0:
+            logger.warning("network_weight must be positive, set to 1.0")
+            config.network_weight = 1.0
+        
         return True, ""
 
 @dataclass
@@ -48,7 +58,7 @@ class ModelConfig:
     arch: str = "flux_kontext"
     name_or_path: str = None
     quantize: bool = True
-    low_vram: bool = True
+    quantize_te: bool = None  # Will default to quantize value
 
     @staticmethod
     def validate(config: 'ModelConfig') -> 'Tuple[bool, str]':
@@ -67,12 +77,16 @@ class ModelConfig:
             logger.warning(f"model path: {config.name_or_path} doesn't exist")
             return False, f"model path {config.name_or_path} doesn't exist"
         
+        # Set quantize_te to quantize if not specified
+        if config.quantize_te is None:
+            config.quantize_te = config.quantize
+        
         return True, ""
 
 @dataclass
 class NetworkConfig:
-    linear: int = 16
-    linear_alpha: int = 16
+    linear: int = 32
+    linear_alpha: int = 32
     type: str = "lora"
 
     @staticmethod
@@ -85,12 +99,12 @@ class NetworkConfig:
             config.type = 'lora'
         
         if config.linear < 1 or config.linear > 256:
-            logger.warning(f"config.linear is not valid: {config.linear}, set to default (16)")
-            config.linear = 16
+            logger.warning(f"config.linear is not valid: {config.linear}, set to default (32)")
+            config.linear = 32
         
         if config.linear_alpha < 1 or config.linear_alpha > 256:
-            logger.warning(f"config.linear_alpha is not valid: {config.linear_alpha}, set to default (16)")
-            config.linear_alpha = 16
+            logger.warning(f"config.linear_alpha is not valid: {config.linear_alpha}, set to default (32)")
+            config.linear_alpha = 32
         
         return True, ""
 
@@ -101,7 +115,7 @@ class SampleConfig:
     neg: str = ""
     prompts: List[str] = field(default_factory=list)
     sample_every: int = 250
-    sample_steps: int = 20
+    sample_steps: int = 25
     sampler: str = "flowmatch"
     seed: int = 42
     walk_seed: bool = True
@@ -130,18 +144,18 @@ class SampleConfig:
             config.sample_every = 250
         
         if config.sample_steps <= 0:
-            logger.warning("config.sample_steps must be positive, set to 20")
-            config.sample_steps = 20
+            logger.warning("config.sample_steps must be positive, set to 25")
+            config.sample_steps = 25
         
         if not config.prompts:
-            logger.warning("config.prompts is empty, adding default prompt")
-            config.prompts = ["make this person a big head"]
+            logger.warning("config.prompts is empty")
+            config.prompts = []
         
         return True, ""
 
 @dataclass
 class SaveConfig:
-    dtype: str = "float16"
+    dtype: str = "fp16"
     max_step_saves_to_keep: int = 4
     push_to_hub: bool = False
     save_every: int = 250
@@ -151,9 +165,9 @@ class SaveConfig:
         if not config:
             return False, "config is None"
         
-        if not config.dtype or config.dtype not in ['float16', 'float32', 'bfloat16']:
-            logger.warning("config.dtype is None or invalid, set to 'float16'")
-            config.dtype = 'float16'
+        if not config.dtype or config.dtype not in ['fp16', 'fp32', 'bf16']:
+            logger.warning("config.dtype is None or invalid, set to 'fp16'")
+            config.dtype = 'fp16'
         
         if config.max_step_saves_to_keep <= 0:
             logger.warning("config.max_step_saves_to_keep must be positive, set to 4")
@@ -164,6 +178,15 @@ class SaveConfig:
             config.save_every = 250
         
         return True, ""
+
+@dataclass
+class OptimizerParams:
+    weight_decay: float = 0.0001
+
+@dataclass
+class EMAConfig:
+    use_ema: bool = False
+    ema_decay: float = 0.99
 
 @dataclass
 class TrainConfig:
@@ -178,6 +201,15 @@ class TrainConfig:
     timestep_type: str = "weighted"
     train_text_encoder: bool = False
     train_unet: bool = True
+    content_or_style: str = "balanced"
+    optimizer_params: OptimizerParams = field(default_factory=OptimizerParams)
+    unload_text_encoder: bool = False
+    ema_config: EMAConfig = field(default_factory=EMAConfig)
+    skip_first_sample: bool = False
+    disable_sampling: bool = False
+    diff_output_preservation: bool = False
+    diff_output_preservation_multiplier: float = 1.0
+    diff_output_preservation_class: str = "person"
 
     @staticmethod
     def validate(config: 'TrainConfig') -> 'Tuple[bool, str]':
@@ -200,6 +232,14 @@ class TrainConfig:
             logger.warning("config.timestep_type is None or invalid, set to 'weighted'")
             config.timestep_type = 'weighted'
         
+        if not config.content_or_style or config.content_or_style != 'balanced':
+            logger.warning("config.content_or_style is None or invalid, set to 'balanced'")
+            config.content_or_style = 'balanced'
+        
+        if not config.diff_output_preservation_class:
+            logger.warning("config.diff_output_preservation_class is None, set to 'person'")
+            config.diff_output_preservation_class = 'person'
+        
         if config.batch_size <= 0:
             logger.warning("config.batch_size must be positive, set to 1")
             config.batch_size = 1
@@ -215,6 +255,24 @@ class TrainConfig:
         if config.steps <= 0:
             logger.warning("config.steps must be positive, set to 3000")
             config.steps = 3000
+        
+        if config.diff_output_preservation_multiplier <= 0:
+            logger.warning("config.diff_output_preservation_multiplier must be positive, set to 1.0")
+            config.diff_output_preservation_multiplier = 1.0
+        
+        # Validate optimizer_params
+        if not config.optimizer_params:
+            config.optimizer_params = OptimizerParams()
+        elif config.optimizer_params.weight_decay < 0:
+            logger.warning("optimizer_params.weight_decay must be non-negative, set to 0.0001")
+            config.optimizer_params.weight_decay = 0.0001
+        
+        # Validate ema_config
+        if not config.ema_config:
+            config.ema_config = EMAConfig()
+        elif config.ema_config.ema_decay <= 0 or config.ema_config.ema_decay >= 1:
+            logger.warning("ema_config.ema_decay must be between 0 and 1, set to 0.99")
+            config.ema_config.ema_decay = 0.99
         
         return True, ""
 
@@ -303,8 +361,8 @@ class KontextConfig:
 
 @dataclass
 class MetaConfig:
-    name: str = "[name]"
-    version: str = "1.0"
+    name: str = ""
+    version: str = ""
 
 @dataclass
 class KontextTrainingParameter:

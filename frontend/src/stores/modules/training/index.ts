@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-04-11 15:42:05
+ * @LastEditTime: 2025-07-24 15:18:26
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -11,6 +11,7 @@ import { defineStore } from "pinia";
 import type {
 	CurrentTaskInfo,
 	GPUData,
+	MonitorFluxKontextData,
 	MonitorFluxLoraData,
 	MonitorGPUData,
 	MonitorHYLoraData,
@@ -181,13 +182,53 @@ export const useTrainingStore = defineStore("training", () => {
 		};
 	}
 
+	/** 监听flux kontext lora训练 */
+	const monitorFluxKontextLoraData = ref<MonitorFluxKontextData>({
+		isListen: false,
+		data: {
+			current: 0,
+			elapsed: "",
+			loss: 0,
+			remaining: "",
+			speed: 0,
+			total: 0,
+			showSampling: false,
+			samplingPath: "",
+			progress: 0,
+			totalTime: 0,
+			raw: void 0
+		}
+	});
+	function setFluxKontextLoraIsListen(val: boolean) {
+		monitorFluxKontextLoraData.value.isListen = val;
+	}
+	function setFluxKontextLoraData(data: MonitorFluxKontextData["data"]) {
+		monitorFluxKontextLoraData.value.data = data;
+	}
+	function resetFluxKontextLoraData() {
+		monitorFluxKontextLoraData.value.data = {
+			current: 0,
+			elapsed: "",
+			loss: 0,
+			remaining: "",
+			speed: 0,
+			total: 0,
+			showSampling: false,
+			samplingPath: "",
+			progress: 0,
+			totalTime: 0,
+			raw: void 0
+		};
+	}
+
 	/** gpu是否在使用中 */
 	const useGPU = computed(() => {
 		return (
 			monitorTagData.value.isListen ||
 			monitorFluxLoraData.value.isListen ||
 			monitorHYLoraData.value.isListen ||
-			monitorWanLoraData.value.isListen
+			monitorWanLoraData.value.isListen ||
+			monitorFluxKontextLoraData.value.isListen
 		);
 	});
 
@@ -234,7 +275,11 @@ export const useTrainingStore = defineStore("training", () => {
 		resetWanLoraData,
 		currentTaskInfo,
 		setCurrentTaskInfo,
-		resetCurrentTaskInfo
+		resetCurrentTaskInfo,
+		monitorFluxKontextLoraData,
+		setFluxKontextLoraIsListen,
+		setFluxKontextLoraData,
+		resetFluxKontextLoraData
 	};
 });
 

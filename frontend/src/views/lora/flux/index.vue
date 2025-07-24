@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-04-11 14:43:24
+ * @LastEditTime: 2025-07-24 14:57:17
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -456,8 +456,6 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-/** 是否已经恢复训练配置 */
-const isRestored = ref(false);
 
 // 折叠
 const openStep1 = ref(true);
@@ -502,7 +500,6 @@ async function onSubmit() {
 		fluxLoraMonitor.setTaskId(task_id).start();
 
 		submitLoading.value = false;
-		isRestored.value = true;
 
 		ElMessage.success("成功创建训练任务");
 	} catch (error) {

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 14:56:49
- * @LastEditTime: 2025-07-24 10:00:13
+ * @LastEditTime: 2025-07-24 10:20:47
  * @LastEditors: mulingyuer
  * @Description: lora基本信息
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\BasicInfo\index.vue
@@ -21,13 +21,13 @@
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"
-		label="底模"
+		label="底模目录"
 		prop="model.name_or_path"
 		popover-content="name_or_path"
 	>
-		<FileSelector
+		<FolderSelector
 			v-model="ruleForm.model.name_or_path"
-			placeholder="请选择训练用的底模，不知道可以不填，默认使用默认底模"
+			placeholder="请选择训练用的底模所在目录，不知道可以不填，默认使用默认底模目录"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem label="LoRA 保存路径" prop="training_folder" popover-content="training_folder">

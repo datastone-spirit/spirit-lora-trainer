@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:32:42
- * @LastEditTime: 2025-04-02 09:28:16
+ * @LastEditTime: 2025-07-24 15:33:57
  * @LastEditors: mulingyuer
  * @Description: task帮助
  * @FilePath: \frontend\src\views\task\task.helper.ts
@@ -23,6 +23,8 @@ export function taskTypeToName(taskType: TaskType) {
 			return "混元视频训练";
 		case TaskType.WAN_TRAINING:
 			return "wan视频训练";
+		case TaskType.FLUX_KONTEXT_TRAINING:
+			return "Flux Kontext 训练";
 		default:
 			return "未知任务";
 	}
@@ -68,6 +70,8 @@ export function taskTypeToClass(taskType: TaskType) {
 			return "item2";
 		case TaskType.WAN_TRAINING:
 			return "item3";
+		case TaskType.FLUX_KONTEXT_TRAINING:
+			return "item4";
 		default:
 			return "item0";
 	}

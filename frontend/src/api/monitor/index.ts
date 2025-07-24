@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:03
- * @LastEditTime: 2025-03-28 11:23:15
+ * @LastEditTime: 2025-07-24 14:13:32
  * @LastEditors: mulingyuer
  * @Description: 监控api
  * @FilePath: \frontend\src\api\monitor\index.ts
@@ -9,6 +9,8 @@
  */
 import { request } from "@/request";
 import type {
+	FluxKontextTrainingInfoParams,
+	FluxKontextTrainingInfoResult,
 	GPUMonitorInfoResult,
 	HyVideoTrainingInfoParams,
 	HyVideoTrainingInfoResult,
@@ -65,6 +67,16 @@ export function hyVideoTrainingInfo(params: HyVideoTrainingInfoParams) {
 /** 监听wan视频训练信息 */
 export function wanVideoTrainingInfo(params: WanVideoTrainingInfoParams) {
 	return request<WanVideoTrainingInfoResult>({
+		url: "/tasks/history",
+		method: "GET",
+		params,
+		showErrorMessage: false
+	});
+}
+
+/** 监听flux-kontext训练信息 */
+export function fluxKontextTrainingInfo(params: FluxKontextTrainingInfoParams) {
+	return request<FluxKontextTrainingInfoResult>({
 		url: "/tasks/history",
 		method: "GET",
 		params,

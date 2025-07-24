@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-04-11 08:58:06
+ * @LastEditTime: 2025-07-24 15:28:19
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -247,6 +247,63 @@ export interface WanVideoTrainingInfoResult {
 				lr_unet: number;
 				/** 不知道 */
 				lr_group0: number;
+		  }
+		| string;
+}
+
+/** 监听flux-kontext训练信息参数 */
+export interface FluxKontextTrainingInfoParams {
+	/** 任务id */
+	task_id: string;
+}
+
+/** 监听flux-kontext训练信息结果 */
+export interface FluxKontextTrainingInfoResult {
+	/** 任务 ID */
+	id: string;
+	/** 任务状态 */
+	status: TaskStatus;
+	/** 任务类型 */
+	task_type: TaskType.CAPTIONING;
+	/** 开始时间 */
+	start_time: number;
+	/** 结束时间 */
+	end_time: number | null;
+	/** 是否显示查看采样 */
+	is_sampling?: boolean;
+	/** 采样文件路径，只有开启了采样才会有 */
+	sampling_path?: string;
+	/** 详情，没数据的时候是空对象，任务失败的时候是字符串 */
+	detail:
+		| {
+				/** 当前第几步 */
+				current: number;
+				/** 当前阶段 */
+				stage: string;
+				/** 数据集路径 */
+				dataset_path: string;
+				/** 总图片数量 */
+				total_images: number;
+				/** 模型名称 */
+				model_name: string;
+				/** 进度百分比 */
+				progress_percent: number;
+				/** 总训练步数 */
+				total: number;
+				/** 已经耗时，例："08:47" */
+				elapsed_time_str: string;
+				/** 剩余时间，例："1:57:15" */
+				remaining_time_str: string;
+				/** 每秒速度，例："2.49s/it" */
+				speed_str: string;
+				/** 学习率 */
+				learning_rate: number;
+				/** 损失 */
+				loss: number;
+				/** 估计总耗时 s */
+				estimated_total_time_seconds: number;
+				/** 每一步耗时 s */
+				seconds_per_step: number;
 		  }
 		| string;
 }

@@ -1,13 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-04-11 15:42:34
+ * @LastEditTime: 2025-07-24 15:12:35
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
  * 怎么可能会有bug！！！
  */
 import type {
+	FluxKontextTrainingInfoResult,
 	GPUMonitorInfoResult,
 	HyVideoTrainingInfoResult,
 	LoRATrainingInfoResult,
@@ -163,4 +164,36 @@ export interface CurrentTaskInfo {
 	name: string;
 	/** 任务进度百分比，例：20 */
 	progress: number;
+}
+
+/** flux kontext lora训练 */
+export interface FluxKontextData extends BaseMonitorData {
+	/** 当前进度 */
+	current: number;
+	/** 已经耗时 */
+	elapsed: string;
+	/** 当前损失 */
+	loss: number;
+	/** 剩余时间 */
+	remaining: string;
+	/** 每秒速度 */
+	speed: number;
+	/** 总进度 */
+	total: number;
+	/** 是否显示查看采样 */
+	showSampling: boolean;
+	/** 采样文件路径，开启采样时才有值，否则是空字符串 */
+	samplingPath: string;
+	/** 预估总时长 s */
+	totalTime: number;
+	/** 源数据，可能为空对象 */
+	raw?: FluxKontextTrainingInfoResult;
+}
+
+/** 监听flux kontext lora训练 */
+export interface MonitorFluxKontextData {
+	/** 是否监听 */
+	isListen: boolean;
+	/** lora数据 */
+	data: FluxKontextData;
 }

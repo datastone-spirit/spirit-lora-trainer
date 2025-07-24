@@ -1,13 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-04-11 14:55:42
+ * @LastEditTime: 2025-07-24 15:05:48
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
  * 怎么可能会有bug！！！
  */
 import type {
+	FluxKontextTrainingInfoResult,
 	HyVideoTrainingInfoResult,
 	LoRATrainingInfoResult,
 	ManualTagInfoResult,
@@ -21,6 +22,7 @@ import { useHYLora } from "@/hooks/task/useHYLora";
 import { useTag } from "@/hooks/task/useTag";
 import type { AxiosError } from "axios";
 import { useWanLora } from "@/hooks/task/useWanLora";
+import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
 
 class TaskInitializer {
 	constructor(private readonly taskData: CurrentTaskResult) {}
@@ -41,6 +43,9 @@ class TaskInitializer {
 				break;
 			case TaskType.WAN_TRAINING: // wan训练
 				initPromise = this.initWanTraining();
+				break;
+			case TaskType.FLUX_KONTEXT_TRAINING: // flux kontext 训练
+				initPromise = this.initFluxKontextTraining();
 				break;
 			default:
 				console.warn("未知任务类型", this.taskData.task_type);
@@ -92,6 +97,18 @@ class TaskInitializer {
 		const { wanLoraMonitor } = useWanLora();
 
 		return wanLoraMonitor.setInitData({
+			taskId: this.taskData.id
+		});
+	}
+
+	/** flux kontext 训练初始化 */
+	private async initFluxKontextTraining() {
+		const { status } = this.taskData as FluxKontextTrainingInfoResult;
+		if (status === "complete" || status === "failed") return;
+
+		const { fluxKontextLoraMonitor } = useFluxKontextLora();
+
+		return fluxKontextLoraMonitor.setInitData({
 			taskId: this.taskData.id
 		});
 	}

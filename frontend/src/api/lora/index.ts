@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 09:32:40
- * @LastEditTime: 2025-07-21 11:02:57
+ * @LastEditTime: 2025-07-24 14:08:50
  * @LastEditors: mulingyuer
  * @Description: lora api
  * @FilePath: \frontend\src\api\lora\index.ts
@@ -62,7 +62,7 @@ export function wanVideoVideoDatasetEstimate(data: WanVideoVideoDatasetEstimateD
 /** 启动flux kontext 训练 */
 export function startFluxKontextTraining(data: StartFluxKontextTrainingData) {
 	return request<StartFluxKontextTrainingResult>({
-		url: "",
+		url: "/training/kontext/start",
 		method: "POST",
 		data
 	});

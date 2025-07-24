@@ -59,6 +59,7 @@ declare module 'vue' {
     FieldSetWrapper: typeof import('./../src/components/FieldSetWrapper/FieldSetWrapper.vue')['default']
     FileManager: typeof import('./../src/components/Form/FileManager.vue')['default']
     FileSelector: typeof import('./../src/components/Form/FileSelector.vue')['default']
+    FluxKontextLoraTrainingMonitor: typeof import('./../src/components/Monitor/FluxKontextLoraTrainingMonitor/index.vue')['default']
     FluxNetworkModuleSelect: typeof import('./../src/components/Form/FluxNetworkModuleSelect.vue')['default']
     FolderSelector: typeof import('./../src/components/Form/FolderSelector.vue')['default']
     GlobalModalManager: typeof import('./../src/components/GlobalModalManager/index.vue')['default']

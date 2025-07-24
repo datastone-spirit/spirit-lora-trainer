@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-24 10:15:13
+ * @LastEditTime: 2025-07-24 15:02:35
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -46,31 +46,31 @@
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
-			:submit-loading="false"
+			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"
 		>
-			<!-- <template #monitor-progress-bar>
-				<LoRATrainingMonitor />
+			<template #monitor-progress-bar>
+				<FluxKontextLoraTrainingMonitor />
 			</template>
 			<template #right-btn-group>
 				<el-button
-					v-if="monitorFluxLoraData.data.showSampling"
+					v-if="monitorFluxKontextLoraData.data.showSampling"
 					size="large"
 					@click="onViewSampling"
 				>
 					查看采样
-				</el-button> -->
-			<!-- </template> -->
+				</el-button>
+			</template>
 		</TeleportFooterBarContent>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { FormInstance, FormRules, TabPaneName } from "element-plus";
-// import type { StartFluxKontextTrainingData } from "@/api/lora";
+import { startFluxKontextTraining, type StartFluxKontextTrainingData } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useSettingsStore } from "@/stores";
+import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { tomlStringify } from "@/utils/toml";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
@@ -79,12 +79,17 @@ import SampleConfig from "./components/SampleConfig/index.vue";
 import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
 import type { RuleForm } from "./types";
-import { generateDefaultDataset } from "./flex-kontext.helper";
-import { checkDirectory } from "@/utils/lora.helper";
+import { formatFormData, generateDefaultDataset } from "./flex-kontext.helper";
+import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
 import { getEnv } from "@/utils/env";
+import { validateForm } from "./flux-kontext.validate";
+import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
 
 const settingsStore = useSettingsStore();
+const trainingStore = useTrainingStore();
+const modalManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
+const { monitorFluxKontextLoraData, fluxKontextLoraMonitor } = useFluxKontextLora();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -93,7 +98,7 @@ const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}flux_kontext_form`;
 const defaultForm: RuleForm = {
 	type: "sd_trainer",
-	training_folder: "",
+	training_folder: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 	trigger_word: "",
 	device: "cuda:0",
 	network: {
@@ -228,12 +233,63 @@ function onResetData() {
 }
 
 // 提交表单
-function onSubmit() {}
+const submitLoading = ref(false);
+async function onSubmit() {
+	try {
+		if (!ruleFormRef.value) return;
+		submitLoading.value = true;
+		const valid = await validateForm({
+			formRef: ruleFormRef,
+			formData: ruleForm,
+			trainingStore: trainingStore
+		});
+		if (!valid) {
+			submitLoading.value = false;
+			return;
+		}
 
-// 初始化
-(function init() {
+		// 开始训练
+		const data: StartFluxKontextTrainingData = formatFormData(ruleForm.value);
+		const { task_id } = await startFluxKontextTraining(data);
+		// // 监听训练数据
+		fluxKontextLoraMonitor.setTaskId(task_id).start();
+
+		submitLoading.value = false;
+
+		ElMessage.success("成功创建训练任务");
+	} catch (error) {
+		// 停止监控LoRA训练数据
+		fluxKontextLoraMonitor.stop();
+		submitLoading.value = false;
+		console.error("创建训练任务失败", error);
+	}
+}
+
+/** 查看采样 */
+function onViewSampling() {
+	modalManagerStore.setViewSamplingDrawerModal({
+		open: true,
+		filePath: monitorFluxKontextLoraData.value.data.samplingPath
+	});
+}
+
+// 组件生命周期
+onMounted(() => {
+	// 初始化
 	initDataset();
-})();
+
+	fluxKontextLoraMonitor.resume();
+	// 恢复表单数据
+	recoveryTaskFormData({
+		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
+		isListen: monitorFluxKontextLoraData.value.isListen,
+		taskId: fluxKontextLoraMonitor.getTaskId(),
+		formData: ruleForm.value
+	});
+});
+onUnmounted(() => {
+	fluxKontextLoraMonitor.pause();
+});
 </script>
 
 <style lang="scss" scoped>

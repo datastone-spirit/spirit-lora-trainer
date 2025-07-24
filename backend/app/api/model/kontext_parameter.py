@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Tuple
 from utils.util import getmodelpath
 from app.api.common.utils import validate_training_data
 import dacite
@@ -152,6 +152,15 @@ class SampleConfig:
             config.prompts = []
         
         return True, ""
+    
+    def is_sampling(self) -> bool:
+        
+        if not self.prompts or len(self.prompts) == 0:
+            return False
+
+        if self.sample_every <= 0 or self.sample_steps <= 0:
+            return False
+        return True
 
 @dataclass
 class SaveConfig:
@@ -388,8 +397,23 @@ class KontextTrainingParameter:
             logger.warning("config.job is None or invalid, set to 'extension'")
             config.job = 'extension'
         
+        if len(config.config.process) != 1:
+            return False, "config.config.process one one process was allowed"
+        
         valid, reason = KontextConfig.validate(config.config)
         if not valid:
             return False, reason
         
         return True, ""
+    
+    def is_sampling(self) -> bool:
+        if not self.config or not self.config.process:
+            return False
+        
+        return self.config.process[0].sample.is_sampling()
+    
+    def sampling_path(self) -> str:
+        if not self.is_sampling():
+            return ""
+        
+        return os.path.join(self.config.process[0].training_folder, self.config.name, "samples")

@@ -156,6 +156,8 @@ class Task:
         task.task_type = TaskType.KONTEXT_TRAINING
         task.start_time = time.time()
         task.stdout_lines = []
+        task.is_sampling = training_parameter.is_sampling()
+        task.sampling_path = training_parameter.sampling_path()
         return task
 
 

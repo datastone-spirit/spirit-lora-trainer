@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 09:41:55
- * @LastEditTime: 2025-07-24 10:06:50
+ * @LastEditTime: 2025-07-24 16:22:00
  * @LastEditors: mulingyuer
  * @Description: 数据集
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\index.vue
@@ -136,13 +136,6 @@ async function onTagClick() {
 		console.log("打标任务创建失败", error);
 	}
 }
-
-// 初始化
-(function init() {
-	if (ruleForm.value.datasets.length > 0) {
-		activeTabName.value = ruleForm.value.datasets[0].id;
-	}
-})();
 </script>
 
 <style lang="scss" scoped>

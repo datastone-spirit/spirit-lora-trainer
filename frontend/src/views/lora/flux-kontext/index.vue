@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-24 15:02:35
+ * @LastEditTime: 2025-07-24 16:20:58
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -40,7 +40,7 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="activeDataSetItem?.folder_path ?? ''" />
+				<SplitRightPanel :toml="toml" :dir="dir" />
 			</template>
 		</TwoSplit>
 		<TeleportFooterBarContent
@@ -157,7 +157,7 @@ const defaultForm: RuleForm = {
 		neg: "",
 		prompts: []
 	},
-	datasets: [],
+	datasets: [generateDefaultDataset(0)],
 	name: "",
 	tagConfig: {
 		tagger_model: "joy-caption-alpha-two",
@@ -168,7 +168,8 @@ const defaultForm: RuleForm = {
 		tagger_is_append: false
 	}
 };
-const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(defaultForm));
+const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
+// const ruleForm = ref(structuredClone(defaultForm));
 const rules = reactive<FormRules<RuleForm>>({
 	name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	trigger_word: [{ required: true, message: "请输入触发词", trigger: "blur" }],
@@ -196,10 +197,10 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-const activeTabName = ref<TabPaneName>("");
-const activeDataSetItem = computed(() => {
+const activeTabName = ref(ruleForm.value.datasets[0].id);
+const dir = computed(() => {
 	const findItem = ruleForm.value.datasets.find((item) => item.id === activeTabName.value);
-	return findItem;
+	return findItem?.folder_path ?? "";
 });
 
 // 折叠
@@ -217,19 +218,11 @@ const generateToml = useDebounceFn(() => {
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
-// 初始化数据集
-function initDataset() {
-	if (ruleForm.value.datasets.length > 0) return;
-	const data = generateDefaultDataset(0);
-	ruleForm.value.datasets.push(data);
-	activeTabName.value = data.id;
-}
-
 // 重置表单
 function onResetData() {
 	if (ruleFormRef.value) ruleFormRef.value.resetFields();
 	ruleForm.value = structuredClone(defaultForm);
-	initDataset();
+	activeTabName.value = ruleForm.value.datasets[0].id;
 }
 
 // 提交表单
@@ -275,9 +268,6 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
-	// 初始化
-	initDataset();
-
 	fluxKontextLoraMonitor.resume();
 	// 恢复表单数据
 	recoveryTaskFormData({

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-24 16:20:58
+ * @LastEditTime: 2025-07-24 16:23:03
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstance, FormRules, TabPaneName } from "element-plus";
+import type { FormInstance, FormRules } from "element-plus";
 import { startFluxKontextTraining, type StartFluxKontextTrainingData } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";

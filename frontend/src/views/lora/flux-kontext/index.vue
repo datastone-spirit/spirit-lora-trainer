@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-23 18:18:16
+ * @LastEditTime: 2025-07-24 10:15:13
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -80,10 +80,15 @@ import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
 import type { RuleForm } from "./types";
 import { generateDefaultDataset } from "./flex-kontext.helper";
+import { checkDirectory } from "@/utils/lora.helper";
+import { getEnv } from "@/utils/env";
 
 const settingsStore = useSettingsStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
+const env = getEnv();
+/** 是否开启小白校验 */
+const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}flux_kontext_form`;
 const defaultForm: RuleForm = {
@@ -159,7 +164,31 @@ const defaultForm: RuleForm = {
 	}
 };
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(defaultForm));
-const rules = reactive<FormRules<RuleForm>>({});
+const rules = reactive<FormRules<RuleForm>>({
+	name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
+	trigger_word: [{ required: true, message: "请输入触发词", trigger: "blur" }],
+	training_folder: [
+		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("LoRA保存目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		},
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (!isWhiteCheck) return callback();
+				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
+				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
+			}
+		}
+	]
+});
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
 const activeTabName = ref<TabPaneName>("");
@@ -186,7 +215,7 @@ watch(ruleForm, generateToml, { deep: true, immediate: true });
 // 初始化数据集
 function initDataset() {
 	if (ruleForm.value.datasets.length > 0) return;
-	const data = generateDefaultDataset(1);
+	const data = generateDefaultDataset(0);
 	ruleForm.value.datasets.push(data);
 	activeTabName.value = data.id;
 }

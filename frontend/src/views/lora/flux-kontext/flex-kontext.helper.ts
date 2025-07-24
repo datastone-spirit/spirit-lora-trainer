@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-23 17:50:46
- * @LastEditTime: 2025-07-23 18:12:36
+ * @LastEditTime: 2025-07-24 10:15:55
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 帮助方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flex-kontext.helper.ts
@@ -22,12 +22,13 @@ export function generateDefaultSamplePrompt(): SamplePrompts[number] {
 
 /** 生成默认数据集对象 */
 export function generateDefaultDataset(index?: number): Datasets[number] {
-	index = index ?? 1;
+	index = index ?? 0;
 	const env = getEnv();
 
 	return {
 		id: generateUUID(),
-		name: `数据集${index}`,
+		name: `数据集${index + 1}`,
+		index: index,
 		folder_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 		control_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 		caption_dropout_rate: 0.05,

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 09:41:55
- * @LastEditTime: 2025-07-23 17:34:04
+ * @LastEditTime: 2025-07-24 10:06:50
  * @LastEditors: mulingyuer
  * @Description: 数据集
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\index.vue
@@ -57,10 +57,21 @@
 				/>
 			</template>
 			<TagSubmitButton
+				:is-bottom-margin="false"
 				:loading="loading || monitorTagData.isListen"
 				:disabled="disabled"
 				@submit="onTagClick"
 			/>
+			<el-form-item class="data-set-alert">
+				<el-alert
+					class="no-select"
+					title="注意：只会给当前选中的数据集进行打标，如果需要打标多个数据集，请一个一个操作。"
+					type="warning"
+					:closable="false"
+					show-icon
+					effect="dark"
+				/>
+			</el-form-item>
 		</div>
 	</div>
 </template>
@@ -177,6 +188,7 @@ async function onTagClick() {
 		}
 	}
 }
-.data-set-add-btn {
+.data-set-alert {
+	margin-bottom: 0;
 }
 </style>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 11:39:51
- * @LastEditTime: 2025-07-23 18:14:17
+ * @LastEditTime: 2025-07-24 10:11:55
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\Tabs.vue
@@ -26,50 +26,53 @@
 		>
 			<PopoverFormItem
 				label="数据集目录"
-				:prop="`dataset[${index}].folder_path`"
+				:prop="`datasets[${index}].folder_path`"
 				popover-content="folder_path"
+				:rules="rules.folder_path"
 			>
 				<FolderSelector v-model="item.folder_path" placeholder="请选择数据集目录" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="控制数据集集目录"
-				:prop="`dataset[${index}].control_path`"
+				:prop="`datasets[${index}].control_path`"
 				popover-content="control_path"
+				:rules="rules.control_path"
 			>
 				<FolderSelector v-model="item.control_path" placeholder="请选择控制数据集集目录" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="LoRA 权重"
-				:prop="`dataset[${index}].network_weight`"
+				:prop="`datasets[${index}].network_weight`"
 				popover-content="network_weight"
 			>
 				<el-input-number v-model.number="item.network_weight" :step="1" step-strictly />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label=" 标题 Dropout Rate"
-				:prop="`dataset[${index}].caption_dropout_rate`"
+				:prop="`datasets[${index}].caption_dropout_rate`"
 				popover-content="caption_dropout_rate"
 			>
 				<el-input-number v-model.number="item.caption_dropout_rate" :step="0.01" :min="0" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="是否将图像的潜在表示（latents）缓存到磁盘"
-				:prop="`dataset[${index}].cache_latents_to_disk`"
+				:prop="`datasets[${index}].cache_latents_to_disk`"
 				popover-content="cache_latents_to_disk"
 			>
 				<el-switch v-model="item.cache_latents_to_disk" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="是否正则化"
-				:prop="`dataset[${index}].is_reg`"
+				:prop="`datasets[${index}].is_reg`"
 				popover-content="is_reg"
 			>
 				<el-switch v-model="item.is_reg" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="分辨率"
-				:prop="`dataset[${index}].resolution`"
+				:prop="`datasets[${index}].resolution`"
 				popover-content="resolution"
+				:rules="rules.resolution"
 			>
 				<el-checkbox-group v-model="item.resolution">
 					<el-checkbox label="256" :value="256" />
@@ -85,12 +88,58 @@
 </template>
 
 <script setup lang="ts">
-import type { TabPaneName } from "element-plus";
+import { checkDirectory } from "@/utils/lora.helper";
+import type { FormItemRule, TabPaneName } from "element-plus";
 import { generateDefaultDataset } from "../../flex-kontext.helper";
 import type { RuleForm } from "../../types";
 
+type DynamicKeys = keyof RuleForm["datasets"][number];
+type DynamicRules = Partial<Record<DynamicKeys, FormItemRule[]>>;
+
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 const activeTabName = defineModel({ type: String as PropType<TabPaneName>, required: true });
+
+// rules
+const rules = reactive<DynamicRules>({
+	folder_path: [
+		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("数据集目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		}
+	],
+	control_path: [
+		{
+			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (!value || value.trim() === "") {
+					callback();
+					return;
+				}
+				checkDirectory(value).then((exists) => {
+					if (!exists) {
+						callback(new Error("控制数据集目录不存在"));
+						return;
+					}
+					callback();
+				});
+			}
+		}
+	],
+	resolution: [
+		{
+			type: "array",
+			required: true,
+			message: "请选择至少一个分辨率"
+		}
+	]
+});
 
 // tab编辑
 function onTabEdit(paneName: TabPaneName | undefined, action: "remove" | "add") {
@@ -106,8 +155,9 @@ function onTabEdit(paneName: TabPaneName | undefined, action: "remove" | "add") 
 
 // 新增数据集
 function onAddDataSet() {
-	const index = ruleForm.value.datasets.length + 1;
-	const data = generateDefaultDataset(index);
+	const { datasets } = ruleForm.value;
+	const lastIndex = datasets[datasets.length - 1]?.index ?? 0;
+	const data = generateDefaultDataset(lastIndex + 1);
 	ruleForm.value.datasets.push(data);
 	activeTabName.value = data.id;
 }

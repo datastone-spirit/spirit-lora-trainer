@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-24 10:25:29
- * @LastEditTime: 2025-07-24 10:37:59
+ * @LastEditTime: 2025-07-25 08:49:32
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 校验方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flux-kontext.validate.ts
@@ -62,12 +62,10 @@ async function validateDataset(ruleForm: Ref<RuleForm>): Promise<boolean> {
 			return false;
 		}
 
-		if (typeof item.control_path === "string" && item.control_path.trim() !== "") {
-			const hasControlData = await checkData(item.control_path);
-			if (!hasControlData) {
-				showError({ message: `${item.name}下的控制数据集目录下没有数据，请检查路径是否正确` });
-				return false;
-			}
+		const hasControlData = await checkData(item.control_path);
+		if (!hasControlData) {
+			showError({ message: `${item.name}下的控制数据集目录下没有数据，请检查路径是否正确` });
+			return false;
 		}
 	}
 

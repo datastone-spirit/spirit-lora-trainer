@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:55:18
- * @LastEditTime: 2025-07-24 10:11:30
+ * @LastEditTime: 2025-07-25 08:42:01
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 类型
  * @FilePath: \frontend\src\views\lora\flux-kontext\types.ts
@@ -51,6 +51,8 @@ export type RuleForm = Prettify<
 					name: string;
 					/** 下标 */
 					index: number;
+					/** 切换右侧数据集预览 */
+					preview: "folder_path" | "control_path";
 				}
 			>
 		>;

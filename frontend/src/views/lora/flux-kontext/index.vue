@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-24 16:23:03
+ * @LastEditTime: 2025-07-25 08:50:39
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -200,7 +200,8 @@ const isExpert = computed(() => settingsStore.isExpert);
 const activeTabName = ref(ruleForm.value.datasets[0].id);
 const dir = computed(() => {
 	const findItem = ruleForm.value.datasets.find((item) => item.id === activeTabName.value);
-	return findItem?.folder_path ?? "";
+	if (!findItem) return "";
+	return findItem.preview === "folder_path" ? findItem.folder_path : findItem.control_path;
 });
 
 // 折叠

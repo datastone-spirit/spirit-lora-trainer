@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 11:39:51
- * @LastEditTime: 2025-07-24 10:11:55
+ * @LastEditTime: 2025-07-25 08:47:59
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\Tabs.vue
@@ -24,6 +24,19 @@
 			:label="item.name"
 			:name="item.id"
 		>
+			<PopoverFormItem
+				label="切换右侧数据集预览"
+				:prop="`datasets[${index}].preview`"
+				popover-content="preview"
+			>
+				<el-switch
+					v-model="item.preview"
+					inactive-value="folder_path"
+					inactive-text="数据集目录"
+					active-value="control_path"
+					active-text="控制数据集目录"
+				/>
+			</PopoverFormItem>
 			<PopoverFormItem
 				label="数据集目录"
 				:prop="`datasets[${index}].folder_path`"
@@ -116,6 +129,7 @@ const rules = reactive<DynamicRules>({
 		}
 	],
 	control_path: [
+		{ required: true, message: "请选择训练用的控制数据集目录", trigger: "change" },
 		{
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				if (!value || value.trim() === "") {

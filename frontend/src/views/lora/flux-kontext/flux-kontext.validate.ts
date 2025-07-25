@@ -1,97 +1,86 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-24 10:25:29
- * @LastEditTime: 2025-07-25 09:03:49
+ * @LastEditTime: 2025-07-25 15:01:41
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 校验方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flux-kontext.validate.ts
  * 怎么可能会有bug！！！
  */
-import type { FormInstance, MessageOptions } from "element-plus";
+import type { ValidationResult } from "@/utils/lora/lora.validator";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
+import type { FormInstance } from "element-plus";
 import type { RuleForm } from "./types";
-import type { Ref } from "vue";
-import { formatFormValidateMessage } from "@/utils/tools";
-import { checkData } from "@/utils/lora.helper";
-import { useTrainingStore, useModalManagerStore } from "@/stores";
 
-export interface ValidateFormData {
-	formRef: Ref<FormInstance | undefined>;
-	formData: Ref<RuleForm>;
-	trainingStore: ReturnType<typeof useTrainingStore>;
+export interface ValidateData {
+	/** 表单数据 */
+	ruleForm: RuleForm;
+	/** 表单实例 */
+	formInstance: FormInstance;
 }
 
-/** 显示错误消息 */
-function showError(options: MessageOptions) {
-	if (!options.type) options.type = "error";
-	if (!("showClose" in options)) options.showClose = true;
-	ElMessage(options);
-}
-
-/** 基础表单校验 */
-function validateFormFields(formRef: Ref<FormInstance | undefined>): Promise<boolean> {
-	return new Promise((resolve) => {
-		if (!formRef.value) return resolve(false);
-
-		formRef.value.validate((valid, invalidFields) => {
-			if (!valid) {
-				const message = invalidFields ? formatFormValidateMessage(invalidFields) : "请填写必填项";
-				const duration = message.split("\n").length >= 2 ? 6000 : 3000;
-				showError({ message, type: "error", customClass: "break-line-message", duration });
-				resolve(false);
-			}
-			resolve(true);
-		});
-	});
-}
-
-/** GPU占用校验 */
-function validateGPU(trainingStore: ReturnType<typeof useTrainingStore>): boolean {
-	if (trainingStore.useGPU) {
-		showError({ message: "GPU已经被占用，请等待对应任务完成", type: "warning" });
-		return false;
-	}
-	return true;
-}
-
-/** 数据集校验 */
-async function validateDataset(ruleForm: Ref<RuleForm>): Promise<boolean> {
-	for (const item of ruleForm.value.datasets) {
-		const hasFolderData = await checkData(item.folder_path);
-		if (!hasFolderData) {
-			showError({ message: `${item.name}下的数据集目录下没有数据，请上传训练素材` });
-			return false;
+/** flux-kontext 数据集校验 */
+async function validateDataset(ruleForm: RuleForm): Promise<ValidationResult> {
+	try {
+		const { datasets } = ruleForm;
+		if (!datasets.length) {
+			const message = "最低需要一个数据集";
+			LoRAValidator.showErrorMessage({ message });
+			return { valid: false, message: "请选择数据集" };
 		}
+
+		for (const item of datasets) {
+			// 数据集
+			const hasFolderData = await LoRAValidator.validateDirectory({
+				path: item.folder_path,
+				checkImageAndLabel: true
+			});
+			if (!hasFolderData.valid) {
+				return { valid: false, message: `${item.name}下的数据集目录下没有数据，请上传训练素材` };
+			}
+
+			// 控制数据集
+			// TODO: 目前api不支持判断目录下是否只有图片文件，flux kontext的控制数据集目录下只会是图片文件，所
+			// 以暂时只能做目录是否存在的校验，理论上是不需要的，但是还是保留吧
+			const hasControlPath = await LoRAValidator.validateLoRASaveDir({ path: item.control_path });
+			if (!hasControlPath.valid) {
+				return {
+					valid: false,
+					message: `${item.name}下的控制数据集目录不存在，请重新选择控制数据集目录`
+				};
+			}
+		}
+
+		// 校验通过
+		return { valid: true };
+	} catch (error) {
+		return {
+			valid: false,
+			message: `数据集校验发生错误: ${(error as Error)?.message ?? "未知错误"}`
+		};
 	}
-
-	return true;
 }
 
-/** LoRA保存路径校验 */
-export function validateLoRASaveDir(formData: Ref<RuleForm>): boolean {
-	if (import.meta.env.VITE_APP_WHITE_CHECK === "false") return true;
-	if (formData.value.training_folder.startsWith("/root")) return true;
-	// 展示警告弹窗
-	const modelManagerStore = useModalManagerStore();
-	modelManagerStore.setLoraSavePathWarningModal(true);
-
-	return false;
-}
-
-/** 主校验函数 */
-export async function validateForm(data: ValidateFormData): Promise<boolean> {
-	const { formRef, formData, trainingStore } = data;
+/** 校验主函数 */
+export async function validate(data: ValidateData): Promise<ValidationResult> {
+	const { ruleForm, formInstance } = data;
 
 	const validations = [
-		() => validateLoRASaveDir(formData),
-		() => validateFormFields(formRef),
-		() => validateGPU(trainingStore),
-		() => validateDataset(formData)
+		// LoRA保存路径校验
+		() => LoRAValidator.validateLoRASaveDir({ path: ruleForm.training_folder }),
+		// 表单校验
+		() => LoRAValidator.validateForm(formInstance),
+		// GPU占用校验
+		() => LoRAValidator.validateGpu(),
+		// 数据集校验
+		() => validateDataset(ruleForm)
 	];
 
+	// NOTE: 每个校验方法都会保证不会抛出异常，所以不需要try
 	for (const validation of validations) {
-		const isValid = await validation();
-		if (!isValid) return false;
+		const validResult = await validation();
+		if (!validResult.valid) return validResult;
 	}
 
-	return true;
+	return { valid: true };
 }

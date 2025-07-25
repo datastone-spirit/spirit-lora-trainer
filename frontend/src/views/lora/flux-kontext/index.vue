@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-25 08:50:39
+ * @LastEditTime: 2025-07-25 15:20:54
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -67,33 +67,31 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstance, FormRules } from "element-plus";
 import { startFluxKontextTraining, type StartFluxKontextTrainingData } from "@/api/lora";
+import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
+import { useModalManagerStore, useSettingsStore } from "@/stores";
+import { getEnv } from "@/utils/env";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { tomlStringify } from "@/utils/toml";
+import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import DataSet from "./components/DataSet/index.vue";
 import SampleConfig from "./components/SampleConfig/index.vue";
 import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
-import type { RuleForm } from "./types";
 import { formatFormData, generateDefaultDataset } from "./flex-kontext.helper";
-import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
-import { getEnv } from "@/utils/env";
-import { validateForm } from "./flux-kontext.validate";
-import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
+import { validate } from "./flux-kontext.validate";
+import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
-const trainingStore = useTrainingStore();
 const modalManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { monitorFluxKontextLoraData, fluxKontextLoraMonitor } = useFluxKontextLora();
 
 const env = getEnv();
-/** 是否开启小白校验 */
-const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}flux_kontext_form`;
 const defaultForm: RuleForm = {
@@ -169,7 +167,6 @@ const defaultForm: RuleForm = {
 	}
 };
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
-// const ruleForm = ref(structuredClone(defaultForm));
 const rules = reactive<FormRules<RuleForm>>({
 	name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	trigger_word: [{ required: true, message: "请输入触发词", trigger: "blur" }],
@@ -177,8 +174,8 @@ const rules = reactive<FormRules<RuleForm>>({
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
 						return;
 					}
@@ -188,9 +185,16 @@ const rules = reactive<FormRules<RuleForm>>({
 		},
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (!isWhiteCheck) return callback();
-				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
-				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
+				LoRAValidator.validateLoRASaveDir({ path: value, shouldShowErrorDialog: false }).then(
+					({ valid, message }) => {
+						if (!valid) {
+							callback(new Error(message));
+							return;
+						}
+
+						callback();
+					}
+				);
 			}
 		}
 	]
@@ -232,10 +236,9 @@ async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
-		const valid = await validateForm({
-			formRef: ruleFormRef,
-			formData: ruleForm,
-			trainingStore: trainingStore
+		const { valid } = await validate({
+			ruleForm: ruleForm.value,
+			formInstance: ruleFormRef.value
 		});
 		if (!valid) {
 			submitLoading.value = false;
@@ -271,7 +274,7 @@ function onViewSampling() {
 onMounted(() => {
 	fluxKontextLoraMonitor.resume();
 	// 恢复表单数据
-	recoveryTaskFormData({
+	LoRAHelper.recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
 		isListen: monitorFluxKontextLoraData.value.isListen,
 		taskId: fluxKontextLoraMonitor.getTaskId(),

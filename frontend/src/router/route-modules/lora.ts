@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2025-07-22 15:06:44
+ * @LastEditTime: 2025-07-25 11:32:22
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
@@ -20,14 +20,6 @@ export default {
 		showFooter: true
 	},
 	children: [
-		// {
-		// 	path: "/lora/sdxl",
-		// 	name: "LoRA-SDXL",
-		// 	component: () => import("@/views/lora/sdxl/index.vue"),
-		// 	meta: {
-		// 		title: "SDXL"
-		// 	}
-		// },
 		{
 			path: "/lora/flux",
 			name: "LoRA-Flux",

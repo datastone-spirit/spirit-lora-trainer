@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-04-11 15:57:22
+ * @LastEditTime: 2025-07-25 09:37:56
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -12,9 +12,28 @@ import type {
 	StartWanVideoTrainingVideoDataset,
 	WanVideoVideoDatasetEstimateData
 } from "@/api/lora";
-import { filterAndConvertKeysToNumber } from "@/utils/lora.helper";
 import { tomlStringify } from "@/utils/toml";
 import type { RuleForm, TargetFrames } from "./types";
+
+/** 过滤并转换对象中的键值对 */
+export function filterAndConvertKeysToNumber(
+	data: Record<string, any>, // 接收一个任意键值对的对象
+	keys: string[] // 接收一个key数组
+): Record<string, number> {
+	// 返回一个新的对象，值为number类型
+	const result: Record<string, number> = {};
+
+	keys.forEach((key) => {
+		if (key in data) {
+			// 判断key是否在对象中
+			const value = data[key];
+			// 尝试将值转换为数字，如果值不是数字或者不能转换，返回NaN
+			result[key] = Number(value);
+		}
+	});
+
+	return result;
+}
 
 export class WanHelper {
 	/** 数据格式化 */

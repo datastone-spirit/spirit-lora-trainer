@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 09:58:06
- * @LastEditTime: 2025-07-28 09:42:24
+ * @LastEditTime: 2025-07-28 15:49:54
  * @LastEditors: mulingyuer
  * @Description: 公共的lora校验
  * @FilePath: \frontend\src\utils\lora\lora.validator\index.ts
@@ -89,52 +89,34 @@ export class LoRAValidator {
 			const pathList = Array.isArray(path) ? path : [path];
 
 			for (const dir of pathList) {
-				// 如果目录不合法或者校验是否存在内容不通过，都会抛出异常
-				// 所以我要再包一层try来捕获异常
-				try {
-					const result = await checkDirectoryExists({
-						path: dir,
-						has_data: checkImageAndLabel
-					});
-					if (!result.exists) {
-						const message = `目录 ${dir} 不存在，请检查路径是否正确`;
-						if (shouldShowErrorDialog) {
-							LoRAValidator.showErrorMessage({ message });
-						}
+				const result = await checkDirectoryExists({
+					path: dir,
+					has_data: checkImageAndLabel
+				});
 
-						return {
-							valid: false,
-							message
-						};
+				if (!result.exists) {
+					const message = `目录 ${dir} 不存在，请检查路径是否正确`;
+					if (shouldShowErrorDialog) {
+						LoRAValidator.showErrorMessage({ message });
 					}
 
-					if (checkImageAndLabel && !result.has_data) {
-						const message = `数据集目录 ${dir} 下没有数据，请上传训练素材`;
-						if (shouldShowErrorDialog) {
-							LoRAValidator.showErrorMessage({ message });
-						}
+					return { valid: false, message };
+				}
 
-						return {
-							valid: false,
-							message
-						};
-					}
-				} catch {
+				if (checkImageAndLabel && !result.has_data) {
 					const message = `数据集目录 ${dir} 下没有数据，请上传训练素材`;
 					if (shouldShowErrorDialog) {
 						LoRAValidator.showErrorMessage({ message });
 					}
 
-					return {
-						valid: false,
-						message
-					};
+					return { valid: false, message };
 				}
 			}
 
 			return { valid: true };
 		} catch (error) {
-			const message = `数据集目录发生错误: ${(error as Error)?.message ?? "未知错误"}`;
+			// 校验不通过会直接触发catch
+			const message = (error as Error)?.message ?? "未知错误";
 			if (shouldShowErrorDialog) {
 				LoRAValidator.showErrorMessage({ message });
 			}

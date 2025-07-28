@@ -69,7 +69,7 @@
 					/>
 				</template>
 				<TagSubmitButton
-					:loading="submitLoading || monitorTagData.isListen"
+					:loading="submitLoading || trainingStore.trainingTagData.isListen"
 					:disabled="trainingStore.useGPU"
 					:is-bottom-margin="false"
 					@submit="onSubmit"
@@ -127,7 +127,7 @@ interface RuleForm {
 }
 
 const trainingStore = useTrainingStore();
-const { monitorTagData, tag, tagMonitor } = useTag();
+const { tag, tagMonitor } = useTag();
 const { gpuMonitor } = useGPU();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 10:43:18
- * @LastEditTime: 2025-07-25 17:25:53
+ * @LastEditTime: 2025-07-28 15:42:34
  * @LastEditors: mulingyuer
  * @Description: 公共的lora校验类型
  * @FilePath: \frontend\src\utils\lora\lora.validator\types.ts

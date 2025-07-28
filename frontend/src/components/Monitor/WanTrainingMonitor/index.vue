@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-27 15:14:43
- * @LastEditTime: 2025-04-11 15:46:39
+ * @LastEditTime: 2025-07-28 15:10:11
  * @LastEditors: mulingyuer
  * @Description: wan训练进度条
  * @FilePath: \frontend\src\components\Monitor\WanTrainingMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="monitorWanLoraData.isListen" class="wan-training-monitor">
+	<div v-if="trainingStore.trainingWanLoRAData.isListen" class="wan-training-monitor">
 		<div v-if="isLoad" class="wan-training-monitor-empty">
 			<el-text> {{ loadText }} </el-text>
 			<el-text class="text-dot"></el-text>
@@ -17,43 +17,43 @@
 			<div class="wan-training-monitor-content-head">
 				<el-progress
 					class="wan-training-monitor-progress"
-					:percentage="monitorWanLoraData.data.progress"
+					:percentage="loraData.progress"
 					:show-text="false"
 					:stroke-width="8"
 				></el-progress>
 				<el-text class="wan-training-monitor-round">
-					{{ monitorWanLoraData.data.current }}/{{ monitorWanLoraData.data.total }}
+					{{ loraData.current }}/{{ loraData.total }}
 				</el-text>
 			</div>
 			<div class="wan-training-monitor-content-body">
 				<div class="wan-training-monitor-item">
 					<div class="wan-training-monitor-item-label">已用时长</div>
 					<div class="wan-training-monitor-item-value">
-						{{ monitorWanLoraData.data.elapsed }}
+						{{ loraData.elapsed }}
 					</div>
 				</div>
 				<div class="wan-training-monitor-item">
 					<div class="wan-training-monitor-item-label">预估剩余时长</div>
 					<div class="wan-training-monitor-item-value">
-						{{ monitorWanLoraData.data.remaining }}
+						{{ loraData.remaining }}
 					</div>
 				</div>
 				<div class="wan-training-monitor-item">
 					<div class="wan-training-monitor-item-label">平均loss</div>
 					<div class="wan-training-monitor-item-value">
-						{{ toFixed(monitorWanLoraData.data.average_loss) }}
+						{{ toFixed(loraData.average_loss) }}
 					</div>
 				</div>
 				<div class="wan-training-monitor-item">
 					<div class="wan-training-monitor-item-label">当前loss</div>
 					<div class="wan-training-monitor-item-value">
-						{{ toFixed(monitorWanLoraData.data.current_loss) }}
+						{{ toFixed(loraData.current_loss) }}
 					</div>
 				</div>
 				<div class="wan-training-monitor-item">
 					<div class="wan-training-monitor-item-label">总轮数</div>
 					<div class="wan-training-monitor-item-value">
-						{{ monitorWanLoraData.data.total_epoch }}
+						{{ loraData.total_epoch }}
 					</div>
 				</div>
 			</div>
@@ -62,22 +62,24 @@
 </template>
 
 <script setup lang="ts">
-import { useWanLora } from "@/hooks/task/useWanLora";
 import { isEmptyObject, objectHasKeys } from "@/utils/tools";
+import { useTrainingStore } from "@/stores";
 
-const { monitorWanLoraData } = useWanLora();
+const trainingStore = useTrainingStore();
+
+const loraData = computed(() => trainingStore.trainingWanLoRAData.data);
 /** 是否还在加载中 */
 const isLoad = computed(() => {
-	const rawData = monitorWanLoraData.value.data.raw;
+	const rawData = trainingStore.trainingWanLoRAData.raw;
 	if (!rawData) return true;
-	if (monitorWanLoraData.value.data.phase !== "WanTrainingSubTask") return true;
+	if (loraData.value.phase !== "WanTrainingSubTask") return true;
 	const isEmpty = !rawData.detail || isEmptyObject(rawData.detail);
 	const hasKey = objectHasKeys(rawData.detail, ["current", "loss", "total"]);
 	return isEmpty || !hasKey;
 });
 /** 加载时的提示文本 */
 const loadText = computed(() => {
-	const phase = monitorWanLoraData.value.data.phase ?? "none";
+	const phase = loraData.value.phase ?? "none";
 	switch (phase) {
 		case "WanPrepareJsonlFileSubTask":
 			return "准备训练数据";

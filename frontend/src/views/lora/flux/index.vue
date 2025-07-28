@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-07-25 17:28:11
+ * @LastEditTime: 2025-07-28 11:47:53
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -57,7 +57,7 @@
 			</template>
 			<template #right-btn-group>
 				<el-button
-					v-if="monitorFluxLoraData.data.showSampling"
+					v-if="trainingStore.trainingFluxLoRAData.data.showSampling"
 					size="large"
 					@click="onViewSampling"
 				>
@@ -73,7 +73,7 @@ import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import { useFluxLora } from "@/hooks/task/useFluxLora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useModalManagerStore, useSettingsStore } from "@/stores";
+import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
@@ -91,7 +91,8 @@ import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();
-const { monitorFluxLoraData, fluxLoraMonitor } = useFluxLora();
+const trainingStore = useTrainingStore();
+const { fluxLoraMonitor } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const env = getEnv();
@@ -520,7 +521,7 @@ async function onSubmit() {
 function onViewSampling() {
 	modalManagerStore.setViewSamplingDrawerModal({
 		open: true,
-		filePath: monitorFluxLoraData.value.data.samplingPath
+		filePath: trainingStore.trainingFluxLoRAData.data.samplingPath
 	});
 }
 
@@ -530,7 +531,7 @@ onMounted(() => {
 	// 恢复表单数据
 	LoRAHelper.recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: monitorFluxLoraData.value.isListen,
+		isListen: trainingStore.trainingFluxLoRAData.isListen,
 		taskId: fluxLoraMonitor.getTaskId(),
 		formData: ruleForm.value
 	});

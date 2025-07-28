@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-07-28 09:44:29
+ * @LastEditTime: 2025-07-28 15:11:16
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -51,7 +51,11 @@
 				<WanTrainingMonitor />
 			</template>
 			<template #right-btn-group>
-				<el-button v-if="monitorWanLoraData.data.showSampling" size="large" @click="onViewSampling">
+				<el-button
+					v-if="trainingStore.trainingWanLoRAData.data.showSampling"
+					size="large"
+					@click="onViewSampling"
+				>
 					查看采样
 				</el-button>
 			</template>
@@ -63,9 +67,8 @@
 import type { StartWanVideoTrainingData } from "@/api/lora";
 import { startWanVideoTraining } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useSettingsStore, useModalManagerStore } from "@/stores";
+import { useSettingsStore, useModalManagerStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
-// import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { tomlStringify } from "@/utils/toml";
@@ -83,8 +86,9 @@ import { useWanLora } from "@/hooks/task/useWanLora";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();
+const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const { wanLoraMonitor, monitorWanLoraData } = useWanLora();
+const { wanLoraMonitor } = useWanLora();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -539,7 +543,7 @@ async function onSubmit() {
 function onViewSampling() {
 	modalManagerStore.setViewSamplingDrawerModal({
 		open: true,
-		filePath: monitorWanLoraData.value.data.samplingPath
+		filePath: trainingStore.trainingWanLoRAData.data.samplingPath
 	});
 }
 
@@ -549,7 +553,7 @@ onMounted(() => {
 	// 恢复表单数据
 	LoRAHelper.recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: monitorWanLoraData.value.isListen,
+		isListen: trainingStore.trainingWanLoRAData.isListen,
 		taskId: wanLoraMonitor.getTaskId(),
 		formData: ruleForm.value
 	});

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-08 09:58:29
- * @LastEditTime: 2025-04-11 11:51:12
+ * @LastEditTime: 2025-07-28 11:05:39
  * @LastEditors: mulingyuer
  * @Description: flux数据集组件
  * @FilePath: \frontend\src\views\lora\flux\components\FluxDataset\index.vue
@@ -59,7 +59,7 @@
 		/>
 	</template>
 	<TagSubmitButton
-		:loading="loading || monitorTagData.isListen"
+		:loading="loading || trainingStore.trainingTagData.isListen"
 		:disabled="disabled"
 		@submit="onTagClick"
 	/>
@@ -73,7 +73,7 @@ import { useTrainingStore } from "@/stores";
 const trainingStore = useTrainingStore();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 // hooks
-const { monitorTagData, tag, tagMonitor } = useTag();
+const { tag, tagMonitor } = useTag();
 
 const loading = ref(false);
 const disabled = computed(() => loading.value || trainingStore.useGPU);

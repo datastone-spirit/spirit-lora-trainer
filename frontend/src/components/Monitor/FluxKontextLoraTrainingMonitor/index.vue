@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-24 15:01:26
- * @LastEditTime: 2025-07-24 15:14:15
+ * @LastEditTime: 2025-07-28 14:38:34
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练监控
  * @FilePath: \frontend\src\components\Monitor\FluxKontextLoraTrainingMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="monitorFluxKontextLoraData.isListen" class="lo-ra-training-monitor">
+	<div v-if="trainingStore.trainingFluxKontextLoRAData.isListen" class="lo-ra-training-monitor">
 		<div v-if="isLoad" class="lo-ra-training-monitor-empty">
 			<el-text> 模型加载中 </el-text>
 			<el-text class="text-dot"></el-text>
@@ -55,14 +55,15 @@
 
 <script setup lang="ts">
 import { isEmptyObject, objectHasKeys } from "@/utils/tools";
-import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
 import { secondsToHHMMSS } from "@/utils/tools";
+import { useTrainingStore } from "@/stores";
 
-const { monitorFluxKontextLoraData } = useFluxKontextLora();
-const loraData = computed(() => monitorFluxKontextLoraData.value.data);
+const trainingStore = useTrainingStore();
+
+const loraData = computed(() => trainingStore.trainingFluxKontextLoRAData.data);
 /** 是否还在加载中 */
 const isLoad = computed(() => {
-	const rawData = loraData.value.raw;
+	const rawData = trainingStore.trainingFluxKontextLoRAData.raw;
 	if (!rawData) return true;
 	const isEmpty = !rawData.detail || isEmptyObject(rawData.detail);
 	const hasKey = objectHasKeys(rawData.detail, ["current", "loss", "total"]);

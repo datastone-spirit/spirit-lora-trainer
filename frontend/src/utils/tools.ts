@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-07-25 10:02:43
+ * @LastEditTime: 2025-07-28 15:58:45
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -84,6 +84,7 @@ export function downloadFile(url: string, filename?: string) {
 
 /** 秒转HH:MM:SS */
 export function secondsToHHMMSS(totalSeconds: number): string {
+	console.log("🚀 ~ secondsToHHMMSS ~ totalSeconds:", totalSeconds);
 	totalSeconds = Math.ceil(totalSeconds);
 	const hours = Math.floor(totalSeconds / 3600);
 	const minutes = Math.floor((totalSeconds % 3600) / 60);

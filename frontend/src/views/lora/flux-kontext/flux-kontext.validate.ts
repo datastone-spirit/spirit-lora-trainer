@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-24 10:25:29
- * @LastEditTime: 2025-07-28 09:14:20
+ * @LastEditTime: 2025-07-28 15:53:24
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 校验方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flux-kontext.validate.ts
@@ -36,28 +36,33 @@ async function validateDataset(ruleForm: RuleForm): Promise<ValidationResult> {
 				checkImageAndLabel: true
 			});
 			if (!hasFolderData.valid) {
-				return { valid: false, message: `${item.name}下的数据集目录下没有数据，请上传训练素材` };
+				const message = `${item.name}下的数据集目录：${hasFolderData.message}`;
+				LoRAValidator.showErrorMessage({ message });
+
+				return { valid: false, message };
 			}
 
 			// 控制数据集
 			// TODO: 目前api不支持判断目录下是否只有图片文件，flux kontext的控制数据集目录下只会是图片文件，所
 			// 以暂时只能做目录是否存在的校验，理论上是不需要的，但是还是保留吧
-			const hasControlPath = await LoRAValidator.validateLoRASaveDir({ path: item.control_path });
+			const hasControlPath = await LoRAValidator.validateLoRASaveDir({
+				path: item.control_path
+			});
 			if (!hasControlPath.valid) {
-				return {
-					valid: false,
-					message: `${item.name}下的控制数据集目录不存在，请重新选择控制数据集目录`
-				};
+				const message = `${item.name}下的控制数据集目录不存在，请重新选择控制数据集目录`;
+				LoRAValidator.showErrorMessage({ message });
+
+				return { valid: false, message };
 			}
 		}
 
 		// 校验通过
 		return { valid: true };
 	} catch (error) {
-		return {
-			valid: false,
-			message: `数据集校验发生错误: ${(error as Error)?.message ?? "未知错误"}`
-		};
+		const message = `数据集校验发生错误: ${(error as Error)?.message ?? "未知错误"}`;
+		LoRAValidator.showErrorMessage({ message });
+
+		return { valid: false, message };
 	}
 }
 

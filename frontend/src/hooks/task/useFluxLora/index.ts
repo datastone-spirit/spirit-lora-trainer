@@ -1,18 +1,17 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 11:52:55
- * @LastEditTime: 2025-04-11 14:42:48
+ * @LastEditTime: 2025-07-28 15:33:42
  * @LastEditors: mulingyuer
  * @Description: flux lora hooks
- * @FilePath: \frontend\src\hooks\v2\useFluxLora\index.ts
+ * @FilePath: \frontend\src\hooks\task\useFluxLora\index.ts
  * 怎么可能会有bug！！！
  */
 import type { LoRATrainingInfoResult } from "@/api/monitor";
 import { loRATrainingInfo } from "@/api/monitor";
 import { isNetworkError } from "@/request";
-import type { FluxLoraData, UseModalManagerStore, UseTrainingStore } from "@/stores";
+import type { UseModalManagerStore, UseTrainingStore } from "@/stores";
 import { useModalManagerStore, useTrainingStore } from "@/stores";
-import { calculatePercentage } from "@/utils/tools";
 import mitt from "mitt";
 import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
 
@@ -28,8 +27,6 @@ interface FluxLoraMonitorOptions {
 	taskId?: string;
 	/** 任务类型 */
 	taskType?: TaskType;
-	/** 任务进度 */
-	taskProgress?: number;
 }
 
 /** 设置初始数据 */
@@ -58,8 +55,6 @@ class FluxLoraMonitor implements TaskImplementation {
 	private taskId: string = "";
 	/** 任务类型 */
 	private readonly taskType: TaskType = "flux";
-	/** 任务进度 */
-	private taskProgress: number = 0;
 	/** 任务名称 */
 	private readonly taskName: string = "Flux";
 	/** 事件订阅 */
@@ -72,7 +67,6 @@ class FluxLoraMonitor implements TaskImplementation {
 		this.modalManagerStore = options.modalManagerStore;
 		this.taskId = options.taskId ?? this.taskId;
 		this.taskType = options.taskType ?? this.taskType;
-		this.taskProgress = options.taskProgress ?? this.taskProgress;
 	}
 
 	start(): void {
@@ -178,7 +172,7 @@ class FluxLoraMonitor implements TaskImplementation {
 
 	/** 更新是否监听 */
 	private updateIsListening(isListening: boolean): void {
-		this.trainingStore.setFluxLoraIsListen(isListening);
+		this.trainingStore.setTrainingFluxLoRAListen(isListening);
 	}
 
 	/** 更新当前任务信息 */
@@ -187,7 +181,7 @@ class FluxLoraMonitor implements TaskImplementation {
 			id: this.taskId,
 			type: this.taskType,
 			name: this.taskName,
-			progress: this.taskProgress
+			progress: this.trainingStore.trainingFluxLoRAData.data.progress
 		});
 	}
 
@@ -204,9 +198,7 @@ class FluxLoraMonitor implements TaskImplementation {
 	/** 处理查询成功 */
 	private handleQuerySuccess(result: LoRATrainingInfoResult): void {
 		// 更新数据
-		const data = this.formatData(result);
-		this.trainingStore.setFluxLoraData(data);
-		this.taskProgress = data.progress;
+		this.trainingStore.setTrainingFluxLoRAData(result);
 		this.updateCurrentTaskInfo();
 		this.modalManagerStore.setNetworkDisconnectModal(false);
 
@@ -218,7 +210,7 @@ class FluxLoraMonitor implements TaskImplementation {
 			case "complete": // 训练完成
 				this.updateStatus("success");
 				this.updateIsListening(false);
-				this.trainingStore.resetFluxLoraData();
+				this.trainingStore.resetTrainingFluxLoRAData();
 				this.trainingStore.resetCurrentTaskInfo();
 				this.events.emit("complete");
 
@@ -233,7 +225,7 @@ class FluxLoraMonitor implements TaskImplementation {
 			case "failed": // 训练失败
 				this.updateStatus("failure");
 				this.updateIsListening(false);
-				this.trainingStore.resetFluxLoraData();
+				this.trainingStore.resetTrainingFluxLoRAData();
 				this.trainingStore.resetCurrentTaskInfo();
 				this.events.emit("failed");
 
@@ -276,7 +268,7 @@ class FluxLoraMonitor implements TaskImplementation {
 		// 其他错误
 		this.updateStatus("failure");
 		this.updateIsListening(false);
-		this.trainingStore.resetFluxLoraData();
+		this.trainingStore.resetTrainingFluxLoRAData();
 		this.trainingStore.resetCurrentTaskInfo();
 
 		// 事件通知
@@ -284,29 +276,6 @@ class FluxLoraMonitor implements TaskImplementation {
 
 		// log
 		console.error("查询wan训练任务信息出错：", error);
-	}
-
-	/** 格式化数据 */
-	private formatData(res: LoRATrainingInfoResult): FluxLoraData {
-		let detail = res?.detail ?? {};
-		if (typeof detail === "string") detail = {};
-
-		const loraData: FluxLoraData = {
-			current: detail.current ?? 0,
-			elapsed: detail.elapsed ?? "00:00",
-			loss: detail.loss ?? 0,
-			loss_avr: detail.loss_avr ?? 0,
-			remaining: detail.remaining ?? "00:00",
-			speed: detail.speed ?? 0,
-			total: detail.total ?? 0,
-			progress: 0,
-			showSampling: res.is_sampling ?? false,
-			samplingPath: res.sampling_path ?? "",
-			raw: res
-		};
-		loraData.progress = calculatePercentage(loraData.current, loraData.total);
-
-		return loraData;
 	}
 
 	/** 开始定时器 */
@@ -329,7 +298,6 @@ let fluxLoraMonitor: FluxLoraMonitor | null = null;
 export function useFluxLora() {
 	const trainingStore = useTrainingStore();
 	const modalManagerStore = useModalManagerStore();
-	const { monitorFluxLoraData } = storeToRefs(trainingStore);
 
 	if (!fluxLoraMonitor) {
 		fluxLoraMonitor = new FluxLoraMonitor({
@@ -339,7 +307,6 @@ export function useFluxLora() {
 	}
 
 	return {
-		fluxLoraMonitor,
-		monitorFluxLoraData
+		fluxLoraMonitor
 	};
 }

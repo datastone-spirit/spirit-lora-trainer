@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 09:41:55
- * @LastEditTime: 2025-07-24 16:22:00
+ * @LastEditTime: 2025-07-28 11:00:28
  * @LastEditors: mulingyuer
  * @Description: 数据集
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\index.vue
@@ -58,7 +58,7 @@
 			</template>
 			<TagSubmitButton
 				:is-bottom-margin="false"
-				:loading="loading || monitorTagData.isListen"
+				:loading="loading || trainingStore.trainingTagData.isListen"
 				:disabled="disabled"
 				@submit="onTagClick"
 			/>
@@ -84,7 +84,7 @@ import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
 
 const trainingStore = useTrainingStore();
-const { monitorTagData, tag, tagMonitor } = useTag();
+const { tag, tagMonitor } = useTag();
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 const activeTabName = defineModel("activeTabName", {

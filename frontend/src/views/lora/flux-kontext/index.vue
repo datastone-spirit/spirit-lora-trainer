@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-25 17:29:02
+ * @LastEditTime: 2025-07-28 14:40:43
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -55,7 +55,7 @@
 			</template>
 			<template #right-btn-group>
 				<el-button
-					v-if="monitorFluxKontextLoraData.data.showSampling"
+					v-if="trainingStore.trainingFluxKontextLoRAData.data.showSampling"
 					size="large"
 					@click="onViewSampling"
 				>
@@ -70,7 +70,7 @@
 import { startFluxKontextTraining, type StartFluxKontextTrainingData } from "@/api/lora";
 import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useModalManagerStore, useSettingsStore } from "@/stores";
+import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
@@ -88,8 +88,9 @@ import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();
+const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const { monitorFluxKontextLoraData, fluxKontextLoraMonitor } = useFluxKontextLora();
+const { fluxKontextLoraMonitor } = useFluxKontextLora();
 
 const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
@@ -264,7 +265,7 @@ async function onSubmit() {
 function onViewSampling() {
 	modalManagerStore.setViewSamplingDrawerModal({
 		open: true,
-		filePath: monitorFluxKontextLoraData.value.data.samplingPath
+		filePath: trainingStore.trainingFluxKontextLoRAData.data.samplingPath
 	});
 }
 
@@ -274,7 +275,7 @@ onMounted(() => {
 	// 恢复表单数据
 	LoRAHelper.recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: monitorFluxKontextLoraData.value.isListen,
+		isListen: trainingStore.trainingFluxKontextLoRAData.isListen,
 		taskId: fluxKontextLoraMonitor.getTaskId(),
 		formData: ruleForm.value
 	});

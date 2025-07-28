@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-24 15:25:30
- * @LastEditTime: 2025-07-24 15:37:57
+ * @LastEditTime: 2025-07-28 16:01:04
  * @LastEditors: mulingyuer
  * @Description: flux kontext 任务详情
  * @FilePath: \frontend\src\views\task\components\FluxKontextDetail.vue
@@ -45,7 +45,7 @@
 					{{ data.status === "complete" ? "0" : data.detail.remaining_time_str }}
 				</el-descriptions-item>
 				<el-descriptions-item label="预估总耗时">
-					{{ secondsToHHMMSS(data.detail.estimated_total_time_seconds) }}
+					{{ estimatedTotalTimeSeconds }}
 				</el-descriptions-item>
 				<el-descriptions-item label="当前损失">
 					{{ data.detail.loss }}
@@ -121,6 +121,14 @@ const elapsed = computed(() => {
 	timeDiffString += seconds.toString().padStart(2, "0");
 
 	return timeDiffString;
+});
+/** 预估总耗时 */
+const estimatedTotalTimeSeconds = computed(() => {
+	if (typeof props.data.detail === "string") return "";
+	const value = props.data.detail?.estimated_total_time_seconds;
+	if (typeof value !== "number") return "";
+
+	return secondsToHHMMSS(value);
 });
 
 /** 进度百分比 */

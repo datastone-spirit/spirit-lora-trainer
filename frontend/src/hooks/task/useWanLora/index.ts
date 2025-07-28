@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-09 16:23:25
- * @LastEditTime: 2025-04-11 15:46:49
+ * @LastEditTime: 2025-07-28 15:36:08
  * @LastEditors: mulingyuer
  * @Description: wan模型训练hooks
  * @FilePath: \frontend\src\hooks\task\useWanLora\index.ts
@@ -9,12 +9,11 @@
  */
 import type { WanVideoTrainingInfoResult } from "@/api/monitor";
 import { wanVideoTrainingInfo } from "@/api/monitor";
-import type { UseModalManagerStore, UseTrainingStore, WanLoraData } from "@/stores";
+import type { UseModalManagerStore, UseTrainingStore } from "@/stores";
 import { useModalManagerStore, useTrainingStore } from "@/stores";
-import { calculatePercentage } from "@/utils/tools";
 import { isNetworkError } from "axios-retry";
-import type { TaskImplementation, TaskEvents, TaskStatus } from "../types";
 import mitt from "mitt";
+import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
 
 interface WanLoraMonitorOptions {
 	/** 数据仓库 */
@@ -28,8 +27,6 @@ interface WanLoraMonitorOptions {
 	taskId?: string;
 	/** 任务类型 */
 	taskType?: TaskType;
-	/** 任务进度 */
-	taskProgress?: number;
 }
 
 /** 设置初始数据 */
@@ -58,8 +55,6 @@ class WanLoraMonitor implements TaskImplementation {
 	private taskId: string = "";
 	/** 任务类型 */
 	private readonly taskType: TaskType = "wan-video";
-	/** 任务进度 */
-	private taskProgress: number = 0;
 	/** 任务名称 */
 	private readonly taskName: string = "wan视频";
 	/** 事件订阅 */
@@ -72,7 +67,6 @@ class WanLoraMonitor implements TaskImplementation {
 		this.modalManagerStore = options.modalManagerStore;
 		this.taskId = options.taskId ?? this.taskId;
 		this.taskType = options.taskType ?? this.taskType;
-		this.taskProgress = options.taskProgress ?? this.taskProgress;
 	}
 
 	start(): void {
@@ -178,7 +172,7 @@ class WanLoraMonitor implements TaskImplementation {
 
 	/** 更新是否监听 */
 	private updateIsListening(isListening: boolean): void {
-		this.trainingStore.setWanLoraIsListen(isListening);
+		this.trainingStore.setTrainingWanLoRAListen(isListening);
 	}
 
 	/** 更新当前任务信息 */
@@ -187,7 +181,7 @@ class WanLoraMonitor implements TaskImplementation {
 			id: this.taskId,
 			type: this.taskType,
 			name: this.taskName,
-			progress: this.taskProgress
+			progress: this.trainingStore.trainingWanLoRAData.data.progress
 		});
 	}
 
@@ -204,9 +198,7 @@ class WanLoraMonitor implements TaskImplementation {
 	/** 处理查询成功 */
 	private handleQuerySuccess(result: WanVideoTrainingInfoResult): void {
 		// 更新数据
-		const data = this.formatData(result);
-		this.trainingStore.setWanLoraData(data);
-		this.taskProgress = data.progress;
+		this.trainingStore.setTrainingWanLoRAData(result);
 		this.updateCurrentTaskInfo();
 		this.modalManagerStore.setNetworkDisconnectModal(false);
 
@@ -218,7 +210,7 @@ class WanLoraMonitor implements TaskImplementation {
 			case "complete": // 训练完成
 				this.updateStatus("success");
 				this.updateIsListening(false);
-				this.trainingStore.resetWanLoraData();
+				this.trainingStore.resetTrainingWanLoRAData();
 				this.trainingStore.resetCurrentTaskInfo();
 				this.events.emit("complete");
 
@@ -233,7 +225,7 @@ class WanLoraMonitor implements TaskImplementation {
 			case "failed": // 训练失败
 				this.updateStatus("failure");
 				this.updateIsListening(false);
-				this.trainingStore.resetWanLoraData();
+				this.trainingStore.resetTrainingWanLoRAData();
 				this.trainingStore.resetCurrentTaskInfo();
 				this.events.emit("failed");
 
@@ -276,7 +268,7 @@ class WanLoraMonitor implements TaskImplementation {
 		// 其他错误
 		this.updateStatus("failure");
 		this.updateIsListening(false);
-		this.trainingStore.resetWanLoraData();
+		this.trainingStore.resetTrainingWanLoRAData();
 		this.trainingStore.resetCurrentTaskInfo();
 
 		// 事件通知
@@ -284,28 +276,6 @@ class WanLoraMonitor implements TaskImplementation {
 
 		// log
 		console.error("查询wan训练任务信息出错：", error);
-	}
-
-	/** 格式化数据 */
-	private formatData(res: WanVideoTrainingInfoResult): WanLoraData {
-		// @ts-expect-error 取消类型检查
-		let detail: Exclude<WanVideoTrainingInfoResult["detail"], string> = res?.detail ?? {};
-		if (typeof res.detail === "string") detail = {} as any;
-
-		return {
-			progress: calculatePercentage(detail.current, detail.total),
-			current: detail.current ?? 0,
-			total: detail.total ?? 0,
-			elapsed: detail.elapsed ?? "",
-			remaining: detail.remaining ?? "00:00",
-			current_loss: detail.current_loss ?? 0,
-			average_loss: detail.average_loss ?? 0,
-			total_epoch: detail.total_epoch ?? 0,
-			showSampling: res.is_sampling ?? false,
-			samplingPath: res.sampling_path ?? "",
-			phase: res.phase,
-			raw: res
-		};
 	}
 
 	/** 开始定时器 */
@@ -328,7 +298,6 @@ let wanLoraMonitor: WanLoraMonitor | null = null;
 export function useWanLora() {
 	const trainingStore = useTrainingStore();
 	const modalManagerStore = useModalManagerStore();
-	const { monitorWanLoraData } = storeToRefs(trainingStore);
 
 	if (!wanLoraMonitor) {
 		wanLoraMonitor = new WanLoraMonitor({
@@ -338,7 +307,6 @@ export function useWanLora() {
 	}
 
 	return {
-		wanLoraMonitor,
-		monitorWanLoraData
+		wanLoraMonitor
 	};
 }

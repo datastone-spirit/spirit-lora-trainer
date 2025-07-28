@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-04-11 15:26:00
+ * @LastEditTime: 2025-07-28 09:56:04
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -104,7 +104,7 @@ import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useGPU } from "@/hooks/task/useGPU";
 import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
-import { checkDirectory } from "@/utils/lora.helper";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
 import type { FormInstance, FormRules } from "element-plus";
 
 interface RuleForm {
@@ -152,12 +152,13 @@ const rules = reactive<FormRules<RuleForm>>({
 	image_path: [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("目录不存在"));
 						return;
 					}
+
 					callback();
 				});
 			},
@@ -167,7 +168,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	model_name: [{ required: true, message: "请选择打标模型", trigger: "change" }],
 	class_token: [
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				if (!ruleForm.value.is_add_global_prompt) return callback();
 				if (typeof value !== "string" || value.trim() === "") {
 					callback(new Error("请填写触发词"));

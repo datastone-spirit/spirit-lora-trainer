@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-04-15 10:37:24
+ * @LastEditTime: 2025-07-28 09:44:29
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -65,7 +65,9 @@ import { startWanVideoTraining } from "@/api/lora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useSettingsStore, useModalManagerStore } from "@/stores";
 import { getEnv } from "@/utils/env";
-import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
+// import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
@@ -75,7 +77,7 @@ import TrainingData from "./components/TrainingData.vue";
 import WanDataSet from "./components/WanDataSet/index.vue";
 import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
-import { WanValidate } from "./wan.validate";
+import { validate } from "./wan.validate";
 import { generateUUID, isImageFile } from "@/utils/tools";
 import { useWanLora } from "@/hooks/task/useWanLora";
 
@@ -213,28 +215,27 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.output_dir": [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
-			asyncValidator: async (
-				_rule: any,
-				value: string,
-				callback: (error?: string | Error) => void
-			) => {
-				try {
-					const isExists = await checkDirectory(value);
-					if (!isExists) {
+			validator: async (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
 						return;
 					}
-					return callback();
-				} catch (error) {
-					return callback(new Error((error as Error).message));
-				}
+
+					callback();
+				});
 			}
 		},
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (!isWhiteCheck) return callback();
-				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
-				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
+				LoRAValidator.validateLoRASaveDir({ path: value }).then(({ valid, message }) => {
+					if (!valid) {
+						callback(new Error(message));
+						return;
+					}
+
+					callback();
+				});
 			}
 		}
 	],
@@ -378,11 +379,12 @@ const rules = reactive<FormRules<RuleForm>>({
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;
 					}
+
 					callback();
 				});
 			}
@@ -391,12 +393,13 @@ const rules = reactive<FormRules<RuleForm>>({
 	"dataset.datasets.0.video_directory": [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;
 					}
+
 					callback();
 				});
 			}
@@ -505,9 +508,9 @@ async function onSubmit() {
 		submitLoading.value = true;
 
 		// 校验
-		const valid = await new WanValidate().validate({
-			form: ruleFormRef.value,
-			formData: ruleForm.value
+		const { valid } = await validate({
+			ruleForm: ruleForm.value,
+			formInstance: ruleFormRef.value
 		});
 		if (!valid) {
 			submitLoading.value = false;
@@ -544,7 +547,7 @@ function onViewSampling() {
 onMounted(() => {
 	wanLoraMonitor.resume();
 	// 恢复表单数据
-	recoveryTaskFormData({
+	LoRAHelper.recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
 		isListen: monitorWanLoraData.value.isListen,
 		taskId: wanLoraMonitor.getTaskId(),

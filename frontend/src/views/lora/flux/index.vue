@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-07-24 14:57:17
+ * @LastEditTime: 2025-07-25 17:28:11
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -71,25 +71,25 @@
 <script setup lang="ts">
 import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
-import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useFluxLora } from "@/hooks/task/useFluxLora";
-import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import { useModalManagerStore, useSettingsStore } from "@/stores";
 import { getEnv } from "@/utils/env";
-import { checkDirectory, recoveryTaskFormData } from "@/utils/lora.helper";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
+import FluxDataset from "./components/FluxDataset/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormData } from "./flux.helper";
-import { validateForm } from "./flux.validate";
+import { validate } from "./flux.validate";
 import type { RuleForm } from "./types";
-import FluxDataset from "./components/FluxDataset/index.vue";
 
 const settingsStore = useSettingsStore();
-const trainingStore = useTrainingStore();
 const modalManagerStore = useModalManagerStore();
 const { monitorFluxLoraData, fluxLoraMonitor } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
@@ -233,33 +233,40 @@ const rules = reactive<FormRules<RuleForm>>({
 	output_dir: [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
 						return;
 					}
+
 					callback();
 				});
 			}
 		},
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (!isWhiteCheck) return callback();
-				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
-				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
+				LoRAValidator.validateLoRASaveDir({ path: value }).then(({ valid, message }) => {
+					if (!valid) {
+						callback(new Error(message));
+						return;
+					}
+
+					callback();
+				});
 			}
 		}
 	],
 	image_dir: [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;
 					}
+
 					callback();
 				});
 			}
@@ -267,7 +274,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	],
 	resolution_width: [
 		{
-			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
 				if (value < 64) {
 					callback(new Error("图片宽度不能小于64"));
 					return;
@@ -283,7 +290,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	],
 	resolution_height: [
 		{
-			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
 				if (value < 64) {
 					callback(new Error("图片高度不能小于64"));
 					return;
@@ -299,7 +306,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	],
 	lr_scheduler: [
 		{
-			asyncValidator: (_rule: any, _value: string, callback: (error?: string | Error) => void) => {
+			validator: (_rule: any, _value: string, callback: (error?: string | Error) => void) => {
 				// 联动校验
 				ruleFormRef.value?.validateField("lr_warmup_steps");
 				callback();
@@ -309,7 +316,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	],
 	lr_warmup_steps: [
 		{
-			asyncValidator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
 				if (ruleForm.value.lr_scheduler === "constant_with_warmup") {
 					// 学习调度器为该值时lr_warmup_steps预热步数必须大于0
 					if (value <= 0) {
@@ -331,7 +338,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	],
 	sample_every_n_steps: [
 		{
-			asyncValidator: (
+			validator: (
 				_rule: any,
 				value: number | undefined,
 				callback: (error?: string | Error) => void
@@ -354,7 +361,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	],
 	sample_prompts: [
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				const sampleSteps = ruleForm.value.sample_every_n_steps ?? 0;
 				const hasPrompt = value.trim().length > 0;
 
@@ -483,10 +490,9 @@ async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
-		const valid = await validateForm({
-			formRef: ruleFormRef,
-			formData: ruleForm,
-			trainingStore: trainingStore
+		const { valid } = await validate({
+			ruleForm: ruleForm.value,
+			formInstance: ruleFormRef.value
 		});
 		if (!valid) {
 			submitLoading.value = false;
@@ -494,7 +500,7 @@ async function onSubmit() {
 		}
 
 		// 开始训练
-		const data: StartFluxTrainingData = formatFormData(ruleForm.value);
+		const data: StartFluxTrainingData = formatFormData(toRaw(ruleForm.value));
 		const { task_id } = await startFluxTraining(data);
 		// 监听训练数据
 		fluxLoraMonitor.setTaskId(task_id).start();
@@ -522,7 +528,7 @@ function onViewSampling() {
 onMounted(() => {
 	fluxLoraMonitor.resume();
 	// 恢复表单数据
-	recoveryTaskFormData({
+	LoRAHelper.recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
 		isListen: monitorFluxLoraData.value.isListen,
 		taskId: fluxLoraMonitor.getTaskId(),

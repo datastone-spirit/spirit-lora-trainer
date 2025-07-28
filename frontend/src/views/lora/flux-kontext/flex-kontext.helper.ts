@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-23 17:50:46
- * @LastEditTime: 2025-07-25 08:42:23
+ * @LastEditTime: 2025-07-25 15:44:29
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 帮助方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flex-kontext.helper.ts
@@ -44,9 +44,11 @@ export function generateDefaultDataset(index?: number): Datasets[number] {
 	};
 }
 
-/** 格式化表单数据 */
+/** 格式化表单数据
+ * 注意传递进来的form必须是原始对象，不能是Proxy对象，可以用toRaw方法转换
+ */
 export function formatFormData(form: RuleForm): StartFluxKontextTrainingData {
-	const deepCloneForm = structuredClone(toRaw(form));
+	const deepCloneForm = structuredClone(form);
 
 	const data: StartFluxKontextTrainingData = {
 		job: "extension",

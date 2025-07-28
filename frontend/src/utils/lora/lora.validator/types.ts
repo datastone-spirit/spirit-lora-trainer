@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 10:43:18
- * @LastEditTime: 2025-07-25 11:36:57
+ * @LastEditTime: 2025-07-25 17:25:53
  * @LastEditors: mulingyuer
  * @Description: 公共的lora校验类型
  * @FilePath: \frontend\src\utils\lora\lora.validator\types.ts
@@ -16,7 +16,7 @@ export interface ErrorMessageOptions extends MessageOptions {
 
 /** Element-Plus 表单校验选项 */
 export interface ValidateFormOptions {
-	/** 是否显示错误消息弹窗 */
+	/** 是否显示错误消息弹窗，默认不显示 */
 	shouldShowErrorDialog?: boolean;
 }
 
@@ -32,9 +32,7 @@ export interface ValidateDirectoryOptions {
 	path: string | string[];
 	/** 是否校验是否存在图片和打标文件 */
 	checkImageAndLabel?: boolean;
-	/** 是否是混元视频校验 */
-	isHY?: boolean;
-	/** 是否显示错误消息弹窗 */
+	/** 是否显示错误消息弹窗，默认不显示 */
 	shouldShowErrorDialog?: boolean;
 }
 
@@ -42,6 +40,12 @@ export interface ValidateDirectoryOptions {
 export interface ValidateLoRaSaveDirOptions {
 	/** 目录路径 */
 	path: string;
-	/** 是否显示错误消息弹窗 */
+	/** 是否显示错误消息弹窗，默认不显示 */
+	shouldShowErrorDialog?: boolean;
+}
+
+/** GPU占用校验参数 */
+export interface ValidateGpuOptions {
+	/** 是否显示错误消息弹窗，默认不显示 */
 	shouldShowErrorDialog?: boolean;
 }

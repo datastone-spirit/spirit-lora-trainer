@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-03-10 17:04:53
+ * @LastEditTime: 2025-07-25 15:45:58
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -210,9 +210,11 @@ function formatDataset(form: RuleForm): Dataset {
 	};
 }
 
-/** 表单数据格式化 */
+/** 格式化表单数据
+ * 注意传递进来的form必须是原始对象，不能是Proxy对象，可以用toRaw方法转换
+ */
 export function formatFormData(form: RuleForm): StartFluxTrainingData {
-	const deepCloneForm = structuredClone(toRaw(form));
+	const deepCloneForm = structuredClone(form);
 
 	return {
 		config: formatConfig(deepCloneForm),

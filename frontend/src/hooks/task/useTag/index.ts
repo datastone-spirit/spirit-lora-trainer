@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 09:16:38
- * @LastEditTime: 2025-04-11 11:52:25
+ * @LastEditTime: 2025-07-28 09:55:27
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
- * @FilePath: \frontend\src\hooks\v2\useTag\index.ts
+ * @FilePath: \frontend\src\hooks\task\useTag\index.ts
  * 怎么可能会有bug！！！
  */
 import {
@@ -21,7 +21,7 @@ import type { ManualTagInfoResult } from "@/api/monitor";
 import { calculatePercentage } from "@/utils/tools";
 import { isNetworkError } from "axios-retry";
 import { batchTag, type BatchTagData } from "@/api/tag";
-import { checkDirectory } from "@/utils/lora.helper";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
 
 interface TagMonitorOptions {
 	/** 数据仓库 */
@@ -410,7 +410,10 @@ export function useTag() {
 				message: "请先选择训练用的数据集目录"
 			},
 			{
-				condition: async () => !(await checkDirectory(tagDir)),
+				condition: async () => {
+					const { valid } = await LoRAValidator.validateDirectory({ path: tagDir });
+					return !valid;
+				},
 				message: "数据集目录不存在"
 			},
 			{

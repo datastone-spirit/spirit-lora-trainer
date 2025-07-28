@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-24 10:25:29
- * @LastEditTime: 2025-07-25 15:01:41
+ * @LastEditTime: 2025-07-28 09:14:20
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 校验方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flux-kontext.validate.ts
@@ -66,12 +66,16 @@ export async function validate(data: ValidateData): Promise<ValidationResult> {
 	const { ruleForm, formInstance } = data;
 
 	const validations = [
-		// LoRA保存路径校验
-		() => LoRAValidator.validateLoRASaveDir({ path: ruleForm.training_folder }),
 		// 表单校验
-		() => LoRAValidator.validateForm(formInstance),
+		() => LoRAValidator.validateForm(formInstance, { shouldShowErrorDialog: true }),
+		// LoRA保存路径校验
+		() =>
+			LoRAValidator.validateLoRASaveDir({
+				path: ruleForm.training_folder,
+				shouldShowErrorDialog: true
+			}),
 		// GPU占用校验
-		() => LoRAValidator.validateGpu(),
+		() => LoRAValidator.validateGpu({ shouldShowErrorDialog: true }),
 		// 数据集校验
 		() => validateDataset(ruleForm)
 	];

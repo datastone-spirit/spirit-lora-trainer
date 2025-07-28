@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-25 15:20:54
+ * @LastEditTime: 2025-07-25 17:29:02
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -173,7 +173,7 @@ const rules = reactive<FormRules<RuleForm>>({
 	training_folder: [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
@@ -185,16 +185,14 @@ const rules = reactive<FormRules<RuleForm>>({
 		},
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				LoRAValidator.validateLoRASaveDir({ path: value, shouldShowErrorDialog: false }).then(
-					({ valid, message }) => {
-						if (!valid) {
-							callback(new Error(message));
-							return;
-						}
-
-						callback();
+				LoRAValidator.validateLoRASaveDir({ path: value }).then(({ valid, message }) => {
+					if (!valid) {
+						callback(new Error(message));
+						return;
 					}
-				);
+
+					callback();
+				});
 			}
 		}
 	]
@@ -246,7 +244,7 @@ async function onSubmit() {
 		}
 
 		// 开始训练
-		const data: StartFluxKontextTrainingData = formatFormData(ruleForm.value);
+		const data: StartFluxKontextTrainingData = formatFormData(toRaw(ruleForm.value));
 		const { task_id } = await startFluxKontextTraining(data);
 		// // 监听训练数据
 		fluxKontextLoraMonitor.setTaskId(task_id).start();

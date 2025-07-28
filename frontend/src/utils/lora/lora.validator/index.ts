@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 09:58:06
- * @LastEditTime: 2025-07-25 11:57:59
+ * @LastEditTime: 2025-07-28 09:42:24
  * @LastEditors: mulingyuer
  * @Description: 公共的lora校验
  * @FilePath: \frontend\src\utils\lora\lora.validator\index.ts
@@ -14,11 +14,12 @@ import type {
 	ErrorMessageOptions,
 	ValidateDirectoryOptions,
 	ValidateFormOptions,
+	ValidateGpuOptions,
 	ValidateLoRaSaveDirOptions,
 	ValidationResult
 } from "./types";
 export type * from "./types";
-import { checkDirectoryExists, hyCheckDirectoryExists } from "@/api/common";
+import { checkDirectoryExists } from "@/api/common";
 import { getEnv } from "@/utils/env";
 
 export class LoRAValidator {
@@ -35,7 +36,7 @@ export class LoRAValidator {
 		options: ValidateFormOptions = {}
 	): Promise<ValidationResult> {
 		if (!formInstance) return { valid: false, message: "表单实例不存在" };
-		const { shouldShowErrorDialog = true } = options;
+		const { shouldShowErrorDialog = false } = options;
 
 		return new Promise((resolve) => {
 			formInstance.validate((valid, invalidFields) => {
@@ -64,10 +65,13 @@ export class LoRAValidator {
 	/** GPU占用校验
 	 * TODO: 最好是通过接口来判断，现在暂时通过本地变量来判断
 	 */
-	static async validateGpu(): Promise<ValidationResult> {
+	static async validateGpu(options: ValidateGpuOptions = {}): Promise<ValidationResult> {
+		const { shouldShowErrorDialog = false } = options;
 		const trainingStore = useTrainingStore();
 		if (trainingStore.useGPU) {
-			this.showErrorMessage({ message: "GPU已经被占用，请等待对应任务完成" });
+			if (shouldShowErrorDialog) {
+				this.showErrorMessage({ message: "GPU已经被占用，请等待对应任务完成" });
+			}
 			return { valid: false, message: "GPU已经被占用，请等待对应任务完成" };
 		}
 		return { valid: true };
@@ -78,39 +82,45 @@ export class LoRAValidator {
 	 * @remarks
 	 * - 支持检查目录是否存在
 	 * - 当 checkImageAndLabel 为 true 时，检查目录下是否有图片和标注数据
-	 * - 当 isHY 为 true 时，使用混元（HY）专用的目录校验逻辑
 	 */
 	static async validateDirectory(options: ValidateDirectoryOptions): Promise<ValidationResult> {
-		const {
-			path,
-			checkImageAndLabel = false,
-			isHY = false,
-			shouldShowErrorDialog = false
-		} = options;
+		const { path, checkImageAndLabel = false, shouldShowErrorDialog = false } = options;
 		try {
-			const validateApi = isHY ? hyCheckDirectoryExists : checkDirectoryExists;
 			const pathList = Array.isArray(path) ? path : [path];
 
 			for (const dir of pathList) {
-				const result = await validateApi({
-					path: dir,
-					has_data: checkImageAndLabel
-				});
+				// 如果目录不合法或者校验是否存在内容不通过，都会抛出异常
+				// 所以我要再包一层try来捕获异常
+				try {
+					const result = await checkDirectoryExists({
+						path: dir,
+						has_data: checkImageAndLabel
+					});
+					if (!result.exists) {
+						const message = `目录 ${dir} 不存在，请检查路径是否正确`;
+						if (shouldShowErrorDialog) {
+							LoRAValidator.showErrorMessage({ message });
+						}
 
-				if (checkImageAndLabel && !result.has_data) {
-					const message = `数据集目录 ${dir} 下没有数据，请上传训练素材`;
-					if (shouldShowErrorDialog) {
-						LoRAValidator.showErrorMessage({ message });
+						return {
+							valid: false,
+							message
+						};
 					}
 
-					return {
-						valid: false,
-						message
-					};
-				}
+					if (checkImageAndLabel && !result.has_data) {
+						const message = `数据集目录 ${dir} 下没有数据，请上传训练素材`;
+						if (shouldShowErrorDialog) {
+							LoRAValidator.showErrorMessage({ message });
+						}
 
-				if (!result.exists) {
-					const message = `目录 ${dir} 不存在，请检查路径是否正确`;
+						return {
+							valid: false,
+							message
+						};
+					}
+				} catch {
+					const message = `数据集目录 ${dir} 下没有数据，请上传训练素材`;
 					if (shouldShowErrorDialog) {
 						LoRAValidator.showErrorMessage({ message });
 					}
@@ -124,7 +134,7 @@ export class LoRAValidator {
 
 			return { valid: true };
 		} catch (error) {
-			const message = `校验目录发生错误: ${(error as Error)?.message ?? "未知错误"}`;
+			const message = `数据集目录发生错误: ${(error as Error)?.message ?? "未知错误"}`;
 			if (shouldShowErrorDialog) {
 				LoRAValidator.showErrorMessage({ message });
 			}
@@ -141,7 +151,7 @@ export class LoRAValidator {
 	 */
 	static async validateLoRASaveDir(options: ValidateLoRaSaveDirOptions): Promise<ValidationResult> {
 		try {
-			const { path, shouldShowErrorDialog = true } = options;
+			const { path, shouldShowErrorDialog = false } = options;
 			const env = getEnv();
 			const appWhiteCheck = env.VITE_APP_WHITE_CHECK === "true";
 			if (!appWhiteCheck) return { valid: true };

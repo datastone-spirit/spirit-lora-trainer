@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-07-28 15:58:35
+ * @LastEditTime: 2025-07-28 17:36:41
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -243,15 +243,17 @@ export const useTrainingStore = defineStore("training", () => {
 		} else {
 			detail = result.detail;
 		}
+		const current = detail?.current ?? 0;
+		const total = detail?.total ?? 0;
 
 		trainingData.value.flux_kontext_lora.data = {
-			current: detail?.current ?? 0,
+			current,
 			elapsed: detail?.elapsed_time_str ?? "00:00",
 			loss: detail?.loss ?? 0,
 			remaining: detail?.remaining_time_str ?? "00:00",
 			speed: detail?.seconds_per_step ?? 0,
-			total: detail?.total ?? 0,
-			progress: 0,
+			total,
+			progress: calculatePercentage(current, total),
 			// TODO: 这个还没确定
 			showSampling: false,
 			samplingPath: "",

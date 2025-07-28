@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-23 17:50:46
- * @LastEditTime: 2025-07-25 15:44:29
+ * @LastEditTime: 2025-07-28 17:31:18
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 帮助方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flex-kontext.helper.ts
@@ -36,7 +36,7 @@ export function generateDefaultDataset(index?: number): Datasets[number] {
 		control_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
 		caption_dropout_rate: 0.05,
 		shuffle_tokens: false,
-		cache_latents_to_disk: false,
+		cache_latents_to_disk: true,
 		is_reg: false,
 		network_weight: 1,
 		resolution: [512, 768],

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-28 14:40:43
+ * @LastEditTime: 2025-07-28 17:41:03
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -194,6 +194,20 @@ const rules = reactive<FormRules<RuleForm>>({
 
 					callback();
 				});
+			}
+		}
+	],
+	"sample.prompts": [
+		{
+			validator: (_rule: any, value: string[], callback: (error?: string | Error) => void) => {
+				const disable = ruleForm.value.train.disable_sampling;
+
+				if (!disable && value.length === 0) {
+					callback(new Error("请至少添加一个采样提示"));
+					return;
+				}
+
+				callback();
 			}
 		}
 	]

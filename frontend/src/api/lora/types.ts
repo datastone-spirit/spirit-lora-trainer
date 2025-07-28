@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-07-23 17:27:43
+ * @LastEditTime: 2025-07-28 17:30:52
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -758,7 +758,7 @@ export interface StartFluxKontextTrainingData {
 					caption_dropout_rate: number;
 					/** 是否打乱标题顺序，以逗号分隔，默认false */
 					shuffle_tokens: boolean;
-					/** 是否将图像的潜在表示（latents）缓存到磁盘，默认false */
+					/** 是否将图像的潜在表示（latents）缓存到磁盘，默认true */
 					cache_latents_to_disk: boolean;
 					/** 是否正则化，默认false */
 					is_reg: boolean;

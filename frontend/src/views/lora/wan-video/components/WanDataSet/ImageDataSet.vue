@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 11:04:52
- * @LastEditTime: 2025-07-28 11:06:22
+ * @LastEditTime: 2025-07-29 09:52:21
  * @LastEditors: mulingyuer
  * @Description: wan数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\ImageDataSet.vue
@@ -114,7 +114,7 @@ async function onTagClick() {
 		loading.value = false;
 		tagMonitor.stop();
 
-		console.log("打标任务创建失败", error);
+		console.error("打标任务创建失败", error);
 	}
 }
 </script>

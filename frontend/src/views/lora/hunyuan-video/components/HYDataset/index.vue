@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-08 09:22:10
- * @LastEditTime: 2025-07-28 11:06:02
+ * @LastEditTime: 2025-07-29 09:52:36
  * @LastEditors: mulingyuer
  * @Description: 混元AI数据集
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\HYDataset\index.vue
@@ -105,7 +105,7 @@ async function onTagClick() {
 		loading.value = false;
 		tagMonitor.stop();
 
-		console.log("打标任务创建失败", error);
+		console.error("打标任务创建失败", error);
 	}
 }
 </script>

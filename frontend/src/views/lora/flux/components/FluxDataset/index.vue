@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-08 09:58:29
- * @LastEditTime: 2025-07-28 11:05:39
+ * @LastEditTime: 2025-07-29 09:51:55
  * @LastEditors: mulingyuer
  * @Description: flux数据集组件
  * @FilePath: \frontend\src\views\lora\flux\components\FluxDataset\index.vue
@@ -105,7 +105,7 @@ async function onTagClick() {
 		loading.value = false;
 		tagMonitor.stop();
 
-		console.log("打标任务创建失败", error);
+		console.error("打标任务创建失败", error);
 	}
 }
 </script>

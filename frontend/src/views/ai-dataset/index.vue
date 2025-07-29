@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-07-28 09:56:04
+ * @LastEditTime: 2025-07-29 09:52:01
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -209,7 +209,7 @@ async function onSubmit() {
 	} catch (error) {
 		submitLoading.value = false;
 		tagMonitor.stop();
-		console.log("打标任务创建失败", error);
+		console.error("打标任务创建失败", error);
 	}
 }
 

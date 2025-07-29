@@ -1,23 +1,21 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 16:15:46
- * @LastEditTime: 2025-07-28 17:37:34
+ * @LastEditTime: 2025-07-29 09:46:39
  * @LastEditors: mulingyuer
  * @Description: 采样设置
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\SampleConfig\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<el-row :gutter="16">
-		<el-col :span="24">
-			<PopoverFormItem
-				label="禁用采样"
-				prop="train.disable_sampling"
-				popover-content="disable_sampling"
-			>
-				<el-switch v-model="ruleForm.train.disable_sampling" />
-			</PopoverFormItem>
-		</el-col>
+	<PopoverFormItem
+		label="禁用采样"
+		prop="train.disable_sampling"
+		popover-content="disable_sampling"
+	>
+		<el-switch v-model="ruleForm.train.disable_sampling" />
+	</PopoverFormItem>
+	<el-row v-show="!ruleForm.train.disable_sampling" :gutter="16">
 		<el-col v-show="isExpert" :span="24">
 			<PopoverFormItem label="采样器" prop="sample.sampler" popover-content="sampler">
 				<SamplerSelect v-model="ruleForm.sample.sampler" />
@@ -101,8 +99,8 @@
 			</el-col>
 		</template>
 		<el-col :span="24">
-			<PopoverFormItem label="样本提示" prop="sample.samples" popover-content="samples">
-				<SamplePrompts v-model:form="ruleForm" />
+			<PopoverFormItem label="样本提示" prop="sample.prompts" popover-content="prompts">
+				<SamplePrompts v-model:form="ruleForm" :form-instance="formInstance" />
 			</PopoverFormItem>
 		</el-col>
 	</el-row>
@@ -113,10 +111,17 @@ import { useSettingsStore } from "@/stores";
 import type { RuleForm } from "../../types";
 import SamplerSelect from "./SamplerSelect.vue";
 import SamplePrompts from "./SamplePrompts.vue";
+import type { FormInstance } from "element-plus";
+
+export interface SampleConfigProps {
+	/** 表单实例 */
+	formInstance: FormInstance | undefined;
+}
 
 const settingsStore = useSettingsStore();
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
+defineProps<SampleConfigProps>();
 
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-07-28 15:11:16
+ * @LastEditTime: 2025-07-29 09:35:56
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -92,7 +92,7 @@ const { wanLoraMonitor } = useWanLora();
 
 const env = getEnv();
 /** 是否开启小白校验 */
-const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
+const isWhiteCheck = settingsStore.whiteCheck;
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_wan_form`;
 const defaultForm: RuleForm = {
@@ -107,7 +107,7 @@ const defaultForm: RuleForm = {
 		vae: "./models/vae/wan_2.1_vae.safetensors",
 		vae_cache_cpu: false,
 		vae_dtype: "float16",
-		output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+		output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		max_train_epochs: 10,
 		seed: undefined,
 		mixed_precision: "bf16",
@@ -152,7 +152,7 @@ const defaultForm: RuleForm = {
 		sample_at_first: false,
 		sample_every_n_epochs: undefined,
 		sample_every_n_steps: undefined,
-		i2v_sample_image_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+		i2v_sample_image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		sample_prompts: "",
 		guidance_scale: undefined,
 		show_timesteps: "",
@@ -187,8 +187,8 @@ const defaultForm: RuleForm = {
 		},
 		datasets: [
 			{
-				image_directory: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
-				video_directory: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+				image_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+				video_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 				frame_extraction: "head",
 				target_frames: [
 					{ key: generateUUID(), value: 1 },

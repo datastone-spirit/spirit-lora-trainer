@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-23 17:50:46
- * @LastEditTime: 2025-07-28 17:31:18
+ * @LastEditTime: 2025-07-29 09:26:53
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 帮助方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flex-kontext.helper.ts
@@ -12,13 +12,17 @@ import type { Datasets, RuleForm, SamplePrompts } from "./types";
 import { getEnv } from "@/utils/env";
 import type { StartFluxKontextTrainingData } from "@/api/lora";
 import { tomlStringify } from "@/utils/toml";
+import { useSettingsStore } from "@/stores";
 
 /** 生成默认样本提示对象 */
 export function generateDefaultSamplePrompt(): SamplePrompts[number] {
+	const env = getEnv();
+	const settingsStore = useSettingsStore();
+
 	return {
 		id: generateUUID(),
 		prompt: "",
-		ctrl_img: ""
+		ctrl_img: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : ""
 	};
 }
 
@@ -26,14 +30,15 @@ export function generateDefaultSamplePrompt(): SamplePrompts[number] {
 export function generateDefaultDataset(index?: number): Datasets[number] {
 	index = index ?? 0;
 	const env = getEnv();
+	const settingsStore = useSettingsStore();
 
 	return {
 		id: generateUUID(),
 		name: `数据集${index + 1}`,
 		index: index,
 		preview: "folder_path",
-		folder_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
-		control_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+		folder_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		control_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		caption_dropout_rate: 0.05,
 		shuffle_tokens: false,
 		cache_latents_to_disk: true,

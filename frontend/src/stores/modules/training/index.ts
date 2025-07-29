@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-07-28 17:36:41
+ * @LastEditTime: 2025-07-29 09:48:57
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -254,12 +254,9 @@ export const useTrainingStore = defineStore("training", () => {
 			speed: detail?.seconds_per_step ?? 0,
 			total,
 			progress: calculatePercentage(current, total),
-			// TODO: 这个还没确定
-			showSampling: false,
-			samplingPath: "",
+			showSampling: result.is_sampling ?? false,
+			samplingPath: result.sampling_path ?? "",
 			totalTime: detail?.estimated_total_time_seconds ?? 0
-			// showSampling: res.is_sampling ?? false,
-			// samplingPath: res.sampling_path ?? "",
 		};
 		trainingData.value.flux_kontext_lora.raw = result;
 	}

@@ -1,13 +1,13 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 09:58:06
- * @LastEditTime: 2025-07-28 15:49:54
+ * @LastEditTime: 2025-07-29 09:31:53
  * @LastEditors: mulingyuer
  * @Description: 公共的lora校验
  * @FilePath: \frontend\src\utils\lora\lora.validator\index.ts
  * 怎么可能会有bug！！！
  */
-import { useModalManagerStore, useTrainingStore } from "@/stores";
+import { useModalManagerStore, useTrainingStore, useSettingsStore } from "@/stores";
 import { formatFormValidateMessage } from "@/utils/tools";
 import type { FormInstance } from "element-plus";
 import type {
@@ -135,8 +135,8 @@ export class LoRAValidator {
 		try {
 			const { path, shouldShowErrorDialog = false } = options;
 			const env = getEnv();
-			const appWhiteCheck = env.VITE_APP_WHITE_CHECK === "true";
-			if (!appWhiteCheck) return { valid: true };
+			const settingsStore = useSettingsStore();
+			if (!settingsStore.whiteCheck) return { valid: true };
 
 			// 环境变量配置的前缀
 			const prefix = env.VITE_APP_LORA_OUTPUT_PARENT_PATH;

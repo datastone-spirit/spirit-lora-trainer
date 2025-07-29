@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 16:32:59
- * @LastEditTime: 2025-07-23 18:10:20
+ * @LastEditTime: 2025-07-29 09:46:28
  * @LastEditors: mulingyuer
  * @Description: 样本提示组件
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\SampleConfig\SamplePrompts.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="sample-prompts">
-		<div class="sample-prompts-list">
+		<div v-if="ruleForm.sample.prompts.length > 0" class="sample-prompts-list">
 			<div
 				v-for="(item, index) in ruleForm.sample.prompts"
 				:key="item.id"
@@ -25,16 +25,20 @@
 					@click="deleteSample(item, index)"
 				/>
 				<div class="sample-prompts-item-title">Prompt</div>
-				<FileSelector
-					class="sample-prompts-item-file"
-					v-model="item.ctrl_img"
-					placeholder="请选择采样图片"
-				/>
-				<el-input
-					class="sample-prompts-item-input"
-					v-model="item.prompt"
-					placeholder="请输入样本提示词"
-				/>
+				<el-form-item :prop="`sample.prompts[${index}].ctrl_img`" :rules="rules.ctrl_img">
+					<FileSelector
+						class="sample-prompts-item-file"
+						v-model="item.ctrl_img"
+						placeholder="请选择采样图片"
+					/>
+				</el-form-item>
+				<el-form-item :prop="`sample.prompts[${index}].prompt`" :rules="rules.prompt">
+					<el-input
+						class="sample-prompts-item-input"
+						v-model="item.prompt"
+						placeholder="请输入样本提示词"
+					/>
+				</el-form-item>
 			</div>
 		</div>
 		<el-button class="sample-prompts-add-btn" :icon="AddIcon" @click="onAdd">
@@ -47,12 +51,59 @@
 import { useIcon } from "@/hooks/useIcon";
 import { generateDefaultSamplePrompt } from "../../flex-kontext.helper";
 import type { RuleForm } from "../../types";
+import type { FormInstance, FormItemRule } from "element-plus";
+
+type DynamicKeys = keyof RuleForm["sample"]["prompts"][number];
+type DynamicRules = Partial<Record<DynamicKeys, FormItemRule[]>>;
+export interface SamplePromptsProps {
+	/** 表单实例 */
+	formInstance: FormInstance | undefined;
+}
+
+const props = defineProps<SamplePromptsProps>();
 
 // icon
 const AddIcon = useIcon({ name: "ri-add-line" });
 const DeleteIcon = useIcon({ name: "ri-close-line", size: 16 });
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
+const rules = reactive<DynamicRules>({
+	ctrl_img: [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				const disable = ruleForm.value.train.disable_sampling;
+				if (disable) return;
+				// 联动校验
+				props.formInstance?.validateField("sample.prompts");
+
+				if (typeof value !== "string" || value.trim() === "") {
+					callback(new Error("请选择采样图片"));
+					return;
+				}
+
+				callback();
+			}
+		}
+	],
+	prompt: [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				const disable = ruleForm.value.train.disable_sampling;
+				if (disable) return;
+				// 联动校验
+				props.formInstance?.validateField("sample.prompts");
+
+				if (typeof value !== "string" || value.trim() === "") {
+					callback(new Error("请输入样本提示词"));
+					return;
+				}
+
+				callback();
+			},
+			trigger: "blur"
+		}
+	]
+});
 
 // 新增样本提示
 function onAdd() {
@@ -71,6 +122,11 @@ function deleteSample(_item: unknown, index: number) {
 .sample-prompts {
 	width: 100%;
 }
+.sample-prompts :deep(.el-form-item) {
+	&.el-form-item {
+		margin-bottom: 22px;
+	}
+}
 .sample-prompts-add-btn {
 	width: 100%;
 }
@@ -86,7 +142,7 @@ function deleteSample(_item: unknown, index: number) {
 }
 .sample-prompts-item-title {
 	font-size: 14px;
-	line-height: 24px;
+	line-height: 34px;
 	margin-bottom: math.div($zl-padding, 2);
 	color: var(--zl-popover-form-item-tips-color);
 }
@@ -95,8 +151,5 @@ function deleteSample(_item: unknown, index: number) {
 	top: math.div($zl-padding, 2);
 	right: math.div($zl-padding, 2);
 	z-index: 1;
-}
-.sample-prompts-item-input {
-	margin-top: math.div($zl-padding, 2);
 }
 </style>

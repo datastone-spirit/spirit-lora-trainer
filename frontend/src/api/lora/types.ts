@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-07-28 17:30:52
+ * @LastEditTime: 2025-07-29 08:39:11
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -701,7 +701,7 @@ export interface StartFluxKontextTrainingData {
 					};
 					/** 跳过第一个样本，默认false */
 					skip_first_sample: boolean;
-					/** 禁用采样，默认false */
+					/** 禁用采样，默认true */
 					disable_sampling: boolean;
 					/** 差分输出保留，默认false */
 					diff_output_preservation: boolean;

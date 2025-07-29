@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:14:16
- * @LastEditTime: 2025-03-28 11:53:57
+ * @LastEditTime: 2025-07-29 09:25:53
  * @LastEditors: mulingyuer
  * @Description: 设置数据仓库
  * @FilePath: \frontend\src\stores\modules\settings\index.ts
@@ -12,6 +12,7 @@ import { ComplexityEnum } from "@/enums/complexity.enum";
 import { SplitRightEnum } from "@/enums/split-right.enum";
 import type { TrainerSettings } from "./types";
 export type * from "./types";
+import { getEnv } from "@/utils/env";
 
 export const useSettingsStore = defineStore(
 	"settings",
@@ -45,6 +46,9 @@ export const useSettingsStore = defineStore(
 			enableTrainingTaskDataRecovery: true
 		});
 
+		/** 是否开启小白校验 */
+		const whiteCheck = readonly(computed(() => getEnv().VITE_APP_WHITE_CHECK === "true"));
+
 		return {
 			complexity,
 			setComplexity,
@@ -54,7 +58,8 @@ export const useSettingsStore = defineStore(
 			setSplitRightType,
 			showAIDataset,
 			showTomlPreview,
-			trainerSettings
+			trainerSettings,
+			whiteCheck
 		};
 	},
 	{

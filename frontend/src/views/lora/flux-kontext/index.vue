@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-28 17:41:03
+ * @LastEditTime: 2025-07-29 09:44:42
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -32,7 +32,7 @@
 						<TrainingConfig v-model:form="ruleForm" />
 					</Collapse>
 					<Collapse v-model="openStep5" title="第5步：采样配置">
-						<SampleConfig v-model:form="ruleForm" />
+						<SampleConfig v-model:form="ruleForm" :form-instance="ruleFormRef" />
 					</Collapse>
 					<SimpleCollapse v-show="isExpert" v-model="openStep6" title="其它：高级设置">
 						<AdvancedSettings v-model:form="ruleForm" />
@@ -97,7 +97,7 @@ const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}flux_kontext_form`;
 const defaultForm: RuleForm = {
 	type: "sd_trainer",
-	training_folder: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+	training_folder: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 	trigger_word: "",
 	device: "cuda:0",
 	network: {
@@ -132,7 +132,7 @@ const defaultForm: RuleForm = {
 			ema_decay: 0.99
 		},
 		skip_first_sample: false,
-		disable_sampling: false,
+		disable_sampling: true,
 		diff_output_preservation: false,
 		diff_output_preservation_multiplier: 1,
 		diff_output_preservation_class: "person",

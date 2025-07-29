@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-07-28 11:47:53
+ * @LastEditTime: 2025-07-29 09:31:26
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -97,7 +97,7 @@ const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const env = getEnv();
 /** 是否开启小白校验 */
-const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
+const isWhiteCheck = settingsStore.whiteCheck;
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_flux_form`;
 const defaultForm = readonly<RuleForm>({
@@ -108,13 +108,13 @@ const defaultForm = readonly<RuleForm>({
 	clip_l: "./models/clip/clip_l.safetensors",
 	t5xxl: "./models/clip/t5xxl_fp16.safetensors",
 	resume: "",
-	output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+	output_dir: isWhiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 	save_model_as: "safetensors",
 	save_precision: "bf16",
 	save_state: true,
 	blocks_to_swap: undefined,
 	// -----
-	image_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+	image_dir: isWhiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
 	output_trigger_words: true,

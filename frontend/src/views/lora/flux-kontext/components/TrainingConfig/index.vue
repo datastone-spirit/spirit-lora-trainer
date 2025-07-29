@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 15:34:35
- * @LastEditTime: 2025-07-23 17:40:54
+ * @LastEditTime: 2025-07-29 12:20:32
  * @LastEditors: mulingyuer
  * @Description: 训练配置
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\TrainingConfig\index.vue
@@ -24,6 +24,11 @@
 				<el-input-number v-model.number="ruleForm.train.steps" :step="1" step-strictly :min="1" />
 			</PopoverFormItem>
 		</el-col>
+		<el-col :span="12">
+			<PopoverFormItem label="学习率" prop="train.lr" popover-content="lr">
+				<el-input-number v-model.number="ruleForm.train.lr" :step="0.0001" :min="0" />
+			</PopoverFormItem>
+		</el-col>
 		<template v-if="isExpert">
 			<el-col :span="12">
 				<PopoverFormItem
@@ -37,11 +42,6 @@
 						step-strictly
 						:min="1"
 					/>
-				</PopoverFormItem>
-			</el-col>
-			<el-col :span="12">
-				<PopoverFormItem label="学习率" prop="train.lr" popover-content="lr">
-					<el-input-number v-model.number="ruleForm.train.lr" :step="0.0001" :min="0" />
 				</PopoverFormItem>
 			</el-col>
 			<el-col :span="24">
@@ -125,7 +125,7 @@
 					<el-switch v-model="ruleForm.train.diff_output_preservation" />
 				</PopoverFormItem>
 			</el-col>
-			<el-col :span="12">
+			<el-col :span="24">
 				<PopoverFormItem
 					label="DOP 损失乘数"
 					prop="train.diff_output_preservation_multiplier"

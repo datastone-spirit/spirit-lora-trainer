@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-04-11 15:10:56
+ * @LastEditTime: 2025-07-28 09:53:16
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -76,7 +76,7 @@ import { downloadTomlFile, readTomlFile, tomlParse, tomlStringify } from "@/util
 import { useGPU } from "@/hooks/task/useGPU";
 import { useTrainingStore } from "@/stores";
 import { useTag } from "@/hooks/task/useTag";
-import { mergeTrainingFormData } from "@/utils/lora.helper";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 export interface ConfigProps {
 	/** 左按钮组teleport节点 */
@@ -150,7 +150,7 @@ const onUploadRequest: UploadProps["beforeUpload"] = async (file) => {
 function onMergeData(tomlObj: Record<string, any>) {
 	try {
 		// 合并数据
-		mergeTrainingFormData(mergeData.value, tomlObj);
+		LoRAHelper.mergeTrainingFormData(mergeData.value, tomlObj);
 
 		ElMessage.success("配置导入成功");
 	} catch (error) {

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-04-10 10:25:40
+ * @LastEditTime: 2025-07-28 17:34:41
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -96,7 +96,10 @@ export function secondsToHHMMSS(totalSeconds: number): string {
 	return `${hoursStr}:${minutesStr}:${secondsStr}`;
 }
 
-/** 将element-plus的表单校验结果转换成提示信息 */
+/** 将element-plus的表单校验结果转换成提示信息
+ *  多个字段的错误信息会合并成一条
+ *  字段名和错误信息之间用换行符分隔
+ */
 export function formatFormValidateMessage(invalidFields: FormValidateFailure["fields"]): string {
 	let message = "";
 

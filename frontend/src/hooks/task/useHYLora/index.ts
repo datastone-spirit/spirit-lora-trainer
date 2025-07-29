@@ -1,21 +1,19 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 14:45:05
- * @LastEditTime: 2025-04-11 14:53:50
+ * @LastEditTime: 2025-07-28 15:35:04
  * @LastEditors: mulingyuer
  * @Description: 混元lora hooks
- * @FilePath: \frontend\src\hooks\v2\useHYLora\index.ts
+ * @FilePath: \frontend\src\hooks\task\useHYLora\index.ts
  * 怎么可能会有bug！！！
  */
 import type { HyVideoTrainingInfoResult } from "@/api/monitor";
 import { hyVideoTrainingInfo } from "@/api/monitor";
-import type { UseModalManagerStore, UseTrainingStore, HYLoraData } from "@/stores";
+import type { UseModalManagerStore, UseTrainingStore } from "@/stores";
 import { useModalManagerStore, useTrainingStore } from "@/stores";
-import { calculatePercentage } from "@/utils/tools";
 import { isNetworkError } from "axios-retry";
-import type { TaskImplementation, TaskEvents, TaskStatus } from "../types";
 import mitt from "mitt";
-import BigNumber from "bignumber.js";
+import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
 
 interface HYLoraMonitorOptions {
 	/** 数据仓库 */
@@ -29,8 +27,6 @@ interface HYLoraMonitorOptions {
 	taskId?: string;
 	/** 任务类型 */
 	taskType?: TaskType;
-	/** 任务进度 */
-	taskProgress?: number;
 }
 
 /** 设置初始数据 */
@@ -59,8 +55,6 @@ class HYLoraMonitor implements TaskImplementation {
 	private taskId: string = "";
 	/** 任务类型 */
 	private readonly taskType: TaskType = "hunyuan-video";
-	/** 任务进度 */
-	private taskProgress: number = 0;
 	/** 任务名称 */
 	private readonly taskName: string = "混元视频";
 	/** 事件订阅 */
@@ -73,7 +67,6 @@ class HYLoraMonitor implements TaskImplementation {
 		this.modalManagerStore = options.modalManagerStore;
 		this.setTaskId(options.taskId ?? this.taskId);
 		this.taskType = options.taskType ?? this.taskType;
-		this.taskProgress = options.taskProgress ?? this.taskProgress;
 	}
 
 	start(): void {
@@ -179,7 +172,7 @@ class HYLoraMonitor implements TaskImplementation {
 
 	/** 更新是否监听 */
 	private updateIsListening(isListening: boolean): void {
-		this.trainingStore.setHYLoraIsListen(isListening);
+		this.trainingStore.setTrainingHYLoRAListen(isListening);
 	}
 
 	/** 更新当前任务信息 */
@@ -188,7 +181,7 @@ class HYLoraMonitor implements TaskImplementation {
 			id: this.taskId,
 			type: this.taskType,
 			name: this.taskName,
-			progress: this.taskProgress
+			progress: this.trainingStore.trainingHYLoRAData.data.progress
 		});
 	}
 
@@ -205,9 +198,7 @@ class HYLoraMonitor implements TaskImplementation {
 	/** 处理查询成功 */
 	private handleQuerySuccess(result: HyVideoTrainingInfoResult): void {
 		// 更新数据
-		const data = this.formatData(result);
-		this.trainingStore.setHYLoraData(data);
-		this.taskProgress = data.progress;
+		this.trainingStore.setTrainingHYLoRAData(result);
 		this.updateCurrentTaskInfo();
 		this.modalManagerStore.setNetworkDisconnectModal(false);
 
@@ -219,7 +210,7 @@ class HYLoraMonitor implements TaskImplementation {
 			case "complete": // 训练完成
 				this.updateStatus("success");
 				this.updateIsListening(false);
-				this.trainingStore.resetHYLoraData();
+				this.trainingStore.resetTrainingHYLoRAData();
 				this.trainingStore.resetCurrentTaskInfo();
 				this.events.emit("complete");
 
@@ -234,7 +225,7 @@ class HYLoraMonitor implements TaskImplementation {
 			case "failed": // 训练失败
 				this.updateStatus("failure");
 				this.updateIsListening(false);
-				this.trainingStore.resetHYLoraData();
+				this.trainingStore.resetTrainingHYLoRAData();
 				this.trainingStore.resetCurrentTaskInfo();
 				this.events.emit("failed");
 
@@ -277,7 +268,7 @@ class HYLoraMonitor implements TaskImplementation {
 		// 其他错误
 		this.updateStatus("failure");
 		this.updateIsListening(false);
-		this.trainingStore.resetHYLoraData();
+		this.trainingStore.resetTrainingHYLoRAData();
 		this.trainingStore.resetCurrentTaskInfo();
 
 		// 事件通知
@@ -285,56 +276,6 @@ class HYLoraMonitor implements TaskImplementation {
 
 		// log
 		console.error("查询wan训练任务信息出错：", error);
-	}
-
-	/** 格式化数据 */
-	private formatData(res: HyVideoTrainingInfoResult): HYLoraData {
-		const detail = typeof res.detail === "string" ? {} : (res?.detail ?? {});
-
-		const loraData: HYLoraData = {
-			current: detail.current ?? 0,
-			total: "??",
-			elapsed: detail.elapsed ?? 0,
-			epoch_elapsed: 0,
-			estimate_elapsed: 0,
-			loss: detail.loss ?? 0,
-			epoch_loss: detail.epoch_loss ?? 0,
-			progress: 0,
-			current_epoch: detail.current_epoch ?? "??",
-			total_epoch: detail.total_epoch ?? "??",
-			raw: res
-		};
-
-		// 只有第一轮结束后才有预估每轮步数 estimate_steps_per_epoch
-		// 第一轮是用轮数算百分比
-		// 第二轮有预估每轮步数后用步数来算百分比
-		const isPerEpoch = "current_epoch" in detail;
-		let current = 0;
-		let total = 0;
-		if (!isPerEpoch) {
-			// 第一轮
-			current = 1;
-			total = detail.total_epoch ?? 0;
-			loraData.current_epoch = 1;
-		} else {
-			current = detail.current ?? 0;
-			const current_epoch = detail.current_epoch ?? 0;
-			const steps = Math.ceil(current / current_epoch); //每轮的步数
-			const total_epoch = detail.total_epoch ?? 0;
-			total = steps * total_epoch;
-
-			loraData.total = total;
-			loraData.epoch_elapsed = new BigNumber(loraData.elapsed)
-				.dividedBy(detail.current_epoch ?? 1)
-				.toNumber();
-			loraData.estimate_elapsed = new BigNumber(loraData.epoch_elapsed)
-				.multipliedBy(detail.total_epoch ?? 1)
-				.toNumber();
-		}
-
-		loraData.progress = calculatePercentage(current, total);
-
-		return loraData;
 	}
 
 	/** 开始定时器 */
@@ -357,7 +298,6 @@ let hyLoraMonitor: HYLoraMonitor | null = null;
 export function useHYLora() {
 	const trainingStore = useTrainingStore();
 	const modalManagerStore = useModalManagerStore();
-	const { monitorHYLoraData } = storeToRefs(trainingStore);
 
 	if (!hyLoraMonitor) {
 		hyLoraMonitor = new HYLoraMonitor({
@@ -367,7 +307,6 @@ export function useHYLora() {
 	}
 
 	return {
-		hyLoraMonitor,
-		monitorHYLoraData
+		hyLoraMonitor
 	};
 }

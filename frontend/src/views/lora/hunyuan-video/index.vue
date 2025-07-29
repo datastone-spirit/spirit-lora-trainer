@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-04-11 14:56:01
+ * @LastEditTime: 2025-07-29 09:35:24
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -56,31 +56,29 @@
 
 <script setup lang="ts">
 import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
-import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useHYLora } from "@/hooks/task/useHYLora";
-import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
-import { checkData, checkDirectory, checkHYData, recoveryTaskFormData } from "@/utils/lora.helper";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { tomlStringify } from "@/utils/toml";
-import { formatFormValidateMessage } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
+import HYDataset from "./components/HYDataset/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData } from "./hunyuan.helper";
+import { isDirectoryEmpty, validate } from "./hunyuan.validate";
 import type { RuleForm } from "./types";
-import HYDataset from "./components/HYDataset/index.vue";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
-const modelManagerStore = useModalManagerStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
-const { monitorHYLoraData, hyLoraMonitor } = useHYLora();
+const { hyLoraMonitor } = useHYLora();
 
 const env = getEnv();
-/** 是否开启小白校验 */
-const isWhiteCheck = import.meta.env.VITE_APP_WHITE_CHECK === "true";
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_hunyuan_video_form`;
 const defaultForm = readonly<RuleForm>({
@@ -92,8 +90,8 @@ const defaultForm = readonly<RuleForm>({
 	model_dtype: "bfloat16",
 	model_transformer_dtype: "float8",
 	model_timestep_sample_method: "logit_normal",
-	output_dir: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
-	directory_path: env.VITE_APP_LORA_OUTPUT_PARENT_PATH,
+	output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+	directory_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 	directory_num_repeats: 10,
 	tagger_model: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
@@ -146,45 +144,52 @@ const rules = reactive<FormRules<RuleForm>>({
 	output_dir: [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
-			asyncValidator: async (
-				_rule: any,
-				value: string,
-				callback: (error?: string | Error) => void
-			) => {
-				try {
-					const isExists = await checkDirectory(value);
-					if (!isExists) {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
 						return;
 					}
-					const isDataExists = await checkHYData(value);
-					if (isDataExists) {
-						callback(new Error("LoRA保存目录已存在数据，请提供空目录"));
-						return;
-					}
-					return callback();
-				} catch (error) {
-					return callback(new Error((error as Error).message));
-				}
+
+					callback();
+				});
 			}
 		},
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (!isWhiteCheck) return callback();
-				if (value.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return callback();
-				callback(new Error(`LoRA保存目录必须以${env.VITE_APP_LORA_OUTPUT_PARENT_PATH}开头`));
+				isDirectoryEmpty({ path: value }).then(({ valid }) => {
+					if (!valid) {
+						callback(new Error("LoRA保存目录已存在数据，请提供空目录"));
+						return;
+					}
+
+					callback();
+				});
+			}
+		},
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				LoRAValidator.validateLoRASaveDir({ path: value }).then(({ valid, message }) => {
+					if (!valid) {
+						callback(new Error(message));
+						return;
+					}
+
+					callback();
+				});
 			}
 		}
 	],
 	directory_path: [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				checkDirectory(value).then((exists) => {
-					if (!exists) {
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;
 					}
+
 					callback();
 				});
 			}
@@ -233,79 +238,16 @@ function onResetData() {
 
 /** 提交表单 */
 const submitLoading = ref(false);
-function validateForm() {
-	return new Promise((resolve) => {
-		if (!ruleFormRef.value) return resolve(false);
-		ruleFormRef.value.validate(async (valid, invalidFields) => {
-			if (!valid) {
-				let message = "请填写必填项";
-				if (invalidFields) {
-					message = formatFormValidateMessage(invalidFields);
-				}
-				ElMessage({
-					type: "warning",
-					customClass: "break-line-message",
-					message
-				});
-				return resolve(false);
-			}
-
-			// gpu被占用
-			if (trainingStore.useGPU) {
-				ElMessage.warning("GPU已经被占用，请等待对应任务完成再执行训练");
-				return resolve(false);
-			}
-
-			// 校验数据集是否有数据
-			const isHasData = await checkData(ruleForm.value.directory_path);
-			if (!isHasData) {
-				ElMessage.error("数据集目录下没有数据，请上传训练用的素材");
-				return resolve(false);
-			}
-
-			// 检测lora保存目录是否是/root下的
-			if (isWhiteCheck) {
-				const isCheckLoRASaveDir = confirmLoRASaveDir();
-				if (!isCheckLoRASaveDir) return resolve(false);
-			}
-
-			return resolve(true);
-		});
-	});
-}
-// 训练轮数epochs二次确认弹窗
-function onEpochsConfirm() {
-	return new Promise((resolve) => {
-		const { epochs, save_every_n_epochs } = ruleForm.value;
-		if (epochs % save_every_n_epochs !== 0) {
-			ElMessageBox.confirm(
-				"当前epochs训练轮数不是save_every_n_epochs的整数倍，会有训练轮次不会保存训练结果！是否继续训练?",
-				"提示",
-				{
-					confirmButtonText: "继续训练",
-					cancelButtonText: "取消",
-					type: "warning"
-				}
-			)
-				.then(() => {
-					return resolve(true);
-				})
-				.catch(() => {
-					return resolve(false);
-				});
-		} else {
-			return resolve(true);
-		}
-	});
-}
 async function onSubmit() {
 	try {
 		if (!ruleFormRef.value) return;
 		submitLoading.value = true;
-		const valid = await validateForm();
-		const isConfirm = await onEpochsConfirm();
 
-		if (!valid || !isConfirm) {
+		const { valid } = await validate({
+			ruleForm: ruleForm.value,
+			formInstance: ruleFormRef.value
+		});
+		if (!valid) {
 			submitLoading.value = false;
 			return;
 		}
@@ -328,22 +270,13 @@ async function onSubmit() {
 	}
 }
 
-/** lora保存目录非/root确认弹窗 */
-function confirmLoRASaveDir() {
-	if (!isWhiteCheck) return true;
-	if (ruleForm.value.output_dir.startsWith(env.VITE_APP_LORA_OUTPUT_PARENT_PATH)) return true;
-	// 展示警告弹窗
-	modelManagerStore.setLoraSavePathWarningModal(true);
-	return false;
-}
-
 // 组件生命周期
 onMounted(() => {
 	hyLoraMonitor.resume();
 	// 恢复表单数据
-	recoveryTaskFormData({
+	LoRAHelper.recoveryTaskFormData({
 		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: monitorHYLoraData.value.isListen,
+		isListen: trainingStore.trainingHYLoRAData.isListen,
 		taskId: hyLoraMonitor.getTaskId(),
 		formData: ruleForm.value
 	});

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-18 15:40:09
- * @LastEditTime: 2025-04-01 15:58:37
+ * @LastEditTime: 2025-07-25 10:52:58
  * @LastEditors: mulingyuer
  * @Description: 公共api类型
  * @FilePath: \frontend\src\api\common\types.ts
@@ -77,18 +77,3 @@ export type DirectoryFilesResult = Array<{
 	txt_path: string;
 	mime_type: string;
 }>;
-
-/** 混元视频：检测目录是否存参数 */
-export interface HYCheckDirectoryExistsParams {
-	/** 需要检测的目录路径 */
-	path: string;
-	/** 是否检查目录中是否有数据 */
-	has_data: boolean;
-}
-/** 混元视频：检测目录是否存结果 */
-export interface HYCheckDirectoryExistsResult {
-	/** 是否存在 */
-	exists: boolean;
-	/** 是否有数据 */
-	has_data: boolean;
-}

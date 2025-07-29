@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2025-04-11 14:54:59
+ * @LastEditTime: 2025-07-28 14:56:25
  * @LastEditors: mulingyuer
  * @Description: 混元训练监控
  * @FilePath: \frontend\src\components\Monitor\HYTrainingMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="monitorHYLoraData.isListen" class="lo-ra-training-monitor">
+	<div v-if="trainingStore.trainingHYLoRAData.isListen" class="lo-ra-training-monitor">
 		<div v-if="isLoad" class="lo-ra-training-monitor-empty">
 			<el-text> 模型加载中 </el-text>
 			<el-text class="text-dot"></el-text>
@@ -67,13 +67,14 @@
 
 <script setup lang="ts">
 import { isEmptyObject, objectHasKeys, secondsToHHMMSS } from "@/utils/tools";
-import { useHYLora } from "@/hooks/task/useHYLora";
+import { useTrainingStore } from "@/stores";
 
-const { monitorHYLoraData } = useHYLora();
-const loraData = computed(() => monitorHYLoraData.value.data);
+const trainingStore = useTrainingStore();
+
+const loraData = computed(() => trainingStore.trainingHYLoRAData.data);
 /** 是否还在加载中 */
 const isLoad = computed(() => {
-	const rawData = loraData.value.raw;
+	const rawData = trainingStore.trainingHYLoRAData.raw;
 	if (!rawData) return true;
 	const isEmpty = !rawData.detail || isEmptyObject(rawData.detail);
 	const hasKey = objectHasKeys(rawData.detail, ["loss", "elapsed"]);

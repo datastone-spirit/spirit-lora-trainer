@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2025-04-11 11:45:15
+ * @LastEditTime: 2025-07-28 10:56:48
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="monitorTagData.isListen" class="tag-monitor">
+	<div v-if="trainingStore.trainingTagData.isListen" class="tag-monitor">
 		<div v-if="isLoad" class="tag-monitor-head">
 			<el-text class="tag-monitor-tips"> 打标模型加载中，请耐心等待 </el-text>
 			<el-text class="text-dot"></el-text>
@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTag } from "@/hooks/task/useTag";
+import { useTrainingStore } from "@/stores";
 
 export interface TagMonitorData {
 	/** 当前第几个 */
@@ -36,8 +36,8 @@ export interface TagMonitorData {
 	total: number;
 }
 
-const { monitorTagData } = useTag();
-const tagData = computed(() => monitorTagData.value.data);
+const trainingStore = useTrainingStore();
+const tagData = computed(() => trainingStore.trainingTagData.data);
 
 /** 是否在加载中 */
 const isLoad = computed(() => {

@@ -1,27 +1,25 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 09:16:38
- * @LastEditTime: 2025-04-11 11:52:25
+ * @LastEditTime: 2025-07-28 15:35:35
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
- * @FilePath: \frontend\src\hooks\v2\useTag\index.ts
+ * @FilePath: \frontend\src\hooks\task\useTag\index.ts
  * 怎么可能会有bug！！！
  */
+import type { ManualTagInfoResult } from "@/api/monitor";
+import { manualTagInfo } from "@/api/monitor";
+import { batchTag, type BatchTagData } from "@/api/tag";
 import {
 	useModalManagerStore,
 	useTrainingStore,
-	type TagData,
 	type UseModalManagerStore,
 	type UseTrainingStore
 } from "@/stores";
-import type { TaskImplementation, TaskEvents, TaskStatus } from "../types";
-import mitt from "mitt";
-import { manualTagInfo } from "@/api/monitor";
-import type { ManualTagInfoResult } from "@/api/monitor";
-import { calculatePercentage } from "@/utils/tools";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { isNetworkError } from "axios-retry";
-import { batchTag, type BatchTagData } from "@/api/tag";
-import { checkDirectory } from "@/utils/lora.helper";
+import mitt from "mitt";
+import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
 
 interface TagMonitorOptions {
 	/** 数据仓库 */
@@ -103,8 +101,6 @@ class TagMonitor implements TaskImplementation {
 	private taskId: string = "";
 	/** 任务类型 */
 	private readonly taskType: TaskType = "tag";
-	/** 任务进度 */
-	private taskProgress: number = 0;
 	/** 任务名称 */
 	private readonly taskName: string = "打标";
 	/** 事件订阅 */
@@ -117,7 +113,6 @@ class TagMonitor implements TaskImplementation {
 		this.modalManagerStore = options.modalManagerStore;
 		this.taskId = options.taskId ?? this.taskId;
 		this.taskType = options.taskType ?? this.taskType;
-		this.taskProgress = options.taskProgress ?? this.taskProgress;
 	}
 
 	start(): void {
@@ -223,7 +218,7 @@ class TagMonitor implements TaskImplementation {
 
 	/** 更新是否监听 */
 	private updateIsListening(isListening: boolean): void {
-		this.trainingStore.setTagIsListen(isListening);
+		this.trainingStore.setTrainingTagListen(isListening);
 	}
 
 	/** 更新当前任务信息 */
@@ -232,7 +227,7 @@ class TagMonitor implements TaskImplementation {
 			id: this.taskId,
 			type: this.taskType,
 			name: this.taskName,
-			progress: this.taskProgress
+			progress: this.trainingStore.trainingTagData.data.progress
 		});
 	}
 
@@ -249,9 +244,7 @@ class TagMonitor implements TaskImplementation {
 	/** 处理查询成功 */
 	private handleQuerySuccess(result: ManualTagInfoResult): void {
 		// 更新数据
-		const data = this.formatData(result);
-		this.trainingStore.setTagData(data);
-		this.taskProgress = data.progress;
+		this.trainingStore.setTrainingTagData(result);
 		this.updateCurrentTaskInfo();
 		this.modalManagerStore.setNetworkDisconnectModal(false);
 
@@ -263,7 +256,7 @@ class TagMonitor implements TaskImplementation {
 			case "complete": // 打标完成
 				this.updateStatus("success");
 				this.updateIsListening(false);
-				this.trainingStore.resetTagData();
+				this.trainingStore.resetTrainingTagData();
 				this.trainingStore.resetCurrentTaskInfo();
 				this.events.emit("complete");
 
@@ -278,7 +271,7 @@ class TagMonitor implements TaskImplementation {
 			case "failed": // 打标失败
 				this.updateStatus("failure");
 				this.updateIsListening(false);
-				this.trainingStore.resetTagData();
+				this.trainingStore.resetTrainingTagData();
 				this.trainingStore.resetCurrentTaskInfo();
 				this.events.emit("failed");
 
@@ -314,7 +307,7 @@ class TagMonitor implements TaskImplementation {
 		// 其他错误
 		this.updateStatus("failure");
 		this.updateIsListening(false);
-		this.trainingStore.resetTagData();
+		this.trainingStore.resetTrainingTagData();
 		this.trainingStore.resetCurrentTaskInfo();
 
 		// 事件通知
@@ -322,19 +315,6 @@ class TagMonitor implements TaskImplementation {
 
 		// log
 		console.error("查询tag打标任务信息出错：", error);
-	}
-
-	/** 格式化数据 */
-	private formatData(res: ManualTagInfoResult): TagData {
-		const detail = res?.detail ?? {};
-
-		const current = detail?.current >= 0 ? detail.current : 0;
-		const total = detail?.total ?? 0;
-		return {
-			current,
-			total: total,
-			progress: calculatePercentage(current, total)
-		};
 	}
 
 	/** 开始定时器 */
@@ -357,7 +337,6 @@ let tagMonitor: TagMonitor | null = null;
 export function useTag() {
 	const trainingStore = useTrainingStore();
 	const modalManagerStore = useModalManagerStore();
-	const { monitorTagData } = storeToRefs(trainingStore);
 
 	/** 打标 */
 	async function tag(options: TagOptions) {
@@ -410,7 +389,10 @@ export function useTag() {
 				message: "请先选择训练用的数据集目录"
 			},
 			{
-				condition: async () => !(await checkDirectory(tagDir)),
+				condition: async () => {
+					const { valid } = await LoRAValidator.validateDirectory({ path: tagDir });
+					return !valid;
+				},
 				message: "数据集目录不存在"
 			},
 			{
@@ -472,7 +454,6 @@ export function useTag() {
 
 	return {
 		tagMonitor,
-		monitorTagData,
 		tag
 	};
 }

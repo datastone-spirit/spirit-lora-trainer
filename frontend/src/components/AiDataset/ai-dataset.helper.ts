@@ -1,13 +1,13 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-07 14:26:10
- * @LastEditTime: 2025-04-07 15:06:32
+ * @LastEditTime: 2025-07-28 09:54:47
  * @LastEditors: mulingyuer
  * @Description: 数据集帮助
  * @FilePath: \frontend\src\components\AiDataset\ai-dataset.helper.ts
  * 怎么可能会有bug！！！
  */
-import { checkDirectory } from "@/utils/lora.helper";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
 import type { UploadUserFile } from "element-plus";
 
 export class AiDatasetHelper {
@@ -22,8 +22,8 @@ export class AiDatasetHelper {
 				ElMessage.error("请先选择目录");
 				return false;
 			}
-			const exists = await checkDirectory(path);
-			if (!exists) {
+			const { valid } = await LoRAValidator.validateDirectory({ path });
+			if (!valid) {
 				ElMessage.error("目录不存在");
 				return false;
 			}

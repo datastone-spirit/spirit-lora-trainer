@@ -1,17 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-10 08:48:27
- * @LastEditTime: 2025-04-11 11:12:39
+ * @LastEditTime: 2025-07-28 10:49:52
  * @LastEditors: mulingyuer
  * @Description: gpu hooks
- * @FilePath: \frontend\src\hooks\v2\useGPU\index.ts
+ * @FilePath: \frontend\src\hooks\task\useGPU\index.ts
  * 怎么可能会有bug！！！
  */
 import type { GPUMonitorInfoResult } from "@/api/monitor";
 import { gpuMonitorInfo } from "@/api/monitor";
-import type { GPUData, UseTrainingStore } from "@/stores";
+import type { UseTrainingStore } from "@/stores";
 import { useTrainingStore } from "@/stores";
-import { calculatePercentage } from "@/utils/tools";
 import type { TaskImplementation, TaskStatus } from "../types";
 
 interface GPUMonitorOptions {
@@ -106,14 +105,14 @@ class GPUMonitor implements TaskImplementation {
 
 	/** 更新是否监听 */
 	private updateIsListening(isListening: boolean): void {
-		this.trainingStore.setGPUIsListen(isListening);
+		this.trainingStore.setTrainingGPUListen(isListening);
 	}
 
 	/** 处理查询成功 */
 	private handleQuerySuccess(result: GPUMonitorInfoResult): void {
 		const oneItemData = result[0];
 		if (oneItemData) {
-			this.trainingStore.setGPUData(this.formatData(result));
+			this.trainingStore.setTrainingGPUData(result);
 		}
 
 		// 定时器继续查询
@@ -124,17 +123,6 @@ class GPUMonitor implements TaskImplementation {
 	private handleQueryFailure(error: any): void {
 		// gpu信息查询失败也要继续查询，只有查询条件不成立才停止查询
 		console.error("查询GPU信息失败：", error);
-	}
-
-	/** 格式化数据 */
-	private formatData(res: GPUMonitorInfoResult): GPUData {
-		const oneItemData = res[0];
-
-		return {
-			gpuMemory: calculatePercentage(oneItemData.memory_used_mb, oneItemData.memory_total_mb),
-			gpuPower: calculatePercentage(oneItemData.power_draw_watts, oneItemData.power_total_watts),
-			gpuList: res
-		};
 	}
 
 	/** 开始定时器 */
@@ -156,7 +144,6 @@ let gpuMonitor: GPUMonitor | null = null;
 
 export function useGPU() {
 	const trainingStore = useTrainingStore();
-	const { monitorGPUData } = storeToRefs(trainingStore);
 
 	if (!gpuMonitor) {
 		gpuMonitor = new GPUMonitor({
@@ -165,7 +152,6 @@ export function useGPU() {
 	}
 
 	return {
-		gpuMonitor,
-		monitorGPUData
+		gpuMonitor
 	};
 }

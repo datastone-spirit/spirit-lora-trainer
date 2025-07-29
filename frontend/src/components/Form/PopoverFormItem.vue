@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 08:41:44
- * @LastEditTime: 2025-04-07 10:17:42
+ * @LastEditTime: 2025-07-24 09:24:46
  * @LastEditors: mulingyuer
  * @Description: 表单项组件
  * @FilePath: \frontend\src\components\Form\PopoverFormItem.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<el-form-item class="popover-form-item" :prop="prop">
+	<el-form-item class="popover-form-item" :prop="prop" :rules="rules">
 		<template v-if="label" #label>
 			<span class="popover-form-item-label">
 				{{ label }}
@@ -33,6 +33,7 @@ export interface PopoverFormItemProps {
 	label?: FormItemProps["label"];
 	prop?: FormItemProps["prop"];
 	popoverContent?: PopoverProps["content"];
+	rules?: FormItemProps["rules"];
 }
 
 withDefaults(defineProps<PopoverFormItemProps>(), {});

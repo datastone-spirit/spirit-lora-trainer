@@ -1,33 +1,37 @@
 {
-	"explorer.fileNesting.enabled": true,
-	"explorer.fileNesting.patterns": {
-		"tsconfig.json": "tsconfig.*.json, env.d.ts",
-		"vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*",
-		"package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .prettier*, prettier*, .editorconfig"
-	},
-	"editor.codeActionsOnSave": {
-		"source.fixAll": "explicit"
-	},
-	"editor.formatOnSave": true,
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"cSpell.words": [
-		"AIGC",
-		"Axios",
-		"dotdotdot",
-		"friframeder",
-		"huggingface",
-		"hunyuan",
-		"logit",
-		"mulingyuer",
-		"oxlint",
-		"pinia",
-		"popconfirm",
-		"sdxl",
-		"shiki",
-		"VITE"
-	],
-	"editor.wordWrap": "on",
-	"[typescript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	}
+  "explorer.fileNesting.enabled": false,
+  "explorer.fileNesting.patterns": {
+    "tsconfig.json": "tsconfig.*.json, env.d.ts",
+    "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*",
+    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .prettier*, prettier*, .editorconfig"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "cSpell.words": [
+    "AIGC",
+    "Axios",
+    "dotdotdot",
+    "dtype",
+    "friframeder",
+    "huggingface",
+    "hunyuan",
+    "kontext",
+    "logit",
+    "mulingyuer",
+    "oxlint",
+    "pinia",
+    "popconfirm",
+    "sdxl",
+    "shiki",
+    "timestep",
+    "VITE"
+  ],
+  "editor.wordWrap": "on",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "oxc.enable": false
 }

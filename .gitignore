@@ -31,8 +31,9 @@ coverage
 
 __pycache__/
 upload/
-.vscode/
+# .vscode/
 .coverage*
 
 # frontend
 /frontend/.env.development
+CLAUDE.md

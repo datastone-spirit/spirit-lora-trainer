@@ -1,27 +1,30 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-02 15:55:35
- * @LastEditTime: 2025-04-03 16:10:15
+ * @LastEditTime: 2025-07-30 17:48:44
  * @LastEditors: mulingyuer
  * @Description: 任务日志组件
  * @FilePath: \frontend\src\components\TaskLog\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div class="task-log" v-loading="loading">
+	<div class="task-log" :class="{ 'full-screen': isFullScreen }" v-loading="loading">
 		<div class="task-log-head">
 			<el-button-group size="small">
 				<el-button type="default" :icon="RiRefreshLine" @click="onRefresh"></el-button>
+				<el-button
+					type="default"
+					:icon="isFullScreen ? RiFullscreenExitLine : RiFullscreenLine"
+					@click="onFullScreen"
+				></el-button>
 			</el-button-group>
 			<el-button-group size="small">
 				<el-button type="default" :icon="RiDownload_2Line" @click="onDownload">下载日志</el-button>
 			</el-button-group>
 		</div>
-		<el-scrollbar class="task-log-scrollbar" max-height="500px">
-			<div class="task-log-content-wrapper">
-				<div class="task-log-content" v-html="logHtml"></div>
-			</div>
-		</el-scrollbar>
+		<div class="task-log-content-wrapper" :style="{ maxHeight: isFullScreen ? 'none' : maxHeight }">
+			<div class="task-log-content" v-html="logHtml"></div>
+		</div>
 	</div>
 </template>
 
@@ -31,19 +34,29 @@ import type { TaskLogResult } from "@/api/task";
 import { useIcon } from "@/hooks/useIcon";
 import { downloadFile } from "@/utils/tools";
 import { formatDate } from "@/utils/dayjs";
+import type { ScrollbarProps } from "element-plus";
 
 export interface TaskLogProps {
 	/** 任务id */
 	taskId: string;
+	/** 最大滚动高度 */
+	maxHeight?: ScrollbarProps["maxHeight"];
 }
 
-const props = defineProps<TaskLogProps>();
+const props = withDefaults(defineProps<TaskLogProps>(), {
+	maxHeight: "500px"
+});
+
+// icon
+const RiDownload_2Line = useIcon({ name: "ri-download-2-line", size: 12 });
+const RiRefreshLine = useIcon({ name: "ri-refresh-line", size: 12 });
+const RiFullscreenLine = useIcon({ name: "ri-fullscreen-line", size: 12 });
+const RiFullscreenExitLine = useIcon({ name: "ri-fullscreen-exit-line", size: 12 });
 
 const loading = ref(false);
 const logList = ref<TaskLogResult>([]);
 const logHtml = ref("");
-const RiDownload_2Line = useIcon({ name: "ri-download-2-line", size: 12 });
-const RiRefreshLine = useIcon({ name: "ri-refresh-line", size: 12 });
+const isFullScreen = ref(false);
 
 /** 获取任务日志 */
 function getTaskLog() {
@@ -87,6 +100,11 @@ function onDownload() {
 	}, 2000);
 }
 
+/** 全屏 */
+function onFullScreen() {
+	isFullScreen.value = !isFullScreen.value;
+}
+
 watch(
 	() => props.taskId,
 	() => {
@@ -98,17 +116,34 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.task-log.full-screen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	margin: 0;
+	z-index: 9999;
+	background-color: var(--zl-page-bg);
+	display: flex;
+	flex-direction: column;
+	padding: 8px;
+}
+.task-log-head {
+	flex-shrink: 0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 6px;
+}
 .task-log-content-wrapper {
+	flex-grow: 1;
+	min-height: 1px;
 	background-color: var(--el-bg-color-page);
 	font-size: 14px;
 	color: var(--el-text-color);
 	line-height: 1.5;
-}
-.task-log-head {
-	margin-bottom: 6px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+	overflow: auto;
 }
 .task-log-content {
 	min-height: 150px;

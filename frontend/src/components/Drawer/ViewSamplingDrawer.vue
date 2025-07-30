@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-03 09:18:45
- * @LastEditTime: 2025-04-03 09:32:04
+ * @LastEditTime: 2025-07-30 15:15:36
  * @LastEditors: mulingyuer
  * @Description: 查看采样数据抽屉
  * @FilePath: \frontend\src\components\Drawer\ViewSamplingDrawer.vue
@@ -17,15 +17,9 @@
 		@open="onDrawerOpen"
 	>
 		<div class="view-sampling-header">
-			<el-button
-				class="view-sampling-refresh"
-				:icon="RefreshIcon"
-				circle
-				type="info"
-				plain
-				text
-				@click="onRefresh"
-			/>
+			<el-button class="view-sampling-refresh" circle type="info" plain text @click="onRefresh">
+				<Icon :class="{ 'rotate-animation': isRotating }" name="ri-refresh-line" size="24" />
+			</el-button>
 			<el-button
 				class="view-sampling-close"
 				:icon="CloseIcon"
@@ -70,9 +64,11 @@ const { previewVideo } = useVideoPreview();
 const fileManager = new FileManager();
 const modalManagerStore = useModalManagerStore();
 
-const { viewSamplingDrawerModal } = storeToRefs(modalManagerStore);
+// icon
 const CloseIcon = useIcon({ name: "ri-close-line", size: 28 });
-const RefreshIcon = useIcon({ name: "ri-refresh-line", size: 24 });
+// const RefreshIcon = useIcon({ name: "ri-refresh-line", size: 24 });
+
+const { viewSamplingDrawerModal } = storeToRefs(modalManagerStore);
 const open = computed({
 	get() {
 		return viewSamplingDrawerModal.value.open;
@@ -85,6 +81,8 @@ const loading = ref(false);
 const list = ref<FileList>([]);
 /** 采样路径 */
 const samplingPath = computed(() => viewSamplingDrawerModal.value.filePath);
+const isRotating = ref(false);
+let rotateTimer: number | null = null;
 
 /** 关闭抽屉 */
 function onClose() {
@@ -114,6 +112,9 @@ function getSamplingData() {
 		return;
 	}
 	loading.value = true;
+	if (rotateTimer) clearTimeout(rotateTimer);
+	isRotating.value = true;
+
 	directoryFiles({ path: samplingPath.value })
 		.then((res) => {
 			list.value = fileManager
@@ -126,6 +127,9 @@ function getSamplingData() {
 		})
 		.finally(() => {
 			loading.value = false;
+			rotateTimer = setTimeout(() => {
+				isRotating.value = false;
+			}, 500);
 		});
 }
 
@@ -166,6 +170,10 @@ function onRefresh() {
 .view-sampling-content {
 	height: calc(100% - 32px);
 	padding-bottom: $zl-padding;
+}
+/* 应用动画 */
+.rotate-animation {
+	animation: spin 0.6s linear infinite;
 }
 .view-sampling-close {
 	position: absolute;

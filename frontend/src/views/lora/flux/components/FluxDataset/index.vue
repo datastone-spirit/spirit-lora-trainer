@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-08 09:58:29
- * @LastEditTime: 2025-07-29 09:51:55
+ * @LastEditTime: 2025-07-29 17:10:27
  * @LastEditors: mulingyuer
  * @Description: flux数据集组件
  * @FilePath: \frontend\src\views\lora\flux\components\FluxDataset\index.vue
@@ -58,11 +58,7 @@
 			popover-content="tagger_is_append"
 		/>
 	</template>
-	<TagSubmitButton
-		:loading="loading || trainingStore.trainingTagData.isListen"
-		:disabled="disabled"
-		@submit="onTagClick"
-	/>
+	<TagSubmitButton :loading="loading" :disabled="disabled" @submit="onTagClick" />
 </template>
 
 <script setup lang="ts">

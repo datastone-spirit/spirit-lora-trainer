@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-07-28 15:12:22
+ * @LastEditTime: 2025-07-30 10:57:38
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -17,29 +17,40 @@ import type {
 	WanVideoTrainingPhase
 } from "@/api/monitor";
 
-/** 基础训练数据类型 */
+/** 当前任务信息
+ * 任务相关的具体数据因为格式不同，所以单独定义
+ */
+export interface CurrentTaskInfo {
+	/** 任务id */
+	id: string;
+	/** 任务类型 */
+	type: TaskType;
+	/** 任务名称 */
+	name: string;
+	/** 任务进度百分比，例：20 */
+	progress: number;
+}
+
+/** 设置当前任务信息参数 */
+export type SetCurrentTaskInfoData = DeepPrettify<
+	Omit<CurrentTaskInfo, "progress"> & {
+		/** API返回的任务数据 */
+		result?: unknown;
+	}
+>;
+
+/** 重置当前任务信息参数 */
+export type ResetCurrentTaskInfoData = Pick<CurrentTaskInfo, "type">;
+
+/** 基础训练数据 */
 export interface BaseTrainingItem<T = unknown, R = unknown> {
-	/** 是否监听 */
-	isListen: boolean;
 	/** 格式化后的数据 */
 	data: T;
 	/** 原始数据 */
 	raw: R | null;
 }
 
-/** 训练任务数据 */
-export type TaskTrainingItem<T extends BaseTrainingFormatData, R = unknown> = BaseTrainingItem<
-	T,
-	R
->;
-
-/** 基础训练格式化的数据类型 */
-export interface BaseTrainingFormatData {
-	/** 任务进度百分比，例：20 */
-	progress: number;
-}
-
-/** GPU */
+/** 训练数据 - gpu */
 export type TrainingGPUData = DeepPrettify<
 	BaseTrainingItem<
 		{
@@ -54,10 +65,10 @@ export type TrainingGPUData = DeepPrettify<
 	>
 >;
 
-/** 打标 */
+/** 训练数据 - 打标 */
 export type TrainingTagData = DeepPrettify<
-	TaskTrainingItem<
-		BaseTrainingFormatData & {
+	BaseTrainingItem<
+		{
 			/** 当前第几个 */
 			current: number;
 			/** 总共多少个 */
@@ -67,12 +78,11 @@ export type TrainingTagData = DeepPrettify<
 	>
 >;
 
-/** flux lora训练 */
+/** 训练数据 - flux lora */
 export type TrainingFluxLoRAData = DeepPrettify<
-	TaskTrainingItem<
-		BaseTrainingFormatData & {
-			/** 当前进度 */
-			current: number;
+	BaseTrainingItem<
+		{
+			/** 当前进度 */ current: number;
 			/** 已经耗时 */
 			elapsed: string;
 			/** 当前损失 */
@@ -94,10 +104,10 @@ export type TrainingFluxLoRAData = DeepPrettify<
 	>
 >;
 
-/** flux kontext lora训练 */
+/** 训练数据 - flux kontext lora */
 export type TrainingFluxKontextLoRAData = DeepPrettify<
-	TaskTrainingItem<
-		BaseTrainingFormatData & {
+	BaseTrainingItem<
+		{
 			/** 当前进度 */
 			current: number;
 			/** 已经耗时 */
@@ -121,11 +131,12 @@ export type TrainingFluxKontextLoRAData = DeepPrettify<
 	>
 >;
 
-/** 混元视频 lora训练 */
+/** 训练数据 - 混元视频 lora */
 export type TrainingHYLoRAData = DeepPrettify<
-	TaskTrainingItem<
-		BaseTrainingFormatData & {
-			/** 当前第几个 */ current: number;
+	BaseTrainingItem<
+		{
+			/** 当前第几个 */
+			current: number;
 			/** 总图片数量 */
 			total: number | string;
 			/** 已经耗时 */
@@ -147,11 +158,12 @@ export type TrainingHYLoRAData = DeepPrettify<
 	>
 >;
 
-/** wan lora 训练 */
+/** 训练数据 - wan lora */
 export type TrainingWanLoRAData = DeepPrettify<
-	TaskTrainingItem<
-		BaseTrainingFormatData & {
-			/** 当前进度 */ current: number;
+	BaseTrainingItem<
+		{
+			/** 当前进度 */
+			current: number;
 			/** 总进度 */
 			total: number;
 			/** 已用时长 */
@@ -174,31 +186,3 @@ export type TrainingWanLoRAData = DeepPrettify<
 		WanVideoTrainingInfoResult
 	>
 >;
-
-/** 所有训练数据 */
-export interface TrainingData {
-	/** gpu */
-	gpu: TrainingGPUData;
-	/** 打标 */
-	tag: TrainingTagData;
-	/** flux lora 训练 */
-	flux_lora: TrainingFluxLoRAData;
-	/** flux kontext lora 训练 */
-	flux_kontext_lora: TrainingFluxKontextLoRAData;
-	/** 混元视频 lora 训练 */
-	hy_lora: TrainingHYLoRAData;
-	/** wan lora 训练 */
-	wan_lora: TrainingWanLoRAData;
-}
-
-/** 当前任务信息 */
-export interface CurrentTaskInfo {
-	/** 任务id */
-	id: string;
-	/** 任务类型 */
-	type: TaskType;
-	/** 任务名称 */
-	name: string;
-	/** 任务进度百分比，例：20 */
-	progress: number;
-}

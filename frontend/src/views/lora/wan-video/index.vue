@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-07-29 09:35:56
+ * @LastEditTime: 2025-07-30 10:43:36
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -48,7 +48,7 @@
 			@submit="onSubmit"
 		>
 			<template #monitor-progress-bar>
-				<WanTrainingMonitor />
+				<WanTrainingLoRAMonitor />
 			</template>
 			<template #right-btn-group>
 				<el-button
@@ -83,6 +83,7 @@ import { WanHelper } from "./wan.helper";
 import { validate } from "./wan.validate";
 import { generateUUID, isImageFile } from "@/utils/tools";
 import { useWanLora } from "@/hooks/task/useWanLora";
+import WanTrainingLoRAMonitor from "./components/WanTrainingLoRAMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();
@@ -549,14 +550,10 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
+	// 监听如果成功恢复，任务信息会被更新
 	wanLoraMonitor.resume();
-	// 恢复表单数据
-	LoRAHelper.recoveryTaskFormData({
-		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: trainingStore.trainingWanLoRAData.isListen,
-		taskId: wanLoraMonitor.getTaskId(),
-		formData: ruleForm.value
-	});
+	// 恢复表单数据（前提是任务信息存在）
+	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
 });
 onUnmounted(() => {
 	wanLoraMonitor.pause();

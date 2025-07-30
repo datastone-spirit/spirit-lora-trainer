@@ -1,14 +1,24 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-07-29 09:48:57
+ * @LastEditTime: 2025-07-30 09:49:30
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
  * 怎么可能会有bug！！！
  */
 import { defineStore } from "pinia";
-import type { CurrentTaskInfo, TrainingData, TrainingHYLoRAData } from "./types";
+import type {
+	CurrentTaskInfo,
+	ResetCurrentTaskInfoData,
+	SetCurrentTaskInfoData,
+	TrainingFluxKontextLoRAData,
+	TrainingFluxLoRAData,
+	TrainingGPUData,
+	TrainingHYLoRAData,
+	TrainingTagData,
+	TrainingWanLoRAData
+} from "./types";
 import type {
 	FluxKontextTrainingInfoResult,
 	GPUMonitorInfoResult,
@@ -20,25 +30,79 @@ import type {
 import { calculatePercentage } from "@/utils/tools";
 import BigNumber from "bignumber.js";
 export type * from "./types";
+import { resettableRef } from "@/utils/ref";
 
 export const useTrainingStore = defineStore("training", () => {
 	/** 当前任务信息 */
-	const currentTaskInfo = ref<CurrentTaskInfo>({
+	const [currentTaskInfo, restoreCurrentTaskInfo] = resettableRef<CurrentTaskInfo>({
 		type: "none",
 		id: "",
 		name: "",
 		progress: 0
 	});
-	function setCurrentTaskInfo(info: CurrentTaskInfo) {
-		currentTaskInfo.value = info;
+	function setCurrentTaskInfo(data: SetCurrentTaskInfoData) {
+		const { id, name, type, result } = data;
+
+		// 先更新任务数据
+		currentTaskInfo.value.id = id;
+		currentTaskInfo.value.name = name;
+		currentTaskInfo.value.type = type;
+
+		// 根据任务类型更新训练数据
+		// 训练数据更新时计算的进度再赋值给当前任务信息
+		if (!result) return;
+		switch (type) {
+			case "none":
+				break;
+			case "tag":
+				setTrainingTagData(result as ManualTagInfoResult);
+				break;
+			case "flux":
+				setTrainingFluxLoRAData(result as LoRATrainingInfoResult);
+				break;
+			case "flux-kontext":
+				setTrainingFluxKontextLoRAData(result as FluxKontextTrainingInfoResult);
+				break;
+			case "hunyuan-video":
+				setTrainingHYLoRAData(result as HyVideoTrainingInfoResult);
+				break;
+			case "wan-video":
+				setTrainingWanLoRAData(result as WanVideoTrainingInfoResult);
+				break;
+			default:
+				console.warn(`未知的任务类型: ${type}`);
+				break;
+		}
 	}
-	function resetCurrentTaskInfo() {
-		currentTaskInfo.value = {
-			type: "none",
-			id: "",
-			name: "",
-			progress: 0
-		};
+	function resetCurrentTaskInfo(data: ResetCurrentTaskInfoData) {
+		const { type } = data;
+
+		// 先重置任务数据
+		restoreCurrentTaskInfo();
+
+		// 根据任务类型重置训练数据
+		switch (type) {
+			case "none":
+				break;
+			case "tag":
+				resetTrainingTagData();
+				break;
+			case "flux":
+				resetTrainingFluxLoRAData();
+				break;
+			case "flux-kontext":
+				resetTrainingFluxKontextLoRAData();
+				break;
+			case "hunyuan-video":
+				resetTrainingHYLoRAData();
+				break;
+			case "wan-video":
+				resetTrainingWanLoRAData();
+				break;
+			default:
+				console.warn(`未知的任务类型: ${type}`);
+				break;
+		}
 	}
 
 	/** gpu是否在使用中 */
@@ -46,98 +110,15 @@ export const useTrainingStore = defineStore("training", () => {
 		return currentTaskInfo.value.type !== "none";
 	});
 
-	/** 训练数据 */
-	const trainingData = ref<TrainingData>({
-		gpu: {
-			isListen: false,
-			data: {
-				gpuPower: 0,
-				gpuMemory: 0,
-				gpuList: []
-			},
-			raw: null
-		},
-		tag: {
-			isListen: false,
-			data: {
-				progress: 0,
-				current: 0,
-				total: 0
-			},
-			raw: null
-		},
-		flux_lora: {
-			isListen: false,
-			data: {
-				current: 0,
-				elapsed: "",
-				loss: 0,
-				loss_avr: 0,
-				remaining: "",
-				speed: 0,
-				total: 0,
-				progress: 0,
-				samplingPath: "",
-				showSampling: false
-			},
-			raw: null
-		},
-		flux_kontext_lora: {
-			isListen: false,
-			data: {
-				current: 0,
-				elapsed: "",
-				loss: 0,
-				remaining: "",
-				speed: 0,
-				total: 0,
-				showSampling: false,
-				samplingPath: "",
-				progress: 0,
-				totalTime: 0
-			},
-			raw: null
-		},
-		hy_lora: {
-			isListen: false,
-			data: {
-				current: 0,
-				total: 0,
-				progress: 0,
-				elapsed: 0,
-				epoch_elapsed: 0,
-				epoch_loss: 0,
-				estimate_elapsed: 0,
-				loss: 0,
-				current_epoch: "??",
-				total_epoch: "??"
-			},
-			raw: null
-		},
-		wan_lora: {
-			isListen: false,
-			data: {
-				current: 0,
-				total: 0,
-				elapsed: "",
-				remaining: 0,
-				current_loss: 0,
-				average_loss: 0,
-				total_epoch: "",
-				showSampling: false,
-				samplingPath: "",
-				phase: "none",
-				progress: 0
-			},
-			raw: null
-		}
-	});
-
 	// gpu
-	const trainingGPUData = computed(() => trainingData.value.gpu);
-	function setTrainingGPUListen(val: boolean) {
-		trainingData.value.gpu.isListen = val;
-	}
+	const [trainingGPUData, restoreTrainingGPUData] = resettableRef<TrainingGPUData>({
+		data: {
+			gpuPower: 0,
+			gpuMemory: 0,
+			gpuList: []
+		},
+		raw: null
+	});
 	function setTrainingGPUData(result: GPUMonitorInfoResult) {
 		if (!result.length) {
 			console.warn("设置GPU数据为空，请检查接口返回");
@@ -145,52 +126,56 @@ export const useTrainingStore = defineStore("training", () => {
 		}
 
 		const oneItemData = result[0];
-		trainingData.value.gpu.data = {
+		trainingGPUData.value.data = {
 			gpuMemory: calculatePercentage(oneItemData.memory_used_mb, oneItemData.memory_total_mb),
 			gpuPower: calculatePercentage(oneItemData.power_draw_watts, oneItemData.power_total_watts),
 			gpuList: result
 		};
-		trainingData.value.gpu.raw = result;
+		trainingGPUData.value.raw = result;
 	}
 	function resetTrainingGPUData() {
-		trainingData.value.gpu.data = {
-			gpuPower: 0,
-			gpuMemory: 0,
-			gpuList: []
-		};
-		trainingData.value.gpu.raw = null;
+		restoreTrainingGPUData();
 	}
 
 	// 打标
-	const trainingTagData = computed(() => trainingData.value.tag);
-	function setTrainingTagListen(val: boolean) {
-		trainingData.value.tag.isListen = val;
-	}
+	const [trainingTagData, restoreTrainingTagData] = resettableRef<TrainingTagData>({
+		data: {
+			current: 0,
+			total: 0
+		},
+		raw: null
+	});
 	function setTrainingTagData(result: ManualTagInfoResult) {
 		const detail = result?.detail ?? {};
 		const current = detail?.current >= 0 ? detail.current : 0;
 		const total = detail?.total ?? 0;
 
-		trainingData.value.tag.data = {
+		trainingTagData.value.data = {
 			current,
-			total: total,
-			progress: calculatePercentage(current, total)
+			total: total
 		};
-		trainingData.value.tag.raw = result;
+		trainingTagData.value.raw = result;
+		currentTaskInfo.value.progress = calculatePercentage(current, total);
 	}
 	function resetTrainingTagData() {
-		trainingData.value.tag.data = {
-			progress: 0,
-			current: 0,
-			total: 0
-		};
+		restoreTrainingTagData();
 	}
 
 	/** flux lora 训练 */
-	const trainingFluxLoRAData = computed(() => trainingData.value.flux_lora);
-	function setTrainingFluxLoRAListen(val: boolean) {
-		trainingData.value.flux_lora.isListen = val;
-	}
+	const [trainingFluxLoRAData, restoreTrainingFluxLoRAData] = resettableRef<TrainingFluxLoRAData>({
+		data: {
+			current: 0,
+			elapsed: "",
+			loss: 0,
+			loss_avr: 0,
+			remaining: "",
+			speed: 0,
+			total: 0,
+			samplingPath: "",
+			showSampling: false
+		},
+		raw: null
+	});
 	function setTrainingFluxLoRAData(result: LoRATrainingInfoResult) {
 		let detail: Exclude<LoRATrainingInfoResult["detail"], string>;
 		if (!result?.detail || typeof result.detail === "string") {
@@ -201,7 +186,7 @@ export const useTrainingStore = defineStore("training", () => {
 		const current = detail.current ?? 0;
 		const total = detail.total ?? 0;
 
-		trainingData.value.flux_lora.data = {
+		trainingFluxLoRAData.value.data = {
 			current,
 			elapsed: detail.elapsed ?? "00:00",
 			loss: detail.loss ?? 0,
@@ -209,33 +194,32 @@ export const useTrainingStore = defineStore("training", () => {
 			remaining: detail.remaining ?? "00:00",
 			speed: detail.speed ?? 0,
 			total,
-			progress: calculatePercentage(current, total),
 			showSampling: result.is_sampling ?? false,
 			samplingPath: result.sampling_path ?? ""
 		};
-		trainingData.value.flux_lora.raw = result;
+		trainingFluxLoRAData.value.raw = result;
+		currentTaskInfo.value.progress = calculatePercentage(current, total);
 	}
 	function resetTrainingFluxLoRAData() {
-		trainingData.value.flux_lora.data = {
-			current: 0,
-			elapsed: "",
-			loss: 0,
-			loss_avr: 0,
-			remaining: "",
-			speed: 0,
-			total: 0,
-			progress: 0,
-			samplingPath: "",
-			showSampling: false
-		};
-		trainingData.value.flux_lora.raw = null;
+		restoreTrainingFluxLoRAData();
 	}
 
 	/** flux kontext lora 训练 */
-	const trainingFluxKontextLoRAData = computed(() => trainingData.value.flux_kontext_lora);
-	function setTrainingFluxKontextLoRAListen(val: boolean) {
-		trainingData.value.flux_kontext_lora.isListen = val;
-	}
+	const [trainingFluxKontextLoRAData, restoreTrainingFluxKontextLoRAData] =
+		resettableRef<TrainingFluxKontextLoRAData>({
+			data: {
+				current: 0,
+				elapsed: "",
+				loss: 0,
+				remaining: "",
+				speed: 0,
+				total: 0,
+				showSampling: false,
+				samplingPath: "",
+				totalTime: 0
+			},
+			raw: null
+		});
 	function setTrainingFluxKontextLoRAData(result: FluxKontextTrainingInfoResult) {
 		let detail: Exclude<FluxKontextTrainingInfoResult["detail"], string>;
 		if (!result?.detail || typeof result.detail === "string") {
@@ -246,41 +230,39 @@ export const useTrainingStore = defineStore("training", () => {
 		const current = detail?.current ?? 0;
 		const total = detail?.total ?? 0;
 
-		trainingData.value.flux_kontext_lora.data = {
+		trainingFluxKontextLoRAData.value.data = {
 			current,
 			elapsed: detail?.elapsed_time_str ?? "00:00",
 			loss: detail?.loss ?? 0,
 			remaining: detail?.remaining_time_str ?? "00:00",
 			speed: detail?.seconds_per_step ?? 0,
 			total,
-			progress: calculatePercentage(current, total),
 			showSampling: result.is_sampling ?? false,
 			samplingPath: result.sampling_path ?? "",
 			totalTime: detail?.estimated_total_time_seconds ?? 0
 		};
-		trainingData.value.flux_kontext_lora.raw = result;
+		trainingFluxKontextLoRAData.value.raw = result;
+		currentTaskInfo.value.progress = calculatePercentage(current, total);
 	}
 	function resetTrainingFluxKontextLoRAData() {
-		trainingData.value.flux_kontext_lora.data = {
-			current: 0,
-			elapsed: "",
-			loss: 0,
-			remaining: "",
-			speed: 0,
-			total: 0,
-			showSampling: false,
-			samplingPath: "",
-			progress: 0,
-			totalTime: 0
-		};
-		trainingData.value.flux_kontext_lora.raw = null;
+		restoreTrainingFluxKontextLoRAData();
 	}
 
 	/** 混元hy lora 训练 */
-	const trainingHYLoRAData = computed(() => trainingData.value.hy_lora);
-	function setTrainingHYLoRAListen(val: boolean) {
-		trainingData.value.hy_lora.isListen = val;
-	}
+	const [trainingHYLoRAData, restoreTrainingHYLoRAData] = resettableRef<TrainingHYLoRAData>({
+		data: {
+			current: 0,
+			total: 0,
+			elapsed: 0,
+			epoch_elapsed: 0,
+			epoch_loss: 0,
+			estimate_elapsed: 0,
+			loss: 0,
+			current_epoch: "??",
+			total_epoch: "??"
+		},
+		raw: null
+	});
 	function setTrainingHYLoRAData(result: HyVideoTrainingInfoResult) {
 		let detail: Exclude<HyVideoTrainingInfoResult["detail"], string>;
 		if (!result?.detail || typeof result.detail === "string") {
@@ -297,7 +279,6 @@ export const useTrainingStore = defineStore("training", () => {
 			estimate_elapsed: 0,
 			loss: detail.loss ?? 0,
 			epoch_loss: detail.epoch_loss ?? 0,
-			progress: 0,
 			current_epoch: detail.current_epoch ?? "??",
 			total_epoch: detail.total_epoch ?? "??"
 		};
@@ -328,57 +309,17 @@ export const useTrainingStore = defineStore("training", () => {
 				.multipliedBy(detail.total_epoch ?? 1)
 				.toNumber();
 		}
-		data.progress = calculatePercentage(current, total);
-
-		trainingData.value.hy_lora.data = data;
-		trainingData.value.hy_lora.raw = result;
+		trainingHYLoRAData.value.data = data;
+		trainingHYLoRAData.value.raw = result;
+		currentTaskInfo.value.progress = calculatePercentage(current, total);
 	}
 	function resetTrainingHYLoRAData() {
-		trainingData.value.hy_lora.data = {
-			current: 0,
-			total: 0,
-			progress: 0,
-			elapsed: 0,
-			epoch_elapsed: 0,
-			epoch_loss: 0,
-			estimate_elapsed: 0,
-			loss: 0,
-			current_epoch: "??",
-			total_epoch: "??"
-		};
-		trainingData.value.hy_lora.raw = null;
+		restoreTrainingHYLoRAData();
 	}
 
 	/** wan lora 训练 */
-	const trainingWanLoRAData = computed(() => trainingData.value.wan_lora);
-	function setTrainingWanLoRAListen(val: boolean) {
-		trainingData.value.wan_lora.isListen = val;
-	}
-	function setTrainingWanLoRAData(result: WanVideoTrainingInfoResult) {
-		let detail: Exclude<WanVideoTrainingInfoResult["detail"], string>;
-		if (!result?.detail || typeof result.detail === "string") {
-			detail = {} as any;
-		} else {
-			detail = result.detail;
-		}
-
-		trainingData.value.wan_lora.data = {
-			progress: calculatePercentage(detail.current, detail.total),
-			current: detail.current ?? 0,
-			total: detail.total ?? 0,
-			elapsed: detail.elapsed ?? "",
-			remaining: detail.remaining ?? "00:00",
-			current_loss: detail.current_loss ?? 0,
-			average_loss: detail.average_loss ?? 0,
-			total_epoch: detail.total_epoch ?? 0,
-			showSampling: result.is_sampling ?? false,
-			samplingPath: result.sampling_path ?? "",
-			phase: result.phase
-		};
-		trainingData.value.wan_lora.raw = result;
-	}
-	function resetTrainingWanLoRAData() {
-		trainingData.value.wan_lora.data = {
+	const [trainingWanLoRAData, restoreTrainingWanLoRAData] = resettableRef<TrainingWanLoRAData>({
+		data: {
 			current: 0,
 			total: 0,
 			elapsed: "",
@@ -388,10 +329,37 @@ export const useTrainingStore = defineStore("training", () => {
 			total_epoch: "",
 			showSampling: false,
 			samplingPath: "",
-			phase: "none",
-			progress: 0
+			phase: "none"
+		},
+		raw: null
+	});
+	function setTrainingWanLoRAData(result: WanVideoTrainingInfoResult) {
+		let detail: Exclude<WanVideoTrainingInfoResult["detail"], string>;
+		if (!result?.detail || typeof result.detail === "string") {
+			detail = {} as any;
+		} else {
+			detail = result.detail;
+		}
+		const current = detail.current ?? 0;
+		const total = detail.total ?? 0;
+
+		trainingWanLoRAData.value.data = {
+			current,
+			total,
+			elapsed: detail.elapsed ?? "",
+			remaining: detail.remaining ?? "00:00",
+			current_loss: detail.current_loss ?? 0,
+			average_loss: detail.average_loss ?? 0,
+			total_epoch: detail.total_epoch ?? 0,
+			showSampling: result.is_sampling ?? false,
+			samplingPath: result.sampling_path ?? "",
+			phase: result.phase
 		};
-		trainingData.value.wan_lora.raw = null;
+		trainingWanLoRAData.value.raw = result;
+		currentTaskInfo.value.progress = calculatePercentage(current, total);
+	}
+	function resetTrainingWanLoRAData() {
+		restoreTrainingWanLoRAData();
 	}
 
 	return {
@@ -399,31 +367,14 @@ export const useTrainingStore = defineStore("training", () => {
 		useGPU,
 		setCurrentTaskInfo,
 		resetCurrentTaskInfo,
-		trainingData,
 		trainingGPUData,
-		setTrainingGPUListen,
 		setTrainingGPUData,
 		resetTrainingGPUData,
 		trainingTagData,
-		setTrainingTagListen,
-		setTrainingTagData,
-		resetTrainingTagData,
 		trainingFluxLoRAData,
-		setTrainingFluxLoRAListen,
-		setTrainingFluxLoRAData,
-		resetTrainingFluxLoRAData,
 		trainingFluxKontextLoRAData,
-		setTrainingFluxKontextLoRAListen,
-		setTrainingFluxKontextLoRAData,
-		resetTrainingFluxKontextLoRAData,
 		trainingHYLoRAData,
-		setTrainingHYLoRAListen,
-		setTrainingHYLoRAData,
-		resetTrainingHYLoRAData,
-		trainingWanLoRAData,
-		setTrainingWanLoRAListen,
-		setTrainingWanLoRAData,
-		resetTrainingWanLoRAData
+		trainingWanLoRAData
 	};
 });
 

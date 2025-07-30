@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 11:04:52
- * @LastEditTime: 2025-07-29 09:52:21
+ * @LastEditTime: 2025-07-29 17:10:56
  * @LastEditors: mulingyuer
  * @Description: wan数据集
  * @FilePath: \frontend\src\views\lora\wan-video\components\WanDataSet\ImageDataSet.vue
@@ -64,11 +64,7 @@
 			popover-content="tag_is_append"
 		/>
 	</template>
-	<TagSubmitButton
-		:loading="loading || trainingStore.trainingTagData.isListen"
-		:disabled="disabled"
-		@submit="onTagClick"
-	/>
+	<TagSubmitButton :loading="loading" :disabled="disabled" @submit="onTagClick" />
 </template>
 
 <script setup lang="ts">

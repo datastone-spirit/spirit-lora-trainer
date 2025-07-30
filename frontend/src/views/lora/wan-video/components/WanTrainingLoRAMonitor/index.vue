@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-27 15:14:43
- * @LastEditTime: 2025-07-28 15:10:11
+ * @LastEditTime: 2025-07-30 09:39:57
  * @LastEditors: mulingyuer
  * @Description: wan训练进度条
- * @FilePath: \frontend\src\components\Monitor\WanTrainingMonitor\index.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\WanTrainingLoRAMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="trainingStore.trainingWanLoRAData.isListen" class="wan-training-monitor">
+	<div v-if="taskInfo.type === 'wan-video'" class="wan-training-monitor">
 		<div v-if="isLoad" class="wan-training-monitor-empty">
 			<el-text> {{ loadText }} </el-text>
 			<el-text class="text-dot"></el-text>
@@ -17,7 +17,7 @@
 			<div class="wan-training-monitor-content-head">
 				<el-progress
 					class="wan-training-monitor-progress"
-					:percentage="loraData.progress"
+					:percentage="taskInfo.progress"
 					:show-text="false"
 					:stroke-width="8"
 				></el-progress>
@@ -67,6 +67,7 @@ import { useTrainingStore } from "@/stores";
 
 const trainingStore = useTrainingStore();
 
+const taskInfo = computed(() => trainingStore.currentTaskInfo);
 const loraData = computed(() => trainingStore.trainingWanLoRAData.data);
 /** 是否还在加载中 */
 const isLoad = computed(() => {

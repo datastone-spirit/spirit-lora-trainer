@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2024-12-16 17:04:10
- * @LastEditTime: 2025-07-28 11:46:13
+ * @Date: 2025-07-29 17:45:42
+ * @LastEditTime: 2025-07-29 17:45:43
  * @LastEditors: mulingyuer
- * @Description: lora训练监控
- * @FilePath: \frontend\src\components\Monitor\LoRATrainingMonitor\index.vue
+ * @Description: flux lora 监控
+ * @FilePath: \frontend\src\views\lora\flux\components\FluxLoRATrainingMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="trainingStore.trainingFluxLoRAData.isListen" class="lo-ra-training-monitor">
+	<div v-if="taskInfo.type === 'flux'" class="lo-ra-training-monitor">
 		<div v-if="isLoad" class="lo-ra-training-monitor-empty">
 			<el-text> 模型加载中 </el-text>
 			<el-text class="text-dot"></el-text>
@@ -17,7 +17,7 @@
 			<div class="lo-ra-training-monitor-head">
 				<el-progress
 					class="lo-ra-training-monitor-progress"
-					:percentage="loraData.progress"
+					:percentage="taskInfo.progress"
 					:show-text="false"
 					:stroke-width="8"
 				></el-progress>
@@ -57,6 +57,7 @@ import { useTrainingStore } from "@/stores";
 
 const trainingStore = useTrainingStore();
 
+const taskInfo = computed(() => trainingStore.currentTaskInfo);
 const loraData = computed(() => trainingStore.trainingFluxLoRAData.data);
 /** 是否还在加载中 */
 const isLoad = computed(() => {

@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2025-07-24 15:01:26
- * @LastEditTime: 2025-07-28 14:38:34
+ * @Date: 2024-12-16 17:04:10
+ * @LastEditTime: 2025-07-30 09:37:29
  * @LastEditors: mulingyuer
- * @Description: flux kontext 训练监控
- * @FilePath: \frontend\src\components\Monitor\FluxKontextLoraTrainingMonitor\index.vue
+ * @Description: 混元训练监控
+ * @FilePath: \frontend\src\views\lora\hunyuan-video\components\HYTrainingLoRAMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="trainingStore.trainingFluxKontextLoRAData.isListen" class="lo-ra-training-monitor">
+	<div v-if="taskInfo.type === 'hunyuan-video'" class="lo-ra-training-monitor">
 		<div v-if="isLoad" class="lo-ra-training-monitor-empty">
 			<el-text> 模型加载中 </el-text>
 			<el-text class="text-dot"></el-text>
@@ -17,7 +17,7 @@
 			<div class="lo-ra-training-monitor-head">
 				<el-progress
 					class="lo-ra-training-monitor-progress"
-					:percentage="loraData.progress"
+					:percentage="taskInfo.progress"
 					:show-text="false"
 					:stroke-width="8"
 				></el-progress>
@@ -28,25 +28,37 @@
 			<div class="lo-ra-training-monitor-body">
 				<div class="lo-ra-training-monitor-item">
 					<div class="lo-ra-training-monitor-item-label">已用时长</div>
-					<div class="lo-ra-training-monitor-item-value">{{ loraData.elapsed }}</div>
-				</div>
-				<div class="lo-ra-training-monitor-item">
-					<div class="lo-ra-training-monitor-item-label">每步时间</div>
-					<div class="lo-ra-training-monitor-item-value">{{ loraData.speed }}</div>
-				</div>
-				<div class="lo-ra-training-monitor-item">
-					<div class="lo-ra-training-monitor-item-label">预估剩余时长</div>
-					<div class="lo-ra-training-monitor-item-value">{{ loraData.remaining }}</div>
-				</div>
-				<div class="lo-ra-training-monitor-item">
-					<div class="lo-ra-training-monitor-item-label">预估总时长</div>
 					<div class="lo-ra-training-monitor-item-value">
-						{{ secondsToHHMMSS(loraData.totalTime) }}
+						{{ secondsToHHMMSS(loraData.elapsed) }}
+					</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">预估每轮用时</div>
+					<div class="lo-ra-training-monitor-item-value">
+						{{ secondsToHHMMSS(loraData.epoch_elapsed) }}
+					</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">预估总用时</div>
+					<div class="lo-ra-training-monitor-item-value">
+						{{ secondsToHHMMSS(loraData.estimate_elapsed) }}
 					</div>
 				</div>
 				<div class="lo-ra-training-monitor-item">
 					<div class="lo-ra-training-monitor-item-label">当前loss</div>
 					<div class="lo-ra-training-monitor-item-value">{{ toFixed(loraData.loss) }}</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">每轮平均loss</div>
+					<div class="lo-ra-training-monitor-item-value">{{ toFixed(loraData.epoch_loss) }}</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">当前轮</div>
+					<div class="lo-ra-training-monitor-item-value">{{ loraData.current_epoch }}</div>
+				</div>
+				<div class="lo-ra-training-monitor-item">
+					<div class="lo-ra-training-monitor-item-label">总轮数</div>
+					<div class="lo-ra-training-monitor-item-value">{{ loraData.total_epoch }}</div>
 				</div>
 			</div>
 		</div>
@@ -54,19 +66,19 @@
 </template>
 
 <script setup lang="ts">
-import { isEmptyObject, objectHasKeys } from "@/utils/tools";
-import { secondsToHHMMSS } from "@/utils/tools";
+import { isEmptyObject, objectHasKeys, secondsToHHMMSS } from "@/utils/tools";
 import { useTrainingStore } from "@/stores";
 
 const trainingStore = useTrainingStore();
 
-const loraData = computed(() => trainingStore.trainingFluxKontextLoRAData.data);
+const taskInfo = computed(() => trainingStore.currentTaskInfo);
+const loraData = computed(() => trainingStore.trainingHYLoRAData.data);
 /** 是否还在加载中 */
 const isLoad = computed(() => {
-	const rawData = trainingStore.trainingFluxKontextLoRAData.raw;
+	const rawData = trainingStore.trainingHYLoRAData.raw;
 	if (!rawData) return true;
 	const isEmpty = !rawData.detail || isEmptyObject(rawData.detail);
-	const hasKey = objectHasKeys(rawData.detail, ["current", "loss", "total"]);
+	const hasKey = objectHasKeys(rawData.detail, ["loss", "elapsed"]);
 	return isEmpty || !hasKey;
 });
 // 保留5位小数，不四舍五入
@@ -83,11 +95,11 @@ function toFixed(num: number, precision = 5) {
 	align-items: center;
 }
 .lo-ra-training-monitor-empty {
+	padding: 0 $zl-padding;
 	display: flex;
-	justify-content: center;
 }
 .lo-ra-training-monitor-content {
-	min-width: 350px;
+	min-width: 430px;
 }
 .lo-ra-training-monitor-head {
 	display: flex;
@@ -105,6 +117,7 @@ function toFixed(num: number, precision = 5) {
 	display: flex;
 	justify-content: space-between;
 	margin-top: 2px;
+	gap: 10px;
 }
 .lo-ra-training-monitor-item {
 	text-align: center;

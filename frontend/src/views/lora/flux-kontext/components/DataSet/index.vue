@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 09:41:55
- * @LastEditTime: 2025-07-29 09:52:10
+ * @LastEditTime: 2025-07-29 17:10:37
  * @LastEditors: mulingyuer
  * @Description: 数据集
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\index.vue
@@ -58,7 +58,7 @@
 			</template>
 			<TagSubmitButton
 				:is-bottom-margin="false"
-				:loading="loading || trainingStore.trainingTagData.isListen"
+				:loading="loading"
 				:disabled="disabled"
 				@submit="onTagClick"
 			/>

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-24 11:55:23
- * @LastEditTime: 2025-07-28 15:38:33
+ * @LastEditTime: 2025-07-30 09:14:14
  * @LastEditors: mulingyuer
  * @Description: flux kontext lora hooks
  * @FilePath: \frontend\src\hooks\task\useFluxKontextLora\index.ts
@@ -19,6 +19,8 @@ import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
 export interface InitData {
 	/** 任务id */
 	taskId: string;
+	/** api返回的任务数据 */
+	result: FluxKontextTrainingInfoResult;
 	/** 是否显示训练提示弹窗 */
 	showTrainingTip?: boolean;
 	/** 显示训练提示弹窗的文本 */
@@ -60,7 +62,6 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 
 		// 更新数据
 		this.updateStatus("querying");
-		this.updateIsListening(true);
 		this.updateCurrentTaskInfo();
 
 		// 开始查询
@@ -82,7 +83,6 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 
 		// 更新数据
 		this.updateStatus("querying");
-		this.updateIsListening(true);
 		this.updateCurrentTaskInfo();
 
 		// 立即查询
@@ -94,8 +94,7 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 
 		// 更新数据
 		this.updateStatus("idle");
-		this.updateIsListening(false);
-		this.trainingStore.resetCurrentTaskInfo();
+		this.resetCurrentTaskInfo();
 
 		// 停止定时器
 		this.clearTimer();
@@ -103,14 +102,19 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 
 	/** 设置初始数据 */
 	public setInitData(initData: InitData) {
+		const {
+			taskId,
+			result,
+			showTrainingTip = true,
+			trainingTipText = "当前正在训练..."
+		} = initData;
+
 		// 更新数据
 		this.updateStatus("paused");
-		this.setTaskId(initData.taskId);
-		this.updateIsListening(true);
-		this.updateCurrentTaskInfo();
+		this.setTaskId(taskId);
+		this.updateCurrentTaskInfo(result);
 
 		// 弹窗提示
-		const { showTrainingTip = true, trainingTipText = "当前正在训练..." } = initData;
 		if (showTrainingTip) {
 			ElMessage({
 				message: trainingTipText,
@@ -152,19 +156,19 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 		this.status = status;
 	}
 
-	/** 更新是否监听 */
-	private updateIsListening(isListening: boolean): void {
-		this.trainingStore.setTrainingFluxKontextLoRAListen(isListening);
-	}
-
 	/** 更新当前任务信息 */
-	private updateCurrentTaskInfo(): void {
+	private updateCurrentTaskInfo(result?: FluxKontextTrainingInfoResult): void {
 		this.trainingStore.setCurrentTaskInfo({
 			id: this.taskId,
 			type: this.taskType,
 			name: this.taskName,
-			progress: this.trainingStore.trainingFluxKontextLoRAData.data.progress
+			result
 		});
+	}
+
+	/** 重置当前任务信息 */
+	private resetCurrentTaskInfo(): void {
+		this.trainingStore.resetCurrentTaskInfo({ type: this.taskType });
 	}
 
 	/** 校验任务id */
@@ -180,8 +184,7 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 	/** 处理查询成功 */
 	private handleQuerySuccess(result: FluxKontextTrainingInfoResult): void {
 		// 更新数据
-		this.trainingStore.setTrainingFluxKontextLoRAData(result);
-		this.updateCurrentTaskInfo();
+		this.updateCurrentTaskInfo(result);
 		this.modalManagerStore.setNetworkDisconnectModal(false);
 
 		// 事件通知
@@ -191,9 +194,7 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 		switch (result.status) {
 			case "complete": // 训练完成
 				this.updateStatus("success");
-				this.updateIsListening(false);
-				this.trainingStore.resetTrainingFluxKontextLoRAData();
-				this.trainingStore.resetCurrentTaskInfo();
+				this.resetCurrentTaskInfo();
 				this.events.emit("complete");
 
 				ElMessageBox({
@@ -206,9 +207,7 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 				break;
 			case "failed": // 训练失败
 				this.updateStatus("failure");
-				this.updateIsListening(false);
-				this.trainingStore.resetTrainingFluxKontextLoRAData();
-				this.trainingStore.resetCurrentTaskInfo();
+				this.resetCurrentTaskInfo();
 				this.events.emit("failed");
 
 				ElMessageBox({
@@ -249,9 +248,7 @@ class FluxKontextLoraMonitor implements TaskImplementation {
 
 		// 其他错误
 		this.updateStatus("failure");
-		this.updateIsListening(false);
-		this.trainingStore.resetTrainingFluxKontextLoRAData();
-		this.trainingStore.resetCurrentTaskInfo();
+		this.resetCurrentTaskInfo();
 
 		// 事件通知
 		this.events.emit("failed");

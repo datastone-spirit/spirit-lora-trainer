@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-07-29 09:31:26
+ * @LastEditTime: 2025-07-30 09:59:36
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -53,7 +53,7 @@
 			@submit="onSubmit"
 		>
 			<template #monitor-progress-bar>
-				<LoRATrainingMonitor />
+				<FluxLoRATrainingMonitor />
 			</template>
 			<template #right-btn-group>
 				<el-button
@@ -88,6 +88,7 @@ import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormData } from "./flux.helper";
 import { validate } from "./flux.validate";
 import type { RuleForm } from "./types";
+import FluxLoRATrainingMonitor from "./components/FluxLoRATrainingMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
 const modalManagerStore = useModalManagerStore();
@@ -527,14 +528,10 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
+	// 监听如果成功恢复，任务信息会被更新
 	fluxLoraMonitor.resume();
-	// 恢复表单数据
-	LoRAHelper.recoveryTaskFormData({
-		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: trainingStore.trainingFluxLoRAData.isListen,
-		taskId: fluxLoraMonitor.getTaskId(),
-		formData: ruleForm.value
-	});
+	// 恢复表单数据（前提是任务信息存在）
+	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
 });
 onUnmounted(() => {
 	fluxLoraMonitor.pause();

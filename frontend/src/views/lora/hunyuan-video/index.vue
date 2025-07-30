@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-07-29 09:35:24
+ * @LastEditTime: 2025-07-30 10:43:17
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -48,7 +48,7 @@
 			@submit="onSubmit"
 		>
 			<template #monitor-progress-bar>
-				<HYTrainingMonitor />
+				<HYTrainingLoRAMonitor />
 			</template>
 		</TeleportFooterBarContent>
 	</div>
@@ -58,7 +58,7 @@
 import { startHyVideoTraining, type StartHyVideoTrainingData } from "@/api/lora";
 import { useHYLora } from "@/hooks/task/useHYLora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useSettingsStore, useTrainingStore } from "@/stores";
+import { useSettingsStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
@@ -72,9 +72,9 @@ import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData } from "./hunyuan.helper";
 import { isDirectoryEmpty, validate } from "./hunyuan.validate";
 import type { RuleForm } from "./types";
+import HYTrainingLoRAMonitor from "./components/HYTrainingLoRAMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
-const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { hyLoraMonitor } = useHYLora();
 
@@ -272,14 +272,10 @@ async function onSubmit() {
 
 // 组件生命周期
 onMounted(() => {
+	// 监听如果成功恢复，任务信息会被更新
 	hyLoraMonitor.resume();
-	// 恢复表单数据
-	LoRAHelper.recoveryTaskFormData({
-		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: trainingStore.trainingHYLoRAData.isListen,
-		taskId: hyLoraMonitor.getTaskId(),
-		formData: ruleForm.value
-	});
+	// 恢复表单数据（前提是任务信息存在）
+	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
 });
 onUnmounted(() => {
 	hyLoraMonitor.pause();

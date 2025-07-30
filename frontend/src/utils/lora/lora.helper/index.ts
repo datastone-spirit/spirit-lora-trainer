@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 15:10:20
- * @LastEditTime: 2025-07-30 10:39:44
+ * @LastEditTime: 2025-07-30 15:23:45
  * @LastEditors: mulingyuer
  * @Description: 公共的lora帮助方法
  * @FilePath: \frontend\src\utils\lora\lora.helper\index.ts
@@ -42,14 +42,17 @@ export class LoRAHelper {
 		const settingsStore = useSettingsStore();
 		const trainingStore = useTrainingStore();
 		const taskId = trainingStore.currentTaskInfo.id;
+		const route = useRoute();
 
 		// 如果没有开启恢复训练中的任务表单数据功能，则不恢复表单数据
 		// 如果不是训练任务，则不恢复表单数据
 		// 如果没有任务id，则不恢复表单数据
+		// 如果当前页面不是需要恢复表单数据的页面
 		if (
 			!settingsStore.trainerSettings.enableTrainingTaskDataRecovery ||
 			LoRAHelper.RECOVERY_TASK_FORM_DATA_BLACKLIST.includes(trainingStore.currentTaskInfo.type) ||
-			!LoRAHelper.isValidTaskId(taskId)
+			!LoRAHelper.isValidTaskId(taskId) ||
+			route.meta.loRATaskType !== trainingStore.currentTaskInfo.type
 		) {
 			return;
 		}

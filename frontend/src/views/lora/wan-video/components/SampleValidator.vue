@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:58:45
- * @LastEditTime: 2025-04-10 10:19:46
+ * @LastEditTime: 2025-07-30 16:01:36
  * @LastEditors: mulingyuer
  * @Description: 采样与验证选项
  * @FilePath: \frontend\src\views\lora\wan-video\components\SampleValidator.vue
@@ -79,14 +79,14 @@
 	>
 		<el-input-number v-model.number="ruleForm.config.guidance_scale" :step="0.1" :min="0" />
 	</PopoverFormItem>
-	<BaseSelector
+	<PopoverFormItem
 		v-show="isExpert"
-		v-model="ruleForm.config.show_timesteps"
 		label="显示时间步的方式"
 		prop="config.show_timesteps"
 		popoverContent="show_timesteps"
-		:options="showTimeStepsOptions"
-	/>
+	>
+		<BaseSelector v-model="ruleForm.config.show_timesteps" :options="showTimeStepsOptions" />
+	</PopoverFormItem>
 </template>
 
 <script setup lang="ts">

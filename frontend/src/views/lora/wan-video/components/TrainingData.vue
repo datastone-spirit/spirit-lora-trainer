@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 14:42:11
- * @LastEditTime: 2025-04-11 10:25:23
+ * @LastEditTime: 2025-07-30 16:02:41
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\wan-video\components\TrainingData.vue
@@ -154,14 +154,14 @@
 			placeholder="请输入描述文件扩展名"
 		/>
 	</PopoverFormItem>
-	<BaseSelector
+	<PopoverFormItem
 		v-show="isExpert"
-		v-model="ruleForm.config.mixed_precision"
 		label="混合精度训练模式"
 		prop="config.mixed_precision"
 		popoverContent="mixed_precision"
-		:options="mixedPrecisionOptions"
-	/>
+	>
+		<BaseSelector v-model="ruleForm.config.mixed_precision" :options="mixedPrecisionOptions" />
+	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"
 		label="保留加载训练集的worker，减少每个 epoch 之间的停顿"

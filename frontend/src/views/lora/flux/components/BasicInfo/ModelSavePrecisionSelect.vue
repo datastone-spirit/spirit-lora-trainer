@@ -1,32 +1,20 @@
 <!--
  * @Author: mulingyuer
- * @Date: 2024-12-06 11:57:50
- * @LastEditTime: 2024-12-09 09:50:13
+ * @Date: 2025-07-30 15:45:08
+ * @LastEditTime: 2025-07-30 15:46:50
  * @LastEditors: mulingyuer
- * @Description: 模型保存精度选择器
- * @FilePath: \frontend\src\components\Form\ModelSavePrecisionSelector.vue
+ * @Description: 模型保存精度选择
+ * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\ModelSavePrecisionSelect.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem :label="label" :prop="prop" :popover-content="popoverContent">
-		<el-select v-model="value" :placeholder="placeholder">
-			<el-option
-				v-for="item in options"
-				:key="item.value"
-				:label="item.label"
-				:value="item.value"
-			/>
-		</el-select>
-	</PopoverFormItem>
+	<el-select v-model="value" :placeholder="placeholder">
+		<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+	</el-select>
 </template>
 
 <script setup lang="ts">
-import type { FormItemProps } from "element-plus";
-
 export interface ModelSaveFormatSelectorProps {
-	label?: FormItemProps["label"];
-	prop?: FormItemProps["prop"];
-	popoverContent: string;
 	placeholder?: string;
 	options?: Array<{ label: string; value: string; disabled?: boolean }>;
 }

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 09:35:29
- * @LastEditTime: 2025-02-10 09:54:15
+ * @LastEditTime: 2025-07-30 16:00:26
  * @LastEditors: mulingyuer
  * @Description: 高级设置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\index.vue
@@ -25,8 +25,8 @@
 import type { RuleForm } from "../../types";
 import FluxOptions from "./FluxOptions.vue";
 import TrainingOptions from "./TrainingOptions.vue";
-import LRAndOptimizer from "./LRAndOptimizer.vue";
-import NetworkOptions from "./NetworkOptions.vue";
+import LRAndOptimizer from "./LRAndOptimizer/index.vue";
+import NetworkOptions from "./NetworkOptions/index.vue";
 import TrainingPreviewOptions from "./TrainingPreviewOptions.vue";
 import LoggingOptions from "./LoggingOptions.vue";
 import CaptionOptions from "./CaptionOptions.vue";

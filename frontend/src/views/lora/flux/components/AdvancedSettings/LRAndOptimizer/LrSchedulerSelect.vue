@@ -1,30 +1,25 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 10:29:33
- * @LastEditTime: 2024-12-11 09:33:05
+ * @LastEditTime: 2025-07-30 16:06:48
  * @LastEditors: mulingyuer
  * @Description: 学习率调度器设置
- * @FilePath: \frontend\src\components\Form\LrSchedulerSelect.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LRAndOptimizer\LrSchedulerSelect.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem :label="label" :prop="prop" :popover-content="popoverContent">
-		<el-select v-model="value" :placeholder="placeholder">
-			<el-option
-				v-for="item in lrSchedulerOptions"
-				:key="item.value"
-				:label="item.label"
-				:value="item.value"
-			/>
-		</el-select>
-	</PopoverFormItem>
+	<el-select v-model="value" :placeholder="placeholder">
+		<el-option
+			v-for="item in lrSchedulerOptions"
+			:key="item.value"
+			:label="item.label"
+			:value="item.value"
+		/>
+	</el-select>
 </template>
 
 <script setup lang="ts">
 export interface LrSchedulerSelectProps {
-	label?: string;
-	prop?: string;
-	popoverContent: string;
 	placeholder?: string;
 }
 

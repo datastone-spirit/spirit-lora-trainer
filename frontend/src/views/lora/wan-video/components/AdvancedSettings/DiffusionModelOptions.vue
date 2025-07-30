@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 16:16:07
- * @LastEditTime: 2025-03-26 16:38:11
+ * @LastEditTime: 2025-07-30 16:03:08
  * @LastEditors: mulingyuer
  * @Description: 扩散模型参数
- * @FilePath: \frontend\src\views\lora\wan\components\AdvancedSettings\DiffusionModelOptions.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\DiffusionModelOptions.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -63,13 +63,16 @@
 		>
 			<el-input-number v-model.number="ruleForm.config.logit_std" :step="0.1" :min="0" />
 		</PopoverFormItem>
-		<BaseSelector
-			v-model="ruleForm.config.timestep_sampling"
+		<PopoverFormItem
 			label="时间步采样方法"
 			prop="config.timestep_sampling"
 			popoverContent="timestep_sampling"
-			:options="timestepSamplingOptions"
-		/>
+		>
+			<BaseSelector
+				v-model="ruleForm.config.timestep_sampling"
+				:options="timestepSamplingOptions"
+			/>
+		</PopoverFormItem>
 		<PopoverFormItem
 			label="时间步采样sigmoid缩放系数（仅当timestep_sampling为sigmoid/shift时生效）"
 			prop="config.sigmoid_scale"
@@ -77,13 +80,13 @@
 		>
 			<el-input-number v-model.number="ruleForm.config.sigmoid_scale" :step="0.1" :min="0" />
 		</PopoverFormItem>
-		<BaseSelector
-			v-model="ruleForm.config.weighting_scheme"
+		<PopoverFormItem
 			label="时间步权重分配方案"
 			prop="config.weighting_scheme"
 			popoverContent="weighting_scheme"
-			:options="weightingSchemeOptions"
-		/>
+		>
+			<BaseSelector v-model="ruleForm.config.weighting_scheme" :options="weightingSchemeOptions" />
+		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>
 

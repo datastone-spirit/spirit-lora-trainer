@@ -69,7 +69,7 @@ const inputPlaceholder = computed(() => {
 const showTooltip = computed(() => settingsStore.whiteCheck);
 const tooltipContent = computed(() => {
 	return showTooltip.value
-		? `如果挂载了存储请使用挂载存储所使用的句，如：${getEnv().VITE_APP_LORA_OUTPUT_PARENT_PATH} 开头的路径`
+		? `如果挂载了存储请使用挂载存储所使用的路径，如：${getEnv().VITE_APP_LORA_OUTPUT_PARENT_PATH} 开头的路径`
 		: "";
 });
 

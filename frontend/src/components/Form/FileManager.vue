@@ -3,10 +3,10 @@
 		<div class="file-manager-content" :class="{ 'show-tooltip': showTooltip }">
 			<el-input v-model="folder" :placeholder="inputPlaceholder" class="file-manager-input">
 				<template #append>
-					<el-button :icon="FolderIcon" title="请选择" @click="tooglePopover" />
+					<el-button :icon="FolderIcon" title="请选择" @click="togglePopover" />
 				</template>
 			</el-input>
-			<el-tooltip v-if="showTooltip" placement="top" :content="tooltopContent">
+			<el-tooltip v-if="showTooltip" placement="top" :content="tooltipContent">
 				<el-button class="file-manager-info-btn" :icon="InfoIcon" link />
 			</el-tooltip>
 		</div>
@@ -67,9 +67,9 @@ const inputPlaceholder = computed(() => {
 	}
 });
 const showTooltip = computed(() => settingsStore.whiteCheck);
-const tooltopContent = computed(() => {
+const tooltipContent = computed(() => {
 	return showTooltip.value
-		? `挂载了存储请使用 ${getEnv().VITE_APP_LORA_OUTPUT_PARENT_PATH} 开头的路径`
+		? `如果挂载了存储请使用挂载存储所使用的句，如：${getEnv().VITE_APP_LORA_OUTPUT_PARENT_PATH} 开头的路径`
 		: "";
 });
 
@@ -138,7 +138,7 @@ const generateRandomString = () => {
 };
 const fileId = generateRandomString();
 
-const tooglePopover = () => {
+const togglePopover = () => {
 	visible.value = !visible.value;
 };
 </script>

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 14:45:05
- * @LastEditTime: 2025-07-30 09:19:59
+ * @LastEditTime: 2025-07-31 15:12:53
  * @LastEditors: mulingyuer
  * @Description: 混元lora hooks
  * @FilePath: \frontend\src\hooks\task\useHYLora\index.ts
@@ -9,8 +9,9 @@
  */
 import type { HyVideoTrainingInfoResult } from "@/api/monitor";
 import { hyVideoTrainingInfo } from "@/api/monitor";
-import type { UseModalManagerStore, UseTrainingStore } from "@/stores";
-import { useModalManagerStore, useTrainingStore } from "@/stores";
+import type { UseTrainingStore } from "@/stores";
+import { useTrainingStore } from "@/stores";
+import { LoraTaskLogModal, NetworkDisconnectModal } from "@/utils/modal-manager";
 import { isNetworkError } from "axios-retry";
 import mitt from "mitt";
 import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
@@ -34,7 +35,6 @@ class HYLoraMonitor implements TaskImplementation {
 	private readonly delay: number = 8000;
 	/** 数据仓库 */
 	private readonly trainingStore: UseTrainingStore;
-	private readonly modalManagerStore: UseModalManagerStore;
 	/** 当前状态 */
 	private status: TaskStatus = "idle";
 	/** 允许查询的状态数组 */
@@ -50,7 +50,6 @@ class HYLoraMonitor implements TaskImplementation {
 
 	constructor() {
 		this.trainingStore = useTrainingStore();
-		this.modalManagerStore = useModalManagerStore();
 	}
 
 	start(): void {
@@ -185,7 +184,7 @@ class HYLoraMonitor implements TaskImplementation {
 	private handleQuerySuccess(result: HyVideoTrainingInfoResult): void {
 		// 更新数据
 		this.updateCurrentTaskInfo(result);
-		this.modalManagerStore.setNetworkDisconnectModal(false);
+		NetworkDisconnectModal.close();
 
 		// 事件通知
 		this.events.emit("update");
@@ -219,10 +218,7 @@ class HYLoraMonitor implements TaskImplementation {
 					message: "LoRA训练失败，请检查日志或者重新训练"
 				}).catch(() => {
 					// 查看日志弹窗
-					this.modalManagerStore.setLoraTaskLogModal({
-						open: true,
-						taskId: this.taskId
-					});
+					LoraTaskLogModal.show({ taskId: this.taskId });
 				});
 				break;
 			case "running":
@@ -240,7 +236,7 @@ class HYLoraMonitor implements TaskImplementation {
 
 		// 如果是网络错误或者5xx错误，弹出网络连接错误提示
 		if (isNetworkError(error) || is5xxError) {
-			this.modalManagerStore.setNetworkDisconnectModal(true);
+			NetworkDisconnectModal.show();
 			// 继续查询
 			this.startTimer();
 			return;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-04-11 11:45:01
+ * @LastEditTime: 2025-07-31 14:57:18
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -98,7 +98,6 @@ import { deleteFile, manualTag } from "@/api/tag";
 import { FileItemMap } from "@/components/FileManager";
 import { useImageViewer } from "@/hooks/useImageViewer";
 import { useTag } from "@/hooks/task/useTag";
-import { useVideoPreview } from "@/hooks/useVideoPreview";
 import type { FileItem, FileList } from "@/utils/file-manager";
 import { FileManager, FileType } from "@/utils/file-manager";
 import { generateUUID, sleep } from "@/utils/tools";
@@ -108,6 +107,7 @@ import { AiDatasetHelper } from "./ai-dataset.helper";
 import { ContextMenuKeyEnum, updateMenuList, type ContextMenuItem } from "./context-menu.helper";
 import ContextMenu from "./ContextMenu.vue";
 import TagEdit from "./TagEdit.vue";
+import { VideoPreviewModal } from "@/utils/modal-manager";
 
 export interface AiDatasetProps {
 	/** 按钮传送的容器id */
@@ -126,7 +126,6 @@ const props = withDefaults(defineProps<AiDatasetProps>(), {
 		"image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,text/plain,video/mp4, video/quicktime, video/x-msvideo, video/webm"
 });
 const { previewImages } = useImageViewer();
-const { previewVideo } = useVideoPreview();
 const { tagMonitor } = useTag();
 const fileManager = new FileManager();
 const aiDatasetHelper = new AiDatasetHelper();
@@ -179,7 +178,7 @@ function onImagePreview(data: FileItem) {
 
 // 视频预览
 function onVideoPreview(data: FileItem) {
-	return previewVideo({
+	return VideoPreviewModal.show({
 		src: `${data.value}?compress=false`,
 		title: data.name
 	});
@@ -295,7 +294,7 @@ async function onSave() {
 	} catch (error) {
 		loading.value = false;
 		editTagTextLoading.value = false;
-		console.log("打标失败", error);
+		console.error("打标失败", error);
 	}
 }
 

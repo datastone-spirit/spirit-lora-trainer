@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-30 15:13:11
+ * @LastEditTime: 2025-07-31 15:23:16
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -70,25 +70,25 @@
 import { startFluxKontextTraining, type StartFluxKontextTrainingData } from "@/api/lora";
 import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
+import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import DataSet from "./components/DataSet/index.vue";
+import FluxKontextLoRATrainingMonitor from "./components/FluxKontextLoRATrainingMonitor/index.vue";
 import SampleConfig from "./components/SampleConfig/index.vue";
 import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
 import { formatFormData, generateDefaultDataset } from "./flex-kontext.helper";
 import { validate } from "./flux-kontext.validate";
 import type { RuleForm } from "./types";
-import FluxKontextLoRATrainingMonitor from "./components/FluxKontextLoRATrainingMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
-const modalManagerStore = useModalManagerStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { fluxKontextLoraMonitor } = useFluxKontextLora();
@@ -278,8 +278,7 @@ async function onSubmit() {
 
 /** 查看采样 */
 function onViewSampling() {
-	modalManagerStore.setViewSamplingDrawerModal({
-		open: true,
+	ViewSamplingDrawerModal.show({
 		filePath: trainingStore.trainingFluxKontextLoRAData.data.samplingPath
 	});
 }

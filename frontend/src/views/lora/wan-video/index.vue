@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-07-30 10:43:36
+ * @LastEditTime: 2025-07-31 15:24:41
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -66,27 +66,27 @@
 <script setup lang="ts">
 import type { StartWanVideoTrainingData } from "@/api/lora";
 import { startWanVideoTraining } from "@/api/lora";
+import { useWanLora } from "@/hooks/task/useWanLora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useSettingsStore, useModalManagerStore, useTrainingStore } from "@/stores";
+import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
+import { generateUUID, isImageFile } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo.vue";
 import SampleValidator from "./components/SampleValidator.vue";
 import TrainingData from "./components/TrainingData.vue";
 import WanDataSet from "./components/WanDataSet/index.vue";
+import WanTrainingLoRAMonitor from "./components/WanTrainingLoRAMonitor/index.vue";
 import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
 import { validate } from "./wan.validate";
-import { generateUUID, isImageFile } from "@/utils/tools";
-import { useWanLora } from "@/hooks/task/useWanLora";
-import WanTrainingLoRAMonitor from "./components/WanTrainingLoRAMonitor/index.vue";
 
 const settingsStore = useSettingsStore();
-const modalManagerStore = useModalManagerStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { wanLoraMonitor } = useWanLora();
@@ -542,10 +542,7 @@ async function onSubmit() {
 
 /** 查看采样 */
 function onViewSampling() {
-	modalManagerStore.setViewSamplingDrawerModal({
-		open: true,
-		filePath: trainingStore.trainingWanLoRAData.data.samplingPath
-	});
+	ViewSamplingDrawerModal.show({ filePath: trainingStore.trainingWanLoRAData.data.samplingPath });
 }
 
 // 组件生命周期

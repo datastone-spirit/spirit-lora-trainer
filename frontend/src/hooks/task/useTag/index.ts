@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 09:16:38
- * @LastEditTime: 2025-07-29 18:23:51
+ * @LastEditTime: 2025-07-31 14:40:11
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\task\useTag\index.ts
@@ -20,6 +20,7 @@ import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { isNetworkError } from "axios-retry";
 import mitt from "mitt";
 import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
+import { NetworkDisconnectModal } from "@/utils/modal-manager";
 
 interface TagMonitorOptions {
 	/** 数据仓库 */
@@ -249,7 +250,7 @@ class TagMonitor implements TaskImplementation {
 	private handleQuerySuccess(result: ManualTagInfoResult): void {
 		// 更新数据
 		this.updateCurrentTaskInfo(result);
-		this.modalManagerStore.setNetworkDisconnectModal(false);
+		NetworkDisconnectModal.close();
 
 		// 事件通知
 		this.events.emit("update");
@@ -297,7 +298,7 @@ class TagMonitor implements TaskImplementation {
 
 		// 如果是网络错误或者5xx错误，弹出网络连接错误提示
 		if (isNetworkError(error) || is5xxError) {
-			this.modalManagerStore.setNetworkDisconnectModal(true);
+			NetworkDisconnectModal.show();
 			// 继续查询
 			this.startTimer();
 			return;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-03 09:18:45
- * @LastEditTime: 2025-07-30 15:15:36
+ * @LastEditTime: 2025-07-31 15:22:36
  * @LastEditors: mulingyuer
  * @Description: 查看采样数据抽屉
  * @FilePath: \frontend\src\components\Drawer\ViewSamplingDrawer.vue
@@ -56,31 +56,28 @@ import { useIcon } from "@/hooks/useIcon";
 import { useImageViewer } from "@/hooks/useImageViewer";
 import type { FileItem, FileList } from "@/utils/file-manager";
 import { FileManager, FileType } from "@/utils/file-manager";
-import { useVideoPreview } from "@/hooks/useVideoPreview";
-import { useModalManagerStore } from "@/stores";
+import { VideoPreviewModal, ViewSamplingDrawerModal } from "@/utils/modal-manager";
 
 const { previewImages } = useImageViewer();
-const { previewVideo } = useVideoPreview();
 const fileManager = new FileManager();
-const modalManagerStore = useModalManagerStore();
 
 // icon
 const CloseIcon = useIcon({ name: "ri-close-line", size: 28 });
 // const RefreshIcon = useIcon({ name: "ri-refresh-line", size: 24 });
 
-const { viewSamplingDrawerModal } = storeToRefs(modalManagerStore);
+const viewSamplingDrawerModalData = ViewSamplingDrawerModal.state;
 const open = computed({
 	get() {
-		return viewSamplingDrawerModal.value.open;
+		return viewSamplingDrawerModalData.value.open;
 	},
 	set(val: boolean) {
-		viewSamplingDrawerModal.value.open = val;
+		viewSamplingDrawerModalData.value.open = val;
 	}
 });
 const loading = ref(false);
 const list = ref<FileList>([]);
 /** 采样路径 */
-const samplingPath = computed(() => viewSamplingDrawerModal.value.filePath);
+const samplingPath = computed(() => viewSamplingDrawerModalData.value.filePath);
 const isRotating = ref(false);
 let rotateTimer: number | null = null;
 
@@ -98,7 +95,7 @@ function onItemClick(item: FileItem, index: number) {
 			filenameList: list.value.map((item) => item.name)
 		});
 	} else if (item.type === FileType.VIDEO) {
-		previewVideo({
+		VideoPreviewModal.show({
 			src: item.value,
 			title: item.name
 		});

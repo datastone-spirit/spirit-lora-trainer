@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-10 08:48:27
- * @LastEditTime: 2025-07-28 10:49:52
+ * @LastEditTime: 2025-07-29 17:30:43
  * @LastEditors: mulingyuer
  * @Description: gpu hooks
  * @FilePath: \frontend\src\hooks\task\useGPU\index.ts
@@ -12,15 +12,6 @@ import { gpuMonitorInfo } from "@/api/monitor";
 import type { UseTrainingStore } from "@/stores";
 import { useTrainingStore } from "@/stores";
 import type { TaskImplementation, TaskStatus } from "../types";
-
-interface GPUMonitorOptions {
-	/** 数据仓库 */
-	trainingStore: UseTrainingStore;
-	/** 定时器延迟 */
-	delay?: number;
-	/** 当前状态 */
-	status?: TaskStatus;
-}
 
 class GPUMonitor implements TaskImplementation {
 	/** 定时器 */
@@ -34,17 +25,14 @@ class GPUMonitor implements TaskImplementation {
 	/** 允许查询的状态数组 */
 	protected readonly canQueryStatus: Array<TaskStatus> = ["idle", "success", "failure"];
 
-	constructor(options: GPUMonitorOptions) {
-		this.delay = options.delay ?? this.delay;
-		this.trainingStore = options.trainingStore;
-		this.status = options.status ?? this.status;
+	constructor() {
+		this.trainingStore = useTrainingStore();
 	}
 
 	start(): void {
 		if (!this.canQuery()) return;
 
 		// 更新数据
-		this.updateIsListening(true);
 		this.updateStatus("querying");
 
 		// 开始查询
@@ -66,7 +54,6 @@ class GPUMonitor implements TaskImplementation {
 
 		// 更新数据
 		this.updateStatus("querying");
-		this.updateIsListening(true);
 
 		// 立即查询
 		this.query();
@@ -77,7 +64,7 @@ class GPUMonitor implements TaskImplementation {
 
 		// 更新数据
 		this.updateStatus("idle");
-		this.updateIsListening(false);
+		this.trainingStore.resetTrainingGPUData();
 
 		// 停止定时器
 		this.clearTimer();
@@ -103,11 +90,6 @@ class GPUMonitor implements TaskImplementation {
 		this.status = status;
 	}
 
-	/** 更新是否监听 */
-	private updateIsListening(isListening: boolean): void {
-		this.trainingStore.setTrainingGPUListen(isListening);
-	}
-
 	/** 处理查询成功 */
 	private handleQuerySuccess(result: GPUMonitorInfoResult): void {
 		const oneItemData = result[0];
@@ -123,6 +105,9 @@ class GPUMonitor implements TaskImplementation {
 	private handleQueryFailure(error: any): void {
 		// gpu信息查询失败也要继续查询，只有查询条件不成立才停止查询
 		console.error("查询GPU信息失败：", error);
+
+		// 定时器继续查询
+		this.startTimer();
 	}
 
 	/** 开始定时器 */
@@ -143,12 +128,8 @@ class GPUMonitor implements TaskImplementation {
 let gpuMonitor: GPUMonitor | null = null;
 
 export function useGPU() {
-	const trainingStore = useTrainingStore();
-
 	if (!gpuMonitor) {
-		gpuMonitor = new GPUMonitor({
-			trainingStore
-		});
+		gpuMonitor = new GPUMonitor();
 	}
 
 	return {

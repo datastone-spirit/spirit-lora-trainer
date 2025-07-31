@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-16 17:49:22
- * @LastEditTime: 2025-07-28 10:56:48
+ * @LastEditTime: 2025-07-29 15:41:20
  * @LastEditors: mulingyuer
  * @Description: 打标监控
  * @FilePath: \frontend\src\components\Monitor\TagMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="trainingStore.trainingTagData.isListen" class="tag-monitor">
+	<div v-if="show" class="tag-monitor">
 		<div v-if="isLoad" class="tag-monitor-head">
 			<el-text class="tag-monitor-tips"> 打标模型加载中，请耐心等待 </el-text>
 			<el-text class="text-dot"></el-text>
@@ -17,7 +17,7 @@
 			<el-text class="tag-monitor-label"> 打标进度 </el-text>
 			<el-progress
 				class="tag-monitor-progress"
-				:percentage="tagData.progress"
+				:percentage="taskInfo.progress"
 				:show-text="false"
 				:stroke-width="8"
 			></el-progress>
@@ -37,6 +37,8 @@ export interface TagMonitorData {
 }
 
 const trainingStore = useTrainingStore();
+const taskInfo = computed(() => trainingStore.currentTaskInfo);
+const show = computed(() => taskInfo.value.type === "tag");
 const tagData = computed(() => trainingStore.trainingTagData.data);
 
 /** 是否在加载中 */

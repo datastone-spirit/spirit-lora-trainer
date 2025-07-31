@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 15:38:25
- * @LastEditTime: 2025-03-06 17:27:23
+ * @LastEditTime: 2025-07-30 16:06:27
  * @LastEditors: mulingyuer
  * @Description: 学习率与优化器设置
- * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LRAndOptimizer.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LRAndOptimizer\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -19,12 +19,9 @@
 		>
 			<el-input v-model="ruleForm.text_encoder_lr" placeholder="请输入文本编码器学习率" />
 		</PopoverFormItem>
-		<LrSchedulerSelect
-			v-model="ruleForm.lr_scheduler"
-			label="学习率调度器设置"
-			prop="lr_scheduler"
-			popover-content="lr_scheduler"
-		/>
+		<PopoverFormItem label="学习率调度器设置" prop="lr_scheduler" popover-content="lr_scheduler">
+			<LrSchedulerSelect v-model="ruleForm.lr_scheduler" />
+		</PopoverFormItem>
 		<PopoverFormItem
 			label="学习率预热步数"
 			prop="lr_warmup_steps"
@@ -44,12 +41,9 @@
 				:min="0"
 			/>
 		</PopoverFormItem>
-		<OptimizerTypeSelect
-			v-model="ruleForm.optimizer_type"
-			label="优化器设置"
-			prop="optimizer_type"
-			popover-content="optimizer_type"
-		/>
+		<PopoverFormItem label="优化器设置" prop="optimizer_type" popover-content="optimizer_type">
+			<OptimizerTypeSelect v-model="ruleForm.optimizer_type" />
+		</PopoverFormItem>
 		<PopoverFormItem
 			label="最小信噪比伽马值, 如果启用推荐为 5"
 			prop="min_snr_gamma"
@@ -69,19 +63,23 @@
 				placeholder="请输入自定义优化器参数"
 			/>
 		</PopoverFormItem>
-		<WeightingSchemeSelect
+		<PopoverFormItem
 			v-show="isExpert"
-			v-model="ruleForm.weighting_scheme"
 			label="权重分配方案，控制训练中各部分的权重分布"
 			prop="weighting_scheme"
 			popover-content="weighting_scheme"
-		/>
+		>
+			<WeightingSchemeSelect v-model="ruleForm.weighting_scheme" />
+		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>
 
 <script setup lang="ts">
-import type { RuleForm } from "../../types";
+import type { RuleForm } from "../../../types";
 import { useSettingsStore } from "@/stores";
+import OptimizerTypeSelect from "./OptimizerTypeSelect.vue";
+import WeightingSchemeSelect from "./WeightingSchemeSelect.vue";
+import LrSchedulerSelect from "./LrSchedulerSelect.vue";
 
 const settingsStore = useSettingsStore();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });

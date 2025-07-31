@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-10 15:36:10
- * @LastEditTime: 2025-03-27 10:39:36
+ * @LastEditTime: 2025-07-31 14:37:13
  * @LastEditors: mulingyuer
  * @Description: 网络重试弹窗
  * @FilePath: \frontend\src\components\Dialog\NetworkRetryDialog.vue
@@ -29,18 +29,9 @@
 </template>
 
 <script setup lang="ts">
-import { useModalManagerStore } from "@/stores";
+import { NetworkDisconnectModal } from "@/utils/modal-manager";
 
-const modalManagerStore = useModalManagerStore();
-
-const open = computed({
-	get() {
-		return modalManagerStore.networkDisconnectModal;
-	},
-	set(val: boolean) {
-		modalManagerStore.setNetworkDisconnectModal(val);
-	}
-});
+const open = NetworkDisconnectModal.state;
 </script>
 
 <style lang="scss" scoped>

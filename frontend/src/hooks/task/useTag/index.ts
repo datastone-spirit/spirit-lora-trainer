@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 09:16:38
- * @LastEditTime: 2025-07-28 15:35:35
+ * @LastEditTime: 2025-07-31 14:40:11
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\task\useTag\index.ts
@@ -20,6 +20,7 @@ import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { isNetworkError } from "axios-retry";
 import mitt from "mitt";
 import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
+import { NetworkDisconnectModal } from "@/utils/modal-manager";
 
 interface TagMonitorOptions {
 	/** 数据仓库 */
@@ -41,6 +42,8 @@ interface TagMonitorOptions {
 export interface InitData {
 	/** 任务id */
 	taskId: string;
+	/** api返回的任务数据 */
+	result: ManualTagInfoResult;
 	/** 是否显示训练提示弹窗 */
 	showTrainingTip?: boolean;
 	/** 显示训练提示弹窗的文本 */
@@ -124,7 +127,6 @@ class TagMonitor implements TaskImplementation {
 
 		// 更新数据
 		this.updateStatus("querying");
-		this.updateIsListening(true);
 		this.updateCurrentTaskInfo();
 
 		// 开始查询
@@ -146,7 +148,6 @@ class TagMonitor implements TaskImplementation {
 
 		// 更新数据
 		this.updateStatus("querying");
-		this.updateIsListening(true);
 		this.updateCurrentTaskInfo();
 
 		// 立即查询
@@ -158,8 +159,7 @@ class TagMonitor implements TaskImplementation {
 
 		// 更新数据
 		this.updateStatus("idle");
-		this.updateIsListening(false);
-		this.trainingStore.resetCurrentTaskInfo();
+		this.resetCurrentTaskInfo();
 
 		// 停止定时器
 		this.clearTimer();
@@ -167,14 +167,19 @@ class TagMonitor implements TaskImplementation {
 
 	/** 设置初始数据 */
 	public setInitData(initData: InitData) {
+		const {
+			taskId,
+			result,
+			showTrainingTip = true,
+			trainingTipText = "当前正在训练..."
+		} = initData;
+
 		// 更新数据
 		this.updateStatus("paused");
-		this.setTaskId(initData.taskId);
-		this.updateIsListening(true);
-		this.updateCurrentTaskInfo();
+		this.setTaskId(taskId);
+		this.updateCurrentTaskInfo(result);
 
 		// 弹窗提示
-		const { showTrainingTip = true, trainingTipText = "当前正在训练..." } = initData;
 		if (showTrainingTip) {
 			ElMessage({
 				message: trainingTipText,
@@ -216,19 +221,19 @@ class TagMonitor implements TaskImplementation {
 		this.status = status;
 	}
 
-	/** 更新是否监听 */
-	private updateIsListening(isListening: boolean): void {
-		this.trainingStore.setTrainingTagListen(isListening);
-	}
-
 	/** 更新当前任务信息 */
-	private updateCurrentTaskInfo(): void {
+	private updateCurrentTaskInfo(result?: ManualTagInfoResult): void {
 		this.trainingStore.setCurrentTaskInfo({
 			id: this.taskId,
 			type: this.taskType,
 			name: this.taskName,
-			progress: this.trainingStore.trainingTagData.data.progress
+			result
 		});
+	}
+
+	/** 重置当前任务信息 */
+	private resetCurrentTaskInfo(): void {
+		this.trainingStore.resetCurrentTaskInfo({ type: this.taskType });
 	}
 
 	/** 校验任务id */
@@ -244,9 +249,8 @@ class TagMonitor implements TaskImplementation {
 	/** 处理查询成功 */
 	private handleQuerySuccess(result: ManualTagInfoResult): void {
 		// 更新数据
-		this.trainingStore.setTrainingTagData(result);
-		this.updateCurrentTaskInfo();
-		this.modalManagerStore.setNetworkDisconnectModal(false);
+		this.updateCurrentTaskInfo(result);
+		NetworkDisconnectModal.close();
 
 		// 事件通知
 		this.events.emit("update");
@@ -255,9 +259,7 @@ class TagMonitor implements TaskImplementation {
 		switch (result.status) {
 			case "complete": // 打标完成
 				this.updateStatus("success");
-				this.updateIsListening(false);
-				this.trainingStore.resetTrainingTagData();
-				this.trainingStore.resetCurrentTaskInfo();
+				this.resetCurrentTaskInfo();
 				this.events.emit("complete");
 
 				ElMessageBox({
@@ -270,9 +272,7 @@ class TagMonitor implements TaskImplementation {
 				break;
 			case "failed": // 打标失败
 				this.updateStatus("failure");
-				this.updateIsListening(false);
-				this.trainingStore.resetTrainingTagData();
-				this.trainingStore.resetCurrentTaskInfo();
+				this.resetCurrentTaskInfo();
 				this.events.emit("failed");
 
 				ElMessageBox({
@@ -298,7 +298,7 @@ class TagMonitor implements TaskImplementation {
 
 		// 如果是网络错误或者5xx错误，弹出网络连接错误提示
 		if (isNetworkError(error) || is5xxError) {
-			this.modalManagerStore.setNetworkDisconnectModal(true);
+			NetworkDisconnectModal.show();
 			// 继续查询
 			this.startTimer();
 			return;
@@ -306,9 +306,7 @@ class TagMonitor implements TaskImplementation {
 
 		// 其他错误
 		this.updateStatus("failure");
-		this.updateIsListening(false);
-		this.trainingStore.resetTrainingTagData();
-		this.trainingStore.resetCurrentTaskInfo();
+		this.resetCurrentTaskInfo();
 
 		// 事件通知
 		this.events.emit("failed");

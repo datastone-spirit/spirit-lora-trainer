@@ -1,30 +1,25 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 10:56:35
- * @LastEditTime: 2024-12-11 10:40:22
+ * @LastEditTime: 2025-07-30 15:58:52
  * @LastEditors: mulingyuer
  * @Description: 训练网络模块
- * @FilePath: \frontend\src\components\Form\FluxNetworkModuleSelect.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\NetworkOptions\FluxNetworkModuleSelect.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem :label="label" :prop="prop" popover-content="network_module">
-		<el-select v-model="value" :placeholder="placeholder">
-			<el-option
-				v-for="item in networkModuleOptions"
-				:key="item.value"
-				:label="item.label"
-				:value="item.value"
-			/>
-		</el-select>
-	</PopoverFormItem>
+	<el-select v-model="value" :placeholder="placeholder">
+		<el-option
+			v-for="item in networkModuleOptions"
+			:key="item.value"
+			:label="item.label"
+			:value="item.value"
+		/>
+	</el-select>
 </template>
 
 <script setup lang="ts">
 export interface FluxNetworkModuleSelectProps {
-	label?: string;
-	prop?: string;
-	popoverContent: string;
 	placeholder?: string;
 }
 

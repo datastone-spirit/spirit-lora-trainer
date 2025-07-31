@@ -1,16 +1,16 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-01 16:34:57
- * @LastEditTime: 2025-04-01 17:43:01
+ * @LastEditTime: 2025-07-31 15:36:39
  * @LastEditors: mulingyuer
  * @Description: 视频预览组件
- * @FilePath: \frontend\src\components\VideoPreview\index.vue
+ * @FilePath: \frontend\src\components\Dialog\VideoPreviewDialog.vue
  * 怎么可能会有bug！！！
 -->
 <template>
 	<el-dialog
 		v-model="open"
-		:title="videoPreviewModal.title"
+		:title="videoPreviewModalData.title"
 		width="600px"
 		append-to-body
 		destroy-on-close
@@ -18,11 +18,11 @@
 		@open="onHandleOpen"
 		@closed="onHandleClosed"
 	>
-		<div v-if="videoPreviewModal.src" class="video-container">
+		<div v-if="videoPreviewModalData.src" class="video-container">
 			<video
 				ref="videoPlayerRef"
 				class="video-player"
-				:src="videoPreviewModal.src"
+				:src="videoPreviewModalData.src"
 				controls
 				autoplay
 				@loadedmetadata="onLoadedMetadata"
@@ -36,18 +36,16 @@
 </template>
 
 <script setup lang="ts">
-import { useModalManagerStore } from "@/stores";
+import { VideoPreviewModal } from "@/utils/modal-manager";
 
-const modalManagerStore = useModalManagerStore();
-
-const { videoPreviewModal } = storeToRefs(modalManagerStore);
+const videoPreviewModalData = VideoPreviewModal.state;
 const videoPlayerRef = ref<HTMLVideoElement>();
 const open = computed({
 	get() {
-		return videoPreviewModal.value.open;
+		return videoPreviewModalData.value.open;
 	},
-	set(val: boolean) {
-		videoPreviewModal.value.open = val;
+	set(val) {
+		videoPreviewModalData.value.open = val;
 	}
 });
 
@@ -68,8 +66,8 @@ function onHandleClosed() {
 		videoPlayerRef.value.removeAttribute("src");
 		videoPlayerRef.value.load();
 	}
-	// 重置数据
-	modalManagerStore.resetVideoPreviewModal();
+
+	VideoPreviewModal.close();
 }
 
 /** 视频加载完毕 */

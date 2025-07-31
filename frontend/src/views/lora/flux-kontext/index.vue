@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-29 09:44:42
+ * @LastEditTime: 2025-07-31 15:23:16
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -51,7 +51,7 @@
 			@submit="onSubmit"
 		>
 			<template #monitor-progress-bar>
-				<FluxKontextLoraTrainingMonitor />
+				<FluxKontextLoRATrainingMonitor />
 			</template>
 			<template #right-btn-group>
 				<el-button
@@ -70,15 +70,17 @@
 import { startFluxKontextTraining, type StartFluxKontextTrainingData } from "@/api/lora";
 import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
+import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import DataSet from "./components/DataSet/index.vue";
+import FluxKontextLoRATrainingMonitor from "./components/FluxKontextLoRATrainingMonitor/index.vue";
 import SampleConfig from "./components/SampleConfig/index.vue";
 import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
@@ -87,7 +89,6 @@ import { validate } from "./flux-kontext.validate";
 import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
-const modalManagerStore = useModalManagerStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { fluxKontextLoraMonitor } = useFluxKontextLora();
@@ -277,22 +278,17 @@ async function onSubmit() {
 
 /** 查看采样 */
 function onViewSampling() {
-	modalManagerStore.setViewSamplingDrawerModal({
-		open: true,
+	ViewSamplingDrawerModal.show({
 		filePath: trainingStore.trainingFluxKontextLoRAData.data.samplingPath
 	});
 }
 
 // 组件生命周期
 onMounted(() => {
+	// 监听如果成功恢复，任务信息会被更新
 	fluxKontextLoraMonitor.resume();
-	// 恢复表单数据
-	LoRAHelper.recoveryTaskFormData({
-		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: trainingStore.trainingFluxKontextLoRAData.isListen,
-		taskId: fluxKontextLoraMonitor.getTaskId(),
-		formData: ruleForm.value
-	});
+	// 恢复表单数据（前提是任务信息存在）
+	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
 });
 onUnmounted(() => {
 	fluxKontextLoraMonitor.pause();

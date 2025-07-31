@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-07-24 15:05:48
+ * @LastEditTime: 2025-07-30 09:45:52
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
@@ -57,66 +57,83 @@ class TaskInitializer {
 
 	/** 打标初始化 */
 	private async initTag() {
-		const { status } = this.taskData as ManualTagInfoResult;
+		const result = this.taskData as ManualTagInfoResult;
+		const { id, status } = result;
+
 		if (status === "complete" || status === "failed") return;
 
 		const { tagMonitor } = useTag();
 
 		return tagMonitor.setInitData({
-			taskId: this.taskData.id
+			taskId: id,
+			result
 		});
 	}
 
 	/** flux 训练初始化 */
 	private async initFluxTraining() {
-		const { status } = this.taskData as LoRATrainingInfoResult;
+		const result = this.taskData as LoRATrainingInfoResult;
+		const { id, status } = result;
+
 		if (status === "complete" || status === "failed") return;
+
 		const { fluxLoraMonitor } = useFluxLora();
 
 		return fluxLoraMonitor.setInitData({
-			taskId: this.taskData.id
+			taskId: id,
+			result: result
 		});
 	}
 
 	/** 混元视频训练初始化 */
 	private async initHyVideoTraining() {
-		const { status } = this.taskData as HyVideoTrainingInfoResult;
+		const result = this.taskData as HyVideoTrainingInfoResult;
+		const { id, status } = result;
+
 		if (status === "complete" || status === "failed") return;
+
 		const { hyLoraMonitor } = useHYLora();
 
 		return hyLoraMonitor.setInitData({
-			taskId: this.taskData.id
+			taskId: id,
+			result
 		});
 	}
 
 	/** wan 训练初始化 */
 	private async initWanTraining() {
-		const { status } = this.taskData as WanVideoTrainingInfoResult;
+		const result = this.taskData as WanVideoTrainingInfoResult;
+		const { id, status } = result;
+
 		if (status === "complete" || status === "failed") return;
 
 		const { wanLoraMonitor } = useWanLora();
 
 		return wanLoraMonitor.setInitData({
-			taskId: this.taskData.id
+			taskId: id,
+			result
 		});
 	}
 
 	/** flux kontext 训练初始化 */
 	private async initFluxKontextTraining() {
-		const { status } = this.taskData as FluxKontextTrainingInfoResult;
+		const result = this.taskData as FluxKontextTrainingInfoResult;
+		const { id, status } = result;
+
 		if (status === "complete" || status === "failed") return;
 
 		const { fluxKontextLoraMonitor } = useFluxKontextLora();
 
 		return fluxKontextLoraMonitor.setInitData({
-			taskId: this.taskData.id
+			taskId: id,
+			result
 		});
 	}
 }
 
 export async function initTask() {
 	try {
-		const taskData = await currentTask(8000);
+		const taskData = await currentTask();
 		const taskInitializer = new TaskInitializer(taskData);
 		await taskInitializer.init();
 	} catch (error) {

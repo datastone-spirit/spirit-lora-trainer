@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-07-29 09:52:01
+ * @LastEditTime: 2025-07-29 17:10:21
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -69,7 +69,7 @@
 					/>
 				</template>
 				<TagSubmitButton
-					:loading="submitLoading || trainingStore.trainingTagData.isListen"
+					:loading="submitLoading"
 					:disabled="trainingStore.useGPU"
 					:is-bottom-margin="false"
 					@submit="onSubmit"

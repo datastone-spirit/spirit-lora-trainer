@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-07-29 09:31:26
+ * @LastEditTime: 2025-07-31 15:24:04
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -53,7 +53,7 @@
 			@submit="onSubmit"
 		>
 			<template #monitor-progress-bar>
-				<LoRATrainingMonitor />
+				<FluxLoRATrainingMonitor />
 			</template>
 			<template #right-btn-group>
 				<el-button
@@ -73,15 +73,17 @@ import { startFluxTraining } from "@/api/lora";
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import { useFluxLora } from "@/hooks/task/useFluxLora";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useModalManagerStore, useSettingsStore, useTrainingStore } from "@/stores";
+import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import FluxDataset from "./components/FluxDataset/index.vue";
+import FluxLoRATrainingMonitor from "./components/FluxLoRATrainingMonitor/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
@@ -90,7 +92,6 @@ import { validate } from "./flux.validate";
 import type { RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
-const modalManagerStore = useModalManagerStore();
 const trainingStore = useTrainingStore();
 const { fluxLoraMonitor } = useFluxLora();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
@@ -519,22 +520,15 @@ async function onSubmit() {
 
 /** 查看采样 */
 function onViewSampling() {
-	modalManagerStore.setViewSamplingDrawerModal({
-		open: true,
-		filePath: trainingStore.trainingFluxLoRAData.data.samplingPath
-	});
+	ViewSamplingDrawerModal.show({ filePath: trainingStore.trainingFluxLoRAData.data.samplingPath });
 }
 
 // 组件生命周期
 onMounted(() => {
+	// 监听如果成功恢复，任务信息会被更新
 	fluxLoraMonitor.resume();
-	// 恢复表单数据
-	LoRAHelper.recoveryTaskFormData({
-		enableTrainingTaskDataRecovery: settingsStore.trainerSettings.enableTrainingTaskDataRecovery,
-		isListen: trainingStore.trainingFluxLoRAData.isListen,
-		taskId: fluxLoraMonitor.getTaskId(),
-		formData: ruleForm.value
-	});
+	// 恢复表单数据（前提是任务信息存在）
+	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
 });
 onUnmounted(() => {
 	fluxLoraMonitor.pause();

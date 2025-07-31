@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2025-07-23 10:11:53
+ * @LastEditTime: 2025-07-29 10:36:47
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
@@ -71,12 +71,17 @@ const progress = computed(() => {
 });
 </script>
 
+<style lang="scss">
+.el-popup-parent--hidden .footer-bar.footer-bar {
+	width: calc(100% - 8px);
+}
+</style>
 <style lang="scss" scoped>
 .footer-bar {
 	position: fixed;
 	left: 0;
-	right: 0;
 	bottom: 0;
+	width: 100%;
 	height: $zl-footer-bar-height;
 	background-color: var(--zl-footer-bar-bg);
 	border-top-left-radius: $zl-border-radius;

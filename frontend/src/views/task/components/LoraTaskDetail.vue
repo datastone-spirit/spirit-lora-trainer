@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 17:31:23
- * @LastEditTime: 2025-04-03 09:44:51
+ * @LastEditTime: 2025-07-31 15:27:44
  * @LastEditors: mulingyuer
  * @Description: LoRA任务详情
  * @FilePath: \frontend\src\views\task\components\LoraTaskDetail.vue
@@ -90,15 +90,13 @@
 
 <script setup lang="ts">
 import type { LoRATrainingInfoResult } from "@/api/monitor/types";
-import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
 import dayjs from "@/utils/dayjs";
-import { useModalManagerStore } from "@/stores";
+import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
+import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
 
 export interface TaskDetailProps {
 	data: LoRATrainingInfoResult;
 }
-
-const modalManagerStore = useModalManagerStore();
 
 const props = defineProps<TaskDetailProps>();
 
@@ -150,10 +148,7 @@ const showSampling = computed(() => {
 	return props.data.is_sampling ?? false;
 });
 function onViewSampling() {
-	modalManagerStore.setViewSamplingDrawerModal({
-		open: true,
-		filePath: props.data.sampling_path ?? ""
-	});
+	ViewSamplingDrawerModal.show({ filePath: props.data.sampling_path ?? "" });
 }
 
 /** 查看日志 */

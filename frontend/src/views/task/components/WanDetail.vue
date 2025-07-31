@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-01 15:10:43
- * @LastEditTime: 2025-04-03 10:04:51
+ * @LastEditTime: 2025-07-31 15:28:22
  * @LastEditors: mulingyuer
  * @Description: wan视频训练详情
  * @FilePath: \frontend\src\views\task\components\WanDetail.vue
@@ -84,13 +84,11 @@ import type { WanVideoTrainingInfoResult } from "@/api/monitor/types";
 import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
 import dayjs from "@/utils/dayjs";
 import { calculatePercentage } from "@/utils/tools";
-import { useModalManagerStore } from "@/stores";
+import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 
 export interface WanDetailProps {
 	data: WanVideoTrainingInfoResult;
 }
-
-const modalManagerStore = useModalManagerStore();
 
 const props = defineProps<WanDetailProps>();
 
@@ -141,10 +139,7 @@ const showSampling = computed(() => {
 	return props.data.is_sampling ?? false;
 });
 function onViewSampling() {
-	modalManagerStore.setViewSamplingDrawerModal({
-		open: true,
-		filePath: props.data.sampling_path ?? ""
-	});
+	ViewSamplingDrawerModal.show({ filePath: props.data.sampling_path ?? "" });
 }
 
 /** 查看日志 */

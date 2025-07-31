@@ -9,7 +9,7 @@
 -->
 <template>
 	<ViewSamplingDrawer />
-	<VideoPreview />
+	<VideoPreviewDialog />
 	<LoraTaskLogDialog />
 	<LoRASavePathWarningDialog />
 	<NetworkRetryDialog />
@@ -19,7 +19,7 @@
 import NetworkRetryDialog from "@/components/Dialog/NetworkRetryDialog.vue";
 import LoraTaskLogDialog from "@/components/Dialog/LoraTaskLogDialog.vue";
 import LoRASavePathWarningDialog from "@/components/Dialog/LoRASavePathWarningDialog.vue";
-import VideoPreview from "@/components/VideoPreview/index.vue";
+import VideoPreviewDialog from "@/components/Dialog/VideoPreviewDialog.vue";
 import ViewSamplingDrawer from "@/components/Drawer/ViewSamplingDrawer.vue";
 </script>
 

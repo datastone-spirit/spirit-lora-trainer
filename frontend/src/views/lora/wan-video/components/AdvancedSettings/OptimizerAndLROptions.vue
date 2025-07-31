@@ -1,21 +1,21 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 14:47:20
- * @LastEditTime: 2025-03-26 15:56:15
+ * @LastEditTime: 2025-07-30 16:04:30
  * @LastEditors: mulingyuer
  * @Description: 优化器与学习率
- * @FilePath: \frontend\src\views\lora\wan\components\AdvancedSettings\OptimizerAndLROptions.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\OptimizerAndLROptions.vue
  * 怎么可能会有bug！！！
 -->
 <template>
 	<FieldSetWrapper title="优化器与学习率">
-		<BaseSelector
-			v-model="ruleForm.config.optimizer_type"
+		<PopoverFormItem
 			label="优化器类型"
 			prop="config.optimizer_type"
 			popoverContent="optimizer_type"
-			:options="optimizerTypeOptions"
-		/>
+		>
+			<BaseSelector v-model="ruleForm.config.optimizer_type" :options="optimizerTypeOptions" />
+		</PopoverFormItem>
 		<PopoverFormItem
 			label="自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。&#10;示例：weight_decay=0.01 betas=.9,.999"
 			prop="config.optimizer_args"
@@ -43,13 +43,13 @@
 				:min="0"
 			/>
 		</PopoverFormItem>
-		<BaseSelector
-			v-model="ruleForm.config.lr_scheduler"
+		<PopoverFormItem
 			label="学习率调度器类型"
 			prop="config.lr_scheduler"
 			popoverContent="lr_scheduler"
-			:options="lrSchedulerOptions"
-		/>
+		>
+			<BaseSelector v-model="ruleForm.config.lr_scheduler" :options="lrSchedulerOptions" />
+		</PopoverFormItem>
 		<PopoverFormItem
 			label="自定义调度器参数，可以key=value的格式指定多个值，以空格分隔。&#10;示例：T_max=100"
 			prop="config.lr_scheduler_args"

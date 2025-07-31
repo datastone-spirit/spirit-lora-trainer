@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-07-28 09:53:16
+ * @LastEditTime: 2025-07-29 17:07:31
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -220,7 +220,7 @@ watch(
 		if (newVal) {
 			gpuMonitor.start();
 		} else {
-			gpuMonitor.pause();
+			gpuMonitor.stop();
 		}
 	},
 	{ immediate: true }
@@ -230,6 +230,10 @@ watch(
 onMounted(() => {
 	// 恢复打标查询任务
 	tagMonitor.resume();
+	// 存在任务的话就恢复GPU监控
+	if (currentTaskInfo.value.type !== "none") {
+		gpuMonitor.resume();
+	}
 });
 onUnmounted(() => {
 	// 暂停打标查询任务

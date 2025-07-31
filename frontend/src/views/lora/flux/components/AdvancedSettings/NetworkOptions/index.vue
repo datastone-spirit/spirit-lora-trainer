@@ -1,20 +1,17 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 16:25:06
- * @LastEditTime: 2025-01-10 10:58:34
+ * @LastEditTime: 2025-07-30 15:59:17
  * @LastEditors: mulingyuer
  * @Description: 网络配置
- * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\NetworkOptions.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\NetworkOptions\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
 	<FieldSetWrapper title="网络设置">
-		<FluxNetworkModuleSelect
-			v-model="ruleForm.network_module"
-			label="训练网络模块"
-			prop="network_module"
-			popover-content="network_module"
-		/>
+		<PopoverFormItem label="训练网络模块" prop="network_module" popover-content="network_module">
+			<FluxNetworkModuleSelect v-model="ruleForm.network_module" />
+		</PopoverFormItem>
 		<PopoverFormItem
 			label="从已有的 LoRA 模型上继续训练，请选择文件路径"
 			prop="network_weights"
@@ -82,7 +79,8 @@
 </template>
 
 <script setup lang="ts">
-import type { RuleForm } from "../../types";
+import type { RuleForm } from "../../../types";
+import FluxNetworkModuleSelect from "./FluxNetworkModuleSelect.vue";
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 </script>

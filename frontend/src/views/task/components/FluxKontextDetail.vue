@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-24 15:25:30
- * @LastEditTime: 2025-07-28 16:01:04
+ * @LastEditTime: 2025-07-31 15:26:54
  * @LastEditors: mulingyuer
  * @Description: flux kontext 任务详情
  * @FilePath: \frontend\src\views\task\components\FluxKontextDetail.vue
@@ -77,14 +77,12 @@
 import type { FluxKontextTrainingInfoResult } from "@/api/monitor/types";
 import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
 import dayjs from "@/utils/dayjs";
-import { useModalManagerStore } from "@/stores";
 import { calculatePercentage, secondsToHHMMSS } from "@/utils/tools";
+import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 
 export interface TaskDetailProps {
 	data: FluxKontextTrainingInfoResult;
 }
-
-const modalManagerStore = useModalManagerStore();
 
 const props = defineProps<TaskDetailProps>();
 
@@ -143,10 +141,7 @@ const showSampling = computed(() => {
 	return props.data.is_sampling ?? false;
 });
 function onViewSampling() {
-	modalManagerStore.setViewSamplingDrawerModal({
-		open: true,
-		filePath: props.data.sampling_path ?? ""
-	});
+	ViewSamplingDrawerModal.show({ filePath: props.data.sampling_path ?? "" });
 }
 
 /** 查看日志 */

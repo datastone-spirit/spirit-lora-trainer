@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 17:13:09
- * @LastEditTime: 2025-03-10 17:05:19
+ * @LastEditTime: 2025-07-30 15:47:10
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\flux\components\BasicInfo\index.vue
@@ -42,21 +42,22 @@
 	<PopoverFormItem label="LoRA 保存路径" prop="output_dir" popover-content="output_dir">
 		<FolderSelector v-model="ruleForm.output_dir" placeholder="请选择LoRA保存路径" />
 	</PopoverFormItem>
-
-	<ModelSaveFormatSelector
+	<PopoverFormItem
 		v-show="isExpert"
-		v-model="ruleForm.save_model_as"
 		label="模型保存格式"
 		prop="save_model_as"
 		popoverContent="save_model_as"
-	/>
-	<ModelSavePrecisionSelector
+	>
+		<ModelSaveFormatSelect v-model="ruleForm.save_model_as" />
+	</PopoverFormItem>
+	<PopoverFormItem
 		v-show="isExpert"
-		v-model="ruleForm.save_precision"
 		label="模型保存精度"
 		prop="save_precision"
 		popover-content="save_precision"
-	/>
+	>
+		<ModelSavePrecisionSelect v-model="ruleForm.save_precision" />
+	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"
 		label="保存训练状态 配合 resume 参数可以继续从某个状态训练"
@@ -106,6 +107,8 @@
 <script setup lang="ts">
 import { useSettingsStore } from "@/stores";
 import type { RuleForm } from "../../types";
+import ModelSaveFormatSelect from "./ModelSaveFormatSelect.vue";
+import ModelSavePrecisionSelect from "./ModelSavePrecisionSelect.vue";
 
 const settingsStore = useSettingsStore();
 

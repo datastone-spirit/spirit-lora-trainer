@@ -1,10 +1,15 @@
 <template>
 	<div class="file-manager" :id="fileId">
-		<el-input v-model="folder" :placeholder="inputPlaceholder" class="file-manager-input">
-			<template #append>
-				<el-button :icon="FolderIcon" title="请选择" @click="tooglePopover" />
-			</template>
-		</el-input>
+		<div class="file-manager-content" :class="{ 'show-tooltip': showTooltip }">
+			<el-input v-model="folder" :placeholder="inputPlaceholder" class="file-manager-input">
+				<template #append>
+					<el-button :icon="FolderIcon" title="请选择" @click="togglePopover" />
+				</template>
+			</el-input>
+			<el-tooltip v-if="showTooltip" placement="top" :content="tooltipContent">
+				<el-button class="file-manager-info-btn" :icon="InfoIcon" link />
+			</el-tooltip>
+		</div>
 		<el-dialog
 			width="700"
 			trigger="click"
@@ -27,6 +32,8 @@
 
 <script setup lang="ts">
 import { useIcon } from "@/hooks/useIcon";
+import { useSettingsStore } from "@/stores";
+import { getEnv } from "@/utils/env";
 
 export interface InputTreeSelectorProps {
 	placeholder?: string;
@@ -38,6 +45,12 @@ export interface InputTreeSelectorProps {
 	fileIcon?: string;
 }
 
+// icon
+const FolderIcon = useIcon({ name: "ri-folder-line" });
+const InfoIcon = useIcon({ name: "ri-information-line" });
+
+const settingsStore = useSettingsStore();
+
 const features = ["select", "preview", "newfolder"];
 const typeValue: any = {
 	file: false,
@@ -46,14 +59,18 @@ const typeValue: any = {
 const visible = ref(false);
 const props = withDefaults(defineProps<InputTreeSelectorProps>(), {});
 const folder = defineModel({ type: String, required: true });
-const FolderIcon = useIcon({ name: "ri-folder-line" });
-
 const inputPlaceholder = computed(() => {
 	if (!props.placeholder) {
 		return props.isDir ? "请输入或选择目录" : "请输入或选择文件";
 	} else {
 		return props.placeholder;
 	}
+});
+const showTooltip = computed(() => settingsStore.whiteCheck);
+const tooltipContent = computed(() => {
+	return showTooltip.value
+		? `如果挂载了存储请使用挂载存储所使用的句，如：${getEnv().VITE_APP_LORA_OUTPUT_PARENT_PATH} 开头的路径`
+		: "";
 });
 
 const request = ref({
@@ -121,7 +138,7 @@ const generateRandomString = () => {
 };
 const fileId = generateRandomString();
 
-const tooglePopover = () => {
+const togglePopover = () => {
 	visible.value = !visible.value;
 };
 </script>
@@ -129,6 +146,18 @@ const tooglePopover = () => {
 <style lang="scss" scoped>
 .file-manager {
 	width: 100%;
+}
+.file-manager-content {
+	position: relative;
+	&.show-tooltip {
+		padding-right: 30px;
+	}
+}
+.file-manager-info-btn {
+	position: absolute;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
 }
 .file-manager-dialog {
 	height: 500px;

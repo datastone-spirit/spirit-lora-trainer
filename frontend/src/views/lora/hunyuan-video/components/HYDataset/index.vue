@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-08 09:22:10
- * @LastEditTime: 2025-07-29 09:52:36
+ * @LastEditTime: 2025-07-29 17:10:43
  * @LastEditors: mulingyuer
  * @Description: 混元AI数据集
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\HYDataset\index.vue
@@ -58,11 +58,7 @@
 			popover-content="tagger_is_append"
 		/>
 	</template>
-	<TagSubmitButton
-		:loading="loading || trainingStore.trainingTagData.isListen"
-		:disabled="disabled"
-		@submit="onTagClick"
-	/>
+	<TagSubmitButton :loading="loading" :disabled="disabled" @submit="onTagClick" />
 </template>
 
 <script setup lang="ts">

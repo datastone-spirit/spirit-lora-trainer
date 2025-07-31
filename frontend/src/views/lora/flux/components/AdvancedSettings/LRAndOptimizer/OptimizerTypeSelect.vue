@@ -1,30 +1,25 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 10:34:40
- * @LastEditTime: 2024-12-11 15:47:40
+ * @LastEditTime: 2025-07-30 15:52:57
  * @LastEditors: mulingyuer
  * @Description: 优化器设置
- * @FilePath: \frontend\src\components\Form\OptimizerTypeSelect.vue
+ * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LRAndOptimizer\OptimizerTypeSelect.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<PopoverFormItem :label="label" :prop="prop" :popover-content="popoverContent">
-		<el-select v-model="value" :placeholder="placeholder">
-			<el-option
-				v-for="item in optimizerTypeOptions"
-				:key="item.value"
-				:label="item.label"
-				:value="item.value"
-			/>
-		</el-select>
-	</PopoverFormItem>
+	<el-select v-model="value" :placeholder="placeholder">
+		<el-option
+			v-for="item in optimizerTypeOptions"
+			:key="item.value"
+			:label="item.label"
+			:value="item.value"
+		/>
+	</el-select>
 </template>
 
 <script setup lang="ts">
 export interface OptimizerTypeSelectProps {
-	label?: string;
-	prop?: string;
-	popoverContent: string;
 	placeholder?: string;
 }
 

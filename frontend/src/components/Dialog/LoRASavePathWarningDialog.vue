@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:40:45
- * @LastEditTime: 2025-03-27 09:54:45
+ * @LastEditTime: 2025-07-31 14:33:36
  * @LastEditors: mulingyuer
  * @Description: Lora保存路径警告弹窗
  * @FilePath: \frontend\src\components\Dialog\LoRASavePathWarningDialog.vue
@@ -31,18 +31,9 @@
 
 <script setup lang="ts">
 import { getEnv } from "@/utils/env";
-import { useModalManagerStore } from "@/stores";
+import { LoraSavePathWarningModal } from "@/utils/modal-manager";
 
-const modelManagerStore = useModalManagerStore();
-
-const open = computed({
-	get() {
-		return modelManagerStore.loraSavePathWarningModal;
-	},
-	set(val: boolean) {
-		modelManagerStore.setLoraSavePathWarningModal(val);
-	}
-});
+const open = LoraSavePathWarningModal.state;
 const outputPath = getEnv().VITE_APP_LORA_OUTPUT_PARENT_PATH;
 const message = `注意：您当前选择的LoRA保存目录不在${outputPath}存储路径下。这可能导致训练结果无法保存在存储中，从而导致训练结果丢失。请修改LoRA保存目录为${outputPath}路径下的目录。`;
 

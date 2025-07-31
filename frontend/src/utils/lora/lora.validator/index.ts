@@ -1,13 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 09:58:06
- * @LastEditTime: 2025-07-29 09:31:53
+ * @LastEditTime: 2025-07-31 14:32:43
  * @LastEditors: mulingyuer
  * @Description: 公共的lora校验
  * @FilePath: \frontend\src\utils\lora\lora.validator\index.ts
  * 怎么可能会有bug！！！
  */
-import { useModalManagerStore, useTrainingStore, useSettingsStore } from "@/stores";
+import { checkDirectoryExists } from "@/api/common";
+import { useSettingsStore, useTrainingStore } from "@/stores";
+import { getEnv } from "@/utils/env";
+import { LoraSavePathWarningModal } from "@/utils/modal-manager";
 import { formatFormValidateMessage } from "@/utils/tools";
 import type { FormInstance } from "element-plus";
 import type {
@@ -19,8 +22,6 @@ import type {
 	ValidationResult
 } from "./types";
 export type * from "./types";
-import { checkDirectoryExists } from "@/api/common";
-import { getEnv } from "@/utils/env";
 
 export class LoRAValidator {
 	/** 显示错误消息 */
@@ -145,8 +146,7 @@ export class LoRAValidator {
 
 			// 展示警告弹窗，老大强烈要求
 			if (shouldShowErrorDialog) {
-				const modelManagerStore = useModalManagerStore();
-				modelManagerStore.setLoraSavePathWarningModal(true);
+				LoraSavePathWarningModal.show();
 			}
 
 			return { valid: false, message: `LoRA保存路径必须是 ${prefix} 开头` };

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-07-31 15:23:16
+ * @LastEditTime: 2025-08-04 09:36:55
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -23,7 +23,7 @@
 						<BasicInfo v-model:form="ruleForm" />
 					</Collapse>
 					<Collapse v-model="openStep2" title="第2步：AI数据集">
-						<DataSet v-model:form="ruleForm" v-model:active-tab-name="activeTabName" />
+						<DataSet v-model:form="ruleForm" />
 					</Collapse>
 					<Collapse v-model="openStep3" title="第3步：LoRA 保存配置">
 						<SaveConfig v-model:form="ruleForm" />
@@ -49,6 +49,7 @@
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"
+			@import-config="onImportConfig"
 		>
 			<template #monitor-progress-bar>
 				<FluxKontextLoRATrainingMonitor />
@@ -158,6 +159,7 @@ const defaultForm: RuleForm = {
 		prompts: []
 	},
 	datasets: [generateDefaultDataset(0)],
+	activeDatasetId: "",
 	name: "",
 	tagConfig: {
 		tagger_model: "joy-caption-alpha-two",
@@ -215,9 +217,10 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-const activeTabName = ref(ruleForm.value.datasets[0].id);
 const dir = computed(() => {
-	const findItem = ruleForm.value.datasets.find((item) => item.id === activeTabName.value);
+	const datasets = ruleForm.value.datasets;
+	const activeDatasetId = ruleForm.value.activeDatasetId;
+	const findItem = datasets.find((item) => item.id === activeDatasetId);
 	if (!findItem) return "";
 	return findItem.preview === "folder_path" ? findItem.folder_path : findItem.control_path;
 });
@@ -237,11 +240,21 @@ const generateToml = useDebounceFn(() => {
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
 
+// 导入配置
+function onImportConfig() {
+	const datasets = ruleForm.value.datasets;
+	if (datasets.length > 0) {
+		ruleForm.value.activeDatasetId = datasets[0].id;
+	} else {
+		ruleForm.value.activeDatasetId = "";
+	}
+}
+
 // 重置表单
 function onResetData() {
 	if (ruleFormRef.value) ruleFormRef.value.resetFields();
 	ruleForm.value = structuredClone(defaultForm);
-	activeTabName.value = ruleForm.value.datasets[0].id;
+	ruleForm.value.activeDatasetId = ruleForm.value.datasets[0]?.id ?? "";
 }
 
 // 提交表单

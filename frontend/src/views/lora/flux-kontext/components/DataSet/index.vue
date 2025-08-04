@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 09:41:55
- * @LastEditTime: 2025-07-29 17:10:37
+ * @LastEditTime: 2025-08-04 09:35:49
  * @LastEditors: mulingyuer
  * @Description: 数据集
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\index.vue
@@ -10,7 +10,7 @@
 <template>
 	<div class="data-set">
 		<div class="data-set-content">
-			<Tabs v-model="activeTabName" v-model:form="ruleForm" />
+			<Tabs v-model="ruleForm.activeDatasetId" v-model:form="ruleForm" />
 		</div>
 		<div class="data-set-footer">
 			<TagModelSelect
@@ -77,7 +77,6 @@
 </template>
 
 <script setup lang="ts">
-import type { TabPaneName } from "element-plus";
 import type { RuleForm } from "../../types";
 import Tabs from "./Tabs.vue";
 import { useTag } from "@/hooks/task/useTag";
@@ -87,12 +86,10 @@ const trainingStore = useTrainingStore();
 const { tag, tagMonitor } = useTag();
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
-const activeTabName = defineModel("activeTabName", {
-	type: String as PropType<TabPaneName>,
-	required: true
-});
 const activeDataSetItem = computed(() => {
-	const findItem = ruleForm.value.datasets.find((item) => item.id === activeTabName.value);
+	const datasets = ruleForm.value.datasets;
+	const activeDatasetId = ruleForm.value.activeDatasetId;
+	const findItem = datasets.find((item) => item.id === activeDatasetId);
 	return findItem;
 });
 const loading = ref(false);

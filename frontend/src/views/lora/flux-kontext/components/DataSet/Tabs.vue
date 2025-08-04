@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 11:39:51
- * @LastEditTime: 2025-07-25 15:19:44
+ * @LastEditTime: 2025-08-04 09:24:58
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\Tabs.vue
@@ -173,7 +173,7 @@ function onTabEdit(paneName: TabPaneName | undefined, action: "remove" | "add") 
 // 新增数据集
 function onAddDataSet() {
 	const { datasets } = ruleForm.value;
-	const lastIndex = datasets[datasets.length - 1]?.index ?? 0;
+	const lastIndex = datasets[datasets.length - 1]?.index ?? -1; // 空数据集时，下标得为0，所以用-1
 	const data = generateDefaultDataset(lastIndex + 1);
 	ruleForm.value.datasets.push(data);
 	activeTabName.value = data.id;
@@ -188,7 +188,11 @@ function onRemoveDataSet(name: TabPaneName) {
 	// 如果删除的是激活的，激活下一个数据集
 	if (activeTabName.value === activeItem.id) {
 		const nextTab = dataset[findIndex + 1] || dataset[findIndex - 1];
-		if (nextTab) activeTabName.value = nextTab.id;
+		if (nextTab) {
+			activeTabName.value = nextTab.id;
+		} else {
+			activeTabName.value = "";
+		}
 	}
 
 	ruleForm.value.datasets.splice(findIndex, 1);

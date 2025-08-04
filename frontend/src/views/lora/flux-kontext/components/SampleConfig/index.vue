@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 16:15:46
- * @LastEditTime: 2025-07-29 09:46:39
+ * @LastEditTime: 2025-08-04 08:49:13
  * @LastEditors: mulingyuer
  * @Description: 采样设置
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\SampleConfig\index.vue
@@ -9,11 +9,15 @@
 -->
 <template>
 	<PopoverFormItem
-		label="禁用采样"
+		label="是否启用采样"
 		prop="train.disable_sampling"
 		popover-content="disable_sampling"
 	>
-		<el-switch v-model="ruleForm.train.disable_sampling" />
+		<el-switch
+			v-model="ruleForm.train.disable_sampling"
+			:active-value="false"
+			:inactive-value="true"
+		/>
 	</PopoverFormItem>
 	<el-row v-show="!ruleForm.train.disable_sampling" :gutter="16">
 		<el-col v-show="isExpert" :span="24">

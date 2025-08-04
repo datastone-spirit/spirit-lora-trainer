@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 16:32:59
- * @LastEditTime: 2025-07-29 09:46:28
+ * @LastEditTime: 2025-08-04 08:43:24
  * @LastEditors: mulingyuer
  * @Description: 样本提示组件
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\SampleConfig\SamplePrompts.vue
@@ -72,7 +72,10 @@ const rules = reactive<DynamicRules>({
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				const disable = ruleForm.value.train.disable_sampling;
-				if (disable) return;
+				if (disable) {
+					callback();
+					return;
+				}
 				// 联动校验
 				props.formInstance?.validateField("sample.prompts");
 
@@ -89,7 +92,10 @@ const rules = reactive<DynamicRules>({
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				const disable = ruleForm.value.train.disable_sampling;
-				if (disable) return;
+				if (disable) {
+					callback();
+					return;
+				}
 				// 联动校验
 				props.formInstance?.validateField("sample.prompts");
 

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 15:10:20
- * @LastEditTime: 2025-07-30 15:23:45
+ * @LastEditTime: 2025-08-04 09:26:38
  * @LastEditors: mulingyuer
  * @Description: 公共的lora帮助方法
  * @FilePath: \frontend\src\utils\lora\lora.helper\index.ts
@@ -38,39 +38,40 @@ export class LoRAHelper {
 	}
 
 	/** 恢复表单数据，只有在任务正在进行中时才恢复表单数据 */
-	static recoveryTaskFormData(options: RecoveryTaskFormDataOptions) {
-		const settingsStore = useSettingsStore();
-		const trainingStore = useTrainingStore();
-		const taskId = trainingStore.currentTaskInfo.id;
-		const route = useRoute();
+	static async recoveryTaskFormData(options: RecoveryTaskFormDataOptions) {
+		try {
+			const settingsStore = useSettingsStore();
+			const trainingStore = useTrainingStore();
+			const taskId = trainingStore.currentTaskInfo.id;
+			const route = useRoute();
 
-		// 如果没有开启恢复训练中的任务表单数据功能，则不恢复表单数据
-		// 如果不是训练任务，则不恢复表单数据
-		// 如果没有任务id，则不恢复表单数据
-		// 如果当前页面不是需要恢复表单数据的页面
-		if (
-			!settingsStore.trainerSettings.enableTrainingTaskDataRecovery ||
-			LoRAHelper.RECOVERY_TASK_FORM_DATA_BLACKLIST.includes(trainingStore.currentTaskInfo.type) ||
-			!LoRAHelper.isValidTaskId(taskId) ||
-			route.meta.loRATaskType !== trainingStore.currentTaskInfo.type
-		) {
-			return;
+			// 如果没有开启恢复训练中的任务表单数据功能，则不恢复表单数据
+			// 如果不是训练任务，则不恢复表单数据
+			// 如果没有任务id，则不恢复表单数据
+			// 如果当前页面不是需要恢复表单数据的页面
+			if (
+				!settingsStore.trainerSettings.enableTrainingTaskDataRecovery ||
+				LoRAHelper.RECOVERY_TASK_FORM_DATA_BLACKLIST.includes(trainingStore.currentTaskInfo.type) ||
+				!LoRAHelper.isValidTaskId(taskId) ||
+				route.meta.loRATaskType !== trainingStore.currentTaskInfo.type
+			) {
+				return;
+			}
+
+			const { formData, showTip = true } = options;
+
+			// api
+			const res = await currentTaskFormConfig({ task_id: taskId, show_config: true });
+			if (!res.frontend_config) return;
+			const tomlData = tomlParse(res.frontend_config);
+			// 合并数据
+			LoRAHelper.mergeTrainingFormData(formData, tomlData);
+			showTip && ElMessage.success("训练配置已恢复");
+		} catch (error) {
+			const { showTip = true } = options;
+
+			showTip && ElMessage.error("恢复训练配置失败");
+			console.error("恢复训练配置失败", error);
 		}
-
-		const { formData, showTip = true } = options;
-
-		// api
-		currentTaskFormConfig({ task_id: taskId, show_config: true })
-			.then((res) => {
-				if (!res.frontend_config) return;
-				const tomlData = tomlParse(res.frontend_config);
-				// 合并数据
-				LoRAHelper.mergeTrainingFormData(formData, tomlData);
-				showTip && ElMessage.success("训练配置已恢复");
-			})
-			.catch((error) => {
-				showTip && ElMessage.error("恢复训练配置失败");
-				console.error("恢复训练配置失败", error);
-			});
 	}
 }

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-07-29 17:07:31
+ * @LastEditTime: 2025-08-04 09:12:06
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -109,6 +109,10 @@ const emits = defineEmits<{
 	submit: [];
 	/** 停止训练 */
 	stop: [];
+	/** 配置导入 */
+	importConfig: [];
+	/** 配置导出 */
+	exportConfig: [];
 }>();
 /** 合并的数据 */
 const mergeData = defineModel("mergeData", { type: Object, required: true });
@@ -140,6 +144,7 @@ const onUploadRequest: UploadProps["beforeUpload"] = async (file) => {
 	try {
 		const data = await readTomlFile(file);
 		onMergeData(tomlParse(data));
+		emits("importConfig");
 	} catch (error) {
 		ElMessage.error((error as Error)?.message ?? "读取toml配置文件失败");
 		console.error(error);
@@ -170,6 +175,7 @@ async function onExportConfig() {
 			fileNamePrefix = routeTrainingType.value !== "none" ? routeTrainingType.value : "";
 		}
 		downloadTomlFile({ text: tomlStr, fileNamePrefix });
+		emits("exportConfig");
 	} catch (error) {
 		ElMessage.error(`配置导出发生错误：${(error as Error)?.message ?? "未知错误"}`);
 		console.error(error);

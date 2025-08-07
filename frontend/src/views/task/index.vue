@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:21:01
- * @LastEditTime: 2025-07-24 15:26:14
+ * @LastEditTime: 2025-08-07 15:55:07
  * @LastEditors: mulingyuer
  * @Description: 任务列表页
  * @FilePath: \frontend\src\views\task\index.vue
@@ -44,6 +44,8 @@ import WanDetail from "./components/WanDetail.vue";
 import FluxKontextDetail from "./components/FluxKontextDetail.vue";
 import type { TaskType } from "@/api/types";
 
+const route = useRoute();
+
 const loading = ref(true);
 const list = ref<TaskListResult>([]);
 const activeItemData = ref<TaskListResult[number]>();
@@ -70,7 +72,7 @@ function onItemClick(item: TaskListResult[number]) {
 /** 获取任务列表 */
 function getTaskList() {
 	loading.value = true;
-	taskList()
+	return taskList()
 		.then((res) => {
 			list.value = res.toReversed();
 		})
@@ -79,8 +81,20 @@ function getTaskList() {
 		});
 }
 
+/** 如果有传入任务ID，则默认打开该任务详情 */
+function openTaskDetail() {
+	const taskId = route.query.taskId;
+	if (typeof taskId !== "string" || taskId.trim() === "") return;
+	const task = list.value.find((item) => item.id === taskId);
+	if (!task) return;
+
+	onItemClick(task);
+}
+
 onMounted(() => {
-	getTaskList();
+	getTaskList().then(() => {
+		openTaskDetail();
+	});
 });
 </script>
 

@@ -24,6 +24,7 @@
     "oxlint",
     "pinia",
     "popconfirm",
+    "safetensors",
     "sdxl",
     "shiki",
     "timestep",

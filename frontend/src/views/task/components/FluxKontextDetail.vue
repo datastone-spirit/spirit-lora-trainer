@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-24 15:25:30
- * @LastEditTime: 2025-07-31 15:26:54
+ * @LastEditTime: 2025-08-07 14:59:24
  * @LastEditors: mulingyuer
  * @Description: flux kontext 任务详情
  * @FilePath: \frontend\src\views\task\components\FluxKontextDetail.vue
@@ -70,6 +70,9 @@
 		<div v-if="showLog" class="task-log">
 			<TaskLog :task-id="data.id" />
 		</div>
+		<div class="task-detail-download-list">
+			<DownloadList />
+		</div>
 	</div>
 </template>
 
@@ -79,6 +82,7 @@ import { taskStatusToName, taskTypeToName, unixFormat } from "../task.helper";
 import dayjs from "@/utils/dayjs";
 import { calculatePercentage, secondsToHHMMSS } from "@/utils/tools";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
+import DownloadList from "./DownloadList.vue";
 
 export interface TaskDetailProps {
 	data: FluxKontextTrainingInfoResult;
@@ -161,6 +165,9 @@ function onShowLog() {
 	}
 }
 .task-log {
+	margin-top: 20px;
+}
+.task-detail-download-list {
 	margin-top: 20px;
 }
 </style>

@@ -1,15 +1,15 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 10:01:30
- * @LastEditTime: 2025-02-08 15:38:02
+ * @LastEditTime: 2025-08-06 17:47:14
  * @LastEditors: mulingyuer
  * @Description: 设置页面路由
  * @FilePath: \frontend\src\router\route-modules\settings.ts
  * 怎么可能会有bug！！！
  */
-import type { RouteRecordRaw } from "vue-router";
+import { defineRoutes } from "../helpers";
 
-export default {
+export default defineRoutes({
 	path: "/settings",
 	name: "Settings",
 	component: () => import("@/views/settings/index.vue"),
@@ -19,4 +19,4 @@ export default {
 		icon: "ri-settings-4-line",
 		sort: 50
 	}
-} as RouteRecordRaw;
+});

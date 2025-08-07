@@ -1,15 +1,15 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-27 10:35:37
- * @LastEditTime: 2024-12-27 10:35:37
+ * @LastEditTime: 2025-08-06 17:47:41
  * @LastEditors: mulingyuer
  * @Description: 官网介绍路由模块
  * @FilePath: \frontend\src\router\route-modules\website.ts
  * 怎么可能会有bug！！！
  */
-import type { RouteRecordRaw } from "vue-router";
+import { defineRoutes } from "../helpers";
 
-export default {
+export default defineRoutes({
 	path: "/website",
 	name: "Website",
 	component: () => import("@/views/website/index.vue"),
@@ -18,4 +18,4 @@ export default {
 		title: "官网介绍",
 		isHide: true
 	}
-} as RouteRecordRaw;
+});

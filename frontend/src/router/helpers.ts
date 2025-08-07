@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 17:54:10
- * @LastEditTime: 2025-02-08 15:34:44
+ * @LastEditTime: 2025-08-06 17:43:07
  * @LastEditors: mulingyuer
  * @Description: 路由辅助函数
  * @FilePath: \frontend\src\router\helpers.ts
@@ -78,4 +78,9 @@ export function initRoutes(
 
 	// 标记初始化路由完成
 	appStore.setInitRoute(true);
+}
+
+/** 定义一个路由 */
+export function defineRoutes(route: RouteRecordRaw | RouteRecordRaw[]) {
+	return route;
 }

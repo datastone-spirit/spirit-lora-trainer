@@ -1,15 +1,15 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2025-07-25 11:32:22
+ * @LastEditTime: 2025-08-06 17:46:57
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
  * 怎么可能会有bug！！！
  */
-import type { RouteRecordRaw } from "vue-router";
+import { defineRoutes } from "../helpers";
 
-export default {
+export default defineRoutes({
 	path: "/lora",
 	component: () => import("@/layout/admin-layout/index.vue"),
 	meta: {
@@ -57,4 +57,4 @@ export default {
 			}
 		}
 	]
-} as RouteRecordRaw;
+});

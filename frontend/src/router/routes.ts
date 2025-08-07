@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-27 17:32:12
- * @LastEditTime: 2024-12-31 09:11:47
+ * @LastEditTime: 2025-08-06 17:49:04
  * @LastEditors: mulingyuer
  * @Description: routes
- * @FilePath: \frontend\src\router\routes\index.ts
+ * @FilePath: \frontend\src\router\routes.ts
  * 怎么可能会有bug！！！
  */
 import type { RouteRecordRaw } from "vue-router";
@@ -15,7 +15,7 @@ export const rootRoute: RouteRecordRaw = {
 	path: "/",
 	name: "Root",
 	component: AdminLayout,
-	redirect: { path: "/lora/flux" }, // HACK: 一定要用path重定向，name会导致守卫不触发
+	redirect: { path: "/dashboard" }, // HACK: 一定要用path重定向，name会导致守卫不触发
 	children: []
 };
 

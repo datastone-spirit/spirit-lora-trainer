@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-08-04 09:36:55
+ * @LastEditTime: 2025-08-06 17:41:47
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -97,6 +97,7 @@ const { fluxKontextLoraMonitor } = useFluxKontextLora();
 const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}flux_kontext_form`;
+const defaultDataset = generateDefaultDataset(0);
 const defaultForm: RuleForm = {
 	type: "sd_trainer",
 	training_folder: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
@@ -158,8 +159,8 @@ const defaultForm: RuleForm = {
 		neg: "",
 		prompts: []
 	},
-	datasets: [generateDefaultDataset(0)],
-	activeDatasetId: "",
+	datasets: [defaultDataset],
+	activeDatasetId: defaultDataset.id,
 	name: "",
 	tagConfig: {
 		tagger_model: "joy-caption-alpha-two",

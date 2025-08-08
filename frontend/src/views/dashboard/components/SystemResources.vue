@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-08 11:45:13
- * @LastEditTime: 2025-08-08 15:16:05
+ * @LastEditTime: 2025-08-08 16:20:35
  * @LastEditors: mulingyuer
  * @Description: 系统资源
  * @FilePath: \frontend\src\views\dashboard\components\SystemResources.vue
@@ -71,6 +71,7 @@ const progressColors: ProgressProps["color"] = [
 }
 .system-resources-item {
 	--el-card-border-radius: 8px;
+	--el-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.08);
 	margin-bottom: 16px;
 	position: relative;
 	min-height: 126px;

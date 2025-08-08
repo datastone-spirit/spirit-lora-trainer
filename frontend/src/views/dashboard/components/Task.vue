@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-08 15:15:05
- * @LastEditTime: 2025-08-08 15:55:09
+ * @LastEditTime: 2025-08-08 16:08:22
  * @LastEditors: mulingyuer
  * @Description: 任务监控
  * @FilePath: \frontend\src\views\dashboard\components\Task.vue
@@ -11,7 +11,7 @@
 	<div class="task">
 		<div class="task-title">任务监控</div>
 		<div class="task-content">
-			<el-table :data="tableData">
+			<el-table class="task-table" :data="tableData" :stripe="false">
 				<el-table-column prop="id" label="ID" min-width="320" />
 				<el-table-column prop="type" label="任务类型" min-width="150">
 					<template #default="{ row }">
@@ -63,7 +63,7 @@ import { taskTypeToName, taskStatusToName, taskStatusToIconName } from "@/views/
 const router = useRouter();
 
 // icon
-const RiEyeLine = useIcon({ name: "ri-eye-line" });
+const RiEyeLine = useIcon({ name: "ri-eye-line", size: 12 });
 
 const tableData = ref([
 	{
@@ -101,6 +101,14 @@ function onViewDetail(row: any) {
 }
 .task-content {
 	margin-top: 20px;
+}
+.task-table {
+	:deep(thead) {
+		color: var(--el-text-color-primary);
+		th {
+			font-weight: normal;
+		}
+	}
 }
 .task-status {
 	display: inline-block;

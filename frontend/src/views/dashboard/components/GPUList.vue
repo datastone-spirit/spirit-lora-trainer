@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-07 16:53:50
- * @LastEditTime: 2025-08-08 15:10:31
+ * @LastEditTime: 2025-08-08 16:20:27
  * @LastEditors: mulingyuer
  * @Description: gpu列表
  * @FilePath: \frontend\src\views\dashboard\components\GPUList.vue
@@ -105,6 +105,7 @@ const progressColors: ProgressProps["color"] = [
 }
 .gpu-item {
 	--el-card-border-radius: 8px;
+	--el-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.08);
 	margin-bottom: 10px;
 }
 .gpu-item-name {

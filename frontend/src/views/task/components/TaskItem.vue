@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:10:54
- * @LastEditTime: 2025-08-07 15:50:57
+ * @LastEditTime: 2025-08-08 15:51:05
  * @LastEditors: mulingyuer
  * @Description: 打标任务
  * @FilePath: \frontend\src\views\task\components\TaskItem.vue
@@ -10,7 +10,7 @@
 <template>
 	<div class="task-item" :class="[taskTypeToClass(data.task_type), active ? 'active' : '']">
 		<div class="task-item-status" :class="[data.status]">
-			<Icon class="task-item-status-icon" :name="getIconName(data.status)" />
+			<Icon class="task-item-status-icon" :name="taskStatusToIconName(data.status)" />
 			<span class="task-item-status-text">{{ taskStatusToName(data.status) }}</span>
 		</div>
 		<div class="task-item-head">
@@ -32,7 +32,13 @@
 
 <script setup lang="ts">
 import type { TaskListResult } from "@/api/task";
-import { taskTypeToName, unixFormat, taskStatusToName, taskTypeToClass } from "../task.helper";
+import {
+	taskTypeToName,
+	unixFormat,
+	taskStatusToName,
+	taskTypeToClass,
+	taskStatusToIconName
+} from "../task.helper";
 
 export interface TaskItemProps {
 	data: TaskListResult[number];
@@ -44,22 +50,6 @@ export interface TaskItemProps {
 withDefaults(defineProps<TaskItemProps>(), {
 	active: false
 });
-
-/** 根据状态返回对应icon name */
-function getIconName(status: TaskListResult[number]["status"]) {
-	switch (status) {
-		case "complete":
-			return "ri-check-line";
-		case "failed":
-			return "ri-close-line";
-		case "created":
-			return "ri-time-line";
-		case "running":
-			return "ri-play-circle-line";
-		default:
-			return "ri-spam-line";
-	}
-}
 </script>
 
 <style lang="scss" scoped>

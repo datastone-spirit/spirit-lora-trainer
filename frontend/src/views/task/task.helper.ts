@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:32:42
- * @LastEditTime: 2025-07-24 15:33:57
+ * @LastEditTime: 2025-08-08 15:50:19
  * @LastEditors: mulingyuer
  * @Description: task帮助
  * @FilePath: \frontend\src\views\task\task.helper.ts
@@ -43,6 +43,22 @@ export function taskStatusToName(taskStatus: TaskStatus) {
 			return "任务完成";
 		default:
 			return "未知状态";
+	}
+}
+
+/** 根据状态返回对应icon name */
+export function taskStatusToIconName(status: TaskStatus) {
+	switch (status) {
+		case "complete":
+			return "ri-check-line";
+		case "failed":
+			return "ri-close-line";
+		case "created":
+			return "ri-time-line";
+		case "running":
+			return "ri-play-circle-line";
+		default:
+			return "ri-spam-line";
 	}
 }
 

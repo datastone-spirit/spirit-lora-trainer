@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-02 15:55:35
- * @LastEditTime: 2025-07-30 17:48:44
+ * @LastEditTime: 2025-08-11 10:02:08
  * @LastEditors: mulingyuer
  * @Description: 任务日志组件
  * @FilePath: \frontend\src\components\TaskLog\index.vue
@@ -10,19 +10,32 @@
 <template>
 	<div class="task-log" :class="{ 'full-screen': isFullScreen }" v-loading="loading">
 		<div class="task-log-head">
-			<el-button-group size="small">
+			<el-space :size="8">
+				<el-button
+					class="task-log-polling-btn"
+					:class="{ polling: isPolling }"
+					type="default"
+					:icon="isPolling ? RiStopCircleLine : RiPlayCircleLine"
+					@click="onTogglePolling"
+				>
+					{{ isPolling ? "停止轮询" : "开始轮询" }}
+				</el-button>
 				<el-button type="default" :icon="RiRefreshLine" @click="onRefresh"></el-button>
 				<el-button
 					type="default"
 					:icon="isFullScreen ? RiFullscreenExitLine : RiFullscreenLine"
 					@click="onFullScreen"
 				></el-button>
-			</el-button-group>
-			<el-button-group size="small">
-				<el-button type="default" :icon="RiDownload_2Line" @click="onDownload">下载日志</el-button>
-			</el-button-group>
+			</el-space>
+			<el-space :size="8">
+				<el-button type="primary" :icon="RiDownloadLine" @click="onDownload">下载日志</el-button>
+			</el-space>
 		</div>
-		<div class="task-log-content-wrapper" :style="{ maxHeight: isFullScreen ? 'none' : maxHeight }">
+		<div
+			ref="taskLogContentWrapperRef"
+			class="task-log-content-wrapper"
+			:style="{ maxHeight: isFullScreen ? 'none' : maxHeight }"
+		>
 			<div class="task-log-content" v-html="logHtml"></div>
 		</div>
 	</div>
@@ -48,18 +61,22 @@ const props = withDefaults(defineProps<TaskLogProps>(), {
 });
 
 // icon
-const RiDownload_2Line = useIcon({ name: "ri-download-2-line", size: 12 });
-const RiRefreshLine = useIcon({ name: "ri-refresh-line", size: 12 });
-const RiFullscreenLine = useIcon({ name: "ri-fullscreen-line", size: 12 });
-const RiFullscreenExitLine = useIcon({ name: "ri-fullscreen-exit-line", size: 12 });
+const RiDownloadLine = useIcon({ name: "ri-download-line" });
+const RiRefreshLine = useIcon({ name: "ri-refresh-line" });
+const RiFullscreenLine = useIcon({ name: "ri-fullscreen-line" });
+const RiFullscreenExitLine = useIcon({ name: "ri-fullscreen-exit-line" });
+const RiPlayCircleLine = useIcon({ name: "ri-play-circle-line" });
+const RiStopCircleLine = useIcon({ name: "ri-stop-circle-line" });
 
 const loading = ref(false);
 const logList = ref<TaskLogResult>([]);
 const logHtml = ref("");
 const isFullScreen = ref(false);
+const taskLogContentWrapperRef = ref<HTMLDivElement>();
 
 /** 获取任务日志 */
-function getTaskLog() {
+async function getTaskLog() {
+	if (loading.value) return; // 防止重复请求
 	loading.value = true;
 	return taskLog({ task_id: props.taskId })
 		.then((res) => {
@@ -105,14 +122,41 @@ function onFullScreen() {
 	isFullScreen.value = !isFullScreen.value;
 }
 
-watch(
-	() => props.taskId,
-	() => {
-		if (typeof props.taskId !== "string" || props.taskId.trim() === "") return;
-		getTaskLog();
+/** 轮询 */
+const POLLING_TIME = 5000;
+const {
+	isActive: isPolling,
+	pause,
+	resume
+} = useTimeoutPoll(
+	async () => {
+		await getTaskLog();
+		if (taskLogContentWrapperRef.value) {
+			taskLogContentWrapperRef.value.scrollTo({
+				top: taskLogContentWrapperRef.value.scrollHeight,
+				behavior: "smooth"
+			});
+		}
 	},
-	{ immediate: true }
+	POLLING_TIME,
+	{ immediate: false }
 );
+function onTogglePolling() {
+	if (isPolling.value) {
+		pause();
+	} else {
+		resume();
+	}
+}
+
+onMounted(() => {
+	if (typeof props.taskId !== "string" || props.taskId.trim() === "") return;
+	if (isPolling.value) {
+		resume();
+	} else {
+		getTaskLog();
+	}
+});
 </script>
 
 <style lang="scss" scoped>
@@ -155,6 +199,15 @@ watch(
 	}
 	:deep(.task-log-item) {
 		margin-bottom: 4px;
+	}
+}
+.task-log-polling-btn {
+	--zl-task-log-polling-btn-icon-color: var(--el-color-primary);
+	&.polling {
+		--zl-task-log-polling-btn-icon-color: var(--el-color-danger);
+	}
+	:deep(.el-icon) {
+		color: var(--zl-task-log-polling-btn-icon-color);
 	}
 }
 </style>

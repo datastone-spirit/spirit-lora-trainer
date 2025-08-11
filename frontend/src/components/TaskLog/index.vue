@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-04-02 15:55:35
- * @LastEditTime: 2025-08-11 10:02:08
+ * @LastEditTime: 2025-08-11 10:10:14
  * @LastEditors: mulingyuer
  * @Description: 任务日志组件
  * @FilePath: \frontend\src\components\TaskLog\index.vue
@@ -155,6 +155,12 @@ onMounted(() => {
 		resume();
 	} else {
 		getTaskLog();
+	}
+});
+
+onUnmounted(() => {
+	if (isPolling.value) {
+		pause();
 	}
 });
 </script>

@@ -31,9 +31,11 @@ coverage
 
 __pycache__/
 upload/
-# .vscode/
 .coverage*
 
 # frontend
 /frontend/.env.development
 CLAUDE.md
+/frontend/.vscode/*
+!/frontend/.vscode/extensions.json
+/frontend/.codebuddy

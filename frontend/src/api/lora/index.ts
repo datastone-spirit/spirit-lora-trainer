@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 09:32:40
- * @LastEditTime: 2025-07-24 14:08:50
+ * @LastEditTime: 2025-08-12 10:07:46
  * @LastEditors: mulingyuer
  * @Description: lora api
  * @FilePath: \frontend\src\api\lora\index.ts
@@ -16,6 +16,8 @@ import type {
 	StartFluxTrainingResult,
 	StartHyVideoTrainingData,
 	StartHyVideoTrainingResult,
+	StartQwenImageTrainingData,
+	StartQwenImageTrainingResult,
 	StartWanVideoTrainingData,
 	StartWanVideoTrainingResult,
 	WanVideoVideoDatasetEstimateData,
@@ -63,6 +65,15 @@ export function wanVideoVideoDatasetEstimate(data: WanVideoVideoDatasetEstimateD
 export function startFluxKontextTraining(data: StartFluxKontextTrainingData) {
 	return request<StartFluxKontextTrainingResult>({
 		url: "/training/kontext/start",
+		method: "POST",
+		data
+	});
+}
+
+/** 启动Qwen Image 训练 */
+export function startQwenImageTraining(data: StartQwenImageTrainingData) {
+	return request<StartQwenImageTrainingResult>({
+		url: "/training/qwen/image/start",
 		method: "POST",
 		data
 	});

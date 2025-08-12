@@ -14,6 +14,7 @@ from .resources.training import Training
 from .resources.hunyuan_trainning import HunyuanTraining
 from .resources.kontext_training import KontextTraining
 from app.api.resources.wan_trainning import WanTraining
+from app.api.resources.qwenimage_training import QwenImageTraining
 from .resources.gpu_log import GpuLog
 from .resources.current_task import CurrentTask
 from .resources.task_history import TaskHistory, TaskRunLog
@@ -61,6 +62,7 @@ api.add_resource(Training, "/training/start")  # 启动Flux训练
 api.add_resource(HunyuanTraining, "/training/hunyuan/start")  # 启动Hunyuan训练
 api.add_resource(KontextTraining, "/training/kontext/start")  # 启动Kontext训练
 api.add_resource(WanTraining, "/training/wan/start")  # 启动Wan(万象）训练
+api.add_resource(QwenImageTraining, "/training/qwenimage/start")  # 启动QwenImage训练
 api.add_resource(WanDatasets, "/training/wan/datasets/estimate")  # estimate the number of frames in the video dataset
 api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
 api.add_resource(CurrentTask, "/tasks/current") # gpu功耗、显存信息

@@ -1,7 +1,8 @@
 import dacite
+from base_model import MultiGPUConfig
 
-from dataclasses import dataclass
-from typing import Optional, Tuple, List, field
+from dataclasses import dataclass, field
+from typing import Optional, Tuple, List
 
 from utils.util import setup_logging, is_blank, getprojectpath
 setup_logging()
@@ -47,6 +48,22 @@ class DatasetConfig:
     # Fields for image datasets
     image_directory: Optional[str] = None
     image_jsonl_file: Optional[str] = None
+
+    @staticmethod
+    def validate(config: 'DatasetConfig', task: str = 'qwen-image') -> 'DatasetConfig':
+        """
+        Validate the DatasetConfig instance.
+        """
+        if not config.image_directory and not config.image_jsonl_file:
+            raise ValueError("Either image_directory or image_jsonl_file must be provided.")
+        
+        if config.batch_size is not None and config.batch_size <= 0:
+            raise ValueError("Batch size must be a positive integer.")
+        
+        if config.num_repeats is not None and config.num_repeats <= 0:
+            raise ValueError("Number of repeats must be a positive integer.")
+        
+        return config
 
 
 
@@ -183,12 +200,43 @@ class QWenImageTrainingConfig:
     weighting_scheme: str  = "none" # weighting scheme for timestep distribution. Default is none
     xformers: bool = False # use xformers for CrossAttention, requires xformers
 
+    @staticmethod
+    def validate(config: 'QWenImageTrainingConfig') -> 'QWenImageTrainingConfig':
+        """
+        Validate the QWenImageTrainingConfig instance.
+        """
+        if not config.dit:
+            raise ValueError("DiT checkpoint path is required.")
+        
+        if not config.vae:
+            raise ValueError("VAE checkpoint path is required.")
+            
+        if not config.text_encoder:
+            raise ValueError("Text encoder checkpoint path is required.")
+            
+        if not config.output_dir:
+            raise ValueError("Output directory is required.")
+            
+        if config.max_train_steps is None or config.max_train_steps <= 0:
+            raise ValueError("Max train steps must be a positive integer.")
+            
+        if config.learning_rate is None or config.learning_rate <= 0:
+            raise ValueError("Learning rate must be a positive number.")
+            
+        if config.network_dim is None or config.network_dim <= 0:
+            raise ValueError("Network dimension must be a positive integer.")
+            
+        return config
+
 
 @dataclass
 class QWenImageParameter:
     config: Optional[QWenImageTrainingConfig]
     dataset: Optional[QWenImageDataSetConfig]
+    multi_gpu_config: Optional[MultiGPUConfig]
     frontend_config: Optional[str] = "" # Dedicated to saving the configuratio that frontend restore session configuration from backend
+    skip_cache_latent: bool = False # skip cache latent step
+    skip_cache_text_encoder_output: bool = False # skip cache text encoder output step
 
 
     @classmethod
@@ -202,7 +250,7 @@ class QWenImageParameter:
     @staticmethod
     def validate(parameter: 'QWenImageParameter') -> 'QWenImageParameter':
         """
-        Validate the WanTrainingParamer instance.
+        Validate the QWenImageParameter instance.
         """
         if not parameter.config:
             raise ValueError("Training config is required.")
@@ -211,6 +259,27 @@ class QWenImageParameter:
         
         if not parameter.dataset:
             raise ValueError("Dataset config is required.")
+
+        if not parameter.multi_gpu_config:
+            parameter.multi_gpu_config = MultiGPUConfig(multi_gpu_enabled=False)
         
-        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, task=parameter.config.task)
+        if parameter.multi_gpu_config.multi_gpu_enabled is True: 
+            parameter.multi_gpu_config.gradient_accumulation_steps = parameter.config.gradient_accumulation_steps
+        
+        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset)
         return parameter
+    
+    def is_enable_multi_gpu_train(self) -> bool:
+        if not self.multi_gpu_config:
+            return False
+        
+        if not self.multi_gpu_config.multi_gpu_enabled:
+            return False
+        
+        if self.multi_gpu_config.num_gpus <= 1:
+            return False
+        
+        if len(self.multi_gpu_config.gpu_ids) <= 1:
+            return False
+        
+        return True

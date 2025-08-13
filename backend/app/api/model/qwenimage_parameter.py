@@ -1,10 +1,12 @@
 import dacite
-from base_model import MultiGPUConfig
+from app.api.model.base_model import MultiGPUConfig
 
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, List
+from os import path, makedirs
 
 from utils.util import setup_logging, is_blank, getprojectpath
+from app.api.common.utils import generate_sample_prompt_file
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
@@ -205,27 +207,77 @@ class QWenImageTrainingConfig:
         """
         Validate the QWenImageTrainingConfig instance.
         """
-        if not config.dit:
-            raise ValueError("DiT checkpoint path is required.")
+        if is_blank(config.dit):
+            config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_bf16.safetensors")
         
-        if not config.vae:
-            raise ValueError("VAE checkpoint path is required.")
+        if not path.exists(config.dit):
+            logger.warning(f"dit path does not exist: {config.dit}")
+            raise ValueError(f"dit path does not exist: {config.dit}")
+
+        if is_blank(config.vae):
+            config.vae = path.join(getprojectpath(), "models", "qwen-image", "vae", "diffusion_pytorch_model.safetensors")
+
+        if not path.exists(config.vae):
+            logger.warning(f"vae path does not exist: {config.vae}")
+            raise ValueError(f"vae path does not exist: {config.vae}")
+
+        if is_blank(config.text_encoder):
+            config.text_encoder = path.join(getprojectpath(), "models", "qwen-image", "text-encoders", "qwen_2.5_vl_7b.safetensors")
+
+        if not path.exists(config.text_encoder):
+            logger.warning(f"text_encoder path does not exist: {config.text_encoder}")
+            raise ValueError(f"text_encoder path does not exist: {config.text_encoder}")
             
-        if not config.text_encoder:
-            raise ValueError("Text encoder checkpoint path is required.")
-            
-        if not config.output_dir:
+        if is_blank(config.output_dir):
             raise ValueError("Output directory is required.")
+        
+        if not path.exists(config.output_dir):
+            logger.warning(f"Output directory: {config.output_dir} doesn't exist, created it")
+            makedirs(config.output_dir, exist_ok=True)
             
         if config.max_train_steps is None or config.max_train_steps <= 0:
-            raise ValueError("Max train steps must be a positive integer.")
+            raise ValueError("max_train_steps must be a positive number")
             
         if config.learning_rate is None or config.learning_rate <= 0:
             raise ValueError("Learning rate must be a positive number.")
             
         if config.network_dim is None or config.network_dim <= 0:
-            raise ValueError("Network dimension must be a positive integer.")
-            
+            logger.info("network_dim is invalid value, set to 32")
+            config.network_dim = 32
+        
+        if is_blank(config.network_weights):
+            # Force empty str to None
+            config.network_weights = None
+
+        config.log_with = "tensorboard" 
+        if config.lr_scheduler == "constant" and config.lr_warmup_steps > 0:
+            logger.warning("lr_warmup_steps is ignored when using constant scheduler")
+            config.lr_warmup_steps = 0            
+
+        if config.resume and not path.exists(config.resume):
+            logger.warning(f"Resuming training must set correct resume path: {config.resume}")
+            raise ValueError(f"Resuming training must set correct resume path: {config.resume}")
+
+        if config.save_every_n_epochs and config.save_every_n_epochs <= 0:
+            logger.warning("save_every_n_epochs must be greater than 0.")
+            config.save_every_n_epochs = None
+        
+        if (config.sample_every_n_steps and config.sample_every_n_steps > 0 or  \
+            config.sample_every_n_epochs and config.sample_every_n_epochs > 0): 
+            if is_blank(config.sample_prompts):
+                logger.warning("Do sampling requires sample_prompts.")
+                raise ValueError("Do sampling requires sample_prompts.")
+            else:
+                config.sample_prompts = generate_sample_prompt_file(config.sample_prompts)
+        
+        config.mixed_precision = "bf16"
+
+        if not config.fp8_base:
+            logger.info("fp8_base is false, OOM error could be raised during training, recommand set it to True ")
+        
+        if not config.fp8_vl:
+            logger.info("fp8_vl is false, OOM error could be raised during training, recommand set it to True ")
+
         return config
 
 

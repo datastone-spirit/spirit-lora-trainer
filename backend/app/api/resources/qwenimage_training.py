@@ -2,6 +2,7 @@ from flask import request
 from flask_restful import Resource
 from app.service.qwenimage_train import QwenImageTrainingService
 from app.api.common.utils import use_swagger_config, res
+from app.api.swagger.swagger_config import qwenimage_training_api_config
 from app.api.model.qwenimage_parameter import QWenImageParameter
 from utils.util import setup_logging
 
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class QwenImageTraining(Resource):
+    @use_swagger_config(qwenimage_training_api_config)
     def post(self):
         """
         启动QwenImage训练任务

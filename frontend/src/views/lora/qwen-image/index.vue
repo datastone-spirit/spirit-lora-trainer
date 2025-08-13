@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-13 15:43:55
+ * @LastEditTime: 2025-08-13 16:45:43
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -107,7 +107,7 @@ const defaultForm: RuleForm = {
 		output_name: "",
 		dit: "",
 		vae: "",
-		vae_dtype: "float16",
+		vae_dtype: "bfloat16",
 		text_encoder: "",
 		output_dir: "",
 		seed: 42,
@@ -116,7 +116,7 @@ const defaultForm: RuleForm = {
 		mixed_precision: "bf16",
 		save_state: true,
 		save_every_n_steps: undefined,
-		save_every_n_epochs: 1,
+		save_every_n_epochs: 4,
 		save_last_n_epochs: undefined,
 		save_last_n_epochs_state: undefined,
 		save_last_n_steps: undefined,
@@ -139,13 +139,13 @@ const defaultForm: RuleForm = {
 		network_alpha: 1,
 		network_dropout: undefined,
 		network_args: "",
-		network_module: "",
+		network_module: "networks.lora_qwen_image",
 		network_weights: "",
 		base_weights: "",
 		base_weights_multiplier: undefined,
 		timestep_sampling: "shift",
 		sigmoid_scale: 1,
-		min_timestep: undefined,
+		min_timestep: 0,
 		max_timestep: undefined,
 		mode_scale: 1.29,
 		discrete_flow_shift: 3,
@@ -158,7 +158,6 @@ const defaultForm: RuleForm = {
 		show_timesteps: "",
 		scale_weight_norms: undefined,
 		max_grad_norm: 1,
-		gradient_accumulation_steps: 1,
 		gradient_checkpointing: true,
 		sdpa: true,
 		sage_attn: false,
@@ -168,7 +167,7 @@ const defaultForm: RuleForm = {
 		flash_attn: false,
 		fp8_base: true,
 		fp8_scaled: false,
-		fp8_vl: false,
+		fp8_vl: true,
 		max_data_loader_n_workers: 8,
 		persistent_data_loader_workers: false,
 		blocks_to_swap: 16,
@@ -186,10 +185,11 @@ const defaultForm: RuleForm = {
 		multi_gpu_enabled: false,
 		num_gpus: 0,
 		gpu_ids: [],
-		distributed_backend: "",
+		distributed_backend: "nccl",
 		auto_gpu_selection: true,
-		memory_requirement_mb: 0,
-		gradient_sync_every_n_steps: 0
+		memory_requirement_mb: 8000,
+		gradient_sync_every_n_steps: 1,
+		gradient_accumulation_steps: 4
 	},
 	skip_cache_latent: false,
 	skip_cache_text_encoder_latent: false,
@@ -320,6 +320,17 @@ const rules = reactive<FormRules<RuleForm>>({
 				}
 				if (isLength && !isValidLength) {
 					return callback(new Error("配置了采样提示词，请配置采样步数或开启训练前生成初始样本"));
+				}
+				callback();
+			},
+			trigger: "change"
+		}
+	],
+	"config.blocks_to_swap": [
+		{
+			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
+				if (settingsStore.whiteCheck && (typeof value !== "number" || value < 16)) {
+					return callback(new Error("视频训练时，blocks_to_swap必须大于或等于16"));
 				}
 				callback();
 			},

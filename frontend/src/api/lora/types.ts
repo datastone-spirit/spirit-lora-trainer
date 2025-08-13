@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-13 11:16:20
+ * @LastEditTime: 2025-08-13 16:46:23
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -821,7 +821,7 @@ export interface StartQwenImageTrainingData {
 		save_state: boolean;
 		/** 每N步保存模型，默认：undefined */
 		save_every_n_steps: number | undefined;
-		/** 每N epoch保存模型，默认：1 */
+		/** 每N epoch保存模型，默认：4 */
 		save_every_n_epochs: number;
 		/** 保留最近N个epoch的检查点，默认：undefined */
 		save_last_n_epochs: number | undefined;
@@ -915,8 +915,6 @@ export interface StartQwenImageTrainingData {
 		scale_weight_norms: number | undefined;
 		/** 梯度裁剪阈值（防止梯度爆炸），0.5-2.0（0表示禁用），默认：1.0 */
 		max_grad_norm: number;
-		/** 显存优化技术，通过累积多个小批次的梯度来等效大batch_size训练，默认：1 */
-		gradient_accumulation_steps: number;
 		/** 显存优化技术，通过时间换空间策略，减少约30%显存占用，开启会增加训练时间，默认：true */
 		gradient_checkpointing: boolean;
 		/** 使用PyTorch原生注意力，默认：true */
@@ -1000,6 +998,8 @@ export interface StartQwenImageTrainingData {
 		auto_gpu_selection: true;
 		/** 内存需求（MB）,默认：8000 */
 		memory_requirement_mb: number;
+		/** 显存优化技术，通过累积多个小批次的梯度来等效大batch_size训练，默认：4 */
+		gradient_accumulation_steps: number;
 		/** 梯度同步间隔步数，默认：1 */
 		gradient_sync_every_n_steps: number;
 	};

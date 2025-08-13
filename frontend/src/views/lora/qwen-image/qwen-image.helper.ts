@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-08-13 15:55:41
+ * @LastEditTime: 2025-08-13 16:48:22
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
@@ -111,7 +111,6 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 			weighting_scheme: config.weighting_scheme,
 			scale_weight_norms: config.scale_weight_norms,
 			max_grad_norm: config.max_grad_norm,
-			gradient_accumulation_steps: config.gradient_accumulation_steps,
 			gradient_checkpointing: config.gradient_checkpointing,
 			sdpa: config.sdpa,
 			sage_attn: config.sage_attn,
@@ -144,7 +143,16 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 				};
 			})
 		},
-		multi_gpu_config: multi_gpu_config,
+		multi_gpu_config: {
+			multi_gpu_enabled: multi_gpu_config.multi_gpu_enabled,
+			num_gpus: multi_gpu_config.num_gpus,
+			gpu_ids: multi_gpu_config.gpu_ids,
+			distributed_backend: multi_gpu_config.distributed_backend,
+			auto_gpu_selection: multi_gpu_config.auto_gpu_selection,
+			memory_requirement_mb: multi_gpu_config.memory_requirement_mb,
+			gradient_accumulation_steps: multi_gpu_config.gradient_accumulation_steps,
+			gradient_sync_every_n_steps: multi_gpu_config.gradient_sync_every_n_steps
+		},
 		skip_cache_latent: deepCloneForm.skip_cache_latent,
 		skip_cache_text_encoder_latent: deepCloneForm.skip_cache_text_encoder_latent,
 		frontend_config: tomlStringify(deepCloneForm)

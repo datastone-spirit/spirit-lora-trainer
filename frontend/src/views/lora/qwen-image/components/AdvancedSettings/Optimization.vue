@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 14:21:10
- * @LastEditTime: 2025-08-13 14:25:11
+ * @LastEditTime: 2025-08-13 16:48:59
  * @LastEditors: mulingyuer
  * @Description: 性能优化
  * @FilePath: \frontend\src\views\lora\qwen-image\components\AdvancedSettings\Optimization.vue
@@ -22,18 +22,6 @@
 			popover-content="max_grad_norm"
 		>
 			<el-input-number v-model.number="ruleForm.config.max_grad_norm" :step="0.1" :min="0" />
-		</PopoverFormItem>
-		<PopoverFormItem
-			label="通过累积多个小批次的梯度来等效大batch_size训练"
-			prop="config.gradient_accumulation_steps"
-			popover-content="gradient_accumulation_steps"
-		>
-			<el-input-number
-				v-model.number="ruleForm.config.gradient_accumulation_steps"
-				:step="1"
-				step-strictly
-				:min="0"
-			/>
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="通过时间换空间策略，减少约30%显存占用，开启会增加训练时间"

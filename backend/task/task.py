@@ -688,9 +688,9 @@ class SubTask:
         self.customize_env["PYTHONUNBUFFERED"] = "1"
         self.customize_env["PYTHONWARNINGS"] = "ignore::FutureWarning,ignore::UserWarning"
         self.customize_env["NCCL_P2P_DISABLE"]="1" # For flux training, we disable NCCL P2P and IB
-        self.customize_env["NCCL_IB_DISABLE"]="1"        
-        self.customize_env["PATHONPATH"]=self.module_path
-    
+        self.customize_env["NCCL_IB_DISABLE"]="1"
+        self.customize_env["PYTHONPATH"] = f"{self.module_path}:{os.path.join(self.module_path, 'src')}"
+
     def wait(self, proc: Popen, task: WanTrainingTask = None, detail: dict = None):
         try:
             logger.info("beginning to run proc communication with task training process")
@@ -928,9 +928,6 @@ class QwenImageCacheLatentSubTask(SubTask):
             "--vae",
             task.qwenimage_parameter.config.vae,
         ]
-        
-        if task.qwenimage_parameter.config.batch_size:
-            args.extend(["--batch_size", str(task.qwenimage_parameter.config.batch_size)])
             
         self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
         return task_chain.excute()
@@ -957,8 +954,6 @@ class QwenImageCacheTextEncoderOutputSubTask(SubTask):
             task.qwenimage_parameter.config.text_encoder,
         ]
         
-        if task.qwenimage_parameter.config.batch_size:
-            args.extend(["--batch_size", str(task.qwenimage_parameter.config.batch_size)])
             
         if task.qwenimage_parameter.config.fp8_vl:
             args.append("--fp8_vl")

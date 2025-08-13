@@ -1,3 +1,5 @@
+import os
+
 from flask import request
 from flask_restful import Resource
 from app.service.qwenimage_train import QwenImageTrainingService
@@ -5,6 +7,7 @@ from app.api.common.utils import use_swagger_config, res
 from app.api.swagger.swagger_config import qwenimage_training_api_config
 from app.api.model.qwenimage_parameter import QWenImageParameter
 from utils.util import setup_logging
+
 
 setup_logging()
 import logging
@@ -22,7 +25,10 @@ class QwenImageTraining(Resource):
         parameter = None
         try:
             parameter = QWenImageParameter.from_dict(data)
-            parameter = QWenImageParameter.validate(parameter)
+            if os.environ.get("DISABLE_STRICT_VALIDATION", "0") == "0":
+                parameter = QWenImageParameter.validate(parameter, strict_mod=True)
+            else:
+                parameter = QWenImageParameter.validate(parameter)
             task = QwenImageTrainingService().start_train(parameter)
             return res(
                 data={"task_id": task.id},

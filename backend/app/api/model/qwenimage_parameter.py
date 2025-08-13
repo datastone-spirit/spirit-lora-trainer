@@ -52,7 +52,7 @@ class DatasetConfig:
     image_jsonl_file: Optional[str] = None
 
     @staticmethod
-    def validate(config: 'DatasetConfig', task: str = 'qwen-image') -> 'DatasetConfig':
+    def validate(config: 'DatasetConfig', strict_mod : bool = False) -> 'DatasetConfig':
         """
         Validate the DatasetConfig instance.
         """
@@ -75,7 +75,7 @@ class QWenImageDataSetConfig:
     datasets: List[DatasetConfig] = field(default_factory=list)
 
     @staticmethod
-    def validate(config: 'QWenImageDataSetConfig', task: str = 'i2v-14B') -> 'QWenImageDataSetConfig':
+    def validate(config: 'QWenImageDataSetConfig', strict_mod: bool = False ) -> 'QWenImageDataSetConfig':
         """
         Validate the WanDataSetConfig instance.
         """
@@ -91,7 +91,7 @@ class QWenImageDataSetConfig:
             raise ValueError("At least one dataset configuration is required.")
         
         for i in range(len(config.datasets)):
-            config.datasets[i] = DatasetConfig.validate(config.datasets[i], task = task)
+            config.datasets[i] = DatasetConfig.validate(config.datasets[i], strict_mod = strict_mod)
         return config
 
 @dataclass
@@ -203,7 +203,7 @@ class QWenImageTrainingConfig:
     xformers: bool = False # use xformers for CrossAttention, requires xformers
 
     @staticmethod
-    def validate(config: 'QWenImageTrainingConfig') -> 'QWenImageTrainingConfig':
+    def validate(config: 'QWenImageTrainingConfig', strict_mod: bool = False) -> 'QWenImageTrainingConfig':
         """
         Validate the QWenImageTrainingConfig instance.
         """
@@ -277,6 +277,15 @@ class QWenImageTrainingConfig:
         
         if not config.fp8_vl:
             logger.info("fp8_vl is false, OOM error could be raised during training, recommand set it to True ")
+        
+        if is_blank(config.network_module):
+            logger.info("Training Qwen-Image must set network_module to networks/lora_qwen_image")
+            config.network_module = "networks.lora_qwen_image"
+        
+        if strict_mod is True:
+            if config.blocks_to_swap < 16:
+                logger.info(f"blocks_to_swap {config.blocks_to_swap} is less than 16, could be run on video card whose vram less than 24GB, set to 16")
+                config.blocks_to_swap = 16
 
         return config
 
@@ -294,20 +303,24 @@ class QWenImageParameter:
     @classmethod
     def from_dict(cls, dikt) -> 'QWenImageParameter':
         try: 
-            return dacite.from_dict(data_class=QWenImageParameter, data=dikt)
+            return dacite.from_dict(data_class=QWenImageParameter, data=dikt, config=dacite.Config(
+                            type_hooks={
+                                Tuple[int, int]: lambda x: tuple(x), 
+                            }
+                        ))
         except Exception as e:
             logger.warning(f"QWenImageParameter.from_dict failed, error: ", exc_info=e)
             raise ValueError(f"QWenImageParameter.from_dict failed, error: {str(e)}")
     
     @staticmethod
-    def validate(parameter: 'QWenImageParameter') -> 'QWenImageParameter':
+    def validate(parameter: 'QWenImageParameter', strict_mod = False) -> 'QWenImageParameter':
         """
         Validate the QWenImageParameter instance.
         """
         if not parameter.config:
             raise ValueError("Training config is required.")
         
-        parameter.config = QWenImageTrainingConfig.validate(parameter.config)
+        parameter.config = QWenImageTrainingConfig.validate(parameter.config, strict_mod=strict_mod)
         
         if not parameter.dataset:
             raise ValueError("Dataset config is required.")
@@ -318,7 +331,7 @@ class QWenImageParameter:
         if parameter.multi_gpu_config.multi_gpu_enabled is True: 
             parameter.multi_gpu_config.gradient_accumulation_steps = parameter.config.gradient_accumulation_steps
         
-        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset)
+        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, strict_mod=strict_mod)
         return parameter
     
     def is_enable_multi_gpu_train(self) -> bool:

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-13 16:45:43
+ * @LastEditTime: 2025-08-13 17:08:30
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -67,37 +67,37 @@
 </template>
 
 <script setup lang="ts">
+import { startQwenImageTraining, type StartQwenImageTrainingData } from "@/api/lora";
+import { useQwenImageLora } from "@/hooks/task/useQwenImage";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useSettingsStore, useTrainingStore } from "@/stores";
-// import { getEnv } from "@/utils/env";
+import { getEnv } from "@/utils/env";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
+import { tomlStringify } from "@/utils/toml";
 import type { FormInstance, FormRules } from "element-plus";
-import type { DatasetItem, RuleForm } from "./types";
+import AdvancedSettings from "./components/AdvancedSettings/index.vue";
+import BasicInfo from "./components/BasicInfo/index.vue";
+import DataSet from "./components/DataSet/index.vue";
+import OptimizerLearning from "./components/OptimizerLearning/index.vue";
+import QwenImageTrainingLoRAMonitor from "./components/QwenImageTrainingLoRAMonitor/index.vue";
+import SampleConfig from "./components/SampleConfig/index.vue";
+import TrainingConfig from "./components/TrainingConfig/index.vue";
 import {
 	formatFormData,
 	generateDefaultDataset,
 	generateDefaultDatasetGeneral
 } from "./qwen-image.helper";
-import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
-import { LoRAHelper } from "@/utils/lora/lora.helper";
-import { tomlStringify } from "@/utils/toml";
-import BasicInfo from "./components/BasicInfo/index.vue";
-import DataSet from "./components/DataSet/index.vue";
-import TrainingConfig from "./components/TrainingConfig/index.vue";
-import OptimizerLearning from "./components/OptimizerLearning/index.vue";
-import SampleConfig from "./components/SampleConfig/index.vue";
-import AdvancedSettings from "./components/AdvancedSettings/index.vue";
-import QwenImageTrainingLoRAMonitor from "./components/QwenImageTrainingLoRAMonitor/index.vue";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { validate } from "./qwen-image.validate";
-import { useQwenImageLora } from "@/hooks/task/useQwenImage";
-import { startQwenImageTraining, type StartQwenImageTrainingData } from "@/api/lora";
+import type { DatasetItem, RuleForm } from "./types";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { qwenImageLoraMonitor } = useQwenImageLora();
 
-// const env = getEnv();
+const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}qwen_image_form`;
 const defaultDatasetGeneral = generateDefaultDatasetGeneral();
@@ -109,7 +109,7 @@ const defaultForm: RuleForm = {
 		vae: "",
 		vae_dtype: "bfloat16",
 		text_encoder: "",
-		output_dir: "",
+		output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		seed: 42,
 		max_train_steps: 1600,
 		max_train_epochs: 16,

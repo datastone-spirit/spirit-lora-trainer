@@ -19,6 +19,7 @@ from .resources.gpu_log import GpuLog
 from .resources.current_task import CurrentTask
 from .resources.task_history import TaskHistory, TaskRunLog
 from .resources.wan_dataset import WanDatasets
+from .resources.gpu_info import GPUInfo, GPUValidation, GPUOptimalSelection, MemoryEstimation, GPUMonitoring
 from flasgger import Swagger
 from utils.util import getprojectpath
 
@@ -56,19 +57,31 @@ api.add_resource(TagDirFile, "/tag_dir_file")  # 获取目录中图片和txt文�
 api.add_resource(DeleteFile, "/delete_file")  # 删除文件
 api.add_resource(Image, "/image/<path:image_path>")  # 获取图片
 api.add_resource(Upload, "/upload")  # 上传文件的接口
+
+# Tagging
 api.add_resource(Tagging, "/training/tag")  # 打标数据集
 api.add_resource(ManualTagging, "/training/tag_manual")  # 手动打标接口
+
+# Training models
 api.add_resource(Training, "/training/start")  # 启动Flux训练
 api.add_resource(HunyuanTraining, "/training/hunyuan/start")  # 启动Hunyuan训练
 api.add_resource(KontextTraining, "/training/kontext/start")  # 启动Kontext训练
 api.add_resource(WanTraining, "/training/wan/start")  # 启动Wan(万象）训练
 api.add_resource(QwenImageTraining, "/training/qwenimage/start")  # 启动QwenImage训练
+
 api.add_resource(WanDatasets, "/training/wan/datasets/estimate")  # estimate the number of frames in the video dataset
 api.add_resource(GpuLog, "/training/gpu_log") # gpu功耗、显存信息
+
+# Task management
 api.add_resource(CurrentTask, "/tasks/current") # gpu功耗、显存信息
 api.add_resource(TaskHistory, "/tasks/history") # gpu功耗、显存信息
 api.add_resource(TaskRunLog, "/tasks/logs") # gpu功耗、显存信息
 
+# Multi-GPU support endpoints
+api.add_resource(GPUInfo, "/gpu/info") # GPU information and detection
+api.add_resource(GPUValidation, "/gpu/validate") # GPU configuration validation
+api.add_resource(GPUOptimalSelection, "/gpu/optimal_selection") # Optimal GPU selection
+api.add_resource(MemoryEstimation, "/gpu/memory_estimation") # Memor
 
 
 # 处理静态文件（如 .js, .css 等）

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-12 15:45:34
+ * @LastEditTime: 2025-08-13 11:16:20
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -811,9 +811,9 @@ export interface StartQwenImageTrainingData {
 		// -- 训练流程控制
 		/** 随机种子，用于复现训练结果，默认：42 */
 		seed: number;
-		/** 总训练步数，默认：1600 */
+		/** 最大训练步数，默认：1600 */
 		max_train_steps: number;
-		/** 总训练轮数，默认：16 */
+		/** 最大训练轮数，默认：16 */
 		max_train_epochs: number;
 		/** 混合精度训练模式，"no", "fp16", "bf16"，默认："bf16" */
 		mixed_precision: string;
@@ -863,6 +863,19 @@ export interface StartQwenImageTrainingData {
 		lr_scheduler_timescale: number | undefined;
 		/** 自定义调度器模块，默认："" */
 		lr_scheduler_type: string;
+		// -- 采样和推理配置
+		/** 训练前生成初始样本，默认：false */
+		sample_at_first: boolean;
+		/** 每N个epoch生成样本，默认：undefined */
+		sample_every_n_epochs: number | undefined;
+		/** 每N步生成样本，默认：undefined */
+		sample_every_n_steps: number | undefined;
+		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
+		sample_prompts: string | undefined;
+		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
+		guidance_scale: number | undefined;
+		/** 显示时间步的方式（"image"生成时序图，"console"打印到控制台），默认："" */
+		show_timesteps: string;
 		// -- LoRA网络结构参数
 		/** LoRA的秩（rank），8-128，默认：32 */
 		network_dim: number;
@@ -878,8 +891,6 @@ export interface StartQwenImageTrainingData {
 		network_module: string;
 		/** 预训练权重文件路径，默认：""，空字符的情况下不要传递该属性 */
 		network_weights: string;
-		/** 启用基础权重（差异炼丹） */
-		enable_base_weight: boolean;
 		/** 基础权重-合并入底模的 LoRA  */
 		base_weights: string;
 		/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
@@ -899,19 +910,6 @@ export interface StartQwenImageTrainingData {
 		discrete_flow_shift: number;
 		/** 时间步权重分配方案，可选值：logit_normal|mode|uniform|none，默认："none" */
 		weighting_scheme: string;
-		// -- 采样和推理配置
-		/** 训练前生成初始样本，默认：false */
-		sample_at_first: boolean;
-		/** 每N个epoch生成样本，默认：undefined */
-		sample_every_n_epochs: number | undefined;
-		/** 每N步生成样本，默认：undefined */
-		sample_every_n_steps: number | undefined;
-		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
-		sample_prompts: string | undefined;
-		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
-		guidance_scale: number | undefined;
-		/** 显示时间步的方式（"image"生成时序图，"console"打印到控制台），默认："" */
-		show_timesteps: string;
 		// -- 性能优化
 		/** 权重标准化防梯度爆炸，默认：undefined */
 		scale_weight_norms: number | undefined;
@@ -937,7 +935,7 @@ export interface StartQwenImageTrainingData {
 		fp8_base: boolean;
 		/** 启用FP8缩放模式，云端不支持，默认：false */
 		fp8_scaled: boolean;
-		/** 文本编码器优化，显存小于16GB建议开启，默认：true */
+		/** 文本编码器优化，显存小于16GB建议开启，默认：false */
 		fp8_vl: boolean;
 		// -- 系统资源配置
 		/** 控制数据加载并行进程数，4-16（根据CPU核心数调整），默认：8 */

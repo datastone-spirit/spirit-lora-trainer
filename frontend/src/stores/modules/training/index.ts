@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-07-30 09:49:30
+ * @LastEditTime: 2025-08-13 15:24:34
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -16,6 +16,7 @@ import type {
 	TrainingFluxLoRAData,
 	TrainingGPUData,
 	TrainingHYLoRAData,
+	TrainingQwenImageData,
 	TrainingTagData,
 	TrainingWanLoRAData
 } from "./types";
@@ -25,6 +26,7 @@ import type {
 	HyVideoTrainingInfoResult,
 	LoRATrainingInfoResult,
 	ManualTagInfoResult,
+	QwenImageTrainingInfoResult,
 	WanVideoTrainingInfoResult
 } from "@/api/monitor";
 import { calculatePercentage } from "@/utils/tools";
@@ -69,6 +71,9 @@ export const useTrainingStore = defineStore("training", () => {
 			case "wan-video":
 				setTrainingWanLoRAData(result as WanVideoTrainingInfoResult);
 				break;
+			case "qwen-image":
+				setTrainingQwenImageLoRAData(result as QwenImageTrainingInfoResult);
+				break;
 			default:
 				console.warn(`未知的任务类型: ${type}`);
 				break;
@@ -98,6 +103,9 @@ export const useTrainingStore = defineStore("training", () => {
 				break;
 			case "wan-video":
 				resetTrainingWanLoRAData();
+				break;
+			case "qwen-image":
+				resetTrainingQwenImageLoRAData();
 				break;
 			default:
 				console.warn(`未知的任务类型: ${type}`);
@@ -362,6 +370,52 @@ export const useTrainingStore = defineStore("training", () => {
 		restoreTrainingWanLoRAData();
 	}
 
+	/** qwen image 训练 */
+	const [trainingQwenImageLoRAData, restoreTrainingQwenImageLoRAData] =
+		resettableRef<TrainingQwenImageData>({
+			data: {
+				current: 0,
+				total: 0,
+				elapsed: "",
+				remaining: 0,
+				current_loss: 0,
+				average_loss: 0,
+				total_epoch: "",
+				showSampling: false,
+				samplingPath: "",
+				phase: "none"
+			},
+			raw: null
+		});
+	function setTrainingQwenImageLoRAData(result: QwenImageTrainingInfoResult) {
+		let detail: Exclude<QwenImageTrainingInfoResult["detail"], string>;
+		if (!result?.detail || typeof result.detail === "string") {
+			detail = {} as any;
+		} else {
+			detail = result.detail;
+		}
+		const current = detail.current ?? 0;
+		const total = detail.total ?? 0;
+
+		trainingQwenImageLoRAData.value.data = {
+			current,
+			total,
+			elapsed: detail.elapsed ?? "",
+			remaining: detail.remaining ?? "00:00",
+			current_loss: detail.current_loss ?? 0,
+			average_loss: detail.average_loss ?? 0,
+			total_epoch: detail.total_epoch ?? 0,
+			showSampling: result.is_sampling ?? false,
+			samplingPath: result.sampling_path ?? "",
+			phase: result.phase
+		};
+		trainingWanLoRAData.value.raw = result;
+		currentTaskInfo.value.progress = calculatePercentage(current, total);
+	}
+	function resetTrainingQwenImageLoRAData() {
+		restoreTrainingQwenImageLoRAData();
+	}
+
 	return {
 		currentTaskInfo,
 		useGPU,
@@ -374,7 +428,8 @@ export const useTrainingStore = defineStore("training", () => {
 		trainingFluxLoRAData,
 		trainingFluxKontextLoRAData,
 		trainingHYLoRAData,
-		trainingWanLoRAData
+		trainingWanLoRAData,
+		trainingQwenImageLoRAData
 	};
 });
 

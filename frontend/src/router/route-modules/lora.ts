@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2025-07-25 11:32:22
+ * @LastEditTime: 2025-08-12 15:54:30
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
@@ -54,6 +54,15 @@ export default {
 			meta: {
 				title: "Wan2.1",
 				loRATaskType: "wan-video"
+			}
+		},
+		{
+			path: "/lora/qwen-image",
+			name: "LoRA-QwenImage",
+			component: () => import("@/views/lora/qwen-image/index.vue"),
+			meta: {
+				title: "Qwen Image",
+				loRATaskType: "qwen-image"
 			}
 		}
 	]

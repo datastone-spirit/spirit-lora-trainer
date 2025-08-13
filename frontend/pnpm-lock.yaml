@@ -30,8 +30,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       element-plus:
-        specifier: ^2.9.0
-        version: 2.9.0(vue@3.5.13(typescript@5.6.3))
+        specifier: ^2.10.7
+        version: 2.10.7(vue@3.5.13(typescript@5.6.3))
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -62,6 +62,9 @@ importers:
       split.js:
         specifier: ^1.6.5
         version: 1.6.5
+      type-fest:
+        specifier: ^4.41.0
+        version: 4.41.0
       uuid:
         specifier: ^11.0.3
         version: 11.0.3
@@ -1371,8 +1374,8 @@ packages:
   electron-to-chromium@1.5.68:
     resolution: {integrity: sha512-FgMdJlma0OzUYlbrtZ4AeXjKxKPk6KT8WOP8BjcqxWtlg8qyJQjRzPJzUtUn5GBg1oQ26hFs7HOOHJMYiJRnvQ==}
 
-  element-plus@2.9.0:
-    resolution: {integrity: sha512-ccOFXKsauo2dtokAr4OX7gZsb7TuAoVxA2zGRZo5o2yyDDBLBaZxOoFQPoxITSLcHbBfQuNDGK5Iag5hnyKkZA==}
+  element-plus@2.10.7:
+    resolution: {integrity: sha512-bL4yhepL8/0NEQA5+N2Q6ZVKLipIDkiQjK2mqtSmGh6CxJk1yaBMdG5HXfYkbk1htNcT3ULk9g23lzT323JGcA==}
     peerDependencies:
       vue: ^3.2.0
 
@@ -3870,7 +3873,7 @@ snapshots:
 
   electron-to-chromium@1.5.68: {}
 
-  element-plus@2.9.0(vue@3.5.13(typescript@5.6.3)):
+  element-plus@2.10.7(vue@3.5.13(typescript@5.6.3)):
     dependencies:
       '@ctrl/tinycolor': 3.6.1
       '@element-plus/icons-vue': 2.3.1(vue@3.5.13(typescript@5.6.3))

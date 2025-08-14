@@ -63,7 +63,28 @@ class QwenImageTrainingTask(Task):
 
     def update_detail_with_tb(self):
         """Update detail with tensorboard logs"""
-        pass  # TODO: Implement tensorboard reading for QwenImage training
+        logdir = self.qwenimage_parameter.config.logging_dir
+        reader = SummaryReader(logdir)
+        df=reader.scalars
+        current_step = max(df.get('step', [0]))
+        if current_step == 0:
+            return 
+
+        def get_value(step=None, tag=None):
+            try:
+                return df.query('step==@step and tag==@tag')['value'].iloc[0]
+            except Exception as e:
+                logger.warning(f"get value failed with step {step} and tag {tag}, error: {e}")
+                return 0
+
+        self.detail['current'] = current_step
+        self.detail['loss'] = get_value(step=current_step, tag="loss/current")
+        self.detail['total_epoch'] = self.qwenimage_parameter.config.max_train_epochs
+        self.detail['current_loss'] = get_value(step=current_step, tag="loss/current")
+        self.detail['average_loss'] = get_value(step=current_step, tag="loss/average")
+        self.detail['lr_unet'] = get_value(step=current_step, tag="lr/unet")
+        self.detail['lr_group0'] = get_value(step=current_step, tag="lr/group0")
+        return
 
     @classmethod
     def from_parameter(cls, parameter: QWenImageParameter, task_id: str, model_path: str, is_sampling: bool = False) -> 'Task':

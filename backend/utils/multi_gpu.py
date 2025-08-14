@@ -255,7 +255,8 @@ class AccelerateConfigManager:
         """
         import sys
         
-        args = [sys.executable, "-m", "accelerate.commands.launch"]
+        #args = [sys.executable, "-m", "accelerate.commands.launch"]
+        args = []
         
         # Add configuration parameters
         if config.num_processes > 1:

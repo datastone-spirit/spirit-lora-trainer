@@ -8,7 +8,6 @@ def generate_multi_gpu_args(config: MultiGPUConfig) -> List[str]:
     
     # Create accelerate configuration
     accelerate_config = accelerate_manager.create_config(
-        num_gpus=config.num_gpus,
         gpu_ids=config.gpu_ids,
         mixed_precision=getattr(config, 'mixed_precision', 'bf16'),
         gradient_accumulation_steps=getattr(config, 'gradient_accumulation_steps', 1),

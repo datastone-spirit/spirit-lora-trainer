@@ -983,10 +983,12 @@ class QwenImageTrainingSubTask(SubTask):
             from multi_gpu_train_args import generate_multi_gpu_args
             args.extend(generate_multi_gpu_args(task.qwenimage_parameter.multi_gpu_config))
         else: 
+            gpu_ids = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
             args.extend([
-               "--gpu_ids", "0",
-               "--num_processes", "4",  # Start with single GPU
+               "--gpu_ids", gpu_ids,
+               "--num_processes", "1",  # Start with single GPU, more processes more memory
                "--mixed_precision", "bf16",
+               "--gradient_accumulation_steps", "4",
             ])
         
         args.extend(base_args)

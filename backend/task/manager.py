@@ -1,5 +1,5 @@
 from typing import Optional, List
-from task.task import Task, TaskStatus, TaskType, TrainingTask
+from task.task import Task, TaskStatus
 from time import sleep
 from functools import wraps
 import logging

@@ -1,6 +1,7 @@
 import os
 import uuid
 from task.task import Task
+from task.qwenimage_task import QwenImageTrainingTask
 from app.api.model.qwenimage_parameter import QWenImageParameter
 from app.api.common.utils import dataset2toml
 from datetime import datetime
@@ -27,4 +28,4 @@ class QwenImageTrainingService():
 
     @task_decorator
     def run_train(self, parameter: QWenImageParameter, task_id: str, module_path: str) -> Task:
-        return Task.wrap_qwenimage_training(parameter, task_id, module_path, is_sampling=False)
+        return QwenImageTrainingTask.from_parameter(parameter, task_id, module_path, is_sampling=False)

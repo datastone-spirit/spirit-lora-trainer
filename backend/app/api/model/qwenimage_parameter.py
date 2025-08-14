@@ -222,7 +222,7 @@ class QWenImageTrainingConfig:
             raise ValueError(f"vae path does not exist: {config.vae}")
 
         if is_blank(config.text_encoder):
-            config.text_encoder = path.join(getprojectpath(), "models", "qwen-image", "text-encoders", "qwen_2.5_vl_7b.safetensors")
+            config.text_encoder = path.join(getprojectpath(), "models", "qwen-image", "text_encoders", "qwen_2.5_vl_7b.safetensors")
 
         if not path.exists(config.text_encoder):
             logger.warning(f"text_encoder path does not exist: {config.text_encoder}")

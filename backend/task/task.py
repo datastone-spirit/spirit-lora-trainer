@@ -978,7 +978,7 @@ class QwenImageTrainingSubTask(SubTask):
                "--dataset_config", dataset2toml(task.qwenimage_parameter.dataset),
         ]
 
-        args = [self.executable,  "-m", "accelerate.commands.launch"]
+        args = [self.executable, "launch"]
         if task.qwenimage_parameter.is_enable_multi_gpu_train():
             from multi_gpu_train_args import generate_multi_gpu_args
             args.extend(generate_multi_gpu_args(task.qwenimage_parameter.multi_gpu_config))

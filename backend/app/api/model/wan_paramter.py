@@ -229,7 +229,7 @@ class WanTrainingConfig:
     metadata_tags: str  = None # tags for model metadata, separated by comma
     metadata_title: str  = None # title for model metadata (default is output_name)
     min_timestep: int = None # set minimum time step for training (0~999, default is 0)
-    mixed_precision: str  = "no" # use mixed precision
+    mixed_precision: str  = "bf16" # use mixed precision
     mode_scale: float = 1.29 # Scale of mode weighting scheme. Only effective when using the `'mode'` as the `weighting_scheme`
     network_alpha: float = 1 # alpha for LoRA weight scaling, default 1 (same as network_dim for same behavior as old version)
     network_args: str  = None # additional arguments for network (key=value)

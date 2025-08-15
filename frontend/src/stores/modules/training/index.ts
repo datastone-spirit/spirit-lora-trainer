@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-08-15 14:39:11
+ * @LastEditTime: 2025-08-15 14:49:18
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -403,8 +403,8 @@ export const useTrainingStore = defineStore("training", () => {
 			current_loss: detail.current_loss ?? 0,
 			average_loss: detail.average_loss ?? 0,
 			speed: detail.speed ?? 0,
-			elapsed: detail.elapsed ?? "",
-			remaining: detail.remaining ?? "",
+			elapsed: detail.elapsed ?? "00:00",
+			remaining: detail.remaining ?? "00:00",
 			showSampling: result.is_sampling ?? false,
 			samplingPath: result.sampling_path ?? "",
 			phase: result.phase

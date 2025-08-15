@@ -172,7 +172,7 @@ class WanTrainingConfig:
     base_weights: str  = None # network weights to merge into the model before training
     base_weights_multiplier: float = None # multiplier for network weights to merge into the model before training
     blocks_to_swap: int = None # number of blocks to swap in the model, max XXX
-    clip: str  = None # text encoder (CLIP) checkpoint path, optional. If training I2V model, this is required
+    clip: str  = None # text encoder (CLIP) checkpoint path, optional. If training Wan2.1 I2V model, this is required
     config_file: str  = None # using .toml instead of args to pass hyperparameter
     dataset_config = None # config file for dataset
     ddp_gradient_as_bucket_view: bool = False # enable gradient_as_bucket_view for DDP
@@ -181,6 +181,11 @@ class WanTrainingConfig:
     dim_from_weights: bool = False # automatically determine dim (rank) from network_weights
     discrete_flow_shift: float = 1.0 # Discrete flow shift for the Euler Discrete Scheduler, default is 1.0.
     dit: str  = None # DiT checkpoint path
+    dit_high_noise: str  = None # DiT checkpoint path for high noise model
+    dynamo_backend: str  = "NO" # dynamo backend type (default is None)
+    dynamo_dynamic: bool = False # use dynamic mode for dynamo
+    dynamo_fullgraph: bool = False # use fullgraph mode for dynamo
+    dynamo_mode: str  = None # dynamo mode (default is default)
     flash3: bool = False # use FlashAttention 3 for CrossAttention, requires FlashAttention 3, HunyuanVideo does not support this yet
     flash_attn: bool = False # use FlashAttention for CrossAttention, requires FlashAttention
     fp8_base: bool = False # use fp8 for base model
@@ -188,7 +193,7 @@ class WanTrainingConfig:
     fp8_t5: bool = False # use fp8 for Text Encoder model
     gradient_accumulation_steps: int = 1 # Number of updates steps to accumulate before performing a backward
     gradient_checkpointing: bool = False # enable gradient checkpointing
-    guidance_scale: float = None # Embeded classifier free guidance scale (HunyuanVideo only).
+    guidance_scale: float = 1.0 # Embeded classifier free guidance scale (HunyuanVideo only).
     huggingface_path_in_repo: str  = None # huggingface model path to upload files
     huggingface_repo_id: str  = None # huggingface repo name to upload
     huggingface_repo_type: str  = None # huggingface repo type to upload
@@ -217,14 +222,14 @@ class WanTrainingConfig:
     max_grad_norm: float = 1.0 # Max gradient norm, 0 for no clipping
     max_timestep: int = None # set maximum time step for training (1~1000, default is 1000)
     max_train_epochs: int = None # training epochs (overrides max_train_steps)
-    max_train_steps: int = None # training steps
+    max_train_steps: int = 1600 # training steps
     metadata_author: str  = None # author name for model metadata
     metadata_description: str  = None # description for model metadata
     metadata_license: str  = None # license for model metadata
     metadata_tags: str  = None # tags for model metadata, separated by comma
     metadata_title: str  = None # title for model metadata (default is output_name)
     min_timestep: int = None # set minimum time step for training (0~999, default is 0)
-    mixed_precision: str  = "bf16" # use mixed precision
+    mixed_precision: str  = "no" # use mixed precision
     mode_scale: float = 1.29 # Scale of mode weighting scheme. Only effective when using the `'mode'` as the `weighting_scheme`
     network_alpha: float = 1 # alpha for LoRA weight scaling, default 1 (same as network_dim for same behavior as old version)
     network_args: str  = None # additional arguments for network (key=value)
@@ -233,11 +238,14 @@ class WanTrainingConfig:
     network_module: str  = None # network module to train
     network_weights: str  = None # pretrained weights for network
     no_metadata: bool = False # do not save metadata in output model
+    offload_inactive_dit: bool = False # Offload inactive DiT model to CPU. Cannot be used with block swap
+    one_frame: bool = False # Use one frame sampling method for sample generation
     optimizer_args: str  = None # additional arguments for optimizer (like "weight_decay=0.01 betas=0.9,0.999 ...")
     optimizer_type: str  = "" # Optimizer to use
     output_dir: str  = None # directory to output trained model
     output_name: str  = None # base name of trained model file
     persistent_data_loader_workers: bool = False # persistent DataLoader workers (useful for reduce time gap between epoch, but may use more memory)
+    preserve_distribution_shape: bool = False # If specified, constrains timestep sampling to [min_timestep, max_timestep] using rejection sampling, preserving the original distribution shape. By default, the [0, 1] range is scaled, which distorts the distribution. Only effective when `timestep_sampling` is not 'sigma'.
     resume: str  = None # saved state to resume training
     resume_from_huggingface: bool = False # resume from huggingface (ex: --resume {repo_id}
     sage_attn: bool = False # use SageAttention. requires SageAttention
@@ -262,7 +270,8 @@ class WanTrainingConfig:
     split_attn: bool = False # use split attention for attention calculation (split batch size=1, affects memory usage and speed)
     t5: str  = None # text encoder (T5) checkpoint path
     task: str  = "t2v-14B" # The task to run.
-    timestep_sampling: str = 'sigma' # Method to sample timesteps: sigma-based, uniform random, sigmoid of random normal and shift of sigmoid.
+    timestep_boundary: int = None # Timestep boundary for switching between high and low noise models, defaults to None (task specific)
+    timestep_sampling: str = "sigma" # Method to sample timesteps: sigma-based, uniform random, sigmoid of random normal, shift of sigmoid and flux shift.
     training_comment: str  = None # arbitrary comment string stored in metadata
     vae: str  = None # VAE checkpoint path
     vae_cache_cpu: bool = False # cache features in VAE on CPU

@@ -58,7 +58,7 @@ class QwenImageTrainingTask(Task):
             d['qwenimage_parameter'] = asdict(self.qwenimage_parameter)
         
         if show_config is True and self.qwenimage_parameter:
-            d['frontend_config'] = asdict(self.qwenimage_parameter.frontend_config)
+            d['frontend_config'] = self.qwenimage_parameter.frontend_config
         return d
 
     def update_detail_with_tb(self):

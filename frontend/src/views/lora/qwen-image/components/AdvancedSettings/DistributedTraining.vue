@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 14:30:05
- * @LastEditTime: 2025-08-13 16:49:12
+ * @LastEditTime: 2025-08-15 10:21:24
  * @LastEditors: mulingyuer
  * @Description: 分布式训练配置
  * @FilePath: \frontend\src\views\lora\qwen-image\components\AdvancedSettings\DistributedTraining.vue
@@ -43,6 +43,7 @@
 			<el-switch v-model="ruleForm.multi_gpu_config.multi_gpu_enabled" />
 		</PopoverFormItem>
 		<template v-if="ruleForm.multi_gpu_config.multi_gpu_enabled">
+			<MultiGpu v-model:multi-gpu-config="ruleForm.multi_gpu_config" />
 			<PopoverFormItem
 				label="分布式后端"
 				prop="multi_gpu_config.distributed_backend"

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-08-13 15:18:08
+ * @LastEditTime: 2025-08-15 11:13:10
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -321,7 +321,7 @@ export interface QwenImageTrainingInfoResult {
 	/** 任务状态 */
 	status: TaskStatus;
 	/** 任务类型 */
-	task_type: TaskType.CAPTIONING;
+	task_type: TaskType.QWENIMAGE_TRAINING;
 	/** 开始时间 */
 	start_time: number;
 	/** 结束时间 */
@@ -332,39 +332,23 @@ export interface QwenImageTrainingInfoResult {
 	sampling_path?: string;
 	/** 阶段 */
 	phase: WanVideoTrainingPhase;
+	/** 模型路径 */
+	model_path: string;
 	/** 详情，没数据的时候是空对象，任务失败的时候是字符串 */
 	detail:
 		| {
-				/** 当前第几个 */
-				current: number;
-				/** 总图片数量 */
+				/** 总步数 */
 				total: number;
-				/** 每轮的总批次数 num_train_images × 批次计算， 因为是批次为1, 所以这里是120 */
-				num_batches_per_epoch: number;
-				/** 总训练轮数 */
-				num_epochs: number;
-				/** 每个设备上的批次数 总为1, 没有启用分布式训练 */
-				batch_size_per_device: number;
-				/**  多少步累计梯度， 这里是1, 就是每一步的梯度都不累计 */
-				gradient_accumulation_steps: number;
-				/** 总共优化步数，应该是 total / gradient_accumulation_steps 计算得出 */
-				total_optimization_steps: number;
-				/** 已经耗时 */
-				elapsed: string;
-				/** 剩余时间 */
-				remaining: string;
-				/** 损失当前 */
-				loss: number;
-				/** 总轮数 */
-				total_epoch: number;
+				/** 当前步数 */
+				current: number;
 				/** 当前损失 */
-				current_loss: number;
-				/** 平均损失 */
-				average_loss: number;
+				loss: number;
+				/** 损失平均值 */
+				loss_avr: number;
 				/** unet学习率 */
 				lr_unet: number;
-				/** 不知道 */
-				lr_group0: number;
+				/** 进度百分比 */
+				progress: number;
 		  }
 		| string;
 }

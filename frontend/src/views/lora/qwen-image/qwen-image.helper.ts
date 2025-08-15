@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-08-13 16:48:22
+ * @LastEditTime: 2025-08-15 10:56:10
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
@@ -99,7 +99,6 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 			network_dropout: config.network_dropout,
 			network_args: config.network_args,
 			network_module: config.network_module,
-			network_weights: config.network_weights,
 			base_weights: config.base_weights,
 			base_weights_multiplier: config.base_weights_multiplier,
 			timestep_sampling: config.timestep_sampling,
@@ -157,6 +156,9 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 		skip_cache_text_encoder_latent: deepCloneForm.skip_cache_text_encoder_latent,
 		frontend_config: tomlStringify(deepCloneForm)
 	};
+	if (typeof config.network_weights === "string" && config.network_weights.trim() !== "") {
+		data.config.network_weights = config.network_weights;
+	}
 
 	return data;
 }

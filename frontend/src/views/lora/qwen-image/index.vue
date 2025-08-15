@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-13 17:08:30
+ * @LastEditTime: 2025-08-15 10:53:46
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -153,7 +153,7 @@ const defaultForm: RuleForm = {
 		sample_at_first: false,
 		sample_every_n_epochs: undefined,
 		sample_every_n_steps: undefined,
-		sample_prompts: undefined,
+		sample_prompts: "",
 		guidance_scale: undefined,
 		show_timesteps: "",
 		scale_weight_norms: undefined,
@@ -187,7 +187,7 @@ const defaultForm: RuleForm = {
 		gpu_ids: [],
 		distributed_backend: "nccl",
 		auto_gpu_selection: true,
-		memory_requirement_mb: 8000,
+		memory_requirement_mb: 23552,
 		gradient_sync_every_n_steps: 1,
 		gradient_accumulation_steps: 4
 	},

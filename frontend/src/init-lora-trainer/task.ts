@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-08-13 15:51:32
+ * @LastEditTime: 2025-08-14 11:01:45
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
@@ -49,7 +49,7 @@ class TaskInitializer {
 			case TaskType.FLUX_KONTEXT_TRAINING: // flux kontext 训练
 				initPromise = this.initFluxKontextTraining();
 				break;
-			case TaskType.QWEN_IMAGE_TRAINING: // qwen image 训练
+			case TaskType.QWENIMAGE_TRAINING: // qwen image 训练
 				initPromise = this.initQwenImageTraining();
 				break;
 			default:

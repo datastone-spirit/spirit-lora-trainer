@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 16:07:33
- * @LastEditTime: 2025-08-13 09:50:22
+ * @LastEditTime: 2025-08-15 11:03:30
  * @LastEditors: mulingyuer
  * @Description: qwen-image 类型定义
  * @FilePath: \frontend\src\views\lora\qwen-image\types.ts
@@ -19,7 +19,11 @@ export type DatasetItem = Simplify<
 	}
 >;
 
-type TrainingData = Omit<StartQwenImageTrainingData, "frontend_config" | "dataset">;
+type OriginTrainingData = Omit<StartQwenImageTrainingData, "frontend_config" | "dataset">;
+type TrainingConfig = Omit<OriginTrainingData["config"], "network_weights"> & {
+	network_weights: string;
+};
+type TrainingData = SimplifyDeep<Omit<OriginTrainingData, "config"> & { config: TrainingConfig }>;
 
 export type RuleForm = SimplifyDeep<
 	TrainingData & {

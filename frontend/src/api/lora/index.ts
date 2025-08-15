@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 09:32:40
- * @LastEditTime: 2025-08-12 10:07:46
+ * @LastEditTime: 2025-08-15 11:07:39
  * @LastEditors: mulingyuer
  * @Description: lora api
  * @FilePath: \frontend\src\api\lora\index.ts
@@ -73,7 +73,7 @@ export function startFluxKontextTraining(data: StartFluxKontextTrainingData) {
 /** 启动Qwen Image 训练 */
 export function startQwenImageTraining(data: StartQwenImageTrainingData) {
 	return request<StartQwenImageTrainingResult>({
-		url: "/training/qwen/image/start",
+		url: "/training/qwenimage/start",
 		method: "POST",
 		data
 	});

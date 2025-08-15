@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:21:01
- * @LastEditTime: 2025-08-13 10:04:58
+ * @LastEditTime: 2025-08-15 11:04:43
  * @LastEditors: mulingyuer
  * @Description: 任务列表页
  * @FilePath: \frontend\src\views\task\index.vue
@@ -54,7 +54,7 @@ const DetailMap: Record<TaskType, any> = {
 	wan_training: WanDetail,
 	kontext_training: FluxKontextDetail,
 	// TODO: 还没做
-	qwen_image_training: WanDetail
+	qwenimage_training: WanDetail
 };
 // HACK: QTMD 类型校验
 function getItemData() {

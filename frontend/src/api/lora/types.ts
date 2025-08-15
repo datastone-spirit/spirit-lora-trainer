@@ -1,12 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-13 16:46:23
+ * @LastEditTime: 2025-08-15 10:55:44
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
  * 怎么可能会有bug！！！
  */
+
+import type { MultiGpuConfig } from "../types";
 
 /** 启动flux训练参数 */
 export interface StartFluxTrainingData extends Record<string, any> {
@@ -871,7 +873,7 @@ export interface StartQwenImageTrainingData {
 		/** 每N步生成样本，默认：undefined */
 		sample_every_n_steps: number | undefined;
 		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
-		sample_prompts: string | undefined;
+		sample_prompts: string;
 		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
 		guidance_scale: number | undefined;
 		/** 显示时间步的方式（"image"生成时序图，"console"打印到控制台），默认："" */
@@ -890,7 +892,7 @@ export interface StartQwenImageTrainingData {
 		/** 指定要加载的神经网络模块，默认："" */
 		network_module: string;
 		/** 预训练权重文件路径，默认：""，空字符的情况下不要传递该属性 */
-		network_weights: string;
+		network_weights?: string;
 		/** 基础权重-合并入底模的 LoRA  */
 		base_weights: string;
 		/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
@@ -985,24 +987,7 @@ export interface StartQwenImageTrainingData {
 		}>;
 	};
 	// 多gpu训练配置
-	multi_gpu_config: {
-		/** 启用多GPU训练 */
-		multi_gpu_enabled: boolean;
-		/** GPU数量 */
-		num_gpus: number;
-		/** 指定使用的GPU ID列表 */
-		gpu_ids: number[];
-		/** 分布式后端，默认："nccl" */
-		distributed_backend: string;
-		/** 自动选择最优GPU （取消了该表单配置，但是后端代码里还是有相关逻辑，所以还需要提供，默认写死true） */
-		auto_gpu_selection: true;
-		/** 内存需求（MB）,默认：8000 */
-		memory_requirement_mb: number;
-		/** 显存优化技术，通过累积多个小批次的梯度来等效大batch_size训练，默认：4 */
-		gradient_accumulation_steps: number;
-		/** 梯度同步间隔步数，默认：1 */
-		gradient_sync_every_n_steps: number;
-	};
+	multi_gpu_config: MultiGpuConfig;
 	/** 跳过图像潜空间缓存阶段，默认：false */
 	skip_cache_latent: boolean;
 	/** 跳过Text 编码潜空间缓存阶段，默认：false */

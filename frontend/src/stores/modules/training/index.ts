@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-08-13 15:24:34
+ * @LastEditTime: 2025-08-15 14:39:11
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -374,12 +374,12 @@ export const useTrainingStore = defineStore("training", () => {
 	const [trainingQwenImageLoRAData, restoreTrainingQwenImageLoRAData] =
 		resettableRef<TrainingQwenImageData>({
 			data: {
-				current: 0,
-				total: 0,
+				current_epoch: 0,
 				elapsed: "",
-				remaining: 0,
+				remaining: "",
 				current_loss: 0,
 				average_loss: 0,
+				speed: 0,
 				total_epoch: "",
 				showSampling: false,
 				samplingPath: "",
@@ -394,23 +394,23 @@ export const useTrainingStore = defineStore("training", () => {
 		} else {
 			detail = result.detail;
 		}
-		const current = detail.current ?? 0;
-		const total = detail.total ?? 0;
+		const current_epoch = detail.current ?? 0;
+		const total_epoch = detail.total_optimization_steps ?? 0;
 
 		trainingQwenImageLoRAData.value.data = {
-			current,
-			total,
-			elapsed: detail.elapsed ?? "",
-			remaining: detail.remaining ?? "00:00",
+			current_epoch,
+			total_epoch,
 			current_loss: detail.current_loss ?? 0,
 			average_loss: detail.average_loss ?? 0,
-			total_epoch: detail.total_epoch ?? 0,
+			speed: detail.speed ?? 0,
+			elapsed: detail.elapsed ?? "",
+			remaining: detail.remaining ?? "",
 			showSampling: result.is_sampling ?? false,
 			samplingPath: result.sampling_path ?? "",
 			phase: result.phase
 		};
-		trainingWanLoRAData.value.raw = result;
-		currentTaskInfo.value.progress = calculatePercentage(current, total);
+		trainingQwenImageLoRAData.value.raw = result;
+		currentTaskInfo.value.progress = calculatePercentage(current_epoch, total_epoch);
 	}
 	function resetTrainingQwenImageLoRAData() {
 		restoreTrainingQwenImageLoRAData();

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-08-13 15:19:21
+ * @LastEditTime: 2025-08-15 14:22:07
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -14,6 +14,7 @@ import type {
 	LoRATrainingInfoResult,
 	ManualTagInfoResult,
 	QwenImageTrainingInfoResult,
+	QwenImageTrainingPhase,
 	WanVideoTrainingInfoResult,
 	WanVideoTrainingPhase
 } from "@/api/monitor";
@@ -193,10 +194,8 @@ export type TrainingWanLoRAData = SimplifyDeep<
 export type TrainingQwenImageData = SimplifyDeep<
 	BaseTrainingItem<
 		{
-			/** 当前进度 */
-			current: number;
-			/** 总进度 */
-			total: number;
+			/** 当前轮数 */
+			current_epoch: number;
 			/** 已用时长 */
 			elapsed: string;
 			/** 预估剩余时长 */
@@ -205,6 +204,8 @@ export type TrainingQwenImageData = SimplifyDeep<
 			current_loss: number;
 			/** 平均loss */
 			average_loss: number;
+			/** 每秒速度 */
+			speed: number;
 			/** 总轮数 */
 			total_epoch: number | string;
 			/** 是否显示查看采样 */
@@ -212,7 +213,7 @@ export type TrainingQwenImageData = SimplifyDeep<
 			/** 采样文件路径，开启采样时才有值，否则是空字符串 */
 			samplingPath: string;
 			/** 训练阶段 */
-			phase: WanVideoTrainingPhase;
+			phase: QwenImageTrainingPhase;
 		},
 		QwenImageTrainingInfoResult
 	>

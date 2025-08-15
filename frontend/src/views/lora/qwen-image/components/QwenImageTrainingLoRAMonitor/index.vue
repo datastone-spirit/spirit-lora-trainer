@@ -1,58 +1,64 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-27 15:14:43
- * @LastEditTime: 2025-08-13 15:23:30
+ * @LastEditTime: 2025-08-15 14:37:50
  * @LastEditors: mulingyuer
  * @Description: QwenImage训练进度条
  * @FilePath: \frontend\src\views\lora\qwen-image\components\QwenImageTrainingLoRAMonitor\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<div v-if="taskInfo.type === 'wan-video'" class="wan-training-monitor">
-		<div v-if="isLoad" class="wan-training-monitor-empty">
+	<div v-if="taskInfo.type === 'qwen-image'" class="qwen-image-monitor">
+		<div v-if="isLoad" class="qwen-image-monitor-empty">
 			<el-text> {{ loadText }} </el-text>
 			<el-text class="text-dot"></el-text>
 		</div>
-		<div v-else class="wan-training-monitor-content">
-			<div class="wan-training-monitor-content-head">
+		<div v-else class="qwen-image-monitor-content">
+			<div class="qwen-image-monitor-content-head">
 				<el-progress
-					class="wan-training-monitor-progress"
+					class="qwen-image-monitor-progress"
 					:percentage="taskInfo.progress"
 					:show-text="false"
 					:stroke-width="8"
 				></el-progress>
-				<el-text class="wan-training-monitor-round">
-					{{ loraData.current }}/{{ loraData.total }}
+				<el-text class="qwen-image-monitor-round">
+					{{ loraData.current_epoch }}/{{ loraData.total_epoch }}
 				</el-text>
 			</div>
-			<div class="wan-training-monitor-content-body">
-				<div class="wan-training-monitor-item">
-					<div class="wan-training-monitor-item-label">已用时长</div>
-					<div class="wan-training-monitor-item-value">
+			<div class="qwen-image-monitor-content-body">
+				<div class="qwen-image-monitor-item">
+					<div class="qwen-image-monitor-item-label">已用时长</div>
+					<div class="qwen-image-monitor-item-value">
 						{{ loraData.elapsed }}
 					</div>
 				</div>
-				<div class="wan-training-monitor-item">
-					<div class="wan-training-monitor-item-label">预估剩余时长</div>
-					<div class="wan-training-monitor-item-value">
+				<div class="qwen-image-monitor-item">
+					<div class="qwen-image-monitor-item-label">预估剩余时长</div>
+					<div class="qwen-image-monitor-item-value">
 						{{ loraData.remaining }}
 					</div>
 				</div>
-				<div class="wan-training-monitor-item">
-					<div class="wan-training-monitor-item-label">平均loss</div>
-					<div class="wan-training-monitor-item-value">
+				<div class="qwen-image-monitor-item">
+					<div class="qwen-image-monitor-item-label">平均loss</div>
+					<div class="qwen-image-monitor-item-value">
 						{{ toFixed(loraData.average_loss) }}
 					</div>
 				</div>
-				<div class="wan-training-monitor-item">
-					<div class="wan-training-monitor-item-label">当前loss</div>
-					<div class="wan-training-monitor-item-value">
+				<div class="qwen-image-monitor-item">
+					<div class="qwen-image-monitor-item-label">当前loss</div>
+					<div class="qwen-image-monitor-item-value">
 						{{ toFixed(loraData.current_loss) }}
 					</div>
 				</div>
-				<div class="wan-training-monitor-item">
-					<div class="wan-training-monitor-item-label">总轮数</div>
-					<div class="wan-training-monitor-item-value">
+				<div class="qwen-image-monitor-item">
+					<div class="qwen-image-monitor-item-label">速度</div>
+					<div class="qwen-image-monitor-item-value">
+						{{ toFixed(loraData.speed) }}
+					</div>
+				</div>
+				<div class="qwen-image-monitor-item">
+					<div class="qwen-image-monitor-item-label">总轮数</div>
+					<div class="qwen-image-monitor-item-value">
 						{{ loraData.total_epoch }}
 					</div>
 				</div>
@@ -68,12 +74,12 @@ import { useTrainingStore } from "@/stores";
 const trainingStore = useTrainingStore();
 
 const taskInfo = computed(() => trainingStore.currentTaskInfo);
-const loraData = computed(() => trainingStore.trainingWanLoRAData.data);
+const loraData = computed(() => trainingStore.trainingQwenImageLoRAData.data);
 /** 是否还在加载中 */
 const isLoad = computed(() => {
-	const rawData = trainingStore.trainingWanLoRAData.raw;
+	const rawData = trainingStore.trainingQwenImageLoRAData.raw;
 	if (!rawData) return true;
-	if (loraData.value.phase !== "WanTrainingSubTask") return true;
+	if (loraData.value.phase !== "QwenImageTrainingSubTask") return true;
 	const isEmpty = !rawData.detail || isEmptyObject(rawData.detail);
 	const hasKey = objectHasKeys(rawData.detail, ["current", "loss", "total"]);
 	return isEmpty || !hasKey;
@@ -82,13 +88,11 @@ const isLoad = computed(() => {
 const loadText = computed(() => {
 	const phase = loraData.value.phase ?? "none";
 	switch (phase) {
-		case "WanPrepareJsonlFileSubTask":
-			return "准备训练数据";
-		case "WanCacheLatentSubTask":
+		case "QwenImageCacheLatentSubTask":
 			return "正在缓存特征数据";
-		case "WanTextEncoderOutputCacheSubTask":
+		case "QwenImageCacheTextEncoderOutputSubTask":
 			return "正在缓存文本编码数据";
-		case "WanTrainingSubTask":
+		case "QwenImageTrainingSubTask":
 			return "即将训练模型";
 		case "none":
 		default:
@@ -104,43 +108,43 @@ function toFixed(num: number, precision = 5) {
 </script>
 
 <style lang="scss" scoped>
-.wan-training-monitor {
+.qwen-image-monitor {
 	height: 100%;
 	display: flex;
 	align-items: center;
 }
-.wan-training-monitor-empty {
+.qwen-image-monitor-empty {
 	display: flex;
 	justify-content: center;
 }
-.wan-training-monitor-content {
+.qwen-image-monitor-content {
 	min-width: 380px;
 }
-.wan-training-monitor-content-head {
+.qwen-image-monitor-content-head {
 	display: flex;
 }
-.wan-training-monitor-progress {
+.qwen-image-monitor-progress {
 	flex-grow: 1;
 }
-.wan-training-monitor-round {
+.qwen-image-monitor-round {
 	flex-shrink: 0;
 	margin-left: 8px;
 	font-size: 12px;
 	color: var(--el-text-color-primary);
 }
-.wan-training-monitor-content-body {
+.qwen-image-monitor-content-body {
 	display: flex;
 	justify-content: space-between;
 	margin-top: 2px;
 }
-.wan-training-monitor-item {
+.qwen-image-monitor-item {
 	text-align: center;
 	color: var(--el-text-color-primary);
 }
-.wan-training-monitor-item-label {
+.qwen-image-monitor-item-label {
 	font-size: 12px;
 }
-.wan-training-monitor-item-value {
+.qwen-image-monitor-item-value {
 	font-size: 12px;
 }
 </style>

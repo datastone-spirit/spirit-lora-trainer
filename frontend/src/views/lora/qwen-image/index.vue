@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-15 10:53:46
+ * @LastEditTime: 2025-08-15 15:30:00
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -55,7 +55,7 @@
 			</template>
 			<template #right-btn-group>
 				<el-button
-					v-if="trainingStore.trainingWanLoRAData.data.showSampling"
+					v-if="trainingStore.trainingQwenImageLoRAData.data.showSampling"
 					size="large"
 					@click="onViewSampling"
 				>

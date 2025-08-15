@@ -13,8 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 WanTaskMap = {
-    't2v-14B': False, # is i2v ?
-    'i2v-14B': True, # 
+    't2v-14B': (False, False, "wan2.1_t2v_14B_fp8_e4m3fn.safetensors", ""), # is i2v ?, is wan2.2 ?, dit low, dit high noise (wan22 only)
+    'i2v-14B': (True, False, "wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors", ""), # 
+    'i2v-A14B': (True, True, "wan2.2_i2v_low_noise_14B_fp16.safetensors", "wan2.2_i2v_high_noise_14B_fp16.safetensors"), # 
+    't2v-A14B': (False, True, "wan2.2_t2v_low_noise_14B_fp16.safetensors", "wan2.2_t2v_high_noise_14B_fp16.safetensors")# is i2v ?, is wan2.2
 }
 
 # enumerate(FRAM_EXTRACTION_METHODS := ["head", "chunk", "slide", "uniform", "full"])
@@ -40,7 +42,24 @@ def is_i2v(task: str) -> bool:
     """
     Check if the task is i2v (image to video).
     """
-    return task in WanTaskMap and WanTaskMap[task]
+    return task in WanTaskMap and WanTaskMap[task][0]
+
+def is_wan22_task(task: str) -> bool:
+    return task in WanTaskMap and WanTaskMap[task][1]
+
+def wan_task_dit(task: str, model_type: str = 'low') -> str:
+    if not is_wan_task(task):
+        raise ValueError(f"{task} isn't wan task")
+    if is_wan22_task(task) and str.lower(model_type) == 'high':
+        return WanTaskMap[task][3] 
+    return WanTaskMap[task][2]
+    
+
+def wan22_high_noise_model(task: str) -> str:
+    if not is_wan22_task(task):
+        raise ValueError(f"{task} isn't wan2.2 task")
+    return WanTaskMap[task][3] 
+    
 
 @dataclass
 class GeneralConfig:
@@ -182,7 +201,7 @@ class WanTrainingConfig:
     discrete_flow_shift: float = 1.0 # Discrete flow shift for the Euler Discrete Scheduler, default is 1.0.
     dit: str  = None # DiT checkpoint path
     dit_high_noise: str  = None # DiT checkpoint path for high noise model
-    dynamo_backend: str  = "NO" # dynamo backend type (default is None)
+    dynamo_backend: str  = None # dynamo backend type (default is None)
     dynamo_dynamic: bool = False # use dynamic mode for dynamo
     dynamo_fullgraph: bool = False # use fullgraph mode for dynamo
     dynamo_mode: str  = None # dynamo mode (default is default)
@@ -282,7 +301,7 @@ class WanTrainingConfig:
     xformers: bool = False # use xformers for CrossAttention, requires xformers
     
     @staticmethod
-    def validate(config: 'WanTrainingConfig') -> 'WanTrainingConfig':
+    def validate(config: 'WanTrainingConfig', dit_model_type: str = 'low') -> 'WanTrainingConfig':
         """
         Validate the WanTrainingConfig instance.
         This method is a placeholder for any validation logic you want to implement.
@@ -317,34 +336,45 @@ class WanTrainingConfig:
             raise ValueError(f"Invalid task: {config.task}. Supported tasks are: {', '.join(WanTaskMap.keys())}")
         
         if is_i2v(config.task) :
-            if is_blank(config.clip):
+            if is_wan22_task(config.task):
+                config.clip = ""
+            elif is_blank(config.clip):
                 config.clip = path.join(getprojectpath(), "models","clip", "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth")
 
-            if not path.exists(config.clip):
+            if not is_wan22_task(config.task) and not path.exists(config.clip):
                 logger.warning(f"clip path does not exist: {config.clip}")
-                raise ValueError(f"clip path does not exist: {config.clip}")
+                raise ValueError(f"clip path does not exist: {config.clip}, please set correct clip path for i2v task")
         
         if is_blank(config.dit):
-            if is_i2v(config.task):
-                config.dit = path.join(getprojectpath(), "models", 
-                                       "wan", "wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors")
-            else:
-                config.dit = path.join(getprojectpath(), "models", 
-                                   "wan", "wan2.1_t2v_14B_fp8_e4m3fn.safetensors")
-
+            config.dit = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = dit_model_type))
+        
         if not path.exists(config.dit):
             logger.warning(f"dit path does not exist: {config.dit}")
-            raise ValueError(f"dit path does not exist: {config.dit}")
+            raise ValueError(f"dit path does not exit: {config.dit}, please set correct dit path for wan task")
+        
+        if dit_model_type == 'both' and is_wan22_task(config.task):
+            config.dit = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = 'low'))
+            config.dit_high_noise = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = 'high'))
+            logger.info(f"user want to train wan22 with both (high, low noise) models, so let's set dit {config.dit}, dit_high_noise {config.dit_high_noise}")
+
+            if not os.path.exists(config.dit) or not os.path.exists(config.dit_high_noise):
+                logger.warning(f"dit or dit_high_noise path does not exist: {config.dit} or {config.dit_high_noise}")
+                raise ValueError(f"dit or dit_high_noise path does not exit: {config.dit} or {config.dit_high_noise}, please set correct dit path for wan task")
+        
+        if not is_blank(config.dit_high_noise):
+            logger.info(f"dit_high_noise has configured, the blocks_to_swap will be clear to zero, and offload_inactive_dit set to True: {config.dit_high_noise}")
+            config.blocks_to_swap = 0
+            config.offload_inactive_dit = True
 
         if is_blank(config.vae):
             config.vae = path.join(getprojectpath(), "models", "vae", "wan_2.1_vae.safetensors")
 
         if not path.exists(config.vae):
             logger.warning(f"vae path does not exist: {config.vae}")
-            raise ValueError(f"vae path does not exist: {config.vae}")
-        
+            raise ValueError(f"vae path does not exit: {config.vae}, please set correct vae path for wan task")
+
         if not config.t5:
-            config.t5 = path.join(getprojectpath(), "models", "clip", "models_t5_umt5-xxl-enc-bf16.pth")
+            config.t5 = path.join(getprojectpath(), "models", "clip", "models_t5_umt5-xxl-enc-bf16.pth") # same with wan2.1
 
         if not path.exists(config.t5):
             logger.warning(f"t5 path does not exist: {config.t5}")
@@ -419,11 +449,12 @@ class WanTrainingParameter:
     frontend_config: Optional[str] = None
     skip_cache_text_encoder_latent: Optional[bool] = False
     skip_cache_latent: Optional[bool] = False
+    dit_model_type: Optional[str] = 'low'
 
     @classmethod
     def from_dict(cls, dikt) -> 'WanTrainingParameter':
         try: 
-            return dacite.from_dict(data_class=WanTrainingParameter, data=dikt,
+            return dacite.from_dict(data_class=cls, data=dikt,
                                     config=dacite.Config(
                                         type_hooks={
                                             Tuple[int, int]: lambda x: tuple(x), 
@@ -442,7 +473,7 @@ class WanTrainingParameter:
         if not parameter.config:
             raise ValueError("Training config is required.")
         
-        parameter.config = WanTrainingConfig.validate(parameter.config)
+        parameter.config = WanTrainingConfig.validate(parameter.config, dit_model_type=parameter.dit_model_type)
         
         if not parameter.dataset:
             raise ValueError("Dataset config is required.")

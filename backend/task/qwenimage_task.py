@@ -58,7 +58,7 @@ class QwenImageTrainingTask(Task):
             d['qwenimage_parameter'] = asdict(self.qwenimage_parameter)
         
         if show_config is True and self.qwenimage_parameter:
-            d['config'] = asdict(self.qwenimage_parameter)
+            d['frontend_config'] = asdict(self.qwenimage_parameter.frontend_config)
         return d
 
     def update_detail_with_tb(self):
@@ -92,6 +92,9 @@ class QwenImageTrainingTask(Task):
         task.status = TaskStatus.CREATED
         task.task_type = TaskType.QWENIMAGE_TRAINING
         task.start_time = time.time()
+        if task.is_sampling:
+            task.sampling_path = os.path.join(parameter.config.output_dir, "sample")        
+
         if not task_id:
             task.id = uuid.uuid4().hex
         else:

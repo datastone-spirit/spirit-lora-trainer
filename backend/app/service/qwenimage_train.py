@@ -28,4 +28,7 @@ class QwenImageTrainingService():
 
     @task_decorator
     def run_train(self, parameter: QWenImageParameter, task_id: str, module_path: str) -> Task:
-        return QwenImageTrainingTask.from_parameter(parameter, task_id, module_path, is_sampling=False)
+        return QwenImageTrainingTask.from_parameter(parameter, task_id, module_path,
+                                                    is_sampling = True if parameter.config.sample_prompts \
+                                                        and os.path.exists(parameter.config.sample_prompts) \
+                                                        else False)

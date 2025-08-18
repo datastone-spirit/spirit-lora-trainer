@@ -324,8 +324,6 @@ class WanTrainingConfig:
             # Force empty str to None
             config.network_weights = None
 
-        if config.blocks_to_swap and config.blocks_to_swap <=0:
-            raise ValueError("blocks_to_swap must be greater than 0.")
 
         if is_blank(config.task):
             logger.warning("task is required.")
@@ -337,6 +335,7 @@ class WanTrainingConfig:
         
         if is_i2v(config.task) :
             if is_wan22_task(config.task):
+                logger.info("clip isn't required for wan22 training task")
                 config.clip = ""
             elif is_blank(config.clip):
                 config.clip = path.join(getprojectpath(), "models","clip", "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth")
@@ -353,18 +352,16 @@ class WanTrainingConfig:
             raise ValueError(f"dit path does not exit: {config.dit}, please set correct dit path for wan task")
         
         if dit_model_type == 'both' and is_wan22_task(config.task):
-            config.dit = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = 'low'))
-            config.dit_high_noise = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = 'high'))
+            if is_blank(config.dit):
+                config.dit = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = 'low'))
+            if is_blank(config.dit_high_noise):
+                config.dit_high_noise = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = 'high'))
+
             logger.info(f"user want to train wan22 with both (high, low noise) models, so let's set dit {config.dit}, dit_high_noise {config.dit_high_noise}")
 
             if not os.path.exists(config.dit) or not os.path.exists(config.dit_high_noise):
                 logger.warning(f"dit or dit_high_noise path does not exist: {config.dit} or {config.dit_high_noise}")
                 raise ValueError(f"dit or dit_high_noise path does not exit: {config.dit} or {config.dit_high_noise}, please set correct dit path for wan task")
-        
-        if not is_blank(config.dit_high_noise):
-            logger.info(f"dit_high_noise has configured, the blocks_to_swap will be clear to zero, and offload_inactive_dit set to True: {config.dit_high_noise}")
-            config.blocks_to_swap = 0
-            config.offload_inactive_dit = True
 
         if is_blank(config.vae):
             config.vae = path.join(getprojectpath(), "models", "vae", "wan_2.1_vae.safetensors")
@@ -405,8 +402,8 @@ class WanTrainingConfig:
             raise ValueError("network_dim must be greater than 0.")
         
         if config.resume and not path.exists(config.resume):
-            logger.warning(f"Resuming training must set correct resume path: {config.resume}")
-            raise ValueError(f"Resuming training must set correct resume path: {config.resume}")
+            logger.warning(f"resuming training must set correct resume path: {config.resume}")
+            raise ValueError(f"resuming training must set correct resume path: {config.resume}")
         
         if config.sample_every_n_steps and config.sample_every_n_steps <= 0:
             logger.warning("sample_every_n_steps must be greater than 0.")
@@ -419,8 +416,8 @@ class WanTrainingConfig:
         if (config.sample_every_n_steps and config.sample_every_n_steps > 0 or  \
             config.sample_every_n_epochs and config.sample_every_n_epochs > 0): 
             if is_blank(config.sample_prompts):
-                logger.warning("Do sampling requires sample_prompts.")
-                raise ValueError("Do sampling requires sample_prompts.")
+                logger.warning("do sampling requires sample_prompts.")
+                raise ValueError("do sampling requires sample_prompts.")
             else:
                 config.sample_prompts = generate_sample_prompt_file(config.sample_prompts)  
         
@@ -431,14 +428,37 @@ class WanTrainingConfig:
                 raise ValueError("sample_prompts requires sample_every_n_steps or sample_every_n_steps.")
 
         if is_blank(config.output_dir):
-            raise ValueError("Output directory is required.")
+            raise ValueError("output directory is required.")
         elif not path.exists(config.output_dir):
-            raise ValueError(f"Output directory does not exist: {config.output_dir}")
+            raise ValueError(f"output directory does not exist: {config.output_dir}")
         
         # Example of validating a field
         if config.learning_rate <= 0:
             raise ValueError("Learning rate must be positive.")
         
+        if config.min_timestep is not None and (config.min_timestep < 0 or config.min_timestep > 999):
+            logger.info(f"min_timestep is an invalidate value {config.min_timestep}, set to 0")
+            config.min_timestep = 0
+
+        if config.max_timestep is not None and (config.max_timestep < 0 or config.max_timestep > 1000):
+            logger.info(f"max_timestep is an invalidate value {config.max_timestep}, set to 1000")
+            config.max_timestep = 1000
+        
+        if config.max_timestep < config.min_timestep:
+            logger.info(f"max_timestamp {config.max_timestep} must greater then min_timestamp {config.min_timestep}")
+            raise ValueError(f"max_timestamp {config.max_timestep} must greater then min_timestamp {config.min_timestep}")
+        
+        if not is_blank(config.dit) and not is_blank(config.dit_high_noise):
+            # treat this as high/low both training
+            if config.timestep_boundary is None:
+                if is_i2v(config.task):
+                    # according to https://github.com/kohya-ss/musubi-tuner/blob/main/docs/wan.md, set the default value
+                    config.timestamp_boundary = 0.9
+                else:
+                    # according to https://github.com/kohya-ss/musubi-tuner/blob/main/docs/wan.md, set the default value
+                    config.timestamp_boundary = 0.875
+
+
         return config
         
 
@@ -473,6 +493,11 @@ class WanTrainingParameter:
         if not parameter.config:
             raise ValueError("Training config is required.")
         
+        parameter.dit_model_type = str.lower(parameter.dit_model_type) if parameter.dit_model_type else 'low'
+        
+        if parameter.dit_model_type not in ['low', 'high', 'both']:
+            raise ValueError(f"Invalid dit_model_type: {parameter.dit_model_type}. Valid values are: ['low', 'high', 'both']")
+
         parameter.config = WanTrainingConfig.validate(parameter.config, dit_model_type=parameter.dit_model_type)
         
         if not parameter.dataset:
@@ -497,6 +522,15 @@ class WanTrainingParameter:
         if not parameter.dataset:
             raise ValueError("Dataset config is required.")
         
+        if parameter.config.blocks_to_swap and parameter.config.blocks_to_swap <=0 \
+            and parameter.config.offload_inactive_dit is False:
+            raise ValueError("blocks_to_swap must be greater than 0 when offload_inactive_dit is False.")
+
+        if not is_blank(parameter.config.dit_high_noise) and not is_blank(parameter.config.dit):
+            logger.info(f"dit_high_noise has configured, the blocks_to_swap will be clear to zero, and offload_inactive_dit set to True: {config.dit_high_noise}")
+            parameter.config.blocks_to_swap = 0
+            parameter.config.offload_inactive_dit = True
+
         for dataset in parameter.dataset.datasets:
             if not dataset.image_directory and not dataset.video_directory:
                 raise ValueError("Either image_directory or video_directory must be specified.")

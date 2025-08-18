@@ -453,13 +453,7 @@ class WanTrainingConfig:
         if not is_blank(config.dit) and not is_blank(config.dit_high_noise):
             # treat this as high/low both training
             if config.timestep_boundary is None:
-                if is_i2v(config.task):
-                    # according to https://github.com/kohya-ss/musubi-tuner/blob/main/docs/wan.md, set the default value
-                    config.timestamp_boundary = 0.9
-                else:
-                    # according to https://github.com/kohya-ss/musubi-tuner/blob/main/docs/wan.md, set the default value
-                    config.timestamp_boundary = 0.875
-
+                config.timestep_boundary = 900 if is_i2v(config.task) else 875
 
         return config
         

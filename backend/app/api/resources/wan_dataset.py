@@ -5,7 +5,7 @@ from flask_restful import Resource
 from app.service.wan_dataset import WanDatasetService
 from app.api.common.utils import use_swagger_config, res
 from app.api.model.wan_paramter import WanDataSetConfig, FrameExtractionMethod
-from app.api.swagger.swagger_config import wan_dataset_estimate
+from app.api.swagger.wan_swagger_config import wan_dataset_estimate
 
 from utils.util import setup_logging
 setup_logging()

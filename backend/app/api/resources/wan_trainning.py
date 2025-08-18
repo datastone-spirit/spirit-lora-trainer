@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource
 from app.service.wan_train import WanTrainingService
 from app.api.common.utils import use_swagger_config, res
-from app.api.swagger.swagger_config import wan_training_api_config
+from app.api.swagger.wan_swagger_config import wan_training_api_config
 from app.api.model.wan_paramter import WanTrainingParameter
 
 

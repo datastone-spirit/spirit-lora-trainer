@@ -3,7 +3,7 @@ from flask_restful import Resource
 from app.service.hunyuan_train import HunyuanTrainingService
 from task.task import Task
 from ..common.utils import use_swagger_config, res
-from ..swagger.swagger_config import huanyuan_training
+from ..swagger.hunyuan_swagger_config import huanyuan_training
 from ..model.hunyuan_paramter import HunyuanTrainingParameter
 
 

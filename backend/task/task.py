@@ -84,6 +84,21 @@ class Task:
     def __str__(self):
         return f"{self.to_dict(verbose=True)}"
 
+    def run(self):
+        self.status = TaskStatus.RUNNING
+        try:
+            self.start_time = time.time()
+            self._run()
+        except Exception as e:
+            logger.error(f"task {self.id} running failed", exc_info=e)
+            self.status = TaskStatus.FAILED
+            self.detail = str(e)
+            self.end_time = time.time()
+            return 
+            
+        self.status = TaskStatus.COMPLETE
+        self.end_time = time.time()
+        return
 
 @dataclass
 class CaptioningTask(Task):
@@ -173,7 +188,7 @@ class SubTask:
                 if ch == b'' and proc.poll() is not None:
                     break
                 line.extend(ch)
-                if ch == b'\n':
+                if ch == b'\n' or ch == b'\r':
                     linestr = line.decode('utf-8', errors='ignore')
                     print(linestr, end='')
                     if task is not None:

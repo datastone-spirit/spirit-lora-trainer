@@ -110,22 +110,6 @@ class QwenImageTrainingTask(Task):
         task.stdout_lines = []
         return task
 
-
-    def run(self):
-        self.status = TaskStatus.RUNNING
-        try:
-            self.start_time = time.time()
-            self._run()
-        except Exception as e:
-            logger.error(f"task {self.id} running failed", exc_info=e)
-            self.status = TaskStatus.FAILED
-            self.detail = str(e)
-            self.end_time = time.time()
-            return 
-            
-        self.status = TaskStatus.COMPLETE
-        self.end_time = time.time()
-        return
     
 
 

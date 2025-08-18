@@ -154,6 +154,7 @@ class WanPrepareJsonlFileSubTask(SubTask):
                         f"image_jsonl_file={task.wan_parameter.dataset.datasets[i].image_jsonl_file}")
         return task_chain.excute()
 
+
 class WanCacheLatentSubTask(SubTask):
 
     def __init__(self, module_path: str):
@@ -216,12 +217,14 @@ class WanTrainingSubTask(SubTask):
         args = [
             self.executable,
             "launch",
-            "--num_processes", "4",
-            "--mixed_precision", "bf16",
+            "--num_processes", "1",
+            "--mixed_precision", task.wan_parameter.config.mixed_precision,
             self.script,
             "--config", dataset2toml(task.wan_parameter.config),
             "--dataset_config", dataset2toml(task.wan_parameter.dataset),
         ]
+
+        logger.info(f"beginning to run Wan training sub task with args: {' '.join(args)}")
         self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task, detail=task.detail)
         return task_chain.excute()
 

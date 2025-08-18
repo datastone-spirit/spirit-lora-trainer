@@ -444,7 +444,9 @@ class WanTrainingConfig:
             logger.info(f"max_timestep is an invalidate value {config.max_timestep}, set to 1000")
             config.max_timestep = 1000
         
-        if config.max_timestep < config.min_timestep:
+        if config.max_timestep is not None and  \
+            config.min_timestep is not None and \
+            config.max_timestep < config.min_timestep:
             logger.info(f"max_timestamp {config.max_timestep} must greater then min_timestamp {config.min_timestep}")
             raise ValueError(f"max_timestamp {config.max_timestep} must greater then min_timestamp {config.min_timestep}")
         
@@ -527,9 +529,8 @@ class WanTrainingParameter:
             raise ValueError("blocks_to_swap must be greater than 0 when offload_inactive_dit is False.")
 
         if not is_blank(parameter.config.dit_high_noise) and not is_blank(parameter.config.dit):
-            logger.info(f"dit_high_noise has configured, the blocks_to_swap will be clear to zero, and offload_inactive_dit set to True: {config.dit_high_noise}")
-            parameter.config.blocks_to_swap = 0
-            parameter.config.offload_inactive_dit = True
+            raise ValueError("could not training both high and low noise on a 24GB vram !")
+
 
         for dataset in parameter.dataset.datasets:
             if not dataset.image_directory and not dataset.video_directory:

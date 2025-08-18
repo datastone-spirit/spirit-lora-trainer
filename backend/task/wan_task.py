@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from app.api.model.training_paramter import TrainingParameter
-from app.api.model.wan_paramter import WanTrainingParameter, is_i2v
+from app.api.model.wan_paramter import WanTrainingParameter, is_i2v, is_wan22_task
 from app.api.common.utils import dataset2toml, get_dataset_contents
 from task.task import Task, SubTask, TaskChian, TaskType, TaskStatus
 from subprocess import Popen, PIPE, STDOUT
-from utils.util import parse_kohya_stdout, parse_kohya_progress_line
+from utils.util import parse_kohya_stdout, parse_kohya_progress_line, is_blank
 import uuid
 from tbparse import SummaryReader
 import time
@@ -175,9 +175,11 @@ class WanCacheLatentSubTask(SubTask):
             "--vae",
             task.wan_parameter.config.vae,
         ]
-        if is_i2v(task.wan_parameter.config.task):
-            args.append("--clip")
-            args.append(task.wan_parameter.config.clip)
+        if is_i2v(task.wan_parameter.config.task) and not is_wan22_task(task.wan_parameter.config.task):
+            logger.info("clip only required by wan2.1")
+            if not is_blank(task.wan_parameter.config.clip):
+                args.append("--clip")
+                args.append(task.wan_parameter.config.clip)
         self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
         return task_chain.excute()
 

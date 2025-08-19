@@ -269,6 +269,9 @@ class QWenImageTrainingConfig:
                 raise ValueError("Do sampling requires sample_prompts.")
             else:
                 config.sample_prompts = generate_sample_prompt_file(config.sample_prompts)
+        else:
+            logger.warning(f"if you want sampling , sample_every_n_steps {config.sample_every_n_steps} or sample_every_n_epochs {config.sample_every_n_epochs} need to be set")
+            config.sample_prompts = None
         
         config.mixed_precision = "bf16"
 
@@ -334,6 +337,9 @@ class QWenImageParameter:
             parameter.multi_gpu_config.gradient_accumulation_steps = parameter.config.gradient_accumulation_steps
         
         parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, strict_mod=strict_mod)
+
+        # network_module is fix string for the specific task. CAN NOT BE CHANGED
+        parameter.config.network_module = "networks.lora_qwen_image"
         return parameter
     
     def is_enable_multi_gpu_train(self) -> bool:

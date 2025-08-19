@@ -382,7 +382,6 @@ class WanTrainingConfig:
             logger.warning("lr_warmup_steps is ignored when using constant scheduler")
             config.lr_warmup_steps = 0
         
-        config.network_module = "networks.lora_wan"
 
         if not config.max_train_epochs:
             logger.warning("max_train_epochs must have a value.")
@@ -504,6 +503,10 @@ class WanTrainingParameter:
         if os.environ.get("DISABLE_STRICT_VALIDATION", "0") == "0":
             # Strict validation is for cloud, try to avoid the run time error 
             WanTrainingParameter.strict_validate(parameter) 
+
+        # network_module is fix string for the specific task. CAN NOT BE CHANGED
+        parameter.config.network_module = "networks.lora_wan"
+
         return parameter
 
 

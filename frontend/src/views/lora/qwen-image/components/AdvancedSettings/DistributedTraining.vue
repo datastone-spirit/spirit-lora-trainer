@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 14:30:05
- * @LastEditTime: 2025-08-15 10:21:24
+ * @LastEditTime: 2025-08-19 15:29:34
  * @LastEditors: mulingyuer
  * @Description: 分布式训练配置
  * @FilePath: \frontend\src\views\lora\qwen-image\components\AdvancedSettings\DistributedTraining.vue
@@ -35,50 +35,6 @@
 				:min="0"
 			/>
 		</PopoverFormItem>
-		<PopoverFormItem
-			label="启用多GPU训练"
-			prop="multi_gpu_config.multi_gpu_enabled"
-			popover-content="multi_gpu_enabled"
-		>
-			<el-switch v-model="ruleForm.multi_gpu_config.multi_gpu_enabled" />
-		</PopoverFormItem>
-		<template v-if="ruleForm.multi_gpu_config.multi_gpu_enabled">
-			<MultiGpu v-model:multi-gpu-config="ruleForm.multi_gpu_config" />
-			<PopoverFormItem
-				label="分布式后端"
-				prop="multi_gpu_config.distributed_backend"
-				popover-content="distributed_backend"
-			>
-				<el-select v-model="ruleForm.multi_gpu_config.distributed_backend">
-					<el-option label="NCCL (推荐NVIDIA GPU使用)" value="nccl" />
-					<el-option label="Gloo (CPU和GPU)" value="gloo" />
-					<el-option label="MPI" value="mpi" />
-				</el-select>
-			</PopoverFormItem>
-			<PopoverFormItem
-				label="通过累积多个小批次的梯度来等效大batch_size训练"
-				prop="multi_gpu_config.gradient_accumulation_steps"
-				popover-content="gradient_accumulation_steps"
-			>
-				<el-input-number
-					v-model.number="ruleForm.multi_gpu_config.gradient_accumulation_steps"
-					:step="1"
-					step-strictly
-					:min="0"
-				/>
-			</PopoverFormItem>
-			<PopoverFormItem
-				label="每N步进行梯度同步"
-				prop="multi_gpu_config.gradient_sync_every_n_steps"
-				popover-content="gradient_sync_every_n_steps"
-			>
-				<el-input-number
-					v-model="ruleForm.multi_gpu_config.gradient_sync_every_n_steps"
-					:min="1"
-					:max="100"
-				/>
-			</PopoverFormItem>
-		</template>
 	</FieldSetWrapper>
 </template>
 

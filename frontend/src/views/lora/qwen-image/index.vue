@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-15 15:30:00
+ * @LastEditTime: 2025-08-19 15:31:51
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -34,7 +34,8 @@
 					<Collapse v-model="openStep5" title="第5步：采样和推理配置">
 						<SampleConfig v-model:form="ruleForm" />
 					</Collapse>
-					<SimpleCollapse v-show="isExpert" v-model="openStep6" title="其它：高级设置">
+					<MultiGpuConfig v-model:open="openStep6" v-model:form="ruleForm" />
+					<SimpleCollapse v-show="isExpert" v-model="openStep7" title="其它：高级设置">
 						<AdvancedSettings v-model:form="ruleForm" />
 					</SimpleCollapse>
 				</el-form>
@@ -84,6 +85,7 @@ import OptimizerLearning from "./components/OptimizerLearning/index.vue";
 import QwenImageTrainingLoRAMonitor from "./components/QwenImageTrainingLoRAMonitor/index.vue";
 import SampleConfig from "./components/SampleConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
+import MultiGpuConfig from "./components/MultiGpuConfig/index.vue";
 import {
 	formatFormData,
 	generateDefaultDataset,
@@ -139,7 +141,6 @@ const defaultForm: RuleForm = {
 		network_alpha: 1,
 		network_dropout: undefined,
 		network_args: "",
-		network_module: "networks.lora_qwen_image",
 		network_weights: "",
 		base_weights: "",
 		base_weights_multiplier: undefined,
@@ -151,11 +152,10 @@ const defaultForm: RuleForm = {
 		discrete_flow_shift: 3,
 		weighting_scheme: "none",
 		sample_at_first: false,
-		sample_every_n_epochs: undefined,
-		sample_every_n_steps: undefined,
+		sample_every_n_epochs: 0,
+		sample_every_n_steps: 0,
 		sample_prompts: "",
 		guidance_scale: undefined,
-		show_timesteps: "",
 		scale_weight_norms: undefined,
 		max_grad_norm: 1,
 		gradient_checkpointing: true,
@@ -309,17 +309,15 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_prompts": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				const { sample_at_first, sample_every_n_epochs, sample_every_n_steps } =
-					ruleForm.value.config;
+				const { sample_every_n_epochs, sample_every_n_steps } = ruleForm.value.config;
 				// 如果配置了采样选项，则提示必须输入采样提示
 				const isLength = value.trim().length > 0;
-				const isValidLength =
-					sample_at_first || Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
+				const isValidLength = Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
 				if (isValidLength && !isLength) {
 					return callback(new Error("请输入采样提示词"));
 				}
 				if (isLength && !isValidLength) {
-					return callback(new Error("配置了采样提示词，请配置采样步数或开启训练前生成初始样本"));
+					return callback(new Error("配置了采样提示词，请配置采样步数"));
 				}
 				callback();
 			},
@@ -355,6 +353,7 @@ const openStep3 = ref(true);
 const openStep4 = ref(true);
 const openStep5 = ref(true);
 const openStep6 = ref(true);
+const openStep7 = ref(true);
 
 /** toml */
 const toml = ref("");
@@ -386,7 +385,7 @@ async function onSubmit() {
 		// 开始训练
 		const data: StartQwenImageTrainingData = formatFormData(toRaw(ruleForm.value));
 		const { task_id } = await startQwenImageTraining(data);
-		// // 监听训练数据
+		// 监听训练数据
 		qwenImageLoraMonitor.setTaskId(task_id).start();
 		submitLoading.value = false;
 		ElMessage.success("成功创建训练任务");

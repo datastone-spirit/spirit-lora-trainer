@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 11:24:43
- * @LastEditTime: 2025-08-13 11:31:09
+ * @LastEditTime: 2025-08-19 15:03:09
  * @LastEditors: mulingyuer
  * @Description: LoRA网络结构参数
  * @FilePath: \frontend\src\views\lora\qwen-image\components\AdvancedSettings\LoRANetwork.vue
@@ -45,16 +45,6 @@
 				:autosize="{ minRows: 4 }"
 				type="textarea"
 				placeholder="自定义网络参数"
-			/>
-		</PopoverFormItem>
-		<PopoverFormItem
-			label="指定要加载的神经网络模块"
-			prop="config.network_module"
-			popover-content="network_module"
-		>
-			<FileSelector
-				v-model="ruleForm.config.network_module"
-				placeholder="请选择要加载的神经网络模块"
 			/>
 		</PopoverFormItem>
 		<PopoverFormItem

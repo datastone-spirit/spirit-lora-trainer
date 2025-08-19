@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-18 17:24:46
+ * @LastEditTime: 2025-08-19 15:23:13
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -131,7 +131,6 @@ const defaultForm: RuleForm = {
 		network_args: "",
 		network_dim: 64,
 		network_dropout: undefined,
-		network_module: "",
 		network_weights: "",
 		dim_from_weights: false,
 		blocks_to_swap: 36,
@@ -152,12 +151,11 @@ const defaultForm: RuleForm = {
 		ddp_static_graph: false,
 		ddp_timeout: undefined,
 		sample_at_first: false,
-		sample_every_n_epochs: undefined,
-		sample_every_n_steps: undefined,
+		sample_every_n_epochs: 0,
+		sample_every_n_steps: 0,
 		i2v_sample_image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		sample_prompts: "",
 		guidance_scale: undefined,
-		show_timesteps: "",
 		gradient_accumulation_steps: 1,
 		gradient_checkpointing: true,
 		img_in_txt_in_offloading: false,
@@ -355,17 +353,15 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_prompts": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				const { sample_at_first, sample_every_n_epochs, sample_every_n_steps } =
-					ruleForm.value.config;
+				const { sample_every_n_epochs, sample_every_n_steps } = ruleForm.value.config;
 				// 如果配置了采样选项，则提示必须输入采样提示
 				const isLength = value.trim().length > 0;
-				const isValidLength =
-					sample_at_first || Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
+				const isValidLength = Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
 				if (isValidLength && !isLength) {
 					return callback(new Error("请输入采样提示词"));
 				}
 				if (isLength && !isValidLength) {
-					return callback(new Error("配置了采样提示词，请配置采样步数或开启训练前生成初始样本"));
+					return callback(new Error("配置了采样提示词，请配置采样步数"));
 				}
 				callback();
 			},

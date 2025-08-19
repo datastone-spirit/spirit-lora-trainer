@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-14 11:08:28
- * @LastEditTime: 2025-08-15 10:38:44
+ * @LastEditTime: 2025-08-19 15:50:43
  * @LastEditors: mulingyuer
  * @Description: 多GPU表单组件
  * @FilePath: \frontend\src\components\Form\MultiGpu\index.vue
@@ -62,6 +62,13 @@ import type { ItemData } from "./GpuItem.vue";
 import GpuItem from "./GpuItem.vue";
 import { useTrainingStore } from "@/stores";
 
+interface GetGpuInfoResultOptions {
+	/** 是否控制loading状态 */
+	isLoadingVisible: boolean;
+	/** 是否显示错误消息弹窗，默认不显示 */
+	shouldShowErrorDialog?: boolean;
+}
+
 // Icon
 const RiRefreshLine = useIcon({ name: "ri-refresh-line" });
 
@@ -80,8 +87,10 @@ const isError = computed(() => {
 const disabled = computed(() => trainingStore.currentTaskInfo.type !== "none");
 
 /** api 获取gpu信息 */
-async function getGpuInfoResult() {
-	loading.value = true;
+async function getGpuInfoResult(options: GetGpuInfoResultOptions) {
+	const { isLoadingVisible, shouldShowErrorDialog = false } = options;
+
+	isLoadingVisible && (loading.value = true);
 
 	const result = await getGpuInfo({
 		min_memory_required_mb: multiGpuConfig.value.memory_requirement_mb
@@ -90,15 +99,15 @@ async function getGpuInfoResult() {
 	if (result.data) {
 		gpuInfoResult.value = result;
 	} else {
-		ElMessage.error(result.message);
+		shouldShowErrorDialog && ElMessage.error(result.message);
 	}
 
-	loading.value = false;
+	isLoadingVisible && (loading.value = false);
 }
 
 // 重试
 function onMultiGpuRetry() {
-	getGpuInfoResult();
+	getGpuInfoResult({ isLoadingVisible: true, shouldShowErrorDialog: true });
 }
 
 // 是否选中该gpu
@@ -120,8 +129,27 @@ function onGpuItemClick(data: ItemData) {
 	multiGpuConfig.value.num_gpus = newSelected.length;
 }
 
+// 训练中轮询gpu信息
+const POLL_TIME = 5000;
+const isFirstPoll = ref(true);
+const { pause, resume } = useTimeoutPoll(
+	async () => {
+		await getGpuInfoResult({
+			isLoadingVisible: isFirstPoll.value,
+			shouldShowErrorDialog: isFirstPoll.value
+		});
+		isFirstPoll.value && (isFirstPoll.value = false);
+	},
+	POLL_TIME,
+	{ immediate: false }
+);
+
 onMounted(() => {
-	getGpuInfoResult();
+	resume();
+});
+
+onUnmounted(() => {
+	pause();
 });
 </script>
 

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 11:17:17
- * @LastEditTime: 2025-08-13 11:20:04
+ * @LastEditTime: 2025-08-19 15:14:27
  * @LastEditors: mulingyuer
  * @Description: 采样与推理配置
  * @FilePath: \frontend\src\views\lora\qwen-image\components\SampleConfig\index.vue
@@ -24,7 +24,7 @@
 			v-model.number="ruleForm.config.sample_every_n_epochs"
 			:step="1"
 			step-strictly
-			:min="1"
+			:min="0"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
@@ -36,7 +36,7 @@
 			v-model.number="ruleForm.config.sample_every_n_steps"
 			:step="1"
 			step-strictly
-			:min="1"
+			:min="0"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
@@ -58,17 +58,6 @@
 		popover-content="guidance_scale"
 	>
 		<el-input-number v-model.number="ruleForm.config.guidance_scale" :step="0.1" :min="0" />
-	</PopoverFormItem>
-	<PopoverFormItem
-		v-show="isExpert"
-		label="显示时间步的方式"
-		prop="config.show_timesteps"
-		popoverContent="show_timesteps"
-	>
-		<el-select v-model="ruleForm.config.show_timesteps" placeholder="请选择显示时间步的方式">
-			<el-option label="生成时序图" value="image" />
-			<el-option label="打印到控制台" value="console" />
-		</el-select>
 	</PopoverFormItem>
 </template>
 

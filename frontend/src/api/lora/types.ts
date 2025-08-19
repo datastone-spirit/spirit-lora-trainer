@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-18 15:55:39
+ * @LastEditTime: 2025-08-19 15:23:08
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -410,8 +410,6 @@ export interface StartWanVideoTrainingData {
 		network_dim: number | undefined;
 		/** 训练时随机失活比例，0.1-0.3，默认：undefined */
 		network_dropout: number | undefined;
-		/** 指定要加载的神经网络模块，默认："" */
-		network_module: string;
 		/** 预训练权重文件路径，默认：""，空字符的情况下不要传递该属性 */
 		network_weights: string;
 		/** 用于自动从预训练权重中推断网络维度（rank）,必须与 --network_weights 配合使用，默认：false */
@@ -455,16 +453,14 @@ export interface StartWanVideoTrainingData {
 		// -------	采样与验证	-------
 		/** 训练前生成初始样本，默认：false */
 		sample_at_first: boolean;
-		/** 每N个epoch生成样本，默认：undefined */
-		sample_every_n_epochs: number | undefined;
-		/** 每N步生成样本，默认：undefined */
-		sample_every_n_steps: number | undefined;
+		/** 每N个epoch生成样本，默认：0 */
+		sample_every_n_epochs: number;
+		/** 每N步生成样本，默认：0 */
+		sample_every_n_steps: number;
 		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
 		sample_prompts: string | undefined;
 		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
 		guidance_scale: number | undefined;
-		/** 显示时间步的方式（"image"生成时序图，"console"打印到控制台），默认："" */
-		show_timesteps: string;
 		// -------	高级显存优化	-------
 		/** 显存优化技术，通过累积多个小批次的梯度来等效大batch_size训练，默认：1 */
 		gradient_accumulation_steps: number;
@@ -876,16 +872,14 @@ export interface StartQwenImageTrainingData {
 		// -- 采样和推理配置
 		/** 训练前生成初始样本，默认：false */
 		sample_at_first: boolean;
-		/** 每N个epoch生成样本，默认：undefined */
-		sample_every_n_epochs: number | undefined;
-		/** 每N步生成样本，默认：undefined */
-		sample_every_n_steps: number | undefined;
+		/** 每N个epoch生成样本，默认：0 */
+		sample_every_n_epochs: number;
+		/** 每N步生成样本，默认：0 */
+		sample_every_n_steps: number;
 		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
 		sample_prompts: string;
 		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
 		guidance_scale: number | undefined;
-		/** 显示时间步的方式（"image"生成时序图，"console"打印到控制台），默认："" */
-		show_timesteps: string;
 		// -- LoRA网络结构参数
 		/** LoRA的秩（rank），8-128，默认：32 */
 		network_dim: number;
@@ -897,8 +891,6 @@ export interface StartQwenImageTrainingData {
 		 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
 		 */
 		network_args: string;
-		/** 指定要加载的神经网络模块，默认："" */
-		network_module: string;
 		/** 预训练权重文件路径，默认：""，空字符的情况下不要传递该属性 */
 		network_weights?: string;
 		/** 基础权重-合并入底模的 LoRA  */

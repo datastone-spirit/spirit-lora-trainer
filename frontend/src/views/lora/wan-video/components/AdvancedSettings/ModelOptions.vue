@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:31:41
- * @LastEditTime: 2025-08-15 17:06:33
+ * @LastEditTime: 2025-08-19 15:01:52
  * @LastEditors: mulingyuer
  * @Description: 模型结构参数设置
  * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\ModelOptions.vue
@@ -46,16 +46,6 @@
 			popover-content="network_dropout"
 		>
 			<el-input-number v-model.number="ruleForm.config.network_dropout" :step="0.1" :min="0" />
-		</PopoverFormItem>
-		<PopoverFormItem
-			label="指定要加载的神经网络模块"
-			prop="config.network_module"
-			popover-content="network_module"
-		>
-			<FileSelector
-				v-model="ruleForm.config.network_module"
-				placeholder="请选择要加载的神经网络模块"
-			/>
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="预训练权重文件"

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-08-18 17:35:17
+ * @LastEditTime: 2025-08-19 15:23:36
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -52,7 +52,6 @@ export class WanHelper {
 				network_args: config.network_args,
 				network_dim: config.network_dim,
 				network_dropout: config.network_dropout,
-				network_module: config.network_module,
 				network_weights: config.network_weights,
 				dim_from_weights: config.dim_from_weights,
 				blocks_to_swap: config.blocks_to_swap,
@@ -77,7 +76,6 @@ export class WanHelper {
 				sample_every_n_steps: config.sample_every_n_steps,
 				sample_prompts: undefined,
 				guidance_scale: config.guidance_scale,
-				show_timesteps: config.show_timesteps,
 				gradient_accumulation_steps: config.gradient_accumulation_steps,
 				gradient_checkpointing: config.gradient_checkpointing,
 				img_in_txt_in_offloading: config.img_in_txt_in_offloading,

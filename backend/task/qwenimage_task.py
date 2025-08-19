@@ -182,21 +182,27 @@ class QwenImageTrainingSubTask(SubTask):
                "--config_file", dataset2toml(task.qwenimage_parameter.config),
                "--dataset_config", dataset2toml(task.qwenimage_parameter.dataset),
         ]
+        customize_env = self.customize_env.copy()
 
         args = [self.executable, "launch"]
         if task.qwenimage_parameter.is_enable_multi_gpu_train():
-            from .multi_gpu_train_args import generate_multi_gpu_args
-            args.extend(generate_multi_gpu_args(task.qwenimage_parameter.multi_gpu_config))
+            from .multi_gpu_train_args import generate_multi_gpu_args, prepare_multi_gpu_environment
+            prepare_multi_gpu_environment(task.qwenimage_parameter.multi_gpu_config, customize_env)
+            multi_gpu_args = generate_multi_gpu_args(task.qwenimage_parameter.multi_gpu_config)
+            args.extend(multi_gpu_args)
+            logger.info(f"Multi-GPU training enabled with {len(task.qwenimage_parameter.multi_gpu_config.gpu_ids)} GPUs")
+            logger.info(f"CUDA_VISIBLE_DEVICES set to: {customize_env.get('CUDA_VISIBLE_DEVICES', '')}")
+            logger.info(f"Multi-GPU args: {multi_gpu_args}")
         else: 
+            # Single GPU configuration
             gpu_ids = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
             args.extend([
-               "--gpu_ids", gpu_ids,
-               "--num_processes", "1",  # Start with single GPU, more processes more memory
+               "--num_processes", "1",  # Single GPU
                "--mixed_precision", "bf16",
-               "--gradient_accumulation_steps", "4",
             ])
+            logger.info(f"Single GPU training on GPU: {gpu_ids}")
         
         args.extend(base_args)
-        logger.info(f"Running QwenImage training with args: {args}")
-        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task, detail=task.detail)
+        logger.info(f"Running QwenImage training with args: {' '.join(args)}")
+        self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=customize_env), task=task, detail=task.detail)
         return task_chain.excute()

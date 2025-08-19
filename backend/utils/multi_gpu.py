@@ -247,28 +247,27 @@ class AccelerateConfigManager:
         
         Args:
             config: AccelerateConfig object
-            script_path: Path to training script
-            script_args: Arguments for training script
             
         Returns:
-            Complete command arguments list
+            Command arguments list for accelerate launch
         """
-        import sys
-        
-        #args = [sys.executable, "-m", "accelerate.commands.launch"]
         args = []
         
         # Add configuration parameters
-        if config.num_processes > 1:
-            args.extend(["--num_processes", str(config.num_processes)])
+        args.extend(["--num_processes", str(config.num_processes)])
         
-        if config.gpu_ids:
-            args.extend(["--gpu_ids", ",".join(map(str, config.gpu_ids))])
+        # For multi-GPU, add additional parameters
+        if config.num_processes > 1:
+            args.extend(["--num_machines", str(config.num_machines)])
+            args.extend(["--machine_rank", str(config.machine_rank)])
         
         if config.mixed_precision != "no":
             args.extend(["--mixed_precision", config.mixed_precision])
+            
+        # Add dynamo backend if specified
+        if config.dynamo_backend != "NO":
+            args.extend(["--dynamo_backend", config.dynamo_backend.lower()])
         
-        # Add script and its arguments
         logger.info(f"Generated launch args: {' '.join(args)}")
         return args
     

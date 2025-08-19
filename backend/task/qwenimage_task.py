@@ -185,7 +185,7 @@ class QwenImageTrainingSubTask(SubTask):
 
         args = [self.executable, "launch"]
         if task.qwenimage_parameter.is_enable_multi_gpu_train():
-            from multi_gpu_train_args import generate_multi_gpu_args
+            from .multi_gpu_train_args import generate_multi_gpu_args
             args.extend(generate_multi_gpu_args(task.qwenimage_parameter.multi_gpu_config))
         else: 
             gpu_ids = os.environ.get("CUDA_VISIBLE_DEVICES", "0")

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 10:12:06
- * @LastEditTime: 2025-04-02 08:48:42
+ * @LastEditTime: 2025-08-18 15:13:14
  * @LastEditors: mulingyuer
  * @Description: lora基本信息
  * @FilePath: \frontend\src\views\lora\wan-video\components\BasicInfo.vue
@@ -10,28 +10,50 @@
 <template>
 	<PopoverFormItem label="训练任务类型" prop="config.task" popover-content="task">
 		<el-radio-group v-model="ruleForm.config.task">
-			<el-radio-button label="I2V" value="i2v-14B" />
-			<el-radio-button label="T2V" value="t2v-14B" />
+			<el-radio-button label="I2V (Wan 2.1)" value="i2v-14B" />
+			<el-radio-button label="T2V (Wan 2.1)" value="t2v-14B" />
+			<el-radio-button label="I2V (Wan 2.2)" value="i2v-A14B" />
+			<el-radio-button label="T2V (Wan 2.2)" value="t2v-A14B" />
 		</el-radio-group>
 	</PopoverFormItem>
 	<PopoverFormItem label="LoRA 名称" prop="config.output_name" popover-content="output_name">
 		<el-input v-model="ruleForm.config.output_name" placeholder="请输入LoRA名称" />
 	</PopoverFormItem>
-	<PopoverFormItem
-		v-show="isExpert && isI2V"
-		label="wan2模型地址"
-		prop="config.i2v_dit"
-		popover-content="i2v_dit"
-	>
-		<FileSelector v-model="ruleForm.config.i2v_dit" placeholder="请选择训练用的wan2模型" />
+	<PopoverFormItem v-show="isExpert" label="wan2模型地址" prop="config.dit" popover-content="dit">
+		<FileSelector v-model="ruleForm.config.dit" placeholder="请选择训练用的wan2模型" />
 	</PopoverFormItem>
 	<PopoverFormItem
-		v-show="isExpert && isT2V"
-		label="wan2模型地址"
-		prop="config.t2v_dit"
-		popover-content="t2v_dit"
+		v-show="isExpert && isWan22"
+		label="wan2.2 模型类型"
+		prop="dit_model_type"
+		popover-content="dit_model_type"
 	>
-		<FileSelector v-model="ruleForm.config.t2v_dit" placeholder="请选择训练用的wan2模型" />
+		<el-radio-group v-model="ruleForm.dit_model_type">
+			<el-radio-button label="high" value="high" />
+			<el-radio-button label="low" value="low" />
+			<el-radio-button label="both" value="both" />
+		</el-radio-group>
+	</PopoverFormItem>
+	<el-form-item v-show="isExpert && isWan22 && ruleForm.dit_model_type === 'both'">
+		<el-alert
+			class="no-select"
+			title="注意：24GB显存不支持both类型训练，请选择high或low类型训练。"
+			type="warning"
+			:closable="false"
+			show-icon
+			effect="dark"
+		/>
+	</el-form-item>
+	<PopoverFormItem
+		v-show="isExpert && isWan22"
+		label="wna2.2 high模型地址"
+		prop="config.dit_high_noise"
+		popover-content="dit_high_noise"
+	>
+		<FileSelector
+			v-model="ruleForm.config.dit_high_noise"
+			placeholder="请选择训练用的wan2.2 high模型地址"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert && isI2V"
@@ -70,12 +92,9 @@
 		popover-content="vae_dtype"
 	>
 		<el-select v-model="ruleForm.config.vae_dtype" placeholder="请选择VAE模型的计算精度">
-			<el-option
-				v-for="(item, index) in vaeDTypeOptions"
-				:key="index"
-				:label="item.label"
-				:value="item.value"
-			/>
+			<el-option label="float16" value="float16" />
+			<el-option label="bfloat16" value="bfloat16" />
+			<el-option label="float32" value="float32" />
 		</el-select>
 	</PopoverFormItem>
 	<PopoverFormItem label="LoRA 保存路径" prop="config.output_dir" popover-content="output_dir">
@@ -93,25 +112,12 @@ const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, requi
 
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-/** 是否i2v任务 */
+/** 是否wan2.1 i2v任务 */
 const isI2V = computed(() => ruleForm.value.config.task === "i2v-14B");
-/** 是否是t2v任务 */
+/** 是否是wan2.1 t2v任务 */
 const isT2V = computed(() => ruleForm.value.config.task === "t2v-14B");
-/** VAE模型的计算精度选项 */
-const vaeDTypeOptions = ref<ElOptions>([
-	{
-		label: "float16",
-		value: "float16"
-	},
-	{
-		label: "bfloat16",
-		value: "bfloat16"
-	},
-	{
-		label: "float32",
-		value: "float32"
-	}
-]);
+/** 是否wan2.2 */
+const isWan22 = computed(() => ["t2v-A14B", "i2v-A14B"].includes(ruleForm.value.config.task));
 </script>
 
 <style scoped></style>

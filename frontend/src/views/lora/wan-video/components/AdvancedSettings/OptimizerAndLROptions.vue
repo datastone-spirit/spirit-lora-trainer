@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 14:47:20
- * @LastEditTime: 2025-07-30 16:04:30
+ * @LastEditTime: 2025-08-18 14:24:24
  * @LastEditors: mulingyuer
  * @Description: 优化器与学习率
  * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\OptimizerAndLROptions.vue
@@ -29,7 +29,7 @@
 			/>
 		</PopoverFormItem>
 		<PopoverFormItem label="学习率" prop="config.learning_rate" popover-content="learning_rate">
-			<el-input v-model="ruleForm.config.learning_rate" placeholder="请输入学习率" />
+			<el-input-number v-model.number="ruleForm.config.learning_rate" :step="0.0001" />
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="学习率衰减步数"

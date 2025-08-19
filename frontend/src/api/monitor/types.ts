@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-08-15 11:56:33
+ * @LastEditTime: 2025-08-15 16:52:06
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -351,7 +351,7 @@ export interface QwenImageTrainingInfoResult {
 				average_loss?: number;
 				/** 每个设备上的批次数 总为1, 没有启用分布式训练 */
 				batch_size_per_device?: number;
-				/** 当前轮数 */
+				/** 当前步数 */
 				current: number;
 				/** 当前损失 */
 				current_loss?: number;
@@ -379,9 +379,9 @@ export interface QwenImageTrainingInfoResult {
 				speed?: number;
 				/** 总步数（无效属性） */
 				total: number;
-				/** 总训练步数 */
-				total_epoch?: number;
 				/** 总训练轮数 */
+				total_epoch?: number;
+				/** 总训练步数 */
 				total_optimization_steps?: number;
 		  }
 		| string;

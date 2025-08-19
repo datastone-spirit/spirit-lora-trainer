@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:58:45
- * @LastEditTime: 2025-07-30 16:01:36
+ * @LastEditTime: 2025-08-18 14:34:34
  * @LastEditors: mulingyuer
  * @Description: 采样与验证选项
  * @FilePath: \frontend\src\views\lora\wan-video\components\SampleValidator.vue
@@ -110,7 +110,7 @@ const showTimeStepsOptions = ref<ElOptions>([
 	}
 ]);
 /** 是否i2v任务 */
-const isI2V = computed(() => ruleForm.value.config.task === "i2v-14B");
+const isI2V = computed(() => ["i2v-14B", "i2v-A14B"].includes(ruleForm.value.config.task));
 </script>
 
 <style scoped></style>

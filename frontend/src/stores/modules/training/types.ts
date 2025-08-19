@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:16
- * @LastEditTime: 2025-08-15 14:22:07
+ * @LastEditTime: 2025-08-15 16:52:54
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据类型
  * @FilePath: \frontend\src\stores\modules\training\types.ts
@@ -194,8 +194,8 @@ export type TrainingWanLoRAData = SimplifyDeep<
 export type TrainingQwenImageData = SimplifyDeep<
 	BaseTrainingItem<
 		{
-			/** 当前轮数 */
-			current_epoch: number;
+			/** 当前步数 */
+			current_steps: number;
 			/** 已用时长 */
 			elapsed: string;
 			/** 预估剩余时长 */
@@ -206,8 +206,8 @@ export type TrainingQwenImageData = SimplifyDeep<
 			average_loss: number;
 			/** 每秒速度 */
 			speed: number;
-			/** 总轮数 */
-			total_epoch: number | string;
+			/** 总步数 */
+			total_steps: number;
 			/** 是否显示查看采样 */
 			showSampling: boolean;
 			/** 采样文件路径，开启采样时才有值，否则是空字符串 */

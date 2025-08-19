@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-15 14:40:02
- * @LastEditTime: 2025-08-15 14:45:39
+ * @LastEditTime: 2025-08-15 16:54:16
  * @LastEditors: mulingyuer
  * @Description: qwen-image训练详情
  * @FilePath: \frontend\src\views\task\components\QwenImageDetail.vue
@@ -26,10 +26,10 @@
 				{{ data.detail }}
 			</el-descriptions-item>
 			<template v-else>
-				<el-descriptions-item label="当前第几轮">
+				<el-descriptions-item label="当前第几步">
 					{{ data.detail.current }}
 				</el-descriptions-item>
-				<el-descriptions-item label="总轮数">
+				<el-descriptions-item label="总步数">
 					{{ data.detail.total_optimization_steps }}
 				</el-descriptions-item>
 				<el-descriptions-item label="进度百分比">

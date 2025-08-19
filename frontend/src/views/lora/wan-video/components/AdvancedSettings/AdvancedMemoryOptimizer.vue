@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 16:10:12
- * @LastEditTime: 2025-03-26 16:13:52
+ * @LastEditTime: 2025-08-18 11:49:23
  * @LastEditors: mulingyuer
  * @Description: 高级显存优化
- * @FilePath: \frontend\src\views\lora\wan\components\AdvancedSettings\AdvancedMemoryOptimizer.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\AdvancedMemoryOptimizer.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -69,6 +69,23 @@
 		>
 			<el-switch v-model="ruleForm.config.xformers" />
 		</PopoverFormItem>
+		<PopoverFormItem
+			label="wan2.2开启高噪声和低噪声模型时，是否允许将 当前不活跃的DiT模型卸载到CPU ，从而节省GPU显存(VRAM)"
+			prop="config.offload_inactive_dit"
+			popover-content="offload_inactive_dit"
+		>
+			<el-switch v-model="ruleForm.config.offload_inactive_dit" />
+		</PopoverFormItem>
+		<el-form-item>
+			<el-alert
+				class="no-select"
+				title="注意：开启该选项后，blocks_to_swap 必须为0"
+				type="warning"
+				:closable="false"
+				show-icon
+				effect="dark"
+			/>
+		</el-form-item>
 	</FieldSetWrapper>
 </template>
 

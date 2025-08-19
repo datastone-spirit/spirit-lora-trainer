@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-27 15:14:43
- * @LastEditTime: 2025-08-15 14:37:50
+ * @LastEditTime: 2025-08-15 16:54:41
  * @LastEditors: mulingyuer
  * @Description: QwenImage训练进度条
  * @FilePath: \frontend\src\views\lora\qwen-image\components\QwenImageTrainingLoRAMonitor\index.vue
@@ -22,7 +22,7 @@
 					:stroke-width="8"
 				></el-progress>
 				<el-text class="qwen-image-monitor-round">
-					{{ loraData.current_epoch }}/{{ loraData.total_epoch }}
+					{{ loraData.current_steps }}/{{ loraData.total_steps }}
 				</el-text>
 			</div>
 			<div class="qwen-image-monitor-content-body">
@@ -57,9 +57,9 @@
 					</div>
 				</div>
 				<div class="qwen-image-monitor-item">
-					<div class="qwen-image-monitor-item-label">总轮数</div>
+					<div class="qwen-image-monitor-item-label">总步数</div>
 					<div class="qwen-image-monitor-item-value">
-						{{ loraData.total_epoch }}
+						{{ loraData.total_steps }}
 					</div>
 				</div>
 			</div>

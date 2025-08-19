@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2025-08-12 15:54:30
+ * @LastEditTime: 2025-08-15 15:26:54
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
@@ -52,7 +52,7 @@ export default {
 			name: "LoRA-WanVideo",
 			component: () => import("@/views/lora/wan-video/index.vue"),
 			meta: {
-				title: "Wan2.1",
+				title: "Wan",
 				loRATaskType: "wan-video"
 			}
 		},

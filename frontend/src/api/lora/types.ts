@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-15 10:55:44
+ * @LastEditTime: 2025-08-18 15:55:39
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -339,12 +339,14 @@ export interface StartHyVideoTrainingResult {
 export interface StartWanVideoTrainingData {
 	config: {
 		// -------	LoRA 基本信息	-------
-		/** 任务类型，i2v-14B|t2v-14B， 默认："i2v-14B" */
+		/** 任务类型，i2v-14B|t2v-14B|t2v-A14B|i2v-A14B， 默认："i2v-14B" */
 		task: string;
 		/** 模型文件名，默认："" */
 		output_name: string;
 		/** wan2模型地址 */
 		dit: string;
+		/** wna2.2 high模型地址 */
+		dit_high_noise: string;
 		/** CLIP模型路径 */
 		clip: string;
 		/** T5模型路径，默认："" */
@@ -416,6 +418,8 @@ export interface StartWanVideoTrainingData {
 		dim_from_weights: boolean;
 		/** 指定要交换的网络块数量，用于调整LoRA模型结构，默认36 */
 		blocks_to_swap: number | undefined;
+		/** wan2.2使用，需清理blocks_to_swap为0，默认值：I2V：0.9,T2V: 0.875 */
+		timestep_boundary: number;
 		/** 启用基础FP8模式，目前云端必须开启，默认：true */
 		fp8_base: boolean;
 		/** 启用FP8缩放模式，云端不支持，默认：false */
@@ -480,6 +484,8 @@ export interface StartWanVideoTrainingData {
 		split_attn: boolean;
 		/** 启用xformers优化库（需要安装xformers），用于CrossAttention层的显存优化，默认：true */
 		xformers: boolean;
+		/** wan2.2使用，将不活跃的 DiT 模型卸载到 CPU，节省显存，仅在未指定blocks_to_swap时生效，默认：false */
+		offload_inactive_dit: boolean;
 		// -------	扩散模型参数	-------
 		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：3.0 */
 		discrete_flow_shift: number;
@@ -572,14 +578,16 @@ export interface StartWanVideoTrainingData {
 			/** 数据集重复次数，默认：1 */
 			num_repeats: number;
 		};
-		datasets: [StartWanVideoTrainingImageDataset | StartWanVideoTrainingVideoDataset];
+		datasets: Array<StartWanVideoTrainingImageDataset | StartWanVideoTrainingVideoDataset>;
 	};
-	/** 训练器的训练配置 */
-	frontend_config: string;
+	/** wan2.2 模型类型：high、low、both。默认low  */
+	dit_model_type: string;
 	/** 跳过图像潜空间缓存阶段，默认：false */
 	skip_cache_latent: boolean;
 	/** 跳过Text 编码潜空间缓存阶段，默认：false */
 	skip_cache_text_encoder_latent: boolean;
+	/** 训练器的训练配置 */
+	frontend_config: string;
 }
 
 /** 启动wan视频训练参数-图片训练数据集 */
@@ -986,7 +994,7 @@ export interface StartQwenImageTrainingData {
 			bucket_no_upscale: boolean;
 		}>;
 	};
-	// 多gpu训练配置
+	/** 多gpu训练配置 */
 	multi_gpu_config: MultiGpuConfig;
 	/** 跳过图像潜空间缓存阶段，默认：false */
 	skip_cache_latent: boolean;

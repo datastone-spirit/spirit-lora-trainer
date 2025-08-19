@@ -175,11 +175,16 @@ class WanCacheLatentSubTask(SubTask):
             "--vae",
             task.wan_parameter.config.vae,
         ]
-        if is_i2v(task.wan_parameter.config.task) and not is_wan22_task(task.wan_parameter.config.task):
-            logger.info("clip only required by wan2.1")
-            if not is_blank(task.wan_parameter.config.clip):
-                args.append("--clip")
-                args.append(task.wan_parameter.config.clip)
+        if is_i2v(task.wan_parameter.config.task):
+            if is_wan22_task(task.wan_parameter.config.task):
+                # https://github.com/kohya-ss/musubi-tuner/issues/416#issuecomment-3164360971
+                args.append("--i2v")
+            else:
+                logger.info("clip only required by wan2.1")
+                if not is_blank(task.wan_parameter.config.clip):
+                    args.append("--clip")
+                    args.append(task.wan_parameter.config.clip)
+        logger.info(f'WanCacheLatentSubTask command is {" ".join(args)}') 
         self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
         return task_chain.excute()
 

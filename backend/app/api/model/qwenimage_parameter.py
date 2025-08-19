@@ -286,6 +286,8 @@ class QWenImageTrainingConfig:
             if config.blocks_to_swap < 16:
                 logger.info(f"blocks_to_swap {config.blocks_to_swap} is less than 16, could be run on video card whose vram less than 24GB, set to 16")
                 config.blocks_to_swap = 16
+            if not is_blank(config.show_timesteps):
+                config.show_timesteps = None
 
         return config
 

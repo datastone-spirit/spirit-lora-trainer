@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-14 14:47:37
- * @LastEditTime: 2025-08-15 10:47:54
+ * @LastEditTime: 2025-08-19 16:09:56
  * @LastEditors: mulingyuer
  * @Description: gpu item
  * @FilePath: \frontend\src\components\Form\MultiGpu\GpuItem.vue
@@ -234,6 +234,7 @@ function onGpuItemClick() {
 	padding: 9px 12px;
 	border: 1px solid var(--el-input-border-color, var(--el-border-color));
 	border-radius: $zl-border-radius;
+	@include no-select();
 	cursor: pointer;
 	& + & {
 		margin-top: 6px;
@@ -254,6 +255,10 @@ function onGpuItemClick() {
 		}
 	}
 }
+.multi-gpu-item.active.disabled {
+	border-color: var(--el-color-primary);
+}
+
 .multi-gpu-item-checkbox {
 	margin-right: 24px;
 }

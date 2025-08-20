@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 14:55:57
- * @LastEditTime: 2025-03-28 10:17:02
+ * @LastEditTime: 2025-08-20 11:24:32
  * @LastEditors: mulingyuer
  * @Description: 路由类型
  * @FilePath: \frontend\types\router.d.ts

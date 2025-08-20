@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-14 14:47:37
- * @LastEditTime: 2025-08-19 16:09:56
+ * @LastEditTime: 2025-08-20 14:15:46
  * @LastEditors: mulingyuer
  * @Description: gpu item
  * @FilePath: \frontend\src\components\Form\MultiGpu\GpuItem.vue
@@ -28,7 +28,7 @@
 			<el-tag :type="gpuStatusByTagType" size="default" class="multi-gpu-item-status">
 				{{ gpuStatus }}
 			</el-tag>
-			<el-tooltip :content="`内存使用率: ${memoryUsagePercent.toFixed(1)}%`" placement="top">
+			<el-tooltip :content="`显存使用率: ${memoryUsagePercent.toFixed(1)}%`" placement="top">
 				<el-progress
 					class="multi-gpu-item-memory-progress"
 					:percentage="Math.min(Math.floor(memoryUsagePercent), 100)"
@@ -36,7 +36,7 @@
 					:show-text="false"
 				/>
 			</el-tooltip>
-			<el-tooltip :content="`内存: ${usedMemory} / ${totalMemory}`" placement="top">
+			<el-tooltip :content="`显存: ${usedMemory} / ${totalMemory}`" placement="top">
 				<div class="multi-gpu-item-metric-display">
 					<Icon class="multi-gpu-item-metric-icon memory-icon" name="ri-computer-line" />
 					<span class="multi-gpu-item-metric-value">{{ freeMemory }}</span>
@@ -144,10 +144,10 @@ const gpuStatus = computed(() => {
 
 	if (!props.itemData.is_available) {
 		if (memoryFree < memoryRequired) {
-			return "内存不足";
+			return "显存不足";
 		}
 		if (memoryFree < 2000) {
-			return "内存严重不足";
+			return "显存严重不足";
 		}
 		if (props.itemData.temperature_celsius && props.itemData.temperature_celsius >= 90) {
 			return "温度过高";

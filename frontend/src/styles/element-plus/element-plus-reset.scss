@@ -188,3 +188,10 @@
 		margin-block-end: 14px;
 	}
 }
+
+// 定制 Splitter 分隔面板
+.el-splitter {
+	.el-splitter-panel {
+		scrollbar-color: var(--zl-scrollbar) transparent;
+	}
+}

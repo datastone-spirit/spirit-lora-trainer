@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-19 15:23:13
+ * @LastEditTime: 2025-08-20 15:33:38
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="wan-page">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2>
 			<template #left>
 				<el-form
 					ref="ruleFormRef"
@@ -39,7 +39,7 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="wanDatasetPath" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
@@ -85,6 +85,7 @@ import WanTrainingLoRAMonitor from "./components/WanTrainingLoRAMonitor/index.vu
 import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
 import { validate } from "./wan.validate";
+import { joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -95,7 +96,7 @@ const env = getEnv();
 /** 是否开启小白校验 */
 const isWhiteCheck = settingsStore.whiteCheck;
 const ruleFormRef = ref<FormInstance>();
-const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_wan_form`;
+const localStorageKey = joinPrefixKey("lora_wan_form");
 const defaultForm: RuleForm = {
 	config: {
 		task: "i2v-14B",
@@ -456,7 +457,7 @@ const rules = reactive<FormRules<RuleForm>>({
 						const isSorted = value.every((item, index) => {
 							if (index === 0) return true;
 							const current = item.value ?? 0;
-							const prev = value[index - 1].value ?? 0;
+							const prev = value[index - 1]?.value ?? 0;
 							return current > prev;
 						});
 						if (!isSorted) {

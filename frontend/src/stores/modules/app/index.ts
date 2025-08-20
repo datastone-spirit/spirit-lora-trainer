@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 11:22:25
- * @LastEditTime: 2025-03-27 16:23:58
+ * @LastEditTime: 2025-08-20 15:30:05
  * @LastEditors: mulingyuer
  * @Description: 应用配置
  * @FilePath: \frontend\src\stores\modules\app\index.ts
@@ -9,6 +9,7 @@
  */
 import { defineStore } from "pinia";
 import type { RouteAnimateType } from "./types";
+import { joinPrefixKey } from "@/utils/tools";
 
 export const useAppStore = defineStore(
 	"app",
@@ -81,7 +82,7 @@ export const useAppStore = defineStore(
 
 		/** 是否暗色模式，useDark自己有持久化 */
 		const isDark = useDark({
-			storageKey: `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}color-scheme`,
+			storageKey: joinPrefixKey("color-scheme"),
 			valueDark: "dark",
 			valueLight: "light"
 		});

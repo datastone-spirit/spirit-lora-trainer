@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-07-29 17:10:21
+ * @LastEditTime: 2025-08-20 15:30:41
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -106,6 +106,7 @@ import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import type { FormInstance, FormRules } from "element-plus";
+import { joinPrefixKey } from "@/utils/tools";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -133,7 +134,7 @@ const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const ruleFormRef = ref<FormInstance>();
-const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}ai_dataset_form`;
+const localStorageKey = joinPrefixKey("ai_dataset_form");
 const defaultForm = readonly<RuleForm>({
 	image_path: "/root",
 	model_name: "joy-caption-alpha-two",

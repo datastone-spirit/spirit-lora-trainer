@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-07-30 10:43:17
+ * @LastEditTime: 2025-08-20 15:32:52
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="hunyuan-video">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2>
 			<template #left>
 				<el-form
 					ref="ruleFormRef"
@@ -39,7 +39,7 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="ruleForm.directory_path" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
@@ -73,6 +73,7 @@ import { formatFormData } from "./hunyuan.helper";
 import { isDirectoryEmpty, validate } from "./hunyuan.validate";
 import type { RuleForm } from "./types";
 import HYTrainingLoRAMonitor from "./components/HYTrainingLoRAMonitor/index.vue";
+import { joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
@@ -80,7 +81,7 @@ const { hyLoraMonitor } = useHYLora();
 
 const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
-const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_hunyuan_video_form`;
+const localStorageKey = joinPrefixKey("lora_hunyuan_video_form");
 const defaultForm = readonly<RuleForm>({
 	class_tokens: "",
 	model_transformer_path: "",

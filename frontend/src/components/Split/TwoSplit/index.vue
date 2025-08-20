@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-05 10:13:40
- * @LastEditTime: 2025-01-09 11:36:27
+ * @LastEditTime: 2025-08-20 14:53:20
  * @LastEditors: mulingyuer
  * @Description: 2分割组件
  * @FilePath: \frontend\src\components\Split\TwoSplit\index.vue
@@ -84,6 +84,8 @@ function destroySplit() {
 
 onMounted(() => {
 	initSplit();
+
+	console.warn("TwoSplit 组件已弃用，请使用 TwoSplit2 组件代替");
 });
 
 // NOTE: 销毁太快了会导致样式被去除，从而宽度丢失，整体布局错位，所以延迟销毁

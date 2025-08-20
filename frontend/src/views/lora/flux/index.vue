@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-07-31 15:24:04
+ * @LastEditTime: 2025-08-20 15:31:19
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="lora-flux-page">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2>
 			<template #left>
 				<div class="lora-flux-content">
 					<el-form
@@ -44,7 +44,7 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
@@ -90,6 +90,7 @@ import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormData } from "./flux.helper";
 import { validate } from "./flux.validate";
 import type { RuleForm } from "./types";
+import { joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -100,7 +101,7 @@ const env = getEnv();
 /** 是否开启小白校验 */
 const isWhiteCheck = settingsStore.whiteCheck;
 const ruleFormRef = ref<FormInstance>();
-const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_flux_form`;
+const localStorageKey = joinPrefixKey("lora_flux_form");
 const defaultForm = readonly<RuleForm>({
 	output_name: "",
 	class_tokens: "",

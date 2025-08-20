@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-08-04 09:36:55
+ * @LastEditTime: 2025-08-20 15:31:44
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="flux-kontext-page">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2>
 			<template #left>
 				<el-form
 					ref="ruleFormRef"
@@ -42,14 +42,13 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="dir" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"
-			@import-config="onImportConfig"
 		>
 			<template #monitor-progress-bar>
 				<FluxKontextLoRATrainingMonitor />
@@ -87,7 +86,8 @@ import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
 import { formatFormData, generateDefaultDataset } from "./flex-kontext.helper";
 import { validate } from "./flux-kontext.validate";
-import type { RuleForm } from "./types";
+import type { DatasetItem, RuleForm } from "./types";
+import { joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -96,7 +96,8 @@ const { fluxKontextLoraMonitor } = useFluxKontextLora();
 
 const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
-const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}flux_kontext_form`;
+const localStorageKey = joinPrefixKey("flux_kontext_form");
+const defaultDatasetItem: DatasetItem = generateDefaultDataset(0);
 const defaultForm: RuleForm = {
 	type: "sd_trainer",
 	training_folder: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
@@ -158,8 +159,8 @@ const defaultForm: RuleForm = {
 		neg: "",
 		prompts: []
 	},
-	datasets: [generateDefaultDataset(0)],
-	activeDatasetId: "",
+	datasets: [defaultDatasetItem],
+	activeDatasetId: defaultDatasetItem.id,
 	name: "",
 	tagConfig: {
 		tagger_model: "joy-caption-alpha-two",
@@ -239,16 +240,6 @@ const generateToml = useDebounceFn(() => {
 	toml.value = tomlStringify(ruleForm.value);
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
-
-// 导入配置
-function onImportConfig() {
-	const datasets = ruleForm.value.datasets;
-	if (datasets.length > 0) {
-		ruleForm.value.activeDatasetId = datasets[0].id;
-	} else {
-		ruleForm.value.activeDatasetId = "";
-	}
-}
 
 // 重置表单
 function onResetData() {

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-19 15:31:51
+ * @LastEditTime: 2025-08-20 15:33:08
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="qwen-image-page">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2>
 			<template #left>
 				<el-form
 					ref="ruleFormRef"
@@ -43,7 +43,7 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="dir" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
@@ -93,6 +93,7 @@ import {
 } from "./qwen-image.helper";
 import { validate } from "./qwen-image.validate";
 import type { DatasetItem, RuleForm } from "./types";
+import { joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -101,7 +102,7 @@ const { qwenImageLoraMonitor } = useQwenImageLora();
 
 const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
-const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}qwen_image_form`;
+const localStorageKey = joinPrefixKey("qwen_image_form");
 const defaultDatasetGeneral = generateDefaultDatasetGeneral();
 const defaultDatasetItem: DatasetItem = generateDefaultDataset({ general: defaultDatasetGeneral });
 const defaultForm: RuleForm = {

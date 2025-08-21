@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-08-21 14:45:47
+ * @LastEditTime: 2025-08-21 17:30:35
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -10,7 +10,7 @@
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import type { RuleForm } from "./types";
 import { tomlStringify } from "@/utils/toml";
-import { removeNullDeep } from "@/utils/tools";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 type Config = StartFluxTrainingData["config"];
 type Dataset = StartFluxTrainingData["dataset"];
@@ -165,7 +165,7 @@ function formatConfig(form: RuleForm): Config {
 		config[key] = form[key];
 	});
 
-	return removeNullDeep(config);
+	return LoRAHelper.removeEmptyFields(config);
 }
 
 /** 格式化dataset */

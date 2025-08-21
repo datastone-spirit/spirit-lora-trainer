@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-07 10:00:01
- * @LastEditTime: 2025-08-21 14:46:59
+ * @LastEditTime: 2025-08-21 17:31:32
  * @LastEditors: mulingyuer
  * @Description: 换源视频训练帮助
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.helper.ts
@@ -10,7 +10,7 @@
 import type { StartHyVideoTrainingData } from "@/api/lora";
 import type { RuleForm } from "./types";
 import { tomlStringify } from "@/utils/toml";
-import { removeNullDeep } from "@/utils/tools";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 type Config = StartHyVideoTrainingData["config"];
 type Dataset = StartHyVideoTrainingData["dataset"];
@@ -98,7 +98,7 @@ function formatConfig(form: RuleForm): Config {
 		config[key] = form[key];
 	});
 
-	return removeNullDeep(config);
+	return LoRAHelper.removeEmptyFields(config);
 }
 
 /** 格式化dataset */

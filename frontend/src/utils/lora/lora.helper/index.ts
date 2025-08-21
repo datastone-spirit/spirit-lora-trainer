@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 15:10:20
- * @LastEditTime: 2025-08-04 09:26:38
+ * @LastEditTime: 2025-08-21 17:00:39
  * @LastEditors: mulingyuer
  * @Description: 公共的lora帮助方法
  * @FilePath: \frontend\src\utils\lora\lora.helper\index.ts
@@ -73,5 +73,47 @@ export class LoRAHelper {
 			showTip && ElMessage.error("恢复训练配置失败");
 			console.error("恢复训练配置失败", error);
 		}
+	}
+
+	/** 去除提交表单中值为null|undefined|''的字段 */
+	static removeEmptyFields(form: any): any {
+		// 使用 void 0 代替 undefined，避免 undefined 被重新赋值的问题
+		// 检查是否为空值：null、undefined、空字符串（trim后为空）
+		if (form === null || form === void 0) {
+			return void 0;
+		}
+
+		// 检查空字符串：必须是 string 类型且 trim 后为空
+		if (typeof form === "string" && form.trim() === "") {
+			return void 0;
+		}
+
+		// 使用 Object.prototype.toString.call 精确判断类型
+		const type = Object.prototype.toString.call(form);
+		
+		// 如果不是数组也不是普通对象，原样返回
+		if (type !== "[object Array]" && type !== "[object Object]") {
+			return form;
+		}
+
+		// 数组处理
+		if (type === "[object Array]") {
+			const filteredArray = form
+				.map((item: any) => LoRAHelper.removeEmptyFields(item))
+				.filter((item: any) => item !== void 0);
+			return filteredArray;
+		}
+
+		// 普通对象处理（只处理 {} 这种键值对象）
+		const newObj: Record<string, any> = {};
+		Object.keys(form).forEach((key) => {
+			const processedValue = LoRAHelper.removeEmptyFields(form[key]);
+			// 只有当处理后的值不是 undefined 时才添加到新对象中
+			if (processedValue !== void 0) {
+				newObj[key] = processedValue;
+			}
+		});
+
+		return newObj;
 	}
 }

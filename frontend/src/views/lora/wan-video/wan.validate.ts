@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:02:06
- * @LastEditTime: 2025-08-19 10:29:47
+ * @LastEditTime: 2025-08-21 17:26:31
  * @LastEditors: mulingyuer
  * @Description: wan 校验器
  * @FilePath: \frontend\src\views\lora\wan-video\wan.validate.ts
@@ -64,7 +64,7 @@ async function wan22I2VWarning(formData: RuleForm): Promise<ValidationResult> {
 					return resolve({ valid: false, message: "用户取消了操作" });
 				});
 		} else {
-			return resolve({ valid: false, message: "用户取消了操作" });
+			return resolve({ valid: true });
 		}
 	});
 }

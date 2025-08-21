@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-21 15:31:24
+ * @LastEditTime: 2025-08-21 17:28:09
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-08-21 14:47:36
+ * @LastEditTime: 2025-08-21 17:29:45
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -10,7 +10,7 @@
 import type { StartWanVideoTrainingData, WanVideoVideoDatasetEstimateData } from "@/api/lora";
 import { tomlStringify } from "@/utils/toml";
 import type { RuleForm } from "./types";
-import { removeNullDeep } from "@/utils/tools";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 export class WanHelper {
 	/** 数据格式化 */
@@ -123,28 +123,7 @@ export class WanHelper {
 			]);
 		}
 
-		// network_weights，如果为空字符串，则删除该属性
-		const { network_weights } = deepCloneForm.config;
-		if (typeof network_weights === "string" && network_weights.trim() === "") {
-			Reflect.deleteProperty(newData.config, "network_weights");
-		}
-
-		// config中如果是空字符串，就删除的属性
-		const configEmptyKeys = [
-			"network_weights",
-			"dit",
-			"dit_high_noise",
-			"clip",
-			"t5",
-			"vae"
-		] as const;
-		configEmptyKeys.forEach((key) => {
-			if (this.isEmptyString(deepCloneForm.config[key])) {
-				Reflect.deleteProperty(newData.config, key);
-			}
-		});
-
-		return removeNullDeep(newData);
+		return LoRAHelper.removeEmptyFields(newData);
 	}
 
 	/** 计算视频预估图片数量数据格式化 */
@@ -184,10 +163,5 @@ export class WanHelper {
 				}
 			})
 		};
-	}
-
-	/** 是否空字符串 */
-	private isEmptyString(str: string): boolean {
-		return typeof str === "string" && str.trim() === "";
 	}
 }

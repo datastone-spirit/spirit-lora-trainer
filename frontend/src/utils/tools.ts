@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-08-21 14:43:20
+ * @LastEditTime: 2025-08-21 16:14:14
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -145,4 +145,14 @@ export function removeNullDeep<T>(obj: T): T {
 			return value;
 		})
 	);
+}
+
+/** 生成随机种子数
+ * 范围：0 - 4294967296
+ * @returns 返回一个随机的种子数
+ */
+export function generateSeed(): number {
+	const MAX_UINT32 = 4294967295;
+
+	return Math.floor(Math.random() * (MAX_UINT32 + 1));
 }

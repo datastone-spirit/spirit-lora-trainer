@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-08-20 15:31:19
+ * @LastEditTime: 2025-08-21 15:30:50
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -90,7 +90,7 @@ import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormData } from "./flux.helper";
 import { validate } from "./flux.validate";
 import type { RuleForm } from "./types";
-import { joinPrefixKey } from "@/utils/tools";
+import { generateSeed, joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -134,7 +134,7 @@ const defaultForm = readonly<RuleForm>({
 	bucket_reso_steps: 64,
 	bucket_no_upscale: false,
 	// -----
-	seed: 42,
+	seed: generateSeed(),
 	max_data_loader_n_workers: 2,
 	learning_rate: "8e-4",
 	save_every_n_epochs: 4,

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 10:22:12
- * @LastEditTime: 2025-08-13 14:32:30
+ * @LastEditTime: 2025-08-21 16:15:15
  * @LastEditors: mulingyuer
  * @Description: 训练流程控制
  * @FilePath: \frontend\src\views\lora\qwen-image\components\TrainingConfig\index.vue
@@ -45,7 +45,7 @@
 		</el-col>
 		<el-col :span="12">
 			<PopoverFormItem label="随机种子" prop="config.seed" popover-content="seed">
-				<el-input-number v-model.number="ruleForm.config.seed" :step="1" step-strictly />
+				<Seed v-model.number="ruleForm.config.seed" />
 			</PopoverFormItem>
 		</el-col>
 		<el-col :span="12">

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-10 09:10:38
- * @LastEditTime: 2025-03-06 17:23:41
+ * @LastEditTime: 2025-08-21 15:41:40
  * @LastEditors: mulingyuer
  * @Description: 模型参数
  * @FilePath: \frontend\src\views\lora\flux\components\ModelParameters\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<PopoverFormItem label="随机种子" prop="seed" popover-content="seed">
-		<el-input-number v-model.number="ruleForm.seed" :step="1" step-strictly />
+		<Seed v-model.number="ruleForm.seed" />
 	</PopoverFormItem>
 	<PopoverFormItem
 		label="workers 数量"

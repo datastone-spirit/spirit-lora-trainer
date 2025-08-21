@@ -87,6 +87,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SDXLNetworkModuleSelect: typeof import('./../src/components/Form/SDXLNetworkModuleSelect.vue')['default']
+    Seed: typeof import('./../src/components/Form/Seed.vue')['default']
     SimpleCollapse: typeof import('./../src/components/Collapse/SimpleCollapse.vue')['default']
     SplitRightPanel: typeof import('./../src/components/Split/SplitRightPanel/index.vue')['default']
     TagAddGlobalPromptSwitch: typeof import('./../src/components/Form/DataSet-v2/TagAddGlobalPromptSwitch.vue')['default']

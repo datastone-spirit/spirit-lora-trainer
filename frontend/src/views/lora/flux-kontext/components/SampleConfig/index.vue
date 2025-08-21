@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 16:15:46
- * @LastEditTime: 2025-08-04 08:49:13
+ * @LastEditTime: 2025-08-21 16:13:30
  * @LastEditors: mulingyuer
  * @Description: 采样设置
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\SampleConfig\index.vue
@@ -80,7 +80,7 @@
 			</el-col>
 			<el-col :span="12">
 				<PopoverFormItem label="种子" prop="sample.seed" popover-content="seed">
-					<el-input-number v-model.number="ruleForm.sample.seed" :step="1" step-strictly :min="0" />
+					<Seed v-model.number="ruleForm.sample.seed" />
 				</PopoverFormItem>
 			</el-col>
 			<el-col :span="12">

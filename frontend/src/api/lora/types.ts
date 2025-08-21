@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-19 15:23:08
+ * @LastEditTime: 2025-08-21 16:15:54
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -366,8 +366,8 @@ export interface StartWanVideoTrainingData {
 		max_train_epochs: number;
 		/** 总训练步数，默认：undefined 【不展示】 */
 		// max_train_steps: number | undefined;
-		/** 随机种子，用于复现训练结果，默认：undefined */
-		seed: number | undefined;
+		/** 随机种子，用于复现训练结果 */
+		seed: number;
 		/** 混合精度训练模式，"no", "fp16", "bf16"，默认："bf16" */
 		mixed_precision: string;
 		/** 保留加载训练集的worker，减少每个 epoch 之间的停顿，默认：false */

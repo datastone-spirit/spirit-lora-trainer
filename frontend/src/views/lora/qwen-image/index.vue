@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-20 15:33:08
+ * @LastEditTime: 2025-08-21 15:31:11
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -93,7 +93,7 @@ import {
 } from "./qwen-image.helper";
 import { validate } from "./qwen-image.validate";
 import type { DatasetItem, RuleForm } from "./types";
-import { joinPrefixKey } from "@/utils/tools";
+import { generateSeed, joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -113,7 +113,7 @@ const defaultForm: RuleForm = {
 		vae_dtype: "bfloat16",
 		text_encoder: "",
 		output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
-		seed: 42,
+		seed: generateSeed(),
 		max_train_steps: 1600,
 		max_train_epochs: 16,
 		mixed_precision: "bf16",

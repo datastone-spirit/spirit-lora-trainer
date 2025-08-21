@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-14 14:47:37
- * @LastEditTime: 2025-08-21 14:53:47
+ * @LastEditTime: 2025-08-21 15:15:27
  * @LastEditors: mulingyuer
  * @Description: gpu item
  * @FilePath: \frontend\src\components\Form\MultiGpu\GpuItem.vue

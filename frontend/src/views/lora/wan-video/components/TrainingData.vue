@@ -109,7 +109,7 @@
 		</el-col>
 		<el-col :span="12">
 			<PopoverFormItem label="随机种子" prop="config.seed" popover-content="seed">
-				<el-input-number v-model.number="ruleForm.config.seed" :step="1" step-strictly />
+				<Seed v-model.number="ruleForm.config.seed" />
 			</PopoverFormItem>
 		</el-col>
 		<el-col :span="12">

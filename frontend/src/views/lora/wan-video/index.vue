@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-20 15:33:38
+ * @LastEditTime: 2025-08-21 15:31:24
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -74,7 +74,7 @@ import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
-import { generateUUID, isImageFile } from "@/utils/tools";
+import { generateSeed, generateUUID, isImageFile } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo.vue";
@@ -111,7 +111,7 @@ const defaultForm: RuleForm = {
 		vae_dtype: "float16",
 		output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		max_train_epochs: 10,
-		seed: undefined,
+		seed: generateSeed(),
 		mixed_precision: "bf16",
 		persistent_data_loader_workers: false,
 		max_data_loader_n_workers: 8,

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-08-19 15:23:36
+ * @LastEditTime: 2025-08-21 14:47:36
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -10,6 +10,7 @@
 import type { StartWanVideoTrainingData, WanVideoVideoDatasetEstimateData } from "@/api/lora";
 import { tomlStringify } from "@/utils/toml";
 import type { RuleForm } from "./types";
+import { removeNullDeep } from "@/utils/tools";
 
 export class WanHelper {
 	/** 数据格式化 */
@@ -143,7 +144,7 @@ export class WanHelper {
 			}
 		});
 
-		return newData;
+		return removeNullDeep(newData);
 	}
 
 	/** 计算视频预估图片数量数据格式化 */

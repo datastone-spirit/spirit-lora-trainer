@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-07-25 15:45:58
+ * @LastEditTime: 2025-08-21 14:45:47
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
@@ -10,6 +10,7 @@
 import type { StartFluxTrainingData } from "@/api/lora/types";
 import type { RuleForm } from "./types";
 import { tomlStringify } from "@/utils/toml";
+import { removeNullDeep } from "@/utils/tools";
 
 type Config = StartFluxTrainingData["config"];
 type Dataset = StartFluxTrainingData["dataset"];
@@ -45,15 +46,6 @@ function _convertNumberToScientific(config: Config, form: RuleForm) {
 /** 转换图片分辨率为数组字符串 */
 function convertResolutionToString(form: RuleForm) {
 	return [form.resolution_width, form.resolution_height].join(",");
-}
-
-/** 转换图片分辨率数组字符串到对象 */
-function _convertResolutionToObject(config: Config) {
-	const resolution = config.resolution.split(",");
-	return {
-		resolution_width: Number(resolution[0]),
-		resolution_height: Number(resolution[1])
-	};
 }
 
 /** 格式化配置对象 */
@@ -173,14 +165,7 @@ function formatConfig(form: RuleForm): Config {
 		config[key] = form[key];
 	});
 
-	// 去除config中所有value为null的属性
-	(Object.keys(config) as (keyof Config)[]).forEach((key) => {
-		if (config[key] === null) {
-			Reflect.deleteProperty(config, key);
-		}
-	});
-
-	return config;
+	return removeNullDeep(config);
 }
 
 /** 格式化dataset */

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-08-19 15:16:23
+ * @LastEditTime: 2025-08-21 14:44:05
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
@@ -10,7 +10,7 @@
 import { getEnv } from "@/utils/env";
 import type { DatasetGeneral, DatasetItem, RuleForm } from "./types";
 import { useSettingsStore } from "@/stores";
-import { generateUUID } from "@/utils/tools";
+import { generateUUID, removeNullDeep } from "@/utils/tools";
 import type { StartQwenImageTrainingData } from "@/api/lora";
 import { tomlStringify } from "@/utils/toml";
 
@@ -158,5 +158,5 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 		data.config.network_weights = config.network_weights;
 	}
 
-	return data;
+	return removeNullDeep(data);
 }

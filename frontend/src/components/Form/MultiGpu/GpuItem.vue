@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-14 14:47:37
- * @LastEditTime: 2025-08-20 14:15:46
+ * @LastEditTime: 2025-08-21 14:53:47
  * @LastEditors: mulingyuer
  * @Description: gpu item
  * @FilePath: \frontend\src\components\Form\MultiGpu\GpuItem.vue
@@ -222,7 +222,8 @@ const availableIcon = computed(() => {
 
 // item click
 function onGpuItemClick() {
-	if (props.disabled || !props.itemData.is_available) return;
+	if (props.disabled) return; // 禁用状态不允许点击
+	if (!props.active && !props.itemData.is_available) return; // 未选中不可用显卡不允许点击
 	emit("itemClick", props.itemData);
 }
 </script>

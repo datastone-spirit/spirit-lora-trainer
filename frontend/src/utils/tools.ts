@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-08-20 15:28:16
+ * @LastEditTime: 2025-08-21 14:43:20
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -118,4 +118,31 @@ export function joinPrefixKey(key: string, prefix?: string) {
 	prefix = prefix ?? import.meta.env.VITE_APP_LOCAL_KEY_PREFIX;
 
 	return `${prefix}${key}`;
+}
+
+/**
+ * 使用 JSON.stringify 和 JSON.parse 深度移除对象中的 null 值。
+ * @param obj 任意类型的输入对象
+ * @returns 返回一个移除了所有 null 属性和数组中 null 元素的新对象
+ */
+export function removeNullDeep<T>(obj: T): T {
+	// 使用泛型 T，使得函数可以接受任意类型的输入，并返回相同（或相似结构）的类型
+	return JSON.parse(
+		JSON.stringify(obj, (_key: string, value: any) => {
+			// 规则1: 如果值是 null，返回 undefined。
+			// JSON.stringify 在序列化时会自动忽略值为 undefined 的键值对。
+			if (value === null) {
+				return undefined;
+			}
+
+			// 规则2: 如果值是数组，过滤掉其中的 null 元素。
+			// 这一步是必须的，因为规则1无法处理数组内的 null 元素。
+			if (Array.isArray(value)) {
+				return value.filter((item) => item !== null);
+			}
+
+			// 规则3: 其他情况，返回值本身。
+			return value;
+		})
+	);
 }

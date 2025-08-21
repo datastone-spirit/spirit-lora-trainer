@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-07 10:00:01
- * @LastEditTime: 2025-02-18 10:32:41
+ * @LastEditTime: 2025-08-21 14:46:59
  * @LastEditors: mulingyuer
  * @Description: 换源视频训练帮助
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.helper.ts
@@ -10,6 +10,7 @@
 import type { StartHyVideoTrainingData } from "@/api/lora";
 import type { RuleForm } from "./types";
 import { tomlStringify } from "@/utils/toml";
+import { removeNullDeep } from "@/utils/tools";
 
 type Config = StartHyVideoTrainingData["config"];
 type Dataset = StartHyVideoTrainingData["dataset"];
@@ -97,14 +98,7 @@ function formatConfig(form: RuleForm): Config {
 		config[key] = form[key];
 	});
 
-	// 去除config中所有value为null的属性
-	(Object.keys(config) as (keyof Config)[]).forEach((key) => {
-		if (config[key] === null) {
-			Reflect.deleteProperty(config, key);
-		}
-	});
-
-	return config;
+	return removeNullDeep(config);
 }
 
 /** 格式化dataset */

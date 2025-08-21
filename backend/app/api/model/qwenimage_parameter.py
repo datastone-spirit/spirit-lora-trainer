@@ -193,13 +193,13 @@ class QWenImageTrainingConfig:
     sigmoid_scale: float = 1.0 # Scale factor for sigmoid timestep sampling (only used when timestep-sampling is "sigmoid" or "shift").
     split_attn: bool = False # use split attention for attention calculation (split batch size=1, affects memory usage and speed)
     text_encoder: str  = None # text encoder (Qwen2.5-VL) checkpoint path
-    timestep_sampling: str = "sigma" # Method to sample timesteps: sigma-based, uniform random, sigmoid of random normal, shift of sigmoid and flux shift.
+    timestep_sampling: str = "shift" # Method to sample timesteps: sigma-based, uniform random, sigmoid of random normal, shift of sigmoid and flux shift.
     training_comment: str  = None # arbitrary comment string stored in metadata
     vae: str  = None # VAE checkpoint path
     vae_dtype: str  = None # data type for VAE, default is float16
     wandb_api_key: str  = None # specify WandB API key to log in before starting training (optional).
     wandb_run_name: str  = None # The name of the specific wandb session
-    weighting_scheme: str  = "none" # weighting scheme for timestep distribution. Default is none
+    weighting_scheme: str  = None # weighting scheme for timestep distribution. Default is none
     xformers: bool = False # use xformers for CrossAttention, requires xformers
 
     @staticmethod
@@ -291,7 +291,20 @@ class QWenImageTrainingConfig:
                 config.blocks_to_swap = 16
             if not is_blank(config.show_timesteps):
                 config.show_timesteps = None
+        
+        if config.weighting_scheme == "none":
+            # let the trainer to determin the default value
+            config.weighting_scheme = None
 
+        # Force blank to none
+        if is_blank(config.base_weights):
+            config.base_weights = None
+        if is_blank(config.network_args):
+            config.network_args = None
+        if is_blank(config.lr_scheduler_type):
+            config.lr_scheduler_type = None
+        if is_blank(config.resume):
+            config.resume = None
         return config
 
 

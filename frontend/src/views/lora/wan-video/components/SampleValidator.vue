@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:58:45
- * @LastEditTime: 2025-08-19 15:20:16
+ * @LastEditTime: 2025-08-21 11:44:36
  * @LastEditors: mulingyuer
  * @Description: 采样与验证选项
  * @FilePath: \frontend\src\views\lora\wan-video\components\SampleValidator.vue
@@ -57,7 +57,7 @@
 	>
 		<el-input
 			v-model="ruleForm.config.sample_prompts"
-			:autosize="{ minRows: 4 }"
+			:rows="6"
 			type="textarea"
 			placeholder="请输入采样提示词，多个词用英文逗号分隔"
 		/>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 14:47:20
- * @LastEditTime: 2025-08-18 14:24:24
+ * @LastEditTime: 2025-08-21 11:44:46
  * @LastEditors: mulingyuer
  * @Description: 优化器与学习率
  * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\OptimizerAndLROptions.vue
@@ -23,7 +23,7 @@
 		>
 			<el-input
 				v-model="ruleForm.config.optimizer_args"
-				:autosize="{ minRows: 4 }"
+				:rows="6"
 				type="textarea"
 				placeholder="请输入自定义优化器参数"
 			/>
@@ -57,7 +57,7 @@
 		>
 			<el-input
 				v-model="ruleForm.config.lr_scheduler_args"
-				:autosize="{ minRows: 4 }"
+				:rows="6"
 				type="textarea"
 				placeholder="请输入自定义调度器参数"
 			/>

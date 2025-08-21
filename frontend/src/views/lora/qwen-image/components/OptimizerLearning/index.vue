@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 10:44:14
- * @LastEditTime: 2025-08-13 10:59:54
+ * @LastEditTime: 2025-08-21 11:44:25
  * @LastEditors: mulingyuer
  * @Description: 优化器和学习率配置
  * @FilePath: \frontend\src\views\lora\qwen-image\components\OptimizerLearning\index.vue
@@ -24,7 +24,7 @@
 	>
 		<el-input
 			v-model="ruleForm.config.optimizer_args"
-			:autosize="{ minRows: 4 }"
+			:rows="6"
 			type="textarea"
 			placeholder="请输入自定义优化器参数"
 		/>
@@ -57,7 +57,7 @@
 	>
 		<el-input
 			v-model="ruleForm.config.lr_scheduler_args"
-			:autosize="{ minRows: 4 }"
+			:rows="6"
 			type="textarea"
 			placeholder="请输入自定义调度器参数"
 		/>

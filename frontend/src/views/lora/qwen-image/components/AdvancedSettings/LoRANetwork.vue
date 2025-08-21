@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 11:24:43
- * @LastEditTime: 2025-08-19 15:03:09
+ * @LastEditTime: 2025-08-21 11:44:21
  * @LastEditors: mulingyuer
  * @Description: LoRA网络结构参数
  * @FilePath: \frontend\src\views\lora\qwen-image\components\AdvancedSettings\LoRANetwork.vue
@@ -42,7 +42,7 @@
 		>
 			<el-input
 				v-model="ruleForm.config.network_args"
-				:autosize="{ minRows: 4 }"
+				:rows="6"
 				type="textarea"
 				placeholder="自定义网络参数"
 			/>

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:31:41
- * @LastEditTime: 2025-08-19 15:01:52
+ * @LastEditTime: 2025-08-21 11:44:40
  * @LastEditors: mulingyuer
  * @Description: 模型结构参数设置
  * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\ModelOptions.vue
@@ -23,7 +23,7 @@
 		>
 			<el-input
 				v-model="ruleForm.config.network_args"
-				:autosize="{ minRows: 4 }"
+				:rows="6"
 				type="textarea"
 				placeholder="自定义网络参数"
 			/>

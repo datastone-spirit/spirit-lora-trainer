@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-14 11:08:28
- * @LastEditTime: 2025-08-19 15:50:43
+ * @LastEditTime: 2025-08-21 11:48:03
  * @LastEditors: mulingyuer
  * @Description: 多GPU表单组件
  * @FilePath: \frontend\src\components\Form\MultiGpu\index.vue
@@ -64,7 +64,7 @@ import { useTrainingStore } from "@/stores";
 
 interface GetGpuInfoResultOptions {
 	/** 是否控制loading状态 */
-	isLoadingVisible: boolean;
+	isLoadingVisible?: boolean;
 	/** 是否显示错误消息弹窗，默认不显示 */
 	shouldShowErrorDialog?: boolean;
 }
@@ -88,7 +88,7 @@ const disabled = computed(() => trainingStore.currentTaskInfo.type !== "none");
 
 /** api 获取gpu信息 */
 async function getGpuInfoResult(options: GetGpuInfoResultOptions) {
-	const { isLoadingVisible, shouldShowErrorDialog = false } = options;
+	const { isLoadingVisible = true, shouldShowErrorDialog = false } = options;
 
 	isLoadingVisible && (loading.value = true);
 
@@ -131,21 +131,18 @@ function onGpuItemClick(data: ItemData) {
 
 // 训练中轮询gpu信息
 const POLL_TIME = 5000;
-const isFirstPoll = ref(true);
 const { pause, resume } = useTimeoutPoll(
 	async () => {
-		await getGpuInfoResult({
-			isLoadingVisible: isFirstPoll.value,
-			shouldShowErrorDialog: isFirstPoll.value
-		});
-		isFirstPoll.value && (isFirstPoll.value = false);
+		await getGpuInfoResult({ isLoadingVisible: false, shouldShowErrorDialog: false });
 	},
 	POLL_TIME,
 	{ immediate: false }
 );
 
 onMounted(() => {
-	resume();
+	getGpuInfoResult({ isLoadingVisible: true, shouldShowErrorDialog: true }).finally(() => {
+		resume();
+	});
 });
 
 onUnmounted(() => {

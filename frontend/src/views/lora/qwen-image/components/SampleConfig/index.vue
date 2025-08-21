@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 11:17:17
- * @LastEditTime: 2025-08-19 15:14:27
+ * @LastEditTime: 2025-08-21 11:44:33
  * @LastEditors: mulingyuer
  * @Description: 采样与推理配置
  * @FilePath: \frontend\src\views\lora\qwen-image\components\SampleConfig\index.vue
@@ -46,7 +46,7 @@
 	>
 		<el-input
 			v-model="ruleForm.config.sample_prompts"
-			:autosize="{ minRows: 4 }"
+			:rows="6"
 			type="textarea"
 			placeholder="请输入采样提示词，多个词用英文逗号分隔"
 		/>

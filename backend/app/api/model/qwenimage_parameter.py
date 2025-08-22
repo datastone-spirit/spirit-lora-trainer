@@ -2,7 +2,7 @@ import dacite
 from app.api.model.base_model import MultiGPUConfig
 
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Any
 from os import path, makedirs
 
 from utils.util import setup_logging, is_blank, getprojectpath
@@ -164,7 +164,7 @@ class QWenImageTrainingConfig:
     network_module: str  = None # network module to train
     network_weights: str  = None # pretrained weights for network
     no_metadata: bool = False # do not save metadata in output model
-    optimizer_args: str  = None # additional arguments for optimizer (like "weight_decay=0.01 betas=0.9,0.999 ...")
+    optimizer_args: Any  = None # additional arguments for optimizer (like "weight_decay=0.01 betas=0.9,0.999 ...")
     optimizer_type: str  = "" # Optimizer to use
     output_dir: str  = None # directory to output trained model
     output_name: str  = None # base name of trained model file
@@ -250,7 +250,7 @@ class QWenImageTrainingConfig:
             config.network_weights = None
 
         config.log_with = "tensorboard" 
-        if config.lr_scheduler == "constant" and config.lr_warmup_steps > 0:
+        if config.lr_scheduler == "constant" and config.lr_warmup_steps is not None and config.lr_warmup_steps > 0:
             logger.warning("lr_warmup_steps is ignored when using constant scheduler")
             config.lr_warmup_steps = 0            
 
@@ -305,6 +305,17 @@ class QWenImageTrainingConfig:
             config.lr_scheduler_type = None
         if is_blank(config.resume):
             config.resume = None
+        
+        if config.optimizer_args is not None and not is_blank(config.optimizer_args):
+            args = config.optimizer_args.split(",")
+            config.optimizer_args = [item for item in args]
+            logger.info(f"optimizer_args is convert to List {config.optimizer_args}")
+
+        if config.network_args is not None and not is_blank(config.network_args):
+            args = config.network_args.split(",")
+            config.network_args = [item for item in args]
+            logger.info(f"network_args is convert to List {config.network_args}")
+            
         return config
 
 

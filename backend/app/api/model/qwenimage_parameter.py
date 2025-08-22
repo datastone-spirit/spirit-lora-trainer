@@ -119,33 +119,33 @@ class QWenImageTrainingConfig:
     fp8_vl: bool = False # use fp8 for Text Encoder model
     gradient_accumulation_steps: int = 1 # Number of updates steps to accumulate before performing a backward
     gradient_checkpointing: bool = False # enable gradient checkpointing
-    guidance_scale: float = 1.0 # Embeded classifier free guidance scale (HunyuanVideo only).
+    guidance_scale: float = None # Embeded classifier free guidance scale (HunyuanVideo only).
     huggingface_path_in_repo: str  = None # huggingface model path to upload files
     huggingface_repo_id: str  = None # huggingface repo name to upload
     huggingface_repo_type: str  = None # huggingface repo type to upload
     huggingface_repo_visibility: str  = None # huggingface repository visibility ('public' for public, 'private' or None for private)
     huggingface_token: str  = None # huggingface token
     img_in_txt_in_offloading: bool = False # offload img_in and txt_in to cpu
-    learning_rate: float = 2e-06 # learning rate
+    learning_rate: float = None # learning rate
     log_config: bool = False # log training configuration
     log_prefix: str  = None # add prefix for each log directory
     log_tracker_config: str  = None # path to tracker config file to use for logging
     log_tracker_name: str  = None # name of tracker to use for logging, default is script-specific default name
     log_with: str  = None # what logging tool(s) to use (if 'all', TensorBoard and WandB are both used)
     logging_dir: str  = None # enable logging and output TensorBoard log to this directory
-    logit_mean: float = 0.0 # mean to use when using the `'logit_normal'` weighting scheme
-    logit_std: float = 1.0 # std to use when using the `'logit_normal'` weighting scheme
+    logit_mean: float = None # mean to use when using the `'logit_normal'` weighting scheme
+    logit_std: float = None # std to use when using the `'logit_normal'` weighting scheme
     lr_decay_steps: int = 0 # Int number of steps for the decay in the lr scheduler (default is 0) or float (<1) with ratio of train steps
     lr_scheduler: str  = "constant" # scheduler to use for learning rate
     lr_scheduler_args: str  = None # additional arguments for scheduler (like "T_max=100")
     lr_scheduler_min_lr_ratio: float = None # The minimum learning rate as a ratio of the initial learning rate for cosine with min lr scheduler and warmup decay scheduler
-    lr_scheduler_num_cycles: int = 1 # Number of restarts for cosine scheduler with restarts
-    lr_scheduler_power: float = 1 # Polynomial power for polynomial scheduler
+    lr_scheduler_num_cycles: int = None # Number of restarts for cosine scheduler with restarts
+    lr_scheduler_power: float = None # Polynomial power for polynomial scheduler
     lr_scheduler_timescale: int = None # Inverse sqrt timescale for inverse sqrt scheduler,defaults to `num_warmup_steps`
     lr_scheduler_type: str  = None # custom scheduler module
-    lr_warmup_steps: int = 0 # Int number of steps for the warmup in the lr scheduler (default is 0) or float with ratio of train steps
-    max_data_loader_n_workers: int = 8 # max num workers for DataLoader (lower is less main RAM usage, faster epoch start and slower data loading)
-    max_grad_norm: float = 1.0 # Max gradient norm, 0 for no clipping
+    lr_warmup_steps: int = None # Int number of steps for the warmup in the lr scheduler (default is 0) or float with ratio of train steps
+    max_data_loader_n_workers: int = 4 # max num workers for DataLoader (lower is less main RAM usage, faster epoch start and slower data loading)
+    max_grad_norm: float = None # Max gradient norm, 0 for no clipping
     max_timestep: int = None # set maximum time step for training (1~1000, default is 1000)
     max_train_epochs: int = None # training epochs (overrides max_train_steps)
     max_train_steps: int = 1600 # training steps
@@ -156,7 +156,7 @@ class QWenImageTrainingConfig:
     metadata_title: str  = None # title for model metadata (default is output_name)
     min_timestep: int = None # set minimum time step for training (0~999, default is 0)
     mixed_precision: str  = "no" # use mixed precision
-    mode_scale: float = 1.29 # Scale of mode weighting scheme. Only effective when using the `'mode'` as the `weighting_scheme`
+    mode_scale: float = None # Scale of mode weighting scheme. Only effective when using the `'mode'` as the `weighting_scheme`
     network_alpha: float = 1 # alpha for LoRA weight scaling, default 1 (same as network_dim for same behavior as old version)
     network_args: str  = None # additional arguments for network (key=value)
     network_dim: int = None # network dimensions (depends on each network)
@@ -190,7 +190,7 @@ class QWenImageTrainingConfig:
     sdpa: bool = False # use sdpa for CrossAttention (requires PyTorch 2.0)
     seed: int = None # random seed for training
     show_timesteps: str  = None # show timesteps in image or console, and return to console
-    sigmoid_scale: float = 1.0 # Scale factor for sigmoid timestep sampling (only used when timestep-sampling is "sigmoid" or "shift").
+    sigmoid_scale: float = None # Scale factor for sigmoid timestep sampling (only used when timestep-sampling is "sigmoid" or "shift").
     split_attn: bool = False # use split attention for attention calculation (split batch size=1, affects memory usage and speed)
     text_encoder: str  = None # text encoder (Qwen2.5-VL) checkpoint path
     timestep_sampling: str = "shift" # Method to sample timesteps: sigma-based, uniform random, sigmoid of random normal, shift of sigmoid and flux shift.

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-22 09:11:08
+ * @LastEditTime: 2025-08-22 14:31:16
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -77,15 +77,16 @@ import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
+import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import DataSet from "./components/DataSet/index.vue";
+import MultiGpuConfig from "./components/MultiGpuConfig/index.vue";
 import OptimizerLearning from "./components/OptimizerLearning/index.vue";
 import QwenImageTrainingLoRAMonitor from "./components/QwenImageTrainingLoRAMonitor/index.vue";
 import SampleConfig from "./components/SampleConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
-import MultiGpuConfig from "./components/MultiGpuConfig/index.vue";
 import {
 	formatFormData,
 	generateDefaultDataset,
@@ -93,7 +94,6 @@ import {
 } from "./qwen-image.helper";
 import { validate } from "./qwen-image.validate";
 import type { DatasetItem, RuleForm } from "./types";
-import { generateSeed, joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -113,7 +113,7 @@ const defaultForm: RuleForm = {
 		vae_dtype: "bfloat16",
 		text_encoder: "",
 		output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
-		seed: generateSeed(),
+		seed: 42,
 		max_train_steps: 1600,
 		max_train_epochs: 16,
 		mixed_precision: "bf16",

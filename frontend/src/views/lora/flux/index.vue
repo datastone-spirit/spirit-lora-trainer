@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-08-21 15:30:50
+ * @LastEditTime: 2025-08-22 14:28:41
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -79,6 +79,7 @@ import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
+import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
@@ -90,7 +91,6 @@ import TrainingSamples from "./components/TrainingSamples/index.vue";
 import { formatFormData } from "./flux.helper";
 import { validate } from "./flux.validate";
 import type { RuleForm } from "./types";
-import { generateSeed, joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -134,7 +134,7 @@ const defaultForm = readonly<RuleForm>({
 	bucket_reso_steps: 64,
 	bucket_no_upscale: false,
 	// -----
-	seed: generateSeed(),
+	seed: 42,
 	max_data_loader_n_workers: 2,
 	learning_rate: "8e-4",
 	save_every_n_epochs: 4,

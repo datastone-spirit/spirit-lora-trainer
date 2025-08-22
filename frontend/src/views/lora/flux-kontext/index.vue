@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-08-21 15:31:02
+ * @LastEditTime: 2025-08-22 14:29:10
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -76,6 +76,7 @@ import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
+import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
@@ -87,7 +88,6 @@ import TrainingConfig from "./components/TrainingConfig/index.vue";
 import { formatFormData, generateDefaultDataset } from "./flex-kontext.helper";
 import { validate } from "./flux-kontext.validate";
 import type { DatasetItem, RuleForm } from "./types";
-import { generateSeed, joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
@@ -152,7 +152,7 @@ const defaultForm: RuleForm = {
 		sample_every: 250,
 		width: 1024,
 		height: 1024,
-		seed: generateSeed(),
+		seed: 42,
 		walk_seed: true,
 		guidance_scale: 4,
 		sample_steps: 25,

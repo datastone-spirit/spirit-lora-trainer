@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-21 16:15:54
+ * @LastEditTime: 2025-08-22 08:59:51
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -453,10 +453,10 @@ export interface StartWanVideoTrainingData {
 		// -------	采样与验证	-------
 		/** 训练前生成初始样本，默认：false */
 		sample_at_first: boolean;
-		/** 每N个epoch生成样本，默认：0 */
-		sample_every_n_epochs: number;
-		/** 每N步生成样本，默认：0 */
-		sample_every_n_steps: number;
+		/** 每N个epoch生成样本，默认：undefined */
+		sample_every_n_epochs: number | undefined;
+		/** 每N步生成样本，默认：undefined */
+		sample_every_n_steps: number | undefined;
 		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
 		sample_prompts: string | undefined;
 		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
@@ -872,10 +872,10 @@ export interface StartQwenImageTrainingData {
 		// -- 采样和推理配置
 		/** 训练前生成初始样本，默认：false */
 		sample_at_first: boolean;
-		/** 每N个epoch生成样本，默认：0 */
-		sample_every_n_epochs: number;
-		/** 每N步生成样本，默认：0 */
-		sample_every_n_steps: number;
+		/** 每N个epoch生成样本，默认：undefined */
+		sample_every_n_epochs: number | undefined;
+		/** 每N步生成样本，默认：undefined */
+		sample_every_n_steps: number | undefined;
 		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
 		sample_prompts: string;
 		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */

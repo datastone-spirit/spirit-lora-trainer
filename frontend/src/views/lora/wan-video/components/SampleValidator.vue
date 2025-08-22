@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:58:45
- * @LastEditTime: 2025-08-21 11:44:36
+ * @LastEditTime: 2025-08-22 09:05:22
  * @LastEditors: mulingyuer
  * @Description: 采样与验证选项
  * @FilePath: \frontend\src\views\lora\wan-video\components\SampleValidator.vue
@@ -24,7 +24,7 @@
 			v-model.number="ruleForm.config.sample_every_n_epochs"
 			:step="1"
 			step-strictly
-			:min="0"
+			:min="1"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
@@ -36,7 +36,7 @@
 			v-model.number="ruleForm.config.sample_every_n_steps"
 			:step="1"
 			step-strictly
-			:min="0"
+			:min="1"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem

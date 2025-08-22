@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 11:17:17
- * @LastEditTime: 2025-08-21 11:44:33
+ * @LastEditTime: 2025-08-22 09:08:42
  * @LastEditors: mulingyuer
  * @Description: 采样与推理配置
  * @FilePath: \frontend\src\views\lora\qwen-image\components\SampleConfig\index.vue
@@ -24,7 +24,7 @@
 			v-model.number="ruleForm.config.sample_every_n_epochs"
 			:step="1"
 			step-strictly
-			:min="0"
+			:min="1"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
@@ -36,7 +36,7 @@
 			v-model.number="ruleForm.config.sample_every_n_steps"
 			:step="1"
 			step-strictly
-			:min="0"
+			:min="1"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem

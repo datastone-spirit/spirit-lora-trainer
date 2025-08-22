@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-21 15:31:11
+ * @LastEditTime: 2025-08-22 09:11:08
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -153,8 +153,8 @@ const defaultForm: RuleForm = {
 		discrete_flow_shift: 3,
 		weighting_scheme: "none",
 		sample_at_first: false,
-		sample_every_n_epochs: 0,
-		sample_every_n_steps: 0,
+		sample_every_n_epochs: undefined,
+		sample_every_n_steps: undefined,
 		sample_prompts: "",
 		guidance_scale: undefined,
 		scale_weight_norms: undefined,
@@ -277,9 +277,9 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_at_first": [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
-				if (!value) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
+				if (!value) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -288,9 +288,9 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_every_n_epochs": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (typeof value !== "number" || value <= 0) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
+				if (typeof value !== "number" || value <= 0) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -299,9 +299,9 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_every_n_steps": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (typeof value !== "number" || value <= 0) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
+				if (typeof value !== "number" || value <= 0) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -310,11 +310,12 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_prompts": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				const { sample_every_n_epochs, sample_every_n_steps } = ruleForm.value.config;
+				const { sample_every_n_epochs, sample_every_n_steps, sample_at_first } =
+					ruleForm.value.config;
 				// 如果配置了采样选项，则提示必须输入采样提示
 				const isLength = value.trim().length > 0;
 				const isValidLength = Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
-				if (isValidLength && !isLength) {
+				if ((isValidLength && !isLength) || sample_at_first) {
 					return callback(new Error("请输入采样提示词"));
 				}
 				if (isLength && !isValidLength) {

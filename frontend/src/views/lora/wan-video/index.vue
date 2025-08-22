@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-21 17:28:09
+ * @LastEditTime: 2025-08-22 09:12:18
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -152,8 +152,8 @@ const defaultForm: RuleForm = {
 		ddp_static_graph: false,
 		ddp_timeout: undefined,
 		sample_at_first: false,
-		sample_every_n_epochs: 0,
-		sample_every_n_steps: 0,
+		sample_every_n_epochs: undefined,
+		sample_every_n_steps: undefined,
 		i2v_sample_image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		sample_prompts: "",
 		guidance_scale: undefined,
@@ -290,10 +290,10 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_at_first": [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
-				if (!value) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
 				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
+				if (!value) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -302,10 +302,10 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_every_n_epochs": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (typeof value !== "number" || value <= 0) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
 				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
+				if (typeof value !== "number" || value <= 0) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -314,10 +314,10 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_every_n_steps": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (typeof value !== "number" || value <= 0) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
 				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
+				if (typeof value !== "number" || value <= 0) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -354,11 +354,12 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_prompts": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				const { sample_every_n_epochs, sample_every_n_steps } = ruleForm.value.config;
+				const { sample_every_n_epochs, sample_every_n_steps, sample_at_first } =
+					ruleForm.value.config;
 				// 如果配置了采样选项，则提示必须输入采样提示
 				const isLength = value.trim().length > 0;
 				const isValidLength = Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
-				if (isValidLength && !isLength) {
+				if ((isValidLength && !isLength) || sample_at_first) {
 					return callback(new Error("请输入采样提示词"));
 				}
 				if (isLength && !isValidLength) {

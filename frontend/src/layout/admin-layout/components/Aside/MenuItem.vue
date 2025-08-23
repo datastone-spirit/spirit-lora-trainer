@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:40:29
- * @LastEditTime: 2024-12-04 16:02:35
+ * @LastEditTime: 2025-08-20 11:32:42
  * @LastEditors: mulingyuer
  * @Description: 按钮item
  * @FilePath: \frontend\src\layout\admin-layout\components\Aside\MenuItem.vue
@@ -18,16 +18,35 @@
 	<el-menu-item v-else :index="menu.path">
 		<Icon v-if="menu.icon" :name="menu.icon" size="19" />
 		<span class="truncate">{{ menu.title }}</span>
+		<el-tag v-if="showTaskTag" class="task-tag" type="primary" effect="dark" round> 训练中 </el-tag>
 	</el-menu-item>
 </template>
 
 <script setup lang="ts">
-defineProps({
+import { useTrainingStore } from "@/stores";
+
+const trainingStore = useTrainingStore();
+
+const props = defineProps({
 	menu: {
 		type: Object as PropType<AdminApp.Menu>,
 		required: true
 	}
 });
+
+const showTaskTag = computed(() => {
+	if (props.menu.children) return false;
+	if (!props.menu.loRATaskType || props.menu.loRATaskType === "none") return false;
+	const currentTaskInfo = trainingStore.currentTaskInfo;
+	if (currentTaskInfo.type === "none") return false;
+	return currentTaskInfo.type === props.menu.loRATaskType;
+});
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+@use "sass:math";
+
+.task-tag {
+	margin-left: math.div($zl-padding, 2);
+}
+</style>

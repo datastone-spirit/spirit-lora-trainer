@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  id="_图层_2"
+  data-name="图层 2"
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 62.77 71.94"
+>
+  <defs>
+    <style>
+      /* 动画1: 路径绘制、描边消失、填充出现 */
+      @keyframes draw-fill-fade {
+        0% {
+          stroke-opacity: 1;
+          fill-opacity: 0;
+          stroke-dashoffset: var(--path-length);
+        }
+        50% {
+          stroke-dashoffset: 0;
+          stroke-opacity: 1;
+          fill-opacity: 0;
+        }
+        70% {
+          stroke-opacity: 0;
+          fill-opacity: 1;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          stroke-opacity: 0;
+          fill-opacity: 1;
+        }
+      }
+
+
+      /* 动画路径的基础样式 */
+      .animated-path {
+        stroke-width: 0.5px;
+        animation:
+          draw-fill-fade 4s linear infinite;
+      }
+
+      /* 绿色部分 */
+      .shape-green {
+        --path-length: 165;
+        fill: #5cbca5;
+        stroke: #5cbca5;
+        stroke-dasharray: var(--path-length);
+        stroke-dashoffset: var(--path-length);
+      }
+
+      /* 深灰色部分 */
+      .shape-dark {
+        --path-length: 130;
+        fill: #3d3a39;
+        stroke: #3d3a39;
+        stroke-dasharray: var(--path-length);
+        stroke-dashoffset: var(--path-length);
+      }
+
+      /* 浅灰色部分 */
+      .shape-gray {
+        --path-length: 155;
+        fill: #b3b3b3;
+        stroke: #b3b3b3;
+        stroke-dasharray: var(--path-length);
+        stroke-dashoffset: var(--path-length);
+      }
+    </style>
+  </defs>
+  <!--
+    添加一个外层容器<g>用于实现整体旋转，
+    而内部的<path>则负责各自的绘制和位移动画
+  -->
+  <g id="logo-rotator">
+    <g id="_图层_1-2" data-name="图层 1">
+      <g>
+        <!-- 绿色路径 -->
+        <path
+          class="animated-path shape-green"
+          d="M62.77,26.72 l-21.16-12.22 v5.11 l7.33,4.23 c.63.32,1.04.96,1.08,1.67 c.04.71-.32,1.39-.93,1.77 l-.04.03 s-.04.02-.06.04 l-5.36,3.1 l19.14,11.06 v-14.77Z M22.93,18.49 L29.28,14.82 L29.28,7.39 L16.49,0 L16.49,14.77 L22.93,18.49Z"
+        />
+        <!-- 深灰色路径 -->
+        <path
+          class="animated-path shape-dark"
+          d="M0,61.96 L12.79,54.58 L12.79,47.15 L6.44,43.48 L0,47.2 V61.96Z M4.42,30.41 v-8.57 c0-.7.37-1.35.98-1.71 c.61-.35,1.36-.36,1.97,0 l.04.02,5.38,3.11 V1.14 L0,8.53 v24.43 l4.42-2.55Z"
+        />
+        <!-- 浅灰色路径 -->
+        <path
+          class="animated-path shape-gray"
+          d="M2.17,64.55 l12.79,7.39 21.17-12.22 -4.42-2.55 -7.36,4.25 c-.61.38-1.38.41-2.01.06 c-.63-.35-1.02-1.01-1.02-1.73 v-6.25 l-19.15,11.05Z M42.01,41.55 L42.01,48.89 L48.45,52.61 L61.24,45.22 L48.44,37.83 L42.01,41.55Z"
+        />
+      </g>
+    </g>
+  </g>
+</svg>

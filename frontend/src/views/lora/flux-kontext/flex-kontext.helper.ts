@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-23 17:50:46
- * @LastEditTime: 2025-07-29 09:26:53
+ * @LastEditTime: 2025-08-21 17:31:03
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 帮助方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flex-kontext.helper.ts
@@ -13,6 +13,7 @@ import { getEnv } from "@/utils/env";
 import type { StartFluxKontextTrainingData } from "@/api/lora";
 import { tomlStringify } from "@/utils/toml";
 import { useSettingsStore } from "@/stores";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 /** 生成默认样本提示对象 */
 export function generateDefaultSamplePrompt(): SamplePrompts[number] {
@@ -135,5 +136,5 @@ export function formatFormData(form: RuleForm): StartFluxKontextTrainingData {
 		frontend_config: tomlStringify(deepCloneForm)
 	};
 
-	return data;
+	return LoRAHelper.removeEmptyFields(data);
 }

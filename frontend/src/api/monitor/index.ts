@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:03
- * @LastEditTime: 2025-07-24 14:13:32
+ * @LastEditTime: 2025-08-13 15:19:04
  * @LastEditors: mulingyuer
  * @Description: 监控api
  * @FilePath: \frontend\src\api\monitor\index.ts
@@ -18,6 +18,8 @@ import type {
 	LoRATrainingInfoResult,
 	ManualTagInfoParams,
 	ManualTagInfoResult,
+	QwenImageTrainingInfoParams,
+	QwenImageTrainingInfoResult,
 	WanVideoTrainingInfoParams,
 	WanVideoTrainingInfoResult
 } from "./types";
@@ -77,6 +79,16 @@ export function wanVideoTrainingInfo(params: WanVideoTrainingInfoParams) {
 /** 监听flux-kontext训练信息 */
 export function fluxKontextTrainingInfo(params: FluxKontextTrainingInfoParams) {
 	return request<FluxKontextTrainingInfoResult>({
+		url: "/tasks/history",
+		method: "GET",
+		params,
+		showErrorMessage: false
+	});
+}
+
+/** 监听qwen image训练信息 */
+export function qwenImageTrainingInfo(params: QwenImageTrainingInfoParams) {
+	return request<QwenImageTrainingInfoResult>({
 		url: "/tasks/history",
 		method: "GET",
 		params,

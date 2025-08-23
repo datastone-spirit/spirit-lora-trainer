@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-10 09:52:39
- * @LastEditTime: 2025-03-06 14:31:38
+ * @LastEditTime: 2025-08-22 09:02:52
  * @LastEditors: mulingyuer
  * @Description: 训练采样
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingSamples\index.vue
@@ -17,7 +17,7 @@
 			v-model.number="ruleForm.sample_every_n_steps"
 			:step="10"
 			step-strictly
-			:min="0"
+			:min="1"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem label="采样提示词" prop="sample_prompts" popover-content="sample_prompts">

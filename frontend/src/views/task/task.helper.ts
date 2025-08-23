@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:32:42
- * @LastEditTime: 2025-07-24 15:33:57
+ * @LastEditTime: 2025-08-15 14:41:04
  * @LastEditors: mulingyuer
  * @Description: task帮助
  * @FilePath: \frontend\src\views\task\task.helper.ts
@@ -25,6 +25,8 @@ export function taskTypeToName(taskType: TaskType) {
 			return "wan视频训练";
 		case TaskType.FLUX_KONTEXT_TRAINING:
 			return "Flux Kontext 训练";
+		case TaskType.QWENIMAGE_TRAINING:
+			return "Qwen Image 训练";
 		default:
 			return "未知任务";
 	}
@@ -72,6 +74,8 @@ export function taskTypeToClass(taskType: TaskType) {
 			return "item3";
 		case TaskType.FLUX_KONTEXT_TRAINING:
 			return "item4";
+		case TaskType.QWENIMAGE_TRAINING:
+			return "item5";
 		default:
 			return "item0";
 	}

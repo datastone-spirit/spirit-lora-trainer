@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:58:45
- * @LastEditTime: 2025-07-30 16:01:36
+ * @LastEditTime: 2025-08-22 09:05:22
  * @LastEditors: mulingyuer
  * @Description: 采样与验证选项
  * @FilePath: \frontend\src\views\lora\wan-video\components\SampleValidator.vue
@@ -57,7 +57,7 @@
 	>
 		<el-input
 			v-model="ruleForm.config.sample_prompts"
-			:autosize="{ minRows: 4 }"
+			:rows="6"
 			type="textarea"
 			placeholder="请输入采样提示词，多个词用英文逗号分隔"
 		/>
@@ -79,14 +79,6 @@
 	>
 		<el-input-number v-model.number="ruleForm.config.guidance_scale" :step="0.1" :min="0" />
 	</PopoverFormItem>
-	<PopoverFormItem
-		v-show="isExpert"
-		label="显示时间步的方式"
-		prop="config.show_timesteps"
-		popoverContent="show_timesteps"
-	>
-		<BaseSelector v-model="ruleForm.config.show_timesteps" :options="showTimeStepsOptions" />
-	</PopoverFormItem>
 </template>
 
 <script setup lang="ts">
@@ -98,19 +90,8 @@ const settingsStore = useSettingsStore();
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-/** 显示时间步的方式选项 */
-const showTimeStepsOptions = ref<ElOptions>([
-	{
-		label: "生成时序图",
-		value: "image"
-	},
-	{
-		label: "打印到控制台",
-		value: "console"
-	}
-]);
 /** 是否i2v任务 */
-const isI2V = computed(() => ruleForm.value.config.task === "i2v-14B");
+const isI2V = computed(() => ["i2v-14B", "i2v-A14B"].includes(ruleForm.value.config.task));
 </script>
 
 <style scoped></style>

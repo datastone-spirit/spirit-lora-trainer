@@ -2,6 +2,7 @@ import os
 import subprocess
 import uuid
 from task.task import Task
+from task.hunyuan_task import HunyuanTrainingTask
 from app.api.model.hunyuan_paramter import HunyuanTrainingParameter
 from app.api.common.utils import dataset2toml
 from datetime import datetime
@@ -61,4 +62,4 @@ class HunyuanTrainingService():
         customize_env["NCCL_IB_DISABLE"]="1"
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env, 
                                 cwd=self.module_path)  
-        return Task.wrap_hunyuan_training(proc, training_paramters, task_id)
+        return HunyuanTrainingTask.from_parameter(proc, training_paramters, task_id)

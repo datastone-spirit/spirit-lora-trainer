@@ -144,3 +144,8 @@ pre {
 	-ms-user-select: none;
 	user-select: none;
 }
+
+.wan-warning-dialog .el-message-box__message a {
+	text-decoration: none;
+	color: var(--el-color-primary);
+}

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-07-31 15:24:41
+ * @LastEditTime: 2025-08-22 14:32:00
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -9,7 +9,7 @@
 -->
 <template>
 	<div class="wan-page">
-		<TwoSplit direction="horizontal" :sizes="[50, 50]" :minSize="[550, 380]">
+		<TwoSplit2>
 			<template #left>
 				<el-form
 					ref="ruleFormRef"
@@ -28,10 +28,10 @@
 					<Collapse v-model="openStep3" title="第3步：训练数据配置">
 						<TrainingData v-model:form="ruleForm" />
 					</Collapse>
-					<Collapse v-model="openStep3" title="第4步：采样与验证选项">
+					<Collapse v-model="openStep4" title="第4步：采样与验证选项">
 						<SampleValidator v-model:form="ruleForm" />
 					</Collapse>
-					<SimpleCollapse v-show="isExpert" v-model="openStep4" title="其它：高级设置">
+					<SimpleCollapse v-show="isExpert" v-model="openStep5" title="其它：高级设置">
 						<AdvancedSettings v-model:form="ruleForm" />
 					</SimpleCollapse>
 				</el-form>
@@ -39,7 +39,7 @@
 			<template #right>
 				<SplitRightPanel :toml="toml" :dir="wanDatasetPath" />
 			</template>
-		</TwoSplit>
+		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
@@ -74,7 +74,7 @@ import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { tomlStringify } from "@/utils/toml";
-import { generateUUID, isImageFile } from "@/utils/tools";
+import { generateUUID, isImageFile, joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo.vue";
@@ -95,29 +95,29 @@ const env = getEnv();
 /** 是否开启小白校验 */
 const isWhiteCheck = settingsStore.whiteCheck;
 const ruleFormRef = ref<FormInstance>();
-const localStorageKey = `${import.meta.env.VITE_APP_LOCAL_KEY_PREFIX}lora_wan_form`;
+const localStorageKey = joinPrefixKey("lora_wan_form");
 const defaultForm: RuleForm = {
 	config: {
 		task: "i2v-14B",
 		output_name: "",
-		i2v_dit: "./models/wan/wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors",
-		t2v_dit: "./models/wan/wan2.1_t2v_14B_fp8_e4m3fn.safetensors",
-		clip: "./models/clip/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth",
-		t5: "./models/clip/models_t5_umt5-xxl-enc-bf16.pth",
+		dit: "",
+		dit_high_noise: "",
+		clip: "",
+		t5: "",
 		fp8_t5: false,
-		vae: "./models/vae/wan_2.1_vae.safetensors",
+		vae: "",
 		vae_cache_cpu: false,
 		vae_dtype: "float16",
 		output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		max_train_epochs: 10,
-		seed: undefined,
+		seed: 42,
 		mixed_precision: "bf16",
 		persistent_data_loader_workers: false,
 		max_data_loader_n_workers: 8,
 		save_every_n_epochs: 4,
 		optimizer_type: "adamw8bit",
 		optimizer_args: "",
-		learning_rate: "2e-4",
+		learning_rate: 0.0002,
 		lr_decay_steps: 0,
 		lr_scheduler: "constant",
 		lr_scheduler_args: "",
@@ -131,10 +131,10 @@ const defaultForm: RuleForm = {
 		network_args: "",
 		network_dim: 64,
 		network_dropout: undefined,
-		network_module: "",
 		network_weights: "",
 		dim_from_weights: false,
 		blocks_to_swap: 36,
+		timestep_boundary: 0,
 		fp8_base: true,
 		fp8_scaled: false,
 		save_every_n_steps: undefined,
@@ -156,7 +156,6 @@ const defaultForm: RuleForm = {
 		i2v_sample_image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		sample_prompts: "",
 		guidance_scale: undefined,
-		show_timesteps: "",
 		gradient_accumulation_steps: 1,
 		gradient_checkpointing: true,
 		img_in_txt_in_offloading: false,
@@ -166,6 +165,7 @@ const defaultForm: RuleForm = {
 		sdpa: true,
 		split_attn: true,
 		xformers: true,
+		offload_inactive_dit: false,
 		discrete_flow_shift: 3,
 		min_timestep: undefined,
 		max_timestep: undefined,
@@ -211,10 +211,12 @@ const defaultForm: RuleForm = {
 		tag_global_prompt: "",
 		tag_is_append: false
 	},
+	dit_model_type: "low",
 	skip_cache_latent: false,
 	skip_cache_text_encoder_latent: false
 };
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
+const isWan22 = computed(() => ["t2v-A14B", "i2v-A14B"].includes(ruleForm.value.config.task));
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	"config.output_dir": [
@@ -287,10 +289,10 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_at_first": [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
-				if (!value) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
 				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
+				if (!value) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -299,10 +301,10 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_every_n_epochs": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (typeof value !== "number" || value <= 0) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
 				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
+				if (typeof value !== "number" || value <= 0) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -311,10 +313,10 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_every_n_steps": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (typeof value !== "number" || value <= 0) return callback();
 				// 联动校验
 				ruleFormRef.value?.validateField("config.sample_prompts");
 				ruleFormRef.value?.validateField("config.i2v_sample_image_path");
+				if (typeof value !== "number" || value <= 0) return callback();
 				callback();
 			},
 			trigger: "change"
@@ -327,7 +329,7 @@ const rules = reactive<FormRules<RuleForm>>({
 					ruleForm.value.config;
 				const isValidSample =
 					sample_at_first || Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
-				if (task === "i2v-14B" && isValidSample) {
+				if (["i2v-A14B", "i2v-14B"].includes(task) && isValidSample) {
 					if (typeof value !== "string" || value.trim().length === 0) {
 						return callback(new Error("请选择一张图片进行采样"));
 					}
@@ -351,17 +353,16 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.sample_prompts": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				const { sample_at_first, sample_every_n_epochs, sample_every_n_steps } =
+				const { sample_every_n_epochs, sample_every_n_steps, sample_at_first } =
 					ruleForm.value.config;
 				// 如果配置了采样选项，则提示必须输入采样提示
 				const isLength = value.trim().length > 0;
-				const isValidLength =
-					sample_at_first || Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
-				if (isValidLength && !isLength) {
+				const isValidLength = Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
+				if ((isValidLength && !isLength) || sample_at_first) {
 					return callback(new Error("请输入采样提示词"));
 				}
 				if (isLength && !isValidLength) {
-					return callback(new Error("配置了采样提示词，请配置采样步数或开启训练前生成初始样本"));
+					return callback(new Error("配置了采样提示词，请配置采样步数"));
 				}
 				callback();
 			},
@@ -372,9 +373,16 @@ const rules = reactive<FormRules<RuleForm>>({
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
 				if (ruleForm.value.data_mode !== "video") return callback();
+				if (isWan22.value && ruleForm.value.config.offload_inactive_dit && value !== 0) {
+					return callback(
+						new Error("Wan2.2任务，且开启了offload_inactive_dit，blocks_to_swap必须为0")
+					);
+				}
+
 				if (typeof value !== "number" || value < 36) {
 					return callback(new Error("视频训练时，blocks_to_swap必须大于或等于36"));
 				}
+
 				callback();
 			},
 			trigger: "change"
@@ -449,7 +457,7 @@ const rules = reactive<FormRules<RuleForm>>({
 						const isSorted = value.every((item, index) => {
 							if (index === 0) return true;
 							const current = item.value ?? 0;
-							const prev = value[index - 1].value ?? 0;
+							const prev = value[index - 1]?.value ?? 0;
 							return current > prev;
 						});
 						if (!isSorted) {
@@ -473,6 +481,17 @@ const rules = reactive<FormRules<RuleForm>>({
 			},
 			trigger: "change"
 		}
+	],
+	"config.mixed_precision": [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				if (isWan22.value && settingsStore.whiteCheck && value !== "fp16") {
+					return callback(new Error("Wan2.2任务，mixed_precision必须为fp16"));
+				}
+
+				callback();
+			}
+		}
 	]
 });
 /** 是否专家模式 */
@@ -492,6 +511,7 @@ const openStep1 = ref(true);
 const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
+const openStep5 = ref(true);
 
 /** toml */
 const toml = ref("");
@@ -499,6 +519,65 @@ const generateToml = useDebounceFn(() => {
 	toml.value = tomlStringify(ruleForm.value);
 }, 300);
 watch(ruleForm, generateToml, { deep: true, immediate: true });
+
+/** 监听表单的一些配置项进行默认值设置 */
+watch([() => ruleForm.value.config.task, () => ruleForm.value.dit_model_type], onDefaultChange);
+const TASK_CONFIGS = {
+	"i2v-14B": { timestep_boundary: 0, discrete_flow_shift: 3 },
+	"t2v-14B": { timestep_boundary: 0, discrete_flow_shift: 3 },
+	"t2v-A14B": { timestep_boundary: 0.875, discrete_flow_shift: 12 },
+	"i2v-A14B": { timestep_boundary: 0.9, discrete_flow_shift: 5 }
+} as const;
+const DIT_MODEL_RANGES = {
+	"t2v-A14B": {
+		low: { min_timestep: 0, max_timestep: 875 },
+		high: { min_timestep: 875, max_timestep: 1000 },
+		both: { min_timestep: 0, max_timestep: 1000 }
+	},
+	"i2v-A14B": {
+		low: { min_timestep: 0, max_timestep: 900 },
+		high: { min_timestep: 900, max_timestep: 1000 },
+		both: { min_timestep: 0, max_timestep: 1000 }
+	}
+} as const;
+const DIT_MODEL_CONFIGS = {
+	low: { offload_inactive_dit: false, blocks_to_swap: 36 },
+	high: { offload_inactive_dit: false, blocks_to_swap: 36 },
+	both: { offload_inactive_dit: true, blocks_to_swap: 0 }
+} as const;
+function onDefaultChange() {
+	const { task } = ruleForm.value.config;
+	const { dit_model_type } = ruleForm.value;
+
+	// 应用任务配置
+	// @ts-expect-error fuck ts type check
+	const taskConfig = TASK_CONFIGS[task];
+	if (!taskConfig) {
+		console.warn(`未处理的任务类型: ${task}`);
+		return;
+	}
+	Object.assign(ruleForm.value.config, taskConfig);
+
+	// 应用特定任务的 timestep 范围配置
+	// @ts-expect-error fuck ts type check
+	const ditRanges = DIT_MODEL_RANGES[task]?.[dit_model_type];
+	if (ditRanges) {
+		Object.assign(ruleForm.value.config, ditRanges);
+	}
+
+	// 应用 dit model 配置
+	// @ts-expect-error fuck ts type check
+	const ditConfig = DIT_MODEL_CONFIGS[dit_model_type];
+	if (ditConfig) {
+		Object.assign(ruleForm.value.config, ditConfig);
+	}
+
+	if (isWan22.value && settingsStore.whiteCheck) {
+		ruleForm.value.config.mixed_precision = "fp16";
+	}
+
+	ElMessage.success("检测到任务类型变化，已应用对应的默认配置");
+}
 
 /** 重置表单 */
 function onResetData() {

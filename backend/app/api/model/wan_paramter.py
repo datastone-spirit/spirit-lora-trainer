@@ -13,8 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 WanTaskMap = {
-    't2v-14B': False, # is i2v ?
-    'i2v-14B': True, # 
+    't2v-14B': (False, False, "wan2.1_t2v_14B_fp8_e4m3fn.safetensors", ""), # is i2v ?, is wan2.2 ?, dit low, dit high noise (wan22 only)
+    'i2v-14B': (True, False, "wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors", ""), # 
+    'i2v-A14B': (True, True, "wan2.2_i2v_low_noise_14B_fp16.safetensors", "wan2.2_i2v_high_noise_14B_fp16.safetensors"), # 
+    't2v-A14B': (False, True, "wan2.2_t2v_low_noise_14B_fp16.safetensors", "wan2.2_t2v_high_noise_14B_fp16.safetensors")# is i2v ?, is wan2.2
 }
 
 # enumerate(FRAM_EXTRACTION_METHODS := ["head", "chunk", "slide", "uniform", "full"])
@@ -40,7 +42,24 @@ def is_i2v(task: str) -> bool:
     """
     Check if the task is i2v (image to video).
     """
-    return task in WanTaskMap and WanTaskMap[task]
+    return task in WanTaskMap and WanTaskMap[task][0]
+
+def is_wan22_task(task: str) -> bool:
+    return task in WanTaskMap and WanTaskMap[task][1]
+
+def wan_task_dit(task: str, model_type: str = 'low') -> str:
+    if not is_wan_task(task):
+        raise ValueError(f"{task} isn't wan task")
+    if is_wan22_task(task) and str.lower(model_type) == 'high':
+        return WanTaskMap[task][3] 
+    return WanTaskMap[task][2]
+    
+
+def wan22_high_noise_model(task: str) -> str:
+    if not is_wan22_task(task):
+        raise ValueError(f"{task} isn't wan2.2 task")
+    return WanTaskMap[task][3] 
+    
 
 @dataclass
 class GeneralConfig:
@@ -172,7 +191,7 @@ class WanTrainingConfig:
     base_weights: str  = None # network weights to merge into the model before training
     base_weights_multiplier: float = None # multiplier for network weights to merge into the model before training
     blocks_to_swap: int = None # number of blocks to swap in the model, max XXX
-    clip: str  = None # text encoder (CLIP) checkpoint path, optional. If training I2V model, this is required
+    clip: str  = None # text encoder (CLIP) checkpoint path, optional. If training Wan2.1 I2V model, this is required
     config_file: str  = None # using .toml instead of args to pass hyperparameter
     dataset_config = None # config file for dataset
     ddp_gradient_as_bucket_view: bool = False # enable gradient_as_bucket_view for DDP
@@ -181,6 +200,11 @@ class WanTrainingConfig:
     dim_from_weights: bool = False # automatically determine dim (rank) from network_weights
     discrete_flow_shift: float = 1.0 # Discrete flow shift for the Euler Discrete Scheduler, default is 1.0.
     dit: str  = None # DiT checkpoint path
+    dit_high_noise: str  = None # DiT checkpoint path for high noise model
+    dynamo_backend: str  = None # dynamo backend type (default is None)
+    dynamo_dynamic: bool = False # use dynamic mode for dynamo
+    dynamo_fullgraph: bool = False # use fullgraph mode for dynamo
+    dynamo_mode: str  = None # dynamo mode (default is default)
     flash3: bool = False # use FlashAttention 3 for CrossAttention, requires FlashAttention 3, HunyuanVideo does not support this yet
     flash_attn: bool = False # use FlashAttention for CrossAttention, requires FlashAttention
     fp8_base: bool = False # use fp8 for base model
@@ -188,7 +212,7 @@ class WanTrainingConfig:
     fp8_t5: bool = False # use fp8 for Text Encoder model
     gradient_accumulation_steps: int = 1 # Number of updates steps to accumulate before performing a backward
     gradient_checkpointing: bool = False # enable gradient checkpointing
-    guidance_scale: float = None # Embeded classifier free guidance scale (HunyuanVideo only).
+    guidance_scale: float = 1.0 # Embeded classifier free guidance scale (HunyuanVideo only).
     huggingface_path_in_repo: str  = None # huggingface model path to upload files
     huggingface_repo_id: str  = None # huggingface repo name to upload
     huggingface_repo_type: str  = None # huggingface repo type to upload
@@ -217,7 +241,7 @@ class WanTrainingConfig:
     max_grad_norm: float = 1.0 # Max gradient norm, 0 for no clipping
     max_timestep: int = None # set maximum time step for training (1~1000, default is 1000)
     max_train_epochs: int = None # training epochs (overrides max_train_steps)
-    max_train_steps: int = None # training steps
+    max_train_steps: int = 1600 # training steps
     metadata_author: str  = None # author name for model metadata
     metadata_description: str  = None # description for model metadata
     metadata_license: str  = None # license for model metadata
@@ -233,11 +257,14 @@ class WanTrainingConfig:
     network_module: str  = None # network module to train
     network_weights: str  = None # pretrained weights for network
     no_metadata: bool = False # do not save metadata in output model
+    offload_inactive_dit: bool = False # Offload inactive DiT model to CPU. Cannot be used with block swap
+    one_frame: bool = False # Use one frame sampling method for sample generation
     optimizer_args: str  = None # additional arguments for optimizer (like "weight_decay=0.01 betas=0.9,0.999 ...")
     optimizer_type: str  = "" # Optimizer to use
     output_dir: str  = None # directory to output trained model
     output_name: str  = None # base name of trained model file
     persistent_data_loader_workers: bool = False # persistent DataLoader workers (useful for reduce time gap between epoch, but may use more memory)
+    preserve_distribution_shape: bool = False # If specified, constrains timestep sampling to [min_timestep, max_timestep] using rejection sampling, preserving the original distribution shape. By default, the [0, 1] range is scaled, which distorts the distribution. Only effective when `timestep_sampling` is not 'sigma'.
     resume: str  = None # saved state to resume training
     resume_from_huggingface: bool = False # resume from huggingface (ex: --resume {repo_id}
     sage_attn: bool = False # use SageAttention. requires SageAttention
@@ -262,7 +289,8 @@ class WanTrainingConfig:
     split_attn: bool = False # use split attention for attention calculation (split batch size=1, affects memory usage and speed)
     t5: str  = None # text encoder (T5) checkpoint path
     task: str  = "t2v-14B" # The task to run.
-    timestep_sampling: str = 'sigma' # Method to sample timesteps: sigma-based, uniform random, sigmoid of random normal and shift of sigmoid.
+    timestep_boundary: int = None # Timestep boundary for switching between high and low noise models, defaults to None (task specific)
+    timestep_sampling: str = "sigma" # Method to sample timesteps: sigma-based, uniform random, sigmoid of random normal, shift of sigmoid and flux shift.
     training_comment: str  = None # arbitrary comment string stored in metadata
     vae: str  = None # VAE checkpoint path
     vae_cache_cpu: bool = False # cache features in VAE on CPU
@@ -273,7 +301,7 @@ class WanTrainingConfig:
     xformers: bool = False # use xformers for CrossAttention, requires xformers
     
     @staticmethod
-    def validate(config: 'WanTrainingConfig') -> 'WanTrainingConfig':
+    def validate(config: 'WanTrainingConfig', dit_model_type: str = 'low') -> 'WanTrainingConfig':
         """
         Validate the WanTrainingConfig instance.
         This method is a placeholder for any validation logic you want to implement.
@@ -296,8 +324,6 @@ class WanTrainingConfig:
             # Force empty str to None
             config.network_weights = None
 
-        if config.blocks_to_swap and config.blocks_to_swap <=0:
-            raise ValueError("blocks_to_swap must be greater than 0.")
 
         if is_blank(config.task):
             logger.warning("task is required.")
@@ -308,34 +334,44 @@ class WanTrainingConfig:
             raise ValueError(f"Invalid task: {config.task}. Supported tasks are: {', '.join(WanTaskMap.keys())}")
         
         if is_i2v(config.task) :
-            if is_blank(config.clip):
+            if is_wan22_task(config.task):
+                logger.info("clip isn't required for wan22 training task")
+                config.clip = ""
+            elif is_blank(config.clip):
                 config.clip = path.join(getprojectpath(), "models","clip", "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth")
 
-            if not path.exists(config.clip):
+            if not is_wan22_task(config.task) and not path.exists(config.clip):
                 logger.warning(f"clip path does not exist: {config.clip}")
-                raise ValueError(f"clip path does not exist: {config.clip}")
+                raise ValueError(f"clip path does not exist: {config.clip}, please set correct clip path for i2v task")
         
         if is_blank(config.dit):
-            if is_i2v(config.task):
-                config.dit = path.join(getprojectpath(), "models", 
-                                       "wan", "wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors")
-            else:
-                config.dit = path.join(getprojectpath(), "models", 
-                                   "wan", "wan2.1_t2v_14B_fp8_e4m3fn.safetensors")
-
+            config.dit = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = dit_model_type))
+        
         if not path.exists(config.dit):
             logger.warning(f"dit path does not exist: {config.dit}")
-            raise ValueError(f"dit path does not exist: {config.dit}")
+            raise ValueError(f"dit path does not exit: {config.dit}, please set correct dit path for wan task")
+        
+        if dit_model_type == 'both' and is_wan22_task(config.task):
+            if is_blank(config.dit):
+                config.dit = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = 'low'))
+            if is_blank(config.dit_high_noise):
+                config.dit_high_noise = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = 'high'))
+
+            logger.info(f"user want to train wan22 with both (high, low noise) models, so let's set dit {config.dit}, dit_high_noise {config.dit_high_noise}")
+
+            if not os.path.exists(config.dit) or not os.path.exists(config.dit_high_noise):
+                logger.warning(f"dit or dit_high_noise path does not exist: {config.dit} or {config.dit_high_noise}")
+                raise ValueError(f"dit or dit_high_noise path does not exit: {config.dit} or {config.dit_high_noise}, please set correct dit path for wan task")
 
         if is_blank(config.vae):
             config.vae = path.join(getprojectpath(), "models", "vae", "wan_2.1_vae.safetensors")
 
         if not path.exists(config.vae):
             logger.warning(f"vae path does not exist: {config.vae}")
-            raise ValueError(f"vae path does not exist: {config.vae}")
-        
+            raise ValueError(f"vae path does not exit: {config.vae}, please set correct vae path for wan task")
+
         if not config.t5:
-            config.t5 = path.join(getprojectpath(), "models", "clip", "models_t5_umt5-xxl-enc-bf16.pth")
+            config.t5 = path.join(getprojectpath(), "models", "clip", "models_t5_umt5-xxl-enc-bf16.pth") # same with wan2.1
 
         if not path.exists(config.t5):
             logger.warning(f"t5 path does not exist: {config.t5}")
@@ -346,7 +382,6 @@ class WanTrainingConfig:
             logger.warning("lr_warmup_steps is ignored when using constant scheduler")
             config.lr_warmup_steps = 0
         
-        config.network_module = "networks.lora_wan"
 
         if not config.max_train_epochs:
             logger.warning("max_train_epochs must have a value.")
@@ -366,8 +401,8 @@ class WanTrainingConfig:
             raise ValueError("network_dim must be greater than 0.")
         
         if config.resume and not path.exists(config.resume):
-            logger.warning(f"Resuming training must set correct resume path: {config.resume}")
-            raise ValueError(f"Resuming training must set correct resume path: {config.resume}")
+            logger.warning(f"resuming training must set correct resume path: {config.resume}")
+            raise ValueError(f"resuming training must set correct resume path: {config.resume}")
         
         if config.sample_every_n_steps and config.sample_every_n_steps <= 0:
             logger.warning("sample_every_n_steps must be greater than 0.")
@@ -380,8 +415,8 @@ class WanTrainingConfig:
         if (config.sample_every_n_steps and config.sample_every_n_steps > 0 or  \
             config.sample_every_n_epochs and config.sample_every_n_epochs > 0): 
             if is_blank(config.sample_prompts):
-                logger.warning("Do sampling requires sample_prompts.")
-                raise ValueError("Do sampling requires sample_prompts.")
+                logger.warning("do sampling requires sample_prompts.")
+                raise ValueError("do sampling requires sample_prompts.")
             else:
                 config.sample_prompts = generate_sample_prompt_file(config.sample_prompts)  
         
@@ -392,14 +427,33 @@ class WanTrainingConfig:
                 raise ValueError("sample_prompts requires sample_every_n_steps or sample_every_n_steps.")
 
         if is_blank(config.output_dir):
-            raise ValueError("Output directory is required.")
+            raise ValueError("output directory is required.")
         elif not path.exists(config.output_dir):
-            raise ValueError(f"Output directory does not exist: {config.output_dir}")
+            raise ValueError(f"output directory does not exist: {config.output_dir}")
         
         # Example of validating a field
         if config.learning_rate <= 0:
             raise ValueError("Learning rate must be positive.")
         
+        if config.min_timestep is not None and (config.min_timestep < 0 or config.min_timestep > 999):
+            logger.info(f"min_timestep is an invalidate value {config.min_timestep}, set to 0")
+            config.min_timestep = 0
+
+        if config.max_timestep is not None and (config.max_timestep < 0 or config.max_timestep > 1000):
+            logger.info(f"max_timestep is an invalidate value {config.max_timestep}, set to 1000")
+            config.max_timestep = 1000
+        
+        if config.max_timestep is not None and  \
+            config.min_timestep is not None and \
+            config.max_timestep < config.min_timestep:
+            logger.info(f"max_timestamp {config.max_timestep} must greater then min_timestamp {config.min_timestep}")
+            raise ValueError(f"max_timestamp {config.max_timestep} must greater then min_timestamp {config.min_timestep}")
+        
+        if not is_blank(config.dit) and not is_blank(config.dit_high_noise):
+            # treat this as high/low both training
+            if config.timestep_boundary is None:
+                config.timestep_boundary = 900 if is_i2v(config.task) else 875
+
         return config
         
 
@@ -410,11 +464,12 @@ class WanTrainingParameter:
     frontend_config: Optional[str] = None
     skip_cache_text_encoder_latent: Optional[bool] = False
     skip_cache_latent: Optional[bool] = False
+    dit_model_type: Optional[str] = 'low'
 
     @classmethod
     def from_dict(cls, dikt) -> 'WanTrainingParameter':
         try: 
-            return dacite.from_dict(data_class=WanTrainingParameter, data=dikt,
+            return dacite.from_dict(data_class=cls, data=dikt,
                                     config=dacite.Config(
                                         type_hooks={
                                             Tuple[int, int]: lambda x: tuple(x), 
@@ -433,7 +488,12 @@ class WanTrainingParameter:
         if not parameter.config:
             raise ValueError("Training config is required.")
         
-        parameter.config = WanTrainingConfig.validate(parameter.config)
+        parameter.dit_model_type = str.lower(parameter.dit_model_type) if parameter.dit_model_type else 'low'
+        
+        if parameter.dit_model_type not in ['low', 'high', 'both']:
+            raise ValueError(f"Invalid dit_model_type: {parameter.dit_model_type}. Valid values are: ['low', 'high', 'both']")
+
+        parameter.config = WanTrainingConfig.validate(parameter.config, dit_model_type=parameter.dit_model_type)
         
         if not parameter.dataset:
             raise ValueError("Dataset config is required.")
@@ -443,6 +503,10 @@ class WanTrainingParameter:
         if os.environ.get("DISABLE_STRICT_VALIDATION", "0") == "0":
             # Strict validation is for cloud, try to avoid the run time error 
             WanTrainingParameter.strict_validate(parameter) 
+
+        # network_module is fix string for the specific task. CAN NOT BE CHANGED
+        parameter.config.network_module = "networks.lora_wan"
+
         return parameter
 
 
@@ -457,6 +521,14 @@ class WanTrainingParameter:
         if not parameter.dataset:
             raise ValueError("Dataset config is required.")
         
+        if parameter.config.blocks_to_swap and parameter.config.blocks_to_swap <=0 \
+            and parameter.config.offload_inactive_dit is False:
+            raise ValueError("blocks_to_swap must be greater than 0 when offload_inactive_dit is False.")
+
+        if not is_blank(parameter.config.dit_high_noise) and not is_blank(parameter.config.dit):
+            raise ValueError("could not training both high and low noise on a 24GB vram !")
+
+
         for dataset in parameter.dataset.datasets:
             if not dataset.image_directory and not dataset.video_directory:
                 raise ValueError("Either image_directory or video_directory must be specified.")

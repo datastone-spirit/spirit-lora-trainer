@@ -1,6 +1,6 @@
 from args2models import init_advanced, loop_advanced_component
-from hv_train_network import setup_parser_common
-from wan_train_network import wan_setup_parser
+from musubi_tuner.hv_train_network import setup_parser_common
+from musubi_tuner.wan_train_network import wan_setup_parser
 from typing import List
 
 

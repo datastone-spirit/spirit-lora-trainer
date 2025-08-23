@@ -1,12 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-07-29 08:39:11
+ * @LastEditTime: 2025-08-22 08:59:51
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
  * 怎么可能会有bug！！！
  */
+
+import type { MultiGpuConfig } from "../types";
 
 /** 启动flux训练参数 */
 export interface StartFluxTrainingData extends Record<string, any> {
@@ -337,12 +339,14 @@ export interface StartHyVideoTrainingResult {
 export interface StartWanVideoTrainingData {
 	config: {
 		// -------	LoRA 基本信息	-------
-		/** 任务类型，i2v-14B|t2v-14B， 默认："i2v-14B" */
+		/** 任务类型，i2v-14B|t2v-14B|t2v-A14B|i2v-A14B， 默认："i2v-14B" */
 		task: string;
 		/** 模型文件名，默认："" */
 		output_name: string;
 		/** wan2模型地址 */
 		dit: string;
+		/** wna2.2 high模型地址 */
+		dit_high_noise: string;
 		/** CLIP模型路径 */
 		clip: string;
 		/** T5模型路径，默认："" */
@@ -362,8 +366,8 @@ export interface StartWanVideoTrainingData {
 		max_train_epochs: number;
 		/** 总训练步数，默认：undefined 【不展示】 */
 		// max_train_steps: number | undefined;
-		/** 随机种子，用于复现训练结果，默认：undefined */
-		seed: number | undefined;
+		/** 随机种子，用于复现训练结果 */
+		seed: number;
 		/** 混合精度训练模式，"no", "fp16", "bf16"，默认："bf16" */
 		mixed_precision: string;
 		/** 保留加载训练集的worker，减少每个 epoch 之间的停顿，默认：false */
@@ -406,14 +410,14 @@ export interface StartWanVideoTrainingData {
 		network_dim: number | undefined;
 		/** 训练时随机失活比例，0.1-0.3，默认：undefined */
 		network_dropout: number | undefined;
-		/** 指定要加载的神经网络模块，默认："" */
-		network_module: string;
 		/** 预训练权重文件路径，默认：""，空字符的情况下不要传递该属性 */
 		network_weights: string;
 		/** 用于自动从预训练权重中推断网络维度（rank）,必须与 --network_weights 配合使用，默认：false */
 		dim_from_weights: boolean;
 		/** 指定要交换的网络块数量，用于调整LoRA模型结构，默认36 */
 		blocks_to_swap: number | undefined;
+		/** wan2.2使用，需清理blocks_to_swap为0，默认值：I2V：0.9,T2V: 0.875 */
+		timestep_boundary: number;
 		/** 启用基础FP8模式，目前云端必须开启，默认：true */
 		fp8_base: boolean;
 		/** 启用FP8缩放模式，云端不支持，默认：false */
@@ -457,8 +461,6 @@ export interface StartWanVideoTrainingData {
 		sample_prompts: string | undefined;
 		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
 		guidance_scale: number | undefined;
-		/** 显示时间步的方式（"image"生成时序图，"console"打印到控制台），默认："" */
-		show_timesteps: string;
 		// -------	高级显存优化	-------
 		/** 显存优化技术，通过累积多个小批次的梯度来等效大batch_size训练，默认：1 */
 		gradient_accumulation_steps: number;
@@ -478,6 +480,8 @@ export interface StartWanVideoTrainingData {
 		split_attn: boolean;
 		/** 启用xformers优化库（需要安装xformers），用于CrossAttention层的显存优化，默认：true */
 		xformers: boolean;
+		/** wan2.2使用，将不活跃的 DiT 模型卸载到 CPU，节省显存，仅在未指定blocks_to_swap时生效，默认：false */
+		offload_inactive_dit: boolean;
 		// -------	扩散模型参数	-------
 		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：3.0 */
 		discrete_flow_shift: number;
@@ -570,14 +574,16 @@ export interface StartWanVideoTrainingData {
 			/** 数据集重复次数，默认：1 */
 			num_repeats: number;
 		};
-		datasets: [StartWanVideoTrainingImageDataset | StartWanVideoTrainingVideoDataset];
+		datasets: Array<StartWanVideoTrainingImageDataset | StartWanVideoTrainingVideoDataset>;
 	};
-	/** 训练器的训练配置 */
-	frontend_config: string;
+	/** wan2.2 模型类型：high、low、both。默认low  */
+	dit_model_type: string;
 	/** 跳过图像潜空间缓存阶段，默认：false */
 	skip_cache_latent: boolean;
 	/** 跳过Text 编码潜空间缓存阶段，默认：false */
 	skip_cache_text_encoder_latent: boolean;
+	/** 训练器的训练配置 */
+	frontend_config: string;
 }
 
 /** 启动wan视频训练参数-图片训练数据集 */
@@ -786,6 +792,212 @@ export interface StartFluxKontextTrainingData {
 
 /** 启动flux kontext 训练结果 */
 export interface StartFluxKontextTrainingResult {
+	msg: string;
+	success: boolean;
+	/** 任务id */
+	task_id: string;
+}
+
+/** 启动Qwen Image 训练参数 */
+export interface StartQwenImageTrainingData {
+	config: {
+		// -- 基本信息
+		/** LoRA 模型的名称，默认："" */
+		output_name: string;
+		/** 底模文件路径，默认："" */
+		dit: string;
+		/** VAE模型路径，默认："" */
+		vae: string;
+		/** VAE模型的计算精度（默认float16），可选值如fp16/bf16/fp32等，默认："" */
+		vae_dtype: string;
+		/** 文本编码器模型路径，默认："" */
+		text_encoder: string;
+		/** 模型保存目录，默认："" */
+		output_dir: string;
+		// -- 训练流程控制
+		/** 随机种子，用于复现训练结果，默认：42 */
+		seed: number;
+		/** 最大训练步数，默认：1600 */
+		max_train_steps: number;
+		/** 最大训练轮数，默认：16 */
+		max_train_epochs: number;
+		/** 混合精度训练模式，"no", "fp16", "bf16"，默认："bf16" */
+		mixed_precision: string;
+		/** 保存训练状态 配合 resume 参数可以继续从某个状态训练，默认：true */
+		save_state: boolean;
+		/** 每N步保存模型，默认：undefined */
+		save_every_n_steps: number | undefined;
+		/** 每N epoch保存模型，默认：4 */
+		save_every_n_epochs: number;
+		/** 保留最近N个epoch的检查点，默认：undefined */
+		save_last_n_epochs: number | undefined;
+		/** 保留最近N步训练状态，默认：undefined */
+		save_last_n_epochs_state: number | undefined;
+		/** 保留最近N步的检查点，默认：undefined */
+		save_last_n_steps: number | undefined;
+		/** 专门控制state步数保留（覆盖save_last_n_steps），默认：undefined */
+		save_last_n_steps_state: number | undefined;
+		/** 训练结束时强制保存state（即使未启用save_state），默认：false */
+		save_state_on_train_end: boolean;
+		/** 恢复训练的state目录路径，默认："" */
+		resume: string;
+		// -- 优化器和学习率配置
+		/** 优化器设置，默认：adamw8bit */
+		optimizer_type: string;
+		/**
+		 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
+		 * 示例：weight_decay=0.01 betas=.9,.999
+		 */
+		optimizer_args: string;
+		/** 学习率，默认：0.0001 */
+		learning_rate: number;
+		/** 学习率调度器设置，默认：constant */
+		lr_scheduler: string;
+		/** 学习率预热步数，默认：0 */
+		lr_warmup_steps: number;
+		/** 学习率衰减步数，0-总训练步数，默认：0 */
+		lr_decay_steps: number;
+		/** 自定义调度器参数，默认："" */
+		lr_scheduler_args: string;
+		/** 最小学习率比例，0.01-0.1，默认：undefined */
+		lr_scheduler_min_lr_ratio: number | undefined;
+		/** 余弦重启次数，默认：1 */
+		lr_scheduler_num_cycles: number;
+		/** 多项式衰减强度，1.0-5.0，默认：1 */
+		lr_scheduler_power: number;
+		/** 逆平方根调度时间系数，默认：undefined */
+		lr_scheduler_timescale: number | undefined;
+		/** 自定义调度器模块，默认："" */
+		lr_scheduler_type: string;
+		// -- 采样和推理配置
+		/** 训练前生成初始样本，默认：false */
+		sample_at_first: boolean;
+		/** 每N个epoch生成样本，默认：undefined */
+		sample_every_n_epochs: number | undefined;
+		/** 每N步生成样本，默认：undefined */
+		sample_every_n_steps: number | undefined;
+		/** 采样使用的提示词，json格式：'{"image_path":"xx","prompt":"xxx"}' */
+		sample_prompts: string;
+		/** 文本控制强度，数值越大生成结果越遵循文本提示，默认：undefined */
+		guidance_scale: number | undefined;
+		// -- LoRA网络结构参数
+		/** LoRA的秩（rank），8-128，默认：32 */
+		network_dim: number;
+		/** LoRA权重缩放因子，8-128（推荐等于dim），默认：1 */
+		network_alpha: number;
+		/** 训练时随机失活比例，0.1-0.3，默认：undefined */
+		network_dropout: number | undefined;
+		/** 自定义 network_args
+		 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
+		 */
+		network_args: string;
+		/** 预训练权重文件路径，默认：""，空字符的情况下不要传递该属性 */
+		network_weights?: string;
+		/** 基础权重-合并入底模的 LoRA  */
+		base_weights: string;
+		/** 基础权重-合并入底模的 LoRA 权重，与 base_weights 对应 */
+		base_weights_multiplier: number | undefined;
+		// -- 扩散模型参数
+		/** 时间步采样方法，uniform|sigmoid|shift|sigma，默认："shift" */
+		timestep_sampling: string;
+		/** 时间步采样sigmoid缩放系数（仅当timestep_sampling为sigmoid/shift时生效），默认：1.0 */
+		sigmoid_scale: number;
+		/** 最小扩散时间步长，0-999（控制起始噪声水平），默认：undefined */
+		min_timestep: number | undefined;
+		/** 最大扩散时间步长，1-1000（控制噪声水平），默认：undefined */
+		max_timestep: number | undefined;
+		/** 时间步权重分布集中度，1.0-2.0（值越大越集中），默认：1.29 */
+		mode_scale: number;
+		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：3.0 */
+		discrete_flow_shift: number;
+		/** 时间步权重分配方案，可选值：logit_normal|mode|uniform|none，默认："none" */
+		weighting_scheme: string;
+		// -- 性能优化
+		/** 权重标准化防梯度爆炸，默认：undefined */
+		scale_weight_norms: number | undefined;
+		/** 梯度裁剪阈值（防止梯度爆炸），0.5-2.0（0表示禁用），默认：1.0 */
+		max_grad_norm: number;
+		/** 显存优化技术，通过时间换空间策略，减少约30%显存占用，开启会增加训练时间，默认：true */
+		gradient_checkpointing: boolean;
+		/** 使用PyTorch原生注意力，默认：true */
+		sdpa: boolean;
+		/**  是否使用SageAttention优化节省显存，默认：false */
+		sage_attn: boolean;
+		/** 启用xformers优化库（需要安装xformers），用于CrossAttention层的显存优化，默认：true */
+		xformers: boolean;
+		/** 是否使用split attention优化（需要XFORMERS），默认：true */
+		split_attn: boolean;
+		/** 启用FlashAttention 3，默认：false */
+		flash3: boolean;
+		/** 启用FlashAttention优化CrossAttention计算，默认：false */
+		flash_attn: boolean;
+		/** 对基础模型使用 FP8 精度，默认：true */
+		fp8_base: boolean;
+		/** 启用FP8缩放模式，云端不支持，默认：false */
+		fp8_scaled: boolean;
+		/** 文本编码器优化，显存小于16GB建议开启，默认：false */
+		fp8_vl: boolean;
+		// -- 系统资源配置
+		/** 控制数据加载并行进程数，4-16（根据CPU核心数调整），默认：8 */
+		max_data_loader_n_workers: number;
+		/** 保留加载训练集的worker，减少每个 epoch 之间的停顿，默认：false */
+		persistent_data_loader_workers: boolean;
+		/** 指定要交换的网络块数量，用于调整LoRA模型结构，默认16 */
+		blocks_to_swap: number;
+		/** 让图像和文本的预处理任务在 CPU 上执行，默认：false */
+		img_in_txt_in_offloading: boolean;
+		// -- 分布式训练配置
+		/** 为 DDP 启用 gradient_as_bucket_view，默认：false */
+		ddp_gradient_as_bucket_view: boolean;
+		/** 固定结构模型加速, 默认：false */
+		ddp_static_graph: boolean;
+		/** 设置DDP进程间通信的超时时间 */
+		ddp_timeout: number | undefined;
+	};
+	dataset: {
+		/** 数据集通用配置 */
+		general: {
+			/** 图片尺寸，默认：[960, 544] */
+			resolution: [number, number];
+			/** 描述文件扩展名，默认：".txt" */
+			caption_extension: string;
+			/** 批次大小，默认：1 */
+			batch_size: number;
+			/** 启用动态分辨率，启用 arb 桶以允许非固定宽高比的图片，默认：true */
+			enable_bucket: boolean;
+			/** 允许小图放大，arb 桶不放大图片，默认：false */
+			bucket_no_upscale: boolean;
+		};
+		/** 数据集数组 */
+		datasets: Array<{
+			/** 数据集目录 */
+			image_directory: string;
+			/** 数据集重复次数，默认：1 */
+			num_repeats: number;
+			/** 图片尺寸，默认：[960, 544] */
+			resolution: [number, number];
+			/** 描述文件扩展名，默认：".txt" */
+			caption_extension: string;
+			/** 批次大小，默认：1 */
+			batch_size: number;
+			/** 启用动态分辨率，启用 arb 桶以允许非固定宽高比的图片，默认：true */
+			enable_bucket: boolean;
+			/** 允许小图放大，arb 桶不放大图片，默认：false */
+			bucket_no_upscale: boolean;
+		}>;
+	};
+	/** 多gpu训练配置 */
+	multi_gpu_config: MultiGpuConfig;
+	/** 跳过图像潜空间缓存阶段，默认：false */
+	skip_cache_latent: boolean;
+	/** 跳过Text 编码潜空间缓存阶段，默认：false */
+	skip_cache_text_encoder_latent: boolean;
+	/** 训练器的训练配置 */
+	frontend_config: string;
+}
+
+/** 启动Qwen Image 训练结果 */
+export interface StartQwenImageTrainingResult {
 	msg: string;
 	success: boolean;
 	/** 任务id */

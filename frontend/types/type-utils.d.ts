@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-25 15:56:35
- * @LastEditTime: 2025-07-28 11:24:55
+ * @LastEditTime: 2025-08-14 10:02:57
  * @LastEditors: mulingyuer
  * @Description: 类型工具
  * @FilePath: \frontend\types\type-utils.d.ts
@@ -32,3 +32,7 @@ type DeepPrettify<T> = T extends (...args: any[]) => any
 
 // 专门处理数组类型
 type DeepPrettifyArray<T> = T extends (infer U)[] ? DeepPrettify<U>[] : T;
+
+type DeepNonNullable<T> = {
+	[K in keyof T]: T[K] extends object ? DeepNonNullable<T[K]> : NonNullable<T[K]>;
+};

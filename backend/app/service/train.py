@@ -9,6 +9,7 @@ import logging
 import subprocess
 from task.manager import task_decorator
 from task.task import Task
+from task.flux_task import TrainingTask
 from task.manager import tm
 from utils.util import pathFormat
 
@@ -101,7 +102,7 @@ class TrainingService:
         customize_env["NCCL_P2P_DISABLE"]="1" # For flux training, we disable NCCL P2P and IB
         customize_env["NCCL_IB_DISABLE"]="1"
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env)
-        return Task.wrap_training(proc, training_paramters, task_id)
+        return TrainingTask.from_parameter(proc, training_paramters, task_id)
 
     def get_gpu_info(self):
         try:

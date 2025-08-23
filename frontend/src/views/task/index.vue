@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-26 11:21:01
- * @LastEditTime: 2025-07-24 15:26:14
+ * @LastEditTime: 2025-08-15 14:42:37
  * @LastEditors: mulingyuer
  * @Description: 任务列表页
  * @FilePath: \frontend\src\views\task\index.vue
@@ -42,6 +42,7 @@ import LoraTaskDetail from "./components/LoraTaskDetail.vue";
 import HYDetail from "./components/HYDetail.vue";
 import WanDetail from "./components/WanDetail.vue";
 import FluxKontextDetail from "./components/FluxKontextDetail.vue";
+import QwenImageDetail from "./components/QwenImageDetail.vue";
 import type { TaskType } from "@/api/types";
 
 const loading = ref(true);
@@ -52,7 +53,8 @@ const DetailMap: Record<TaskType, any> = {
 	training: LoraTaskDetail,
 	hunyuan_training: HYDetail,
 	wan_training: WanDetail,
-	kontext_training: FluxKontextDetail
+	kontext_training: FluxKontextDetail,
+	qwenimage_training: QwenImageDetail
 };
 // HACK: QTMD 类型校验
 function getItemData() {

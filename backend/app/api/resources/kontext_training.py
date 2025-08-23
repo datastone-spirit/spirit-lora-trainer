@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource
 from app.service.kontext_train import KontextTrainingService
 from app.api.common.utils import use_swagger_config, res
-from app.api.swagger.swagger_config import kontext_training_api_config
+from app.api.swagger.kontext_swagger_config import kontext_training_api_config
 from app.api.model.kontext_parameter import KontextTrainingParameter
 
 

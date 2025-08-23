@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 10:01:07
- * @LastEditTime: 2025-03-28 14:47:32
+ * @LastEditTime: 2025-08-20 15:58:44
  * @LastEditors: mulingyuer
  * @Description: 设置页面
  * @FilePath: \frontend\src\views\settings\index.vue
@@ -37,6 +37,14 @@
 					<el-switch v-model="ruleForm.enableTrainingTaskDataRecovery"></el-switch>
 				</el-form-item>
 				<div class="form-item-info">启用后，可以在页面首次加载时恢复正在训练的任务表单数据</div>
+				<el-form-item label="重置分隔面板宽度设置">
+					<el-button
+						:icon="RiResetLeftLine"
+						circle
+						@click="onDeleteTwoSplitLocalStorage"
+					></el-button>
+				</el-form-item>
+				<div class="form-item-info">点击后将分隔面板宽度恢复默认值</div>
 			</el-form>
 		</div>
 	</div>
@@ -46,12 +54,25 @@
 import { useSettingsStore } from "@/stores";
 import type { TrainerSettings } from "@/stores";
 import type { FormInstance, FormRules } from "element-plus";
+import { useIcon } from "@/hooks/useIcon";
+import { CONFIG_KEYS } from "@/constants";
 
 const settingsStore = useSettingsStore();
+
+// icon
+const RiResetLeftLine = useIcon({ name: "ri-reset-left-line" });
 
 const ruleFormRef = ref<FormInstance>();
 const ruleForm = storeToRefs(settingsStore).trainerSettings;
 const rules = reactive<FormRules<TrainerSettings>>({});
+
+// 删除分隔面板宽度设置
+function onDeleteTwoSplitLocalStorage() {
+	localStorage.removeItem(CONFIG_KEYS.TWO_SPLIT2_LEFT_KEY);
+	localStorage.removeItem(CONFIG_KEYS.TWO_SPLIT2_RIGHT_KEY);
+
+	ElMessage.success("重置分隔面板宽度设置成功");
+}
 </script>
 
 <style lang="scss" scoped>

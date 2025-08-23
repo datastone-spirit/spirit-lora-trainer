@@ -1,52 +1,129 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-07-25 09:37:56
+ * @LastEditTime: 2025-08-21 17:29:45
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
  * 怎么可能会有bug！！！
  */
-import type {
-	StartWanVideoTrainingData,
-	StartWanVideoTrainingVideoDataset,
-	WanVideoVideoDatasetEstimateData
-} from "@/api/lora";
+import type { StartWanVideoTrainingData, WanVideoVideoDatasetEstimateData } from "@/api/lora";
 import { tomlStringify } from "@/utils/toml";
-import type { RuleForm, TargetFrames } from "./types";
-
-/** 过滤并转换对象中的键值对 */
-export function filterAndConvertKeysToNumber(
-	data: Record<string, any>, // 接收一个任意键值对的对象
-	keys: string[] // 接收一个key数组
-): Record<string, number> {
-	// 返回一个新的对象，值为number类型
-	const result: Record<string, number> = {};
-
-	keys.forEach((key) => {
-		if (key in data) {
-			// 判断key是否在对象中
-			const value = data[key];
-			// 尝试将值转换为数字，如果值不是数字或者不能转换，返回NaN
-			result[key] = Number(value);
-		}
-	});
-
-	return result;
-}
+import type { RuleForm } from "./types";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 export class WanHelper {
 	/** 数据格式化 */
 	public formatData(data: RuleForm): StartWanVideoTrainingData {
 		const deepCloneForm = structuredClone(toRaw(data));
+		const { config } = deepCloneForm;
 
-		return {
-			config: this.formatConfig(deepCloneForm),
+		const newData: StartWanVideoTrainingData = {
+			config: {
+				task: config.task,
+				output_name: config.output_name,
+				dit: config.dit,
+				dit_high_noise: config.dit_high_noise,
+				clip: config.clip,
+				t5: config.t5,
+				fp8_t5: config.fp8_t5,
+				vae: config.vae,
+				vae_cache_cpu: config.vae_cache_cpu,
+				vae_dtype: config.vae_dtype,
+				output_dir: config.output_dir,
+				max_train_epochs: config.max_train_epochs,
+				seed: config.seed,
+				mixed_precision: config.mixed_precision,
+				persistent_data_loader_workers: config.persistent_data_loader_workers,
+				max_data_loader_n_workers: config.max_data_loader_n_workers,
+				save_every_n_epochs: config.save_every_n_epochs,
+				optimizer_type: config.optimizer_type,
+				optimizer_args: config.optimizer_args,
+				learning_rate: config.learning_rate,
+				lr_decay_steps: config.lr_decay_steps,
+				lr_scheduler: config.lr_scheduler,
+				lr_scheduler_args: config.lr_scheduler_args,
+				lr_scheduler_min_lr_ratio: config.lr_scheduler_min_lr_ratio,
+				lr_scheduler_num_cycles: config.lr_scheduler_num_cycles,
+				lr_scheduler_power: config.lr_scheduler_power,
+				lr_scheduler_timescale: config.lr_scheduler_timescale,
+				lr_scheduler_type: config.lr_scheduler_type,
+				lr_warmup_steps: config.lr_warmup_steps,
+				network_alpha: config.network_alpha,
+				network_args: config.network_args,
+				network_dim: config.network_dim,
+				network_dropout: config.network_dropout,
+				network_weights: config.network_weights,
+				dim_from_weights: config.dim_from_weights,
+				blocks_to_swap: config.blocks_to_swap,
+				timestep_boundary: Math.floor(config.timestep_boundary * 1000),
+				fp8_base: config.fp8_base,
+				fp8_scaled: config.fp8_scaled,
+				save_every_n_steps: config.save_every_n_steps,
+				save_last_n_epochs: config.save_last_n_epochs,
+				save_last_n_epochs_state: config.save_last_n_epochs_state,
+				save_last_n_steps: config.save_last_n_steps,
+				save_last_n_steps_state: config.save_last_n_steps_state,
+				save_state: config.save_state,
+				save_state_on_train_end: config.save_state_on_train_end,
+				resume: config.resume,
+				scale_weight_norms: config.scale_weight_norms,
+				max_grad_norm: config.max_grad_norm,
+				ddp_gradient_as_bucket_view: config.ddp_gradient_as_bucket_view,
+				ddp_static_graph: config.ddp_static_graph,
+				ddp_timeout: config.ddp_timeout,
+				sample_at_first: config.sample_at_first,
+				sample_every_n_epochs: config.sample_every_n_epochs,
+				sample_every_n_steps: config.sample_every_n_steps,
+				sample_prompts: undefined,
+				guidance_scale: config.guidance_scale,
+				gradient_accumulation_steps: config.gradient_accumulation_steps,
+				gradient_checkpointing: config.gradient_checkpointing,
+				img_in_txt_in_offloading: config.img_in_txt_in_offloading,
+				flash3: config.flash3,
+				flash_attn: config.flash_attn,
+				sage_attn: config.sage_attn,
+				sdpa: config.sdpa,
+				split_attn: config.split_attn,
+				xformers: config.xformers,
+				offload_inactive_dit: config.offload_inactive_dit,
+				discrete_flow_shift: config.discrete_flow_shift,
+				min_timestep: config.min_timestep,
+				max_timestep: config.max_timestep,
+				mode_scale: config.mode_scale,
+				logit_mean: config.logit_mean,
+				logit_std: config.logit_std,
+				timestep_sampling: config.timestep_sampling,
+				sigmoid_scale: config.sigmoid_scale,
+				weighting_scheme: config.weighting_scheme
+			},
 			dataset: this.formatDataset(deepCloneForm),
-			frontend_config: tomlStringify(deepCloneForm),
-			skip_cache_latent: data.skip_cache_latent,
-			skip_cache_text_encoder_latent: data.skip_cache_text_encoder_latent
+			dit_model_type: deepCloneForm.dit_model_type,
+			skip_cache_latent: deepCloneForm.skip_cache_latent,
+			skip_cache_text_encoder_latent: deepCloneForm.skip_cache_text_encoder_latent,
+			frontend_config: tomlStringify(deepCloneForm)
 		};
+
+		// 采样
+		const {
+			sample_at_first,
+			sample_every_n_epochs,
+			sample_every_n_steps,
+			i2v_sample_image_path,
+			sample_prompts
+		} = deepCloneForm.config;
+		const isSample =
+			sample_at_first || Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
+		if (isSample) {
+			newData.config.sample_prompts = JSON.stringify([
+				{
+					image_path: i2v_sample_image_path,
+					prompt: sample_prompts
+				}
+			]);
+		}
+
+		return LoRAHelper.removeEmptyFields(newData);
 	}
 
 	/** 计算视频预估图片数量数据格式化 */
@@ -54,189 +131,37 @@ export class WanHelper {
 		return this.formatDataset(data);
 	}
 
-	/** 格式化config数据 */
-	private formatConfig(data: RuleForm): StartWanVideoTrainingData["config"] {
-		const config: StartWanVideoTrainingData["config"] = {
-			task: "",
-			output_name: "",
-			dit: "",
-			clip: "",
-			t5: "",
-			fp8_t5: false,
-			vae: "",
-			vae_cache_cpu: false,
-			vae_dtype: "",
-			output_dir: "",
-			max_train_epochs: 0,
-			seed: undefined,
-			mixed_precision: "",
-			persistent_data_loader_workers: false,
-			max_data_loader_n_workers: 0,
-			optimizer_type: "",
-			optimizer_args: "",
-			learning_rate: 0,
-			lr_decay_steps: 0,
-			lr_scheduler: "",
-			lr_scheduler_args: "",
-			lr_scheduler_min_lr_ratio: undefined,
-			lr_scheduler_num_cycles: 0,
-			lr_scheduler_power: 0,
-			lr_scheduler_timescale: undefined,
-			lr_scheduler_type: "",
-			lr_warmup_steps: 0,
-			network_alpha: 0,
-			network_args: "",
-			network_dim: undefined,
-			network_dropout: undefined,
-			network_module: "",
-			network_weights: "",
-			dim_from_weights: false,
-			blocks_to_swap: undefined,
-			fp8_base: false,
-			fp8_scaled: false,
-			save_every_n_epochs: undefined,
-			save_every_n_steps: undefined,
-			save_last_n_epochs: undefined,
-			save_last_n_epochs_state: undefined,
-			save_last_n_steps: undefined,
-			save_last_n_steps_state: undefined,
-			save_state: false,
-			save_state_on_train_end: false,
-			resume: "",
-			scale_weight_norms: undefined,
-			max_grad_norm: 0,
-			ddp_gradient_as_bucket_view: false,
-			ddp_static_graph: false,
-			ddp_timeout: undefined,
-			sample_at_first: false,
-			sample_every_n_epochs: undefined,
-			sample_every_n_steps: undefined,
-			sample_prompts: "",
-			guidance_scale: undefined,
-			show_timesteps: "",
-			gradient_accumulation_steps: 0,
-			gradient_checkpointing: false,
-			img_in_txt_in_offloading: false,
-			flash3: false,
-			flash_attn: false,
-			sage_attn: false,
-			sdpa: false,
-			split_attn: false,
-			xformers: false,
-			discrete_flow_shift: 0,
-			min_timestep: undefined,
-			max_timestep: undefined,
-			mode_scale: 0,
-			logit_mean: 0,
-			logit_std: 0,
-			timestep_sampling: "",
-			sigmoid_scale: 0,
-			weighting_scheme: ""
-		};
-
-		// 将科学计数的string转成number
-		const scientificNumberKeys = ["learning_rate"];
-		const scientificObj = filterAndConvertKeysToNumber(data.config, scientificNumberKeys);
-		Object.assign(config, scientificObj);
-
-		// wan模型的配置项
-		const wanDitKeys = ["dit", "i2v_dit", "t2v_dit"];
-		config.dit = data.config.task === "i2v-14B" ? data.config.i2v_dit : data.config.t2v_dit;
-
-		// 采样处理
-		const sampleKeys = ["i2v_sample_image_path", "sample_prompts"];
-		const { sample_at_first, sample_every_n_epochs, sample_every_n_steps } = data.config;
-		const isSample =
-			sample_at_first || Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
-		config.sample_prompts = isSample
-			? JSON.stringify([
-					{
-						image_path: data.config.i2v_sample_image_path,
-						prompt: data.config.sample_prompts
-					}
-				])
-			: undefined;
-
-		// 其它数据直接赋值
-		const excludeKeys = [...scientificNumberKeys, ...wanDitKeys, ...sampleKeys];
-		const otherKeys = Object.keys(config).filter(
-			(key) => !excludeKeys.includes(key) && Object.hasOwn(data.config, key)
-		);
-		otherKeys.forEach((key) => {
-			// @ts-expect-error 去除ts类型检查
-			config[key] = data.config[key];
-		});
-
-		// network_weights 如果为空就设置为null，最后会被移除
-		if (typeof config.network_weights === "string" && config.network_weights.trim() === "") {
-			// @ts-expect-error 去除ts类型检查
-			config.network_weights = null;
-		}
-
-		return this.removeNullProperty(config);
-	}
-
 	/** 格式化dataset数据 */
 	private formatDataset(data: RuleForm): StartWanVideoTrainingData["dataset"] {
-		const { data_mode } = data;
-		const { general, datasets } = data.dataset;
-
-		const formatGeneral: StartWanVideoTrainingData["dataset"]["general"] = {
-			resolution: [general.resolution[0], general.resolution[1]],
-			batch_size: general.batch_size,
-			enable_bucket: general.enable_bucket,
-			bucket_no_upscale: general.bucket_no_upscale,
-			caption_extension: general.caption_extension,
-			num_repeats: general.num_repeats
-		};
-		let formatDatasets: StartWanVideoTrainingData["dataset"]["datasets"][number];
-
-		switch (data_mode) {
-			case "image":
-				formatDatasets = {
-					image_directory: datasets[0].image_directory
-				};
-				break;
-			case "video":
-				formatDatasets = {
-					video_directory: datasets[0].video_directory,
-					frame_extraction: datasets[0].frame_extraction,
-					target_frames: this.formatTargetFrames(datasets[0].target_frames),
-					frame_stride: datasets[0].frame_stride,
-					frame_sample: datasets[0].frame_sample,
-					max_frames: datasets[0].max_frames
-				};
-				break;
-		}
-
+		const { data_mode, dataset } = data;
 		return {
-			general: formatGeneral,
-			datasets: [formatDatasets]
+			general: {
+				resolution: [dataset.general.resolution[0], dataset.general.resolution[1]],
+				batch_size: dataset.general.batch_size,
+				enable_bucket: dataset.general.enable_bucket,
+				bucket_no_upscale: dataset.general.bucket_no_upscale,
+				caption_extension: dataset.general.caption_extension,
+				num_repeats: dataset.general.num_repeats
+			},
+			datasets: dataset.datasets.map((item) => {
+				switch (data_mode) {
+					case "image":
+						return {
+							image_directory: item.image_directory
+						};
+					case "video":
+						return {
+							video_directory: item.video_directory,
+							frame_extraction: item.frame_extraction,
+							target_frames: item.target_frames
+								.filter((frame) => typeof frame.value === "number")
+								.map((frame) => frame.value!),
+							frame_stride: item.frame_stride,
+							frame_sample: item.frame_sample,
+							max_frames: item.max_frames
+						};
+				}
+			})
 		};
-	}
-
-	/** 去除对象中值为null的属性 */
-	private removeNullProperty<T extends Record<string, any>>(obj: T): T {
-		const result = {} as T;
-
-		// 使用 for...in 循环遍历对象的所有键
-		for (const key in obj) {
-			if (obj.hasOwnProperty(key) && obj[key] !== null) {
-				// 确保键存在，并且值不为null
-				result[key] = obj[key];
-			}
-		}
-
-		return result;
-	}
-
-	/** 将target_frames格式化成数组 */
-	private formatTargetFrames(
-		target_frames: TargetFrames
-	): StartWanVideoTrainingVideoDataset["target_frames"] {
-		target_frames = target_frames.filter((item) => item.value !== undefined);
-		return target_frames.map(
-			(item) => item.value
-		) as StartWanVideoTrainingVideoDataset["target_frames"];
 	}
 }

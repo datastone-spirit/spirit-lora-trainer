@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 15:37:04
- * @LastEditTime: 2025-03-26 17:05:01
+ * @LastEditTime: 2025-08-18 15:55:25
  * @LastEditors: mulingyuer
  * @Description: 高级设置
- * @FilePath: \frontend\src\views\lora\wan\components\AdvancedSettings\index.vue
+ * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>

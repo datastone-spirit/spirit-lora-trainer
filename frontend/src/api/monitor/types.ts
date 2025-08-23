@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 15:22:11
- * @LastEditTime: 2025-07-24 15:28:19
+ * @LastEditTime: 2025-08-15 16:52:06
  * @LastEditors: mulingyuer
  * @Description: 监控api类型
  * @FilePath: \frontend\src\api\monitor\types.ts
@@ -304,6 +304,85 @@ export interface FluxKontextTrainingInfoResult {
 				estimated_total_time_seconds: number;
 				/** 每一步耗时 s */
 				seconds_per_step: number;
+		  }
+		| string;
+}
+
+/** 监听qwen image训练信息参数 */
+export interface QwenImageTrainingInfoParams {
+	/** 任务id */
+	task_id: string;
+}
+
+/** qwen image训练的阶段 */
+export type QwenImageTrainingPhase =
+	| "none"
+	/** 缓存潜在特征，使用VAE模型将图像或视频编码为潜在空间表示，并缓存这些特征以加速训练 */
+	| "QwenImageCacheLatentSubTask"
+	/** 缓存文本编码器输出，使用T5文本编码器处理描述文本，并缓存编码结果 */
+	| "QwenImageCacheTextEncoderOutputSubTask"
+	/** 实际训练，使用前面阶段生成的缓存文件，训练模型 */
+	| "QwenImageTrainingSubTask";
+
+/** 监听qwen image训练信息结果 */
+export interface QwenImageTrainingInfoResult {
+	/** 任务 ID */
+	id: string;
+	/** 任务状态 */
+	status: TaskStatus;
+	/** 任务类型 */
+	task_type: TaskType.QWENIMAGE_TRAINING;
+	/** 开始时间 */
+	start_time: number;
+	/** 结束时间 */
+	end_time: number | null;
+	/** 是否显示查看采样 */
+	is_sampling?: boolean;
+	/** 采样文件路径，只有开启了采样才会有 */
+	sampling_path?: string;
+	/** 阶段 */
+	phase: QwenImageTrainingPhase;
+	/** 模型路径 */
+	model_path: string;
+	/** 详情，没数据的时候是空对象，任务失败的时候是字符串 */
+	detail:
+		| {
+				/** 平均损失 */
+				average_loss?: number;
+				/** 每个设备上的批次数 总为1, 没有启用分布式训练 */
+				batch_size_per_device?: number;
+				/** 当前步数 */
+				current: number;
+				/** 当前损失 */
+				current_loss?: number;
+				/** 已经耗时 */
+				elapsed?: string;
+				/**  多少步累计梯度， 这里是1, 就是每一步的梯度都不累计 */
+				gradient_accumulation_steps?: number;
+				/** 当前损失 */
+				loss: number;
+				/** 损失平均值（无效属性） */
+				loss_avr: number;
+				/** 不知道 */
+				lr_group0?: number;
+				/** unet学习率 */
+				lr_unet: number;
+				/**  每轮的总批次数 */
+				num_batches_per_epoch?: number;
+				/** 训练轮数 */
+				num_epochs?: number;
+				/** 进度百分比 */
+				progress: number;
+				/** 剩余时间 */
+				remaining?: string;
+				/** 每秒速度 */
+				speed?: number;
+				/** 总步数（无效属性） */
+				total: number;
+				/** 总训练轮数 */
+				total_epoch?: number;
+				/** 总训练步数 */
+				total_optimization_steps?: number;
 		  }
 		| string;
 }

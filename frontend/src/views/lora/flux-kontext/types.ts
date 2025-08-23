@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:55:18
- * @LastEditTime: 2025-08-04 09:31:12
+ * @LastEditTime: 2025-08-20 15:17:00
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 类型
  * @FilePath: \frontend\src\views\lora\flux-kontext\types.ts
@@ -64,3 +64,4 @@ export type RuleForm = Prettify<
 export type SamplePrompts = RuleForm["sample"]["prompts"];
 
 export type Datasets = RuleForm["datasets"];
+export type DatasetItem = Datasets[number];

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-07-28 17:34:41
+ * @LastEditTime: 2025-08-21 17:29:35
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -9,21 +9,6 @@
  */
 import type { FormInstance, FormValidateFailure } from "element-plus";
 import { v4 as uuidV4 } from "uuid";
-
-/** 生成一个键值对对象，键为接口的键，值为键名 */
-export function generateKeyMapFromInterface<
-	T extends Record<string, any>,
-	R extends Record<keyof T, any> = Record<keyof T, string>
->(instance: T): R {
-	return Object.keys(instance).reduce((acc, key) => {
-		// 这里我们需要确保 `key` 被正确地断言为 `keyof T`
-		const typedKey = key as keyof T;
-		// 使用类型断言来满足 R 的类型要求
-		// @ts-expect-error 由于 TypeScript 类型系统的限制，这里使用类型断言
-		acc[typedKey] = key;
-		return acc;
-	}, {} as R);
-}
 
 /** 简单深度克隆 */
 export function easyDeepClone<T>(obj: T): T {
@@ -105,7 +90,7 @@ export function formatFormValidateMessage(invalidFields: FormValidateFailure["fi
 
 	Object.keys(invalidFields).forEach((field) => {
 		const errors = invalidFields[field];
-		message += `${errors.map((error) => error.message).join("、")}\n`;
+		message += `${errors?.map((error) => error.message).join("、")}\n`;
 	});
 
 	return message;
@@ -126,4 +111,26 @@ export function isImageFile(filename: string): boolean {
 
 	const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico", "tif", "tiff"];
 	return imageExtensions.includes(extension);
+}
+
+/** 拼接应用前缀的key */
+export function joinPrefixKey(key: string, prefix?: string) {
+	prefix = prefix ?? import.meta.env.VITE_APP_LOCAL_KEY_PREFIX;
+
+	return `${prefix}${key}`;
+}
+
+/** 生成随机种子数
+ * 范围：0 - 4294967296
+ * @returns 返回一个随机的种子数
+ */
+export function generateSeed(): number {
+	const MAX_UINT32 = 4294967295;
+
+	return Math.floor(Math.random() * (MAX_UINT32 + 1));
+}
+
+/** 是否是空字符串 */
+export function isEmptyString(value: unknown): boolean {
+	return typeof value === "string" && value.trim() === "";
 }

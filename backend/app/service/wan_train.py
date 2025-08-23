@@ -1,12 +1,9 @@
 import os
-import subprocess
 import uuid
 from task.task import Task
+from task.wan_task import WanTrainingTask
 from app.api.model.wan_paramter import WanTrainingParameter
-from app.api.common.utils import dataset2toml
 from datetime import datetime
-from typing import Optional
-import sys
 
 from utils.util import getprojectpath, setup_logging
 
@@ -32,7 +29,7 @@ class WanTrainingService():
 
     @task_decorator 
     def run_train(self, training_paramters: WanTrainingParameter, task_id: str=None, module_path:str = None):
-        return Task.wrap_wan_training(training_paramters, task_id, module_path,
+        return WanTrainingTask.from_parameter(training_paramters, task_id, module_path,
                                       is_sampling = True \
                                           if training_paramters.config.sample_prompts \
                                           and os.path.exists(training_paramters.config.sample_prompts) \

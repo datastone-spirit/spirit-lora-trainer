@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 15:38:25
- * @LastEditTime: 2025-07-30 16:06:27
+ * @LastEditTime: 2025-08-21 11:43:43
  * @LastEditors: mulingyuer
  * @Description: 学习率与优化器设置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\LRAndOptimizer\index.vue
@@ -58,7 +58,7 @@
 		>
 			<el-input
 				v-model="ruleForm.optimizer_args"
-				:autosize="{ minRows: 4 }"
+				:rows="6"
 				type="textarea"
 				placeholder="请输入自定义优化器参数"
 			/>

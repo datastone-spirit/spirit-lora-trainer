@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-09 14:54:45
- * @LastEditTime: 2025-07-30 09:45:52
+ * @LastEditTime: 2025-08-14 11:01:45
  * @LastEditors: mulingyuer
  * @Description: 任务初始化处理
  * @FilePath: \frontend\src\init-lora-trainer\task.ts
@@ -12,6 +12,7 @@ import type {
 	HyVideoTrainingInfoResult,
 	LoRATrainingInfoResult,
 	ManualTagInfoResult,
+	QwenImageTrainingInfoResult,
 	WanVideoTrainingInfoResult
 } from "@/api/monitor";
 import type { CurrentTaskResult } from "@/api/task";
@@ -23,6 +24,7 @@ import { useTag } from "@/hooks/task/useTag";
 import type { AxiosError } from "axios";
 import { useWanLora } from "@/hooks/task/useWanLora";
 import { useFluxKontextLora } from "@/hooks/task/useFluxKontextLora";
+import { useQwenImageLora } from "@/hooks/task/useQwenImage";
 
 class TaskInitializer {
 	constructor(private readonly taskData: CurrentTaskResult) {}
@@ -46,6 +48,9 @@ class TaskInitializer {
 				break;
 			case TaskType.FLUX_KONTEXT_TRAINING: // flux kontext 训练
 				initPromise = this.initFluxKontextTraining();
+				break;
+			case TaskType.QWENIMAGE_TRAINING: // qwen image 训练
+				initPromise = this.initQwenImageTraining();
 				break;
 			default:
 				console.warn("未知任务类型", this.taskData.task_type);
@@ -125,6 +130,21 @@ class TaskInitializer {
 		const { fluxKontextLoraMonitor } = useFluxKontextLora();
 
 		return fluxKontextLoraMonitor.setInitData({
+			taskId: id,
+			result
+		});
+	}
+
+	/** qwen image 训练 */
+	private async initQwenImageTraining() {
+		const result = this.taskData as QwenImageTrainingInfoResult;
+		const { id, status } = result;
+
+		if (status === "complete" || status === "failed") return;
+
+		const { qwenImageLoraMonitor } = useQwenImageLora();
+
+		return qwenImageLoraMonitor.setInitData({
 			taskId: id,
 			result
 		});

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 16:25:06
- * @LastEditTime: 2025-07-30 15:59:17
+ * @LastEditTime: 2025-08-21 11:44:05
  * @LastEditors: mulingyuer
  * @Description: 网络配置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\NetworkOptions\index.vue
@@ -49,7 +49,7 @@
 				v-model="ruleForm.network_args"
 				placeholder="请输入自定义 network_args"
 				type="textarea"
-				:autosize="{ minRows: 4 }"
+				:rows="6"
 			/>
 		</PopoverFormItem>
 		<PopoverFormItem

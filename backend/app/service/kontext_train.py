@@ -2,6 +2,7 @@ import os
 import subprocess
 import uuid
 from task.task import Task
+from task.kontext_task import KontextTrainingTask
 from app.api.model.kontext_parameter import KontextTrainingParameter
 from app.api.common.utils import dataset2toml
 from datetime import datetime
@@ -69,4 +70,5 @@ class KontextTrainingService():
         
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=customize_env, 
                                 cwd=self.module_path)  
-        return Task.wrap_kontext_training(proc, training_parameters, task_id)
+        return KontextTrainingTask.from_parameter(proc, training_parameters, task_id)
+

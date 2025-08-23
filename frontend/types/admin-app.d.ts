@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-27 17:02:33
- * @LastEditTime: 2024-12-04 09:36:52
+ * @LastEditTime: 2025-08-20 11:26:10
  * @LastEditors: mulingyuer
  * @Description: 应用全局类型定义
- * @FilePath: \spirit-lora-trainer\frontend\types\admin-app.d.ts
+ * @FilePath: \frontend\types\admin-app.d.ts
  * 怎么可能会有bug！！！
  */
 
@@ -15,6 +15,7 @@ declare namespace AdminApp {
 		name: string;
 		title: string;
 		icon?: string;
+		loRATaskType?: TaskType;
 		children?: Menu[];
 	}
 	/** navTab数据类型 */

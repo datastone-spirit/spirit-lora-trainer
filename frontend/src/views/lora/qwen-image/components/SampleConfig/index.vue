@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 11:17:17
- * @LastEditTime: 2025-08-22 09:08:42
+ * @LastEditTime: 2025-08-23 21:37:51
  * @LastEditors: mulingyuer
  * @Description: 采样与推理配置
  * @FilePath: \frontend\src\views\lora\qwen-image\components\SampleConfig\index.vue
@@ -59,6 +59,16 @@
 	>
 		<el-input-number v-model.number="ruleForm.config.guidance_scale" :step="0.1" :min="0" />
 	</PopoverFormItem>
+	<el-form-item>
+		<el-alert
+			class="no-select"
+			title="注意：开启采样会严重增加训练时间。"
+			type="warning"
+			:closable="false"
+			show-icon
+			effect="dark"
+		/>
+	</el-form-item>
 </template>
 
 <script setup lang="ts">

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-22 14:32:00
+ * @LastEditTime: 2025-08-23 23:50:59
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -358,8 +358,11 @@ const rules = reactive<FormRules<RuleForm>>({
 				// 如果配置了采样选项，则提示必须输入采样提示
 				const isLength = value.trim().length > 0;
 				const isValidLength = Boolean(sample_every_n_epochs) || Boolean(sample_every_n_steps);
-				if ((isValidLength && !isLength) || sample_at_first) {
+				if (isValidLength && !isLength) {
 					return callback(new Error("请输入采样提示词"));
+				}
+				if (sample_at_first && !isLength && !isValidLength) {
+					return callback(new Error("请配置采样步数和采样提示词"));
 				}
 				if (isLength && !isValidLength) {
 					return callback(new Error("配置了采样提示词，请配置采样步数"));

@@ -161,6 +161,10 @@ def parse_kohya_progress_line(line: str, detail: dict):
     
     if not ('|' in line and '%' in line and 'steps:' in line and '/' in line ):
          return
+        
+    if line.startswith("Denoising steps:"):
+        # ignore Denoising steps 
+        return
            
     patterns = {
          'steps': r'\|?\s*(\d+)/(\d+)',

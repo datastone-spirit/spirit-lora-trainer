@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 14:43:24
- * @LastEditTime: 2025-01-14 14:50:16
+ * @LastEditTime: 2025-08-25 10:31:22
  * @LastEditors: mulingyuer
  * @Description: LoRA 基本信息
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\BasicInfo\index.vue
@@ -22,7 +22,10 @@
 		prop="model_transformer_path"
 		popover-content="model_transformer_path"
 	>
-		<FileSelector v-model="ruleForm.model_transformer_path" placeholder="请选择训练用的底模" />
+		<FileSelector
+			v-model="ruleForm.model_transformer_path"
+			placeholder="请选择训练用的底模，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"
@@ -30,7 +33,10 @@
 		prop="model_vae_path"
 		popover-content="model_vae_path"
 	>
-		<FileSelector v-model="ruleForm.model_vae_path" placeholder="请选择VAE 模型文件" />
+		<FileSelector
+			v-model="ruleForm.model_vae_path"
+			placeholder="请选择VAE 模型文件，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"
@@ -38,7 +44,10 @@
 		prop="model_llm_path"
 		popover-content="model_llm_path"
 	>
-		<FileSelector v-model="ruleForm.model_llm_path" placeholder="请选择LLM 模型文件" />
+		<FileSelector
+			v-model="ruleForm.model_llm_path"
+			placeholder="请选择LLM 模型文件，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"
@@ -46,7 +55,10 @@
 		prop="model_clip_path"
 		popover-content="model_clip_path"
 	>
-		<FileSelector v-model="ruleForm.model_clip_path" placeholder="请选择Clip 模型文件" />
+		<FileSelector
+			v-model="ruleForm.model_clip_path"
+			placeholder="请选择Clip 模型文件，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<ModelDtypeSelector
 		v-show="isExpert"

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:15:19
- * @LastEditTime: 2025-08-12 17:22:55
+ * @LastEditTime: 2025-08-25 10:30:53
  * @LastEditors: mulingyuer
  * @Description: 基本信息
  * @FilePath: \frontend\src\views\lora\qwen-image\components\BasicInfo\index.vue
@@ -18,7 +18,10 @@
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem v-show="isExpert" label="VAE模型路径" prop="config.vae" popover-content="vae">
-		<FileSelector v-model="ruleForm.config.vae" placeholder="请选择VAE模型" />
+		<FileSelector
+			v-model="ruleForm.config.vae"
+			placeholder="请选择VAE模型，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"
@@ -40,7 +43,7 @@
 	>
 		<FileSelector
 			v-model="ruleForm.config.text_encoder"
-			placeholder="请选择文本编码器模型路径，不知道可以不填"
+			placeholder="请选择文本编码器模型路径，不知道可以不填，智灵会自动选择合适的模型"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem label="LoRA 保存路径" prop="config.output_dir" popover-content="output_dir">

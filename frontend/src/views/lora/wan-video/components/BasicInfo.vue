@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 10:12:06
- * @LastEditTime: 2025-08-18 15:13:14
+ * @LastEditTime: 2025-08-25 10:29:29
  * @LastEditors: mulingyuer
  * @Description: lora基本信息
  * @FilePath: \frontend\src\views\lora\wan-video\components\BasicInfo.vue
@@ -20,10 +20,13 @@
 		<el-input v-model="ruleForm.config.output_name" placeholder="请输入LoRA名称" />
 	</PopoverFormItem>
 	<PopoverFormItem v-show="isExpert" label="wan2模型地址" prop="config.dit" popover-content="dit">
-		<FileSelector v-model="ruleForm.config.dit" placeholder="请选择训练用的wan2模型" />
+		<FileSelector
+			v-model="ruleForm.config.dit"
+			placeholder="请选择训练用的wan2模型，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
-		v-show="isExpert && isWan22"
+		v-show="isWan22"
 		label="wan2.2 模型类型"
 		prop="dit_model_type"
 		popover-content="dit_model_type"
@@ -52,7 +55,7 @@
 	>
 		<FileSelector
 			v-model="ruleForm.config.dit_high_noise"
-			placeholder="请选择训练用的wan2.2 high模型地址"
+			placeholder="请选择训练用的wan2.2 high模型地址，不知道可以不填，智灵会自动选择合适的模型"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem
@@ -61,10 +64,16 @@
 		prop="config.clip"
 		popover-content="clip"
 	>
-		<FileSelector v-model="ruleForm.config.clip" placeholder="请选择CLIP模型" />
+		<FileSelector
+			v-model="ruleForm.config.clip"
+			placeholder="请选择CLIP模型，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem v-show="isExpert && isT2V" label="T5模型" prop="config.t5" popover-content="t5">
-		<FileSelector v-model="ruleForm.config.t5" placeholder="请选择T5模型" />
+		<FileSelector
+			v-model="ruleForm.config.t5"
+			placeholder="请选择T5模型，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert && isT2V"
@@ -75,7 +84,10 @@
 		<el-switch v-model="ruleForm.config.fp8_t5" />
 	</PopoverFormItem>
 	<PopoverFormItem v-show="isExpert" label="VAE模型路径" prop="config.vae" popover-content="vae">
-		<FileSelector v-model="ruleForm.config.vae" placeholder="请选择VAE模型" />
+		<FileSelector
+			v-model="ruleForm.config.vae"
+			placeholder="请选择VAE模型，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"

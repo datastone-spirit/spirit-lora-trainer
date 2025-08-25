@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-22 08:59:51
+ * @LastEditTime: 2025-08-25 14:41:39
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -804,6 +804,8 @@ export interface StartQwenImageTrainingData {
 		// -- 基本信息
 		/** LoRA 模型的名称，默认："" */
 		output_name: string;
+		/** 是否训练Qwen Image Edit，默认：false */
+		edit: boolean;
 		/** 底模文件路径，默认："" */
 		dit: string;
 		/** VAE模型路径，默认："" */
@@ -972,6 +974,12 @@ export interface StartQwenImageTrainingData {
 		datasets: Array<{
 			/** 数据集目录 */
 			image_directory: string;
+			/** 控制数据集，只有在开启 edit 模式时才生效 */
+			control_directory: string;
+			/** 禁用调整控件图像的大小，默认：false */
+			qwen_image_edit_no_resize_control: boolean;
+			/** 指定控制图像的尺寸，默认可不填，与qwen_image_edit_no_resize_control互斥 */
+			qwen_image_edit_control_resolution: [number | undefined, number | undefined];
 			/** 数据集重复次数，默认：1 */
 			num_repeats: number;
 			/** 图片尺寸，默认：[960, 544] */

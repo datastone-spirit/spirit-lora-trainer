@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-26 16:32:42
- * @LastEditTime: 2025-08-15 14:41:04
+ * @LastEditTime: 2025-08-25 16:09:38
  * @LastEditors: mulingyuer
  * @Description: task帮助
  * @FilePath: \frontend\src\views\task\task.helper.ts
@@ -26,7 +26,7 @@ export function taskTypeToName(taskType: TaskType) {
 		case TaskType.FLUX_KONTEXT_TRAINING:
 			return "Flux Kontext 训练";
 		case TaskType.QWENIMAGE_TRAINING:
-			return "Qwen Image 训练";
+			return "Qwen Image (Edit) 训练";
 		default:
 			return "未知任务";
 	}

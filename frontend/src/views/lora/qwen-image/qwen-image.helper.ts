@@ -1,19 +1,22 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-08-21 17:32:43
+ * @LastEditTime: 2025-08-25 17:10:45
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
  * 怎么可能会有bug！！！
  */
 import { getEnv } from "@/utils/env";
-import type { DatasetGeneral, DatasetItem, RuleForm } from "./types";
+import type { Dataset, DatasetGeneral, DatasetItem, RuleForm } from "./types";
 import { useSettingsStore } from "@/stores";
 import { generateUUID } from "@/utils/tools";
 import type { StartQwenImageTrainingData } from "@/api/lora";
 import { tomlStringify } from "@/utils/toml";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
+
+/** 依赖注入的key */
+export const QwenImageRuleFormRef = Symbol("QwenImageRuleFormRef");
 
 /** 生成默认的数据集配置 */
 export function generateDefaultDatasetGeneral(): DatasetGeneral {
@@ -38,13 +41,16 @@ export function generateDefaultDataset(data: {
 
 	const env = getEnv();
 	const settingsStore = useSettingsStore();
-
 	return {
 		...general,
 		id: generateUUID(),
 		name: `数据集${index + 1}`,
 		index: index,
 		image_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		control_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		preview: "image_directory",
+		qwen_image_edit_no_resize_control: false,
+		qwen_image_edit_control_resolution: [void 0, void 0],
 		num_repeats: 1
 	};
 }
@@ -59,6 +65,7 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 	const data: StartQwenImageTrainingData = {
 		config: {
 			output_name: config.output_name,
+			edit: config.edit,
 			dit: config.dit,
 			vae: config.vae,
 			vae_dtype: config.vae_dtype,
@@ -130,8 +137,11 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 		dataset: {
 			general: dataset.general,
 			datasets: dataset.datasets.map((item) => {
-				return {
+				const newItem: Dataset["datasets"][number] = {
 					image_directory: item.image_directory,
+					control_directory: item.control_directory,
+					qwen_image_edit_no_resize_control: item.qwen_image_edit_no_resize_control,
+					qwen_image_edit_control_resolution: [void 0, void 0],
 					num_repeats: item.num_repeats,
 					resolution: item.resolution,
 					caption_extension: item.caption_extension,
@@ -139,6 +149,24 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 					enable_bucket: item.enable_bucket,
 					bucket_no_upscale: item.bucket_no_upscale
 				};
+
+				// 如果没有开启edit训练，就移除相关字段
+				if (!deepCloneForm.config.edit) {
+					Reflect.deleteProperty(newItem, "control_image_path");
+					Reflect.deleteProperty(newItem, "qwen_image_edit_control_resolution");
+				} else {
+					// 没有设置qwen_image_edit_control_resolution，就删除该字段
+					const findNoneIndex = item.qwen_image_edit_control_resolution.findIndex(
+						(v) => typeof v !== "number"
+					);
+					if (findNoneIndex !== -1 || item.qwen_image_edit_control_resolution.length <= 0) {
+						Reflect.deleteProperty(newItem, "qwen_image_edit_control_resolution");
+					} else {
+						newItem.qwen_image_edit_control_resolution = item.qwen_image_edit_control_resolution;
+					}
+				}
+
+				return newItem;
 			})
 		},
 		multi_gpu_config: {

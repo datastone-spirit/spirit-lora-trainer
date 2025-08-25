@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-23 21:35:09
+ * @LastEditTime: 2025-08-25 16:49:24
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -90,7 +90,8 @@ import TrainingConfig from "./components/TrainingConfig/index.vue";
 import {
 	formatFormData,
 	generateDefaultDataset,
-	generateDefaultDatasetGeneral
+	generateDefaultDatasetGeneral,
+	QwenImageRuleFormRef
 } from "./qwen-image.helper";
 import { validate } from "./qwen-image.validate";
 import type { DatasetItem, RuleForm } from "./types";
@@ -102,12 +103,14 @@ const { qwenImageLoraMonitor } = useQwenImageLora();
 
 const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
+provide(QwenImageRuleFormRef, ruleFormRef);
 const localStorageKey = joinPrefixKey("qwen_image_form");
 const defaultDatasetGeneral = generateDefaultDatasetGeneral();
 const defaultDatasetItem: DatasetItem = generateDefaultDataset({ general: defaultDatasetGeneral });
 const defaultForm: RuleForm = {
 	config: {
 		output_name: "",
+		edit: false,
 		dit: "",
 		vae: "",
 		vae_dtype: "bfloat16",
@@ -348,6 +351,11 @@ const dir = computed(() => {
 	const activeDatasetId = ruleForm.value.activeDatasetId;
 	const findItem = datasets.find((item) => item.id === activeDatasetId);
 	if (!findItem) return "";
+	if (ruleForm.value.config.edit) {
+		return findItem.preview === "image_directory"
+			? findItem.image_directory
+			: findItem.control_directory;
+	}
 	return findItem.image_directory;
 });
 

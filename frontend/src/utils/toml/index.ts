@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:17:12
- * @LastEditTime: 2025-02-18 08:54:25
+ * @LastEditTime: 2025-08-25 14:56:19
  * @LastEditors: mulingyuer
  * @Description: toml相关工具
  * @FilePath: \frontend\src\utils\toml\index.ts
@@ -9,12 +9,12 @@
  */
 import { stringify, parse } from "smol-toml";
 import { formatDate } from "@/utils/dayjs";
-import { downloadFile } from "@/utils/tools";
+import { downloadFile, removeEmptyFields } from "@/utils/tools";
 import type { DownloadTomlFileOptions } from "./types";
 
 /** 生成toml字符串 */
 export function tomlStringify(obj: any): string {
-	return stringify(obj);
+	return stringify(removeEmptyFields(obj));
 }
 
 /** toml字符串转对象 */

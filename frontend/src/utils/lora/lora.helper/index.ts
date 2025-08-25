@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 15:10:20
- * @LastEditTime: 2025-08-21 17:00:39
+ * @LastEditTime: 2025-08-25 16:50:29
  * @LastEditors: mulingyuer
  * @Description: 公共的lora帮助方法
  * @FilePath: \frontend\src\utils\lora\lora.helper\index.ts
@@ -24,14 +24,18 @@ export class LoRAHelper {
 
 	/** 合并训练表单数据 */
 	static mergeTrainingFormData(form: Record<string, any>, data: Record<string, any>) {
-		const formKeys = new Set(Object.keys(form));
-		const dataKeys = Object.keys(data);
-		// 求交集
-		const keys = dataKeys.filter((key) => formKeys.has(key));
+		Object.keys(form).forEach((key) => {
+			if (!Object.hasOwn(data, key)) return;
+			const formValue = form[key];
+			const dataValue = data[key];
+			const isFormValueObject = Object.prototype.toString.call(formValue) === "[object Object]";
+			const isDataValueObject = Object.prototype.toString.call(dataValue) === "[object Object]";
 
-		// 合并数据
-		keys.forEach((key) => {
-			form[key] = data[key];
+			if (isFormValueObject && isDataValueObject) {
+				LoRAHelper.mergeTrainingFormData(formValue, dataValue);
+			} else {
+				form[key] = dataValue;
+			}
 		});
 
 		return form;
@@ -90,7 +94,7 @@ export class LoRAHelper {
 
 		// 使用 Object.prototype.toString.call 精确判断类型
 		const type = Object.prototype.toString.call(form);
-		
+
 		// 如果不是数组也不是普通对象，原样返回
 		if (type !== "[object Array]" && type !== "[object Object]") {
 			return form;

@@ -3,13 +3,90 @@ from app.api.model.base_model import MultiGPUConfig
 
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, List, Any
-from os import path, makedirs
+from os import path, makedirs, listdir
 
 from utils.util import setup_logging, is_blank, getprojectpath
 from app.api.common.utils import generate_sample_prompt_file
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
+
+def validate_image_control_pairs(image_directory: str, control_directory: str) -> bool:
+    """
+    Validate that at least one image pair exists between image_directory and control_directory.
+    The control images are used from the control_directory with the same filename (or different extension) 
+    as the image, for example, image_dir/image1.jpg and control_dir/image1.png.
+    
+    Args:
+        image_directory: Path to the directory containing training images
+        control_directory: Path to the directory containing control images
+        
+    Returns:
+        bool: True if at least one valid image pair is found
+        
+    Raises:
+        ValueError: If directories don't exist or no valid pairs are found
+    """
+    if not path.exists(image_directory):
+        raise ValueError(f"Image directory does not exist: {image_directory}")
+    
+    if not path.exists(control_directory):
+        raise ValueError(f"Control directory does not exist: {control_directory}")
+    
+    # Common image extensions
+    image_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.webp'}
+    
+    try:
+        # Get all image files from image_directory
+        image_files = []
+        for filename in listdir(image_directory):
+            if path.isfile(path.join(image_directory, filename)):
+                _, ext = path.splitext(filename.lower())
+                if ext in image_extensions:
+                    image_files.append(filename)
+        
+        if not image_files:
+            raise ValueError(f"No image files found in image directory: {image_directory}")
+        
+        # Get all control files from control_directory
+        control_files = []
+        for filename in listdir(control_directory):
+            if path.isfile(path.join(control_directory, filename)):
+                _, ext = path.splitext(filename.lower())
+                if ext in image_extensions:
+                    control_files.append(filename)
+        
+        if not control_files:
+            raise ValueError(f"No control image files found in control directory: {control_directory}")
+        
+        # Create mapping of base names (without extension) to full filenames
+        image_basenames = {}
+        for filename in image_files:
+            basename = path.splitext(filename)[0]
+            image_basenames[basename] = filename
+        
+        control_basenames = {}
+        for filename in control_files:
+            basename = path.splitext(filename)[0]
+            control_basenames[basename] = filename
+        
+        # Find matching pairs
+        matched_pairs = []
+        for basename in image_basenames:
+            if basename in control_basenames:
+                matched_pairs.append((image_basenames[basename], control_basenames[basename]))
+        
+        if not matched_pairs:
+            raise ValueError(
+                f"No matching image pairs found between {image_directory} and {control_directory}. "
+                f"Control images must have the same filename (with any extension) as training images."
+            )
+        
+        logger.info(f"Found {len(matched_pairs)} valid image-control pairs for qwen-image-edit training")
+        return True
+        
+    except OSError as e:
+        raise ValueError(f"Error accessing directories: {str(e)}")
 
 @dataclass
 class GeneralConfig:
@@ -73,6 +150,10 @@ class DatasetConfig:
         if edit and not is_blank(config.image_directory):
             if is_blank(config.control_directory):
                 raise ValueError("control_directory must be specified when training qwen-image-edit LoRA")
+            
+            # Validate that image pairs exist between image_directory and control_directory
+            validate_image_control_pairs(config.image_directory, config.control_directory)
+        
         return config
 
 @dataclass

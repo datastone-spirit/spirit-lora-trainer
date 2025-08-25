@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-08-25 17:10:45
+ * @LastEditTime: 2025-08-25 17:35:06
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
@@ -152,7 +152,7 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 
 				// 如果没有开启edit训练，就移除相关字段
 				if (!deepCloneForm.config.edit) {
-					Reflect.deleteProperty(newItem, "control_image_path");
+					Reflect.deleteProperty(newItem, "control_directory");
 					Reflect.deleteProperty(newItem, "qwen_image_edit_control_resolution");
 				} else {
 					// 没有设置qwen_image_edit_control_resolution，就删除该字段

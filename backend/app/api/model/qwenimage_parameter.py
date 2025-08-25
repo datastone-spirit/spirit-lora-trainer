@@ -51,6 +51,11 @@ class DatasetConfig:
     image_directory: Optional[str] = None
     image_jsonl_file: Optional[str] = None
 
+    control_directory: Optional[str] = None # Must be specified `when` edit is true
+    qwen_image_edit_no_resize_control = False # optional, default is false. Disable resizing of control image
+    qwen_image_edit_control_resolution: Optional[Tuple[int, int]] = None ## optional, default is None. Specify the resolution of the control image. could be specified as [1024, 1024] 
+
+
     @staticmethod
     def validate(config: 'DatasetConfig', strict_mod : bool = False) -> 'DatasetConfig':
         """
@@ -112,6 +117,7 @@ class QWenImageTrainingConfig:
     dynamo_dynamic: bool = False # use dynamic mode for dynamo
     dynamo_fullgraph: bool = False # use fullgraph mode for dynamo
     dynamo_mode: str  = None # dynamo mode (default is default)
+    edit: bool = False # is Qwen-Image-Edit Lora training
     flash3: bool = False # use FlashAttention 3 for CrossAttention, requires FlashAttention 3, HunyuanVideo does not support this yet
     flash_attn: bool = False # use FlashAttention for CrossAttention, requires FlashAttention
     fp8_base: bool = False # use fp8 for base model
@@ -327,7 +333,6 @@ class QWenImageParameter:
     frontend_config: Optional[str] = "" # Dedicated to saving the configuratio that frontend restore session configuration from backend
     skip_cache_latent: bool = False # skip cache latent step
     skip_cache_text_encoder_output: bool = False # skip cache text encoder output step
-
 
     @classmethod
     def from_dict(cls, dikt) -> 'QWenImageParameter':

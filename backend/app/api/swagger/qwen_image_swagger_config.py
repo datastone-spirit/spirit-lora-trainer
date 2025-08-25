@@ -244,7 +244,7 @@ qwenimage_training_api_config = {
                             "max_data_loader_n_workers": {
                                 "type": "integer",
                                 "description": "数据加载器最大工作进程数",
-                                "example": 8
+                                "example": 4
                             },
                             "persistent_data_loader_workers": {
                                 "type": "boolean",
@@ -254,7 +254,7 @@ qwenimage_training_api_config = {
                             "timestep_sampling": {
                                 "type": "string",
                                 "description": "时间步采样方法",
-                                "example": "sigma",
+                                "example": "shift",
                                 "enum": ["sigma", "uniform", "sigmoid", "shift", "flux_shift"]
                             },
                             "discrete_flow_shift": {
@@ -533,6 +533,11 @@ qwenimage_training_api_config = {
                                 "type": "boolean",
                                 "description": "使用全图Dynamo",
                                 "example": False
+                            },
+                            "edit": {
+                                "type": "boolean",
+                                "description": "是否为Qwen-Image-Edit LoRA训练",
+                                "example": False
                             }
                         }
                     },
@@ -633,6 +638,22 @@ qwenimage_training_api_config = {
                                             "type": "string",
                                             "description": "缓存目录路径",
                                             "example": "/path/to/cache"
+                                        },
+                                        "control_directory": {
+                                            "type": "string",
+                                            "description": "控制图像目录路径（edit为true时必须指定）",
+                                            "example": "/path/to/control_images"
+                                        },
+                                        "qwen_image_edit_no_resize_control": {
+                                            "type": "boolean",
+                                            "description": "禁用控制图像的尺寸调整",
+                                            "example": False
+                                        },
+                                        "qwen_image_edit_control_resolution": {
+                                            "type": "array",
+                                            "items": {"type": "integer"},
+                                            "description": "控制图像的分辨率 [宽, 高]",
+                                            "example": [1024, 1024]
                                         }
                                     }
                                 }

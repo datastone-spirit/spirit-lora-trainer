@@ -57,7 +57,7 @@ class DatasetConfig:
 
 
     @staticmethod
-    def validate(config: 'DatasetConfig', strict_mod : bool = False) -> 'DatasetConfig':
+    def validate(config: 'DatasetConfig', strict_mod : bool = False, edit: bool = False) -> 'DatasetConfig':
         """
         Validate the DatasetConfig instance.
         """
@@ -70,9 +70,10 @@ class DatasetConfig:
         if config.num_repeats is not None and config.num_repeats <= 0:
             raise ValueError("Number of repeats must be a positive integer.")
         
+        if edit and not is_blank(config.image_directory):
+            if is_blank(config.control_directory):
+                raise ValueError("control_directory must be specified when training qwen-image-edit LoRA")
         return config
-
-
 
 @dataclass
 class QWenImageDataSetConfig:
@@ -80,7 +81,7 @@ class QWenImageDataSetConfig:
     datasets: List[DatasetConfig] = field(default_factory=list)
 
     @staticmethod
-    def validate(config: 'QWenImageDataSetConfig', strict_mod: bool = False ) -> 'QWenImageDataSetConfig':
+    def validate(config: 'QWenImageDataSetConfig', strict_mod: bool = False, edit: bool = False) -> 'QWenImageDataSetConfig':
         """
         Validate the WanDataSetConfig instance.
         """
@@ -96,7 +97,7 @@ class QWenImageDataSetConfig:
             raise ValueError("At least one dataset configuration is required.")
         
         for i in range(len(config.datasets)):
-            config.datasets[i] = DatasetConfig.validate(config.datasets[i], strict_mod = strict_mod)
+            config.datasets[i] = DatasetConfig.validate(config.datasets[i], strict_mod = strict_mod, edit = edit)
         return config
 
 @dataclass
@@ -214,7 +215,10 @@ class QWenImageTrainingConfig:
         Validate the QWenImageTrainingConfig instance.
         """
         if is_blank(config.dit):
-            config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_bf16.safetensors")
+            if config.edit:
+                config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_edit_bf16.safetensors")
+            else:
+                config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_bf16.safetensors")
         
         if not path.exists(config.dit):
             logger.warning(f"dit path does not exist: {config.dit}")
@@ -365,7 +369,7 @@ class QWenImageParameter:
         if parameter.multi_gpu_config.multi_gpu_enabled is True: 
             parameter.multi_gpu_config.gradient_accumulation_steps = parameter.config.gradient_accumulation_steps
         
-        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, strict_mod=strict_mod)
+        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, strict_mod=strict_mod, edit = parameter.config.edit)
 
         # network_module is fix string for the specific task. CAN NOT BE CHANGED
         parameter.config.network_module = "networks.lora_qwen_image"

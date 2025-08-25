@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:40:29
- * @LastEditTime: 2025-08-20 11:32:42
+ * @LastEditTime: 2025-08-25 10:12:35
  * @LastEditors: mulingyuer
  * @Description: 按钮item
  * @FilePath: \frontend\src\layout\admin-layout\components\Aside\MenuItem.vue
@@ -17,15 +17,19 @@
 	</el-sub-menu>
 	<el-menu-item v-else :index="menu.path">
 		<Icon v-if="menu.icon" :name="menu.icon" size="19" />
-		<span class="truncate">{{ menu.title }}</span>
+		<el-badge class="menu-item-badge" :hidden="!showNewBadge" value="new" type="success">
+			<span class="truncate">{{ menu.title }}</span>
+		</el-badge>
 		<el-tag v-if="showTaskTag" class="task-tag" type="primary" effect="dark" round> 训练中 </el-tag>
 	</el-menu-item>
 </template>
 
 <script setup lang="ts">
-import { useTrainingStore } from "@/stores";
+import { useTrainingStore, useAppStore, useSettingsStore } from "@/stores";
 
 const trainingStore = useTrainingStore();
+const appStore = useAppStore();
+const settingsStore = useSettingsStore();
 
 const props = defineProps({
 	menu: {
@@ -41,6 +45,20 @@ const showTaskTag = computed(() => {
 	if (currentTaskInfo.type === "none") return false;
 	return currentTaskInfo.type === props.menu.loRATaskType;
 });
+
+const showNewBadge = computed(() => {
+	const showNewBadge = props.menu.showNewBadge;
+	if (!showNewBadge) return false;
+
+	const globalShowNewBadge = settingsStore.trainerSettings.showAsideNewBadge;
+	if (!globalShowNewBadge) return false;
+
+	const path = props.menu.path;
+	const openedPaths = appStore.openedPaths;
+	if (openedPaths.includes(path)) return false;
+
+	return true;
+});
 </script>
 
 <style lang="scss" scoped>
@@ -48,5 +66,9 @@ const showTaskTag = computed(() => {
 
 .task-tag {
 	margin-left: math.div($zl-padding, 2);
+}
+
+.menu-item-badge {
+	line-height: normal;
 }
 </style>

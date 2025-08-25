@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:44
- * @LastEditTime: 2025-08-15 15:26:54
+ * @LastEditTime: 2025-08-25 09:47:32
  * @LastEditors: mulingyuer
  * @Description: lora路由模块
  * @FilePath: \frontend\src\router\route-modules\lora.ts
@@ -53,7 +53,8 @@ export default {
 			component: () => import("@/views/lora/wan-video/index.vue"),
 			meta: {
 				title: "Wan",
-				loRATaskType: "wan-video"
+				loRATaskType: "wan-video",
+				showNewBadge: true
 			}
 		},
 		{
@@ -62,7 +63,8 @@ export default {
 			component: () => import("@/views/lora/qwen-image/index.vue"),
 			meta: {
 				title: "Qwen Image",
-				loRATaskType: "qwen-image"
+				loRATaskType: "qwen-image",
+				showNewBadge: true
 			}
 		}
 	]

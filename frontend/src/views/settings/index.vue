@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 10:01:07
- * @LastEditTime: 2025-08-20 15:58:44
+ * @LastEditTime: 2025-08-25 10:10:32
  * @LastEditors: mulingyuer
  * @Description: 设置页面
  * @FilePath: \frontend\src\views\settings\index.vue
@@ -45,6 +45,9 @@
 					></el-button>
 				</el-form-item>
 				<div class="form-item-info">点击后将分隔面板宽度恢复默认值</div>
+				<el-form-item label="是否显示菜单新功能提示" prop="showAsideNewBadge">
+					<el-switch v-model="ruleForm.showAsideNewBadge"></el-switch>
+				</el-form-item>
 			</el-form>
 		</div>
 	</div>

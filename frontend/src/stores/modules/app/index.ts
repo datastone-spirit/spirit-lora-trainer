@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 11:22:25
- * @LastEditTime: 2025-08-20 15:30:05
+ * @LastEditTime: 2025-08-25 10:05:51
  * @LastEditors: mulingyuer
  * @Description: 应用配置
  * @FilePath: \frontend\src\stores\modules\app\index.ts
@@ -93,6 +93,15 @@ export const useAppStore = defineStore(
 			showFooter.value = show;
 		}
 
+		/** 已经打开过的路由path
+		 * 用于判断是否显示new badge
+		 */
+		const openedPaths = ref<Array<string>>([]);
+		function addOpenedPath(path: string) {
+			if (openedPaths.value.includes(path)) return;
+			openedPaths.value.push(path);
+		}
+
 		return {
 			language,
 			setLanguage,
@@ -116,12 +125,14 @@ export const useAppStore = defineStore(
 			setRouteAnimate,
 			isDark,
 			showFooter,
-			setShowFooter
+			setShowFooter,
+			openedPaths,
+			addOpenedPath
 		};
 	},
 	{
 		persist: {
-			pick: ["language", "isCollapse"]
+			pick: ["language", "isCollapse", "openedPaths"]
 		}
 	}
 );

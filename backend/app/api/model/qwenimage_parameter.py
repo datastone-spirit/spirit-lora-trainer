@@ -73,10 +73,10 @@ def validate_image_control_pairs(image_directory: str, control_directory: str) -
         # Find matching pairs
         matched_pairs = []
         for basename in image_basenames:
-            if basename in control_basenames:
+            if not is_blank(control_basenames.get(basename, "")):
                 matched_pairs.append((image_basenames[basename], control_basenames[basename]))
         
-        if not matched_pairs:
+        if len(matched_pairs) == 0:
             raise ValueError(
                 f"No matching image pairs found between {image_directory} and {control_directory}. "
                 f"Control images must have the same filename (with any extension) as training images."

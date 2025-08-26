@@ -101,6 +101,10 @@ setup_logging()
 import logging
 logger = logging.getLogger(__name__)
 
+# Suppress additional HTTP access logs from werkzeug/flask
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
+logging.getLogger('_internal').setLevel(logging.WARNING)
+     # Suppress werkzeug HTTP request logs (TensorBoard proxy)
 logging.info(f"args.port is {args.port}, args.host is {args.host}, tb_host is {args.tb_host}, tb_port is {args.tb_port}")
 
 if __name__ == "__main__":

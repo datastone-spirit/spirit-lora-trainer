@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-30 11:31:58
- * @LastEditTime: 2025-07-30 17:02:09
+ * @LastEditTime: 2025-08-26 16:13:30
  * @LastEditors: mulingyuer
  * @Description: 自定义useLocalStorage
  * @FilePath: \frontend\src\hooks\useEnhancedStorage.ts
@@ -10,19 +10,6 @@
 import type { RemovableRef } from "@vueuse/core";
 
 export function useEnhancedStorage() {
-	/** 检查两个object是否具有相同的“结构” */
-	function isSameStructure(obj1: Record<string, any>, obj2: Record<string, any>): boolean {
-		const keys1: string[] = Object.keys(obj1);
-		const keys2: string[] = Object.keys(obj2);
-
-		// 简单判断两个对象key数量是否相同
-		if (keys1.length !== keys2.length) return false;
-
-		// 复杂判断两个对象key是否完全相同
-		const keySet: Set<string> = new Set(keys2);
-		return keys1.every((key: string) => keySet.has(key));
-	}
-
 	/**
 	 * 获取一个值的精确类型字符串。
 	 * @param value - 任何 JavaScript 值。
@@ -30,6 +17,71 @@ export function useEnhancedStorage() {
 	 */
 	function getPreciseType(value: any): string {
 		return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
+	}
+
+	/** 检查两个对象是否具有相同的“结构” */
+	function isSameStructure(templateObj: any, dataObj: any): boolean {
+		if (templateObj === null || dataObj === null) {
+			return templateObj === dataObj;
+		}
+
+		// 检查顶级类型是否一致，（例如：一个是对象，另一个是数组或原始类型）
+		const templateType = getPreciseType(templateObj);
+		const dataType = getPreciseType(dataObj);
+
+		if (templateType !== dataType) return false;
+
+		// 如果是数组
+		if (templateType === "array") {
+			if (dataType !== "array") return false;
+
+			// 如果模板数组是空的
+			if (templateObj.length === 0) {
+				if (dataObj.length === 0) return true;
+
+				// 如果缓存有数据，而模板数组为空，则无法判断结构是否相同，返回 false
+				return false;
+			} else {
+				// 模板数组有值
+				if (dataObj.length === 0) return false;
+				// 缓存和模板数组长度不一致
+				if (templateObj.length !== dataObj.length) return false;
+
+				// 递归数组每个元素的结构
+				for (let i = 0, len = templateObj.length; i < len; i++) {
+					if (!isSameStructure(templateObj[i], dataObj[i])) return false;
+				}
+
+				// 数组所有元素结构都匹配
+				return true;
+			}
+		}
+
+		// 如果是键值对象
+		if (templateType === "object") {
+			const templateKeys = Object.keys(templateObj);
+			const dataKeys = Object.keys(dataObj);
+
+			// 比对 key 的数量
+			if (templateKeys.length !== dataKeys.length) return false;
+
+			// 比对key是否一致
+			const sortedTemplateKeys = [...templateKeys].sort();
+			const sortedDataKeys = [...dataKeys].sort();
+			if (sortedTemplateKeys.join(",") !== sortedDataKeys.join(",")) return false;
+
+			// 递归每个 key 的结构
+			for (const key of templateKeys) {
+				if (!isSameStructure(templateObj[key], dataObj[key])) return false;
+			}
+
+			// 全部通过
+			return true;
+		}
+
+		// 如果是原始类型 (string, number, boolean, undefined)
+		// 因为已经检查了顶级类型，所以是相同的
+		return true;
 	}
 
 	/** 增强版的 useLocalStorage Ref
@@ -46,21 +98,9 @@ export function useEnhancedStorage() {
 						if (!raw) return defaultValue;
 
 						const parsedValue = JSON.parse(raw);
-						const parsedType = getPreciseType(parsedValue);
-						const defaultType = getPreciseType(defaultValue);
-
-						// 如果类型不匹配或解析的值不是对象，则返回默认值
-						if (parsedType !== defaultType || parsedType !== "object") {
-							return defaultValue;
-						}
 
 						// 检查对象结构是否相同，如果不相同，则使用默认对象
-						if (
-							!isSameStructure(
-								parsedValue as Record<string, unknown>,
-								defaultValue as Record<string, unknown>
-							)
-						) {
+						if (!isSameStructure(defaultValue, parsedValue)) {
 							return defaultValue;
 						}
 

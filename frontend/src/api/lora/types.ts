@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-25 14:41:39
+ * @LastEditTime: 2025-08-26 16:15:46
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -979,7 +979,7 @@ export interface StartQwenImageTrainingData {
 			/** 禁用调整控件图像的大小，默认：false */
 			qwen_image_edit_no_resize_control: boolean;
 			/** 指定控制图像的尺寸，默认可不填，与qwen_image_edit_no_resize_control互斥 */
-			qwen_image_edit_control_resolution: [number | undefined, number | undefined];
+			qwen_image_edit_control_resolution: [number | null, number | null];
 			/** 数据集重复次数，默认：1 */
 			num_repeats: number;
 			/** 图片尺寸，默认：[960, 544] */

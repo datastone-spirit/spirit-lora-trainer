@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 09:27:58
- * @LastEditTime: 2025-08-25 16:01:22
+ * @LastEditTime: 2025-08-26 14:24:39
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\qwen-image\components\DataSet\Tabs.vue
@@ -74,6 +74,24 @@
 						<el-input-number v-model.number="item.resolution[1]" :controls="false" />
 					</PopoverFormItem>
 				</el-col>
+				<el-col :span="12">
+					<PopoverFormItem
+						label="批次大小"
+						:prop="`dataset.datasets[${index}].batch_size`"
+						popover-content="batch_size"
+					>
+						<el-input-number v-model.number="item.batch_size" :step="1" step-strictly :min="1" />
+					</PopoverFormItem>
+				</el-col>
+				<el-col :span="12">
+					<PopoverFormItem
+						label="每个图像重复训练次数"
+						:prop="`dataset.datasets[${index}].num_repeats`"
+						popover-content="num_repeats"
+					>
+						<el-input-number v-model.number="item.num_repeats" :step="1" step-strictly />
+					</PopoverFormItem>
+				</el-col>
 				<el-col v-show="isEdit" :span="24">
 					<PopoverFormItem
 						label="禁用调整控制数据集图像的大小"
@@ -113,24 +131,6 @@
 							:controls="false"
 							@change="onControlResolutionChange(index, 1)"
 						/>
-					</PopoverFormItem>
-				</el-col>
-				<el-col :span="12">
-					<PopoverFormItem
-						label="批次大小"
-						:prop="`dataset.datasets[${index}].batch_size`"
-						popover-content="batch_size"
-					>
-						<el-input-number v-model.number="item.batch_size" :step="1" step-strictly :min="1" />
-					</PopoverFormItem>
-				</el-col>
-				<el-col :span="12">
-					<PopoverFormItem
-						label="每个图像重复训练次数"
-						:prop="`dataset.datasets[${index}].num_repeats`"
-						popover-content="num_repeats"
-					>
-						<el-input-number v-model.number="item.num_repeats" :step="1" step-strictly />
 					</PopoverFormItem>
 				</el-col>
 				<el-col :span="24">

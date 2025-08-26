@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-08-25 17:35:06
+ * @LastEditTime: 2025-08-26 16:15:57
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
@@ -50,7 +50,7 @@ export function generateDefaultDataset(data: {
 		control_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 		preview: "image_directory",
 		qwen_image_edit_no_resize_control: false,
-		qwen_image_edit_control_resolution: [void 0, void 0],
+		qwen_image_edit_control_resolution: [null, null],
 		num_repeats: 1
 	};
 }
@@ -141,7 +141,7 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 					image_directory: item.image_directory,
 					control_directory: item.control_directory,
 					qwen_image_edit_no_resize_control: item.qwen_image_edit_no_resize_control,
-					qwen_image_edit_control_resolution: [void 0, void 0],
+					qwen_image_edit_control_resolution: [null, null],
 					num_repeats: item.num_repeats,
 					resolution: item.resolution,
 					caption_extension: item.caption_extension,

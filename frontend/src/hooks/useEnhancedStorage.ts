@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-30 11:31:58
- * @LastEditTime: 2025-08-26 16:13:30
+ * @LastEditTime: 2025-08-26 17:19:10
  * @LastEditors: mulingyuer
  * @Description: 自定义useLocalStorage
  * @FilePath: \frontend\src\hooks\useEnhancedStorage.ts
@@ -10,6 +10,9 @@
 import type { RemovableRef } from "@vueuse/core";
 
 export function useEnhancedStorage() {
+	/** undefined 占位符 */
+	const UNDEFINED_PLACEHOLDER = "__undefined__";
+
 	/**
 	 * 获取一个值的精确类型字符串。
 	 * @param value - 任何 JavaScript 值。
@@ -59,6 +62,8 @@ export function useEnhancedStorage() {
 
 		// 如果是键值对象
 		if (templateType === "object") {
+			if (dataType !== "object") return false;
+
 			const templateKeys = Object.keys(templateObj);
 			const dataKeys = Object.keys(dataObj);
 
@@ -69,10 +74,11 @@ export function useEnhancedStorage() {
 			const sortedTemplateKeys = [...templateKeys].sort();
 			const sortedDataKeys = [...dataKeys].sort();
 			if (sortedTemplateKeys.join(",") !== sortedDataKeys.join(",")) return false;
-
 			// 递归每个 key 的结构
 			for (const key of templateKeys) {
-				if (!isSameStructure(templateObj[key], dataObj[key])) return false;
+				if (!isSameStructure(templateObj[key], dataObj[key])) {
+					return false;
+				}
 			}
 
 			// 全部通过
@@ -82,6 +88,40 @@ export function useEnhancedStorage() {
 		// 如果是原始类型 (string, number, boolean, undefined)
 		// 因为已经检查了顶级类型，所以是相同的
 		return true;
+	}
+
+	// 递归地将 undefined 转换为占位符
+	function serializeUndefined(obj: any): any {
+		if (typeof obj === "undefined") return UNDEFINED_PLACEHOLDER;
+
+		if (Array.isArray(obj)) {
+			return obj.map(serializeUndefined);
+		}
+
+		if (getPreciseType(obj) === "object") {
+			return Object.fromEntries(
+				Object.entries(obj).map(([key, value]) => [key, serializeUndefined(value)])
+			);
+		}
+
+		return obj;
+	}
+
+	// 递归地将占位符还原为 undefined
+	function deserializeUndefined(obj: any): any {
+		if (obj === UNDEFINED_PLACEHOLDER) return undefined;
+
+		if (Array.isArray(obj)) {
+			return obj.map(deserializeUndefined);
+		}
+
+		if (getPreciseType(obj) === "object") {
+			return Object.fromEntries(
+				Object.entries(obj).map(([key, value]) => [key, deserializeUndefined(value)])
+			);
+		}
+
+		return obj;
 	}
 
 	/** 增强版的 useLocalStorage Ref
@@ -98,20 +138,25 @@ export function useEnhancedStorage() {
 						if (!raw) return defaultValue;
 
 						const parsedValue = JSON.parse(raw);
+						const deserializedValue = deserializeUndefined(parsedValue);
 
 						// 检查对象结构是否相同，如果不相同，则使用默认对象
-						if (!isSameStructure(defaultValue, parsedValue)) {
+						if (!isSameStructure(defaultValue, deserializedValue)) {
 							return defaultValue;
 						}
 
 						// 如果结构相同，则返回解析的值
-						return parsedValue;
+						return deserializedValue;
 					} catch (error) {
 						console.error("解析缓存的数据失败", error);
 						return defaultValue;
 					}
 				},
-				write: (value) => JSON.stringify(value)
+				write: (value) => {
+					// 将 undefined 替换为占位符
+					const serialized = serializeUndefined(value);
+					return JSON.stringify(serialized);
+				}
 			}
 		});
 	}

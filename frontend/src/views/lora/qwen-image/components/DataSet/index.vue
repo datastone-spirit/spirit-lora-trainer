@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:25:36
- * @LastEditTime: 2025-08-13 15:10:41
+ * @LastEditTime: 2025-08-26 16:45:38
  * @LastEditors: mulingyuer
  * @Description: AI 数据集
  * @FilePath: \frontend\src\views\lora\qwen-image\components\DataSet\index.vue
@@ -65,7 +65,22 @@
 			popover-content="tagger_is_append"
 		/>
 	</template>
-	<TagSubmitButton :loading="loading" :disabled="disabled" @submit="onTagClick" />
+	<TagSubmitButton
+		:is-bottom-margin="false"
+		:loading="loading"
+		:disabled="disabled"
+		@submit="onTagClick"
+	/>
+	<el-form-item class="data-set-alert">
+		<el-alert
+			class="no-select"
+			title="注意：只会给当前选中的数据集进行打标，如果需要打标多个数据集，请一个一个操作。"
+			type="warning"
+			:closable="false"
+			show-icon
+			effect="dark"
+		/>
+	</el-form-item>
 </template>
 
 <script setup lang="ts">
@@ -138,5 +153,9 @@ async function onTagClick() {
 	:deep(.el-collapse-item__content) {
 		padding: math.div($zl-padding, 2) $zl-padding;
 	}
+}
+
+.data-set-alert {
+	margin-bottom: 0;
 }
 </style>

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-13 15:32:36
- * @LastEditTime: 2025-08-13 15:34:08
+ * @LastEditTime: 2025-08-26 16:58:48
  * @LastEditors: mulingyuer
  * @Description: qwen-image校验方法
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.validate.ts
@@ -22,6 +22,7 @@ export interface ValidateData {
 /** qwen-image 数据集校验 */
 async function validateDataset(ruleForm: RuleForm): Promise<ValidationResult> {
 	try {
+		const { edit } = ruleForm.config;
 		const { datasets } = ruleForm.dataset;
 		if (!datasets.length) {
 			const message = "最低需要一个数据集";
@@ -38,6 +39,21 @@ async function validateDataset(ruleForm: RuleForm): Promise<ValidationResult> {
 			if (!hasFolderData.valid) {
 				const message = `${item.name}下的数据集目录：${hasFolderData.message}`;
 				LoRAValidator.showErrorMessage({ message });
+
+				return { valid: false, message };
+			}
+
+			// edit才校验控制数据集
+			// 判断控制数据集的图片数量与数据集是否一致，控制数据集数量可以大于数据集数量
+			// 但是图片名称必须与数据集图片名称一致，不关心图片格式
+			if (!edit) continue;
+			const hasControlFolderData = await LoRAValidator.validateControlDataset({
+				controlPath: item.control_directory,
+				datasetPath: item.image_directory
+			});
+			if (!hasControlFolderData.valid) {
+				const message = `${item.name}下的数据集校验不通过：${hasControlFolderData.message}`;
+				LoRAValidator.showErrorMessage({ message, duration: 5000 });
 
 				return { valid: false, message };
 			}

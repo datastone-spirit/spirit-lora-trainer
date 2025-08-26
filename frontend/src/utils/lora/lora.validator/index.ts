@@ -1,13 +1,13 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 09:58:06
- * @LastEditTime: 2025-07-31 14:32:43
+ * @LastEditTime: 2025-08-26 16:55:41
  * @LastEditors: mulingyuer
  * @Description: 公共的lora校验
  * @FilePath: \frontend\src\utils\lora\lora.validator\index.ts
  * 怎么可能会有bug！！！
  */
-import { checkDirectoryExists } from "@/api/common";
+import { checkDirectoryExists, directoryFiles } from "@/api/common";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoraSavePathWarningModal } from "@/utils/modal-manager";
@@ -15,6 +15,7 @@ import { formatFormValidateMessage } from "@/utils/tools";
 import type { FormInstance } from "element-plus";
 import type {
 	ErrorMessageOptions,
+	ValidateControlDatasetOptions,
 	ValidateDirectoryOptions,
 	ValidateFormOptions,
 	ValidateGpuOptions,
@@ -155,6 +156,44 @@ export class LoRAValidator {
 				valid: false,
 				message: `校验目录发生错误: ${(error as Error)?.message ?? "未知错误"}`
 			};
+		}
+	}
+
+	/** 数据集与控制数据集校验
+	 * 控制数据集中图片的数量可以大于数据集图片数量，但不能少于数据集图片数量
+	 * 控制数据集中的图片名称必须要与数据集中的图片名称完全一致，不考虑文件格式
+	 */
+	static async validateControlDataset(
+		options: ValidateControlDatasetOptions
+	): Promise<ValidationResult> {
+		const { controlPath, datasetPath, shouldShowErrorDialog = false } = options;
+		try {
+			const datasetResult = await directoryFiles({ path: datasetPath });
+			const datasetImageList = datasetResult.map((item) => {
+				return item.image_name.split(".").slice(0, -1).join(".");
+			});
+			const controlResult = await directoryFiles({ path: controlPath });
+			const controlImageList = controlResult.map((item) => {
+				return item.image_name.split(".").slice(0, -1).join(".");
+			});
+
+			if (controlImageList.length < datasetImageList.length) {
+				return { valid: false, message: "控制数据集图片数量与数据集图片数量不匹配" };
+			}
+			// 文件名必须一致
+			const diff = controlImageList.every((item) => datasetImageList.includes(item));
+			if (!diff) {
+				return { valid: false, message: "控制数据集图片名称与数据集图片名称不匹配" };
+			}
+
+			return { valid: true };
+		} catch (error) {
+			const message = (error as Error)?.message ?? "数据集与控制数据集校验发生未知错误";
+			if (shouldShowErrorDialog) {
+				LoRAValidator.showErrorMessage({ message });
+			}
+
+			return { valid: false, message };
 		}
 	}
 }

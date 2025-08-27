@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 09:27:58
- * @LastEditTime: 2025-08-26 14:24:39
+ * @LastEditTime: 2025-08-27 09:44:57
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\qwen-image\components\DataSet\Tabs.vue
@@ -197,9 +197,15 @@ const rules = reactive<DynamicRules>({
 		}
 	],
 	control_directory: [
-		{ required: true, message: "请选择训练用的控制数据集目录", trigger: "change" },
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				const { edit } = ruleForm.value.config;
+				if (!edit) return callback();
+
+				if (typeof value !== "string" || value.trim() === "") {
+					return callback(new Error("请选择训练用的控制数据集目录"));
+				}
+
 				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("控制数据集目录不存在"));

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-08-22 14:28:41
+ * @LastEditTime: 2025-08-27 11:09:56
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -20,6 +20,7 @@
 						label-position="top"
 						size="large"
 					>
+						<FieldTooltipGuide />
 						<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 							<BasicInfo v-model:form="ruleForm" />
 						</Collapse>
@@ -88,6 +89,7 @@ import FluxLoRATrainingMonitor from "./components/FluxLoRATrainingMonitor/index.
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import { formatFormData } from "./flux.helper";
 import { validate } from "./flux.validate";
 import type { RuleForm } from "./types";

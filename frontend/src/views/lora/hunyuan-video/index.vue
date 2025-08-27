@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-08-20 15:32:52
+ * @LastEditTime: 2025-08-27 10:54:16
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -19,6 +19,7 @@
 					label-position="top"
 					size="large"
 				>
+					<FieldTooltipGuide />
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo :form="ruleForm" />
 					</Collapse>
@@ -73,6 +74,7 @@ import { formatFormData } from "./hunyuan.helper";
 import { isDirectoryEmpty, validate } from "./hunyuan.validate";
 import type { RuleForm } from "./types";
 import HYTrainingLoRAMonitor from "./components/HYTrainingLoRAMonitor/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import { joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-25 16:49:24
+ * @LastEditTime: 2025-08-27 09:55:03
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -19,6 +19,7 @@
 					label-position="top"
 					size="large"
 				>
+					<FieldTooltipGuide />
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo v-model:form="ruleForm" />
 					</Collapse>
@@ -87,6 +88,7 @@ import OptimizerLearning from "./components/OptimizerLearning/index.vue";
 import QwenImageTrainingLoRAMonitor from "./components/QwenImageTrainingLoRAMonitor/index.vue";
 import SampleConfig from "./components/SampleConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import {
 	formatFormData,
 	generateDefaultDataset,

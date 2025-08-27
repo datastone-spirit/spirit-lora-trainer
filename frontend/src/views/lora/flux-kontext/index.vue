@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-08-22 14:29:10
+ * @LastEditTime: 2025-08-27 10:57:57
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -19,6 +19,7 @@
 					label-position="top"
 					size="large"
 				>
+					<FieldTooltipGuide />
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo v-model:form="ruleForm" />
 					</Collapse>
@@ -85,6 +86,7 @@ import FluxKontextLoRATrainingMonitor from "./components/FluxKontextLoRATraining
 import SampleConfig from "./components/SampleConfig/index.vue";
 import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import { formatFormData, generateDefaultDataset } from "./flex-kontext.helper";
 import { validate } from "./flux-kontext.validate";
 import type { DatasetItem, RuleForm } from "./types";

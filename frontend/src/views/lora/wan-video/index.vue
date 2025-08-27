@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-23 23:50:59
+ * @LastEditTime: 2025-08-27 10:48:08
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -19,6 +19,7 @@
 					label-position="top"
 					size="large"
 				>
+					<FieldTooltipGuide />
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo v-model:form="ruleForm" />
 					</Collapse>
@@ -82,6 +83,7 @@ import SampleValidator from "./components/SampleValidator.vue";
 import TrainingData from "./components/TrainingData.vue";
 import WanDataSet from "./components/WanDataSet/index.vue";
 import WanTrainingLoRAMonitor from "./components/WanTrainingLoRAMonitor/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
 import { validate } from "./wan.validate";

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-08-27 11:09:56
+ * @LastEditTime: 2025-08-28 10:43:45
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -49,6 +49,7 @@
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
+			:form-instance="ruleFormRef"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"

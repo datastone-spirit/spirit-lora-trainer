@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-27 10:48:08
+ * @LastEditTime: 2025-08-28 10:42:57
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -44,6 +44,7 @@
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
+			:form-instance="ruleFormRef"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"

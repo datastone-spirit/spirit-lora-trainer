@@ -2,7 +2,7 @@ import os
 import uuid
 from task.task import Task
 from task.wan_task import WanTrainingTask
-from app.api.model.wan_paramter import WanTrainingParameter
+from app.api.model.wan_paramter import WanTrainingParameter, is_wan22_task, is_i2v 
 from datetime import datetime
 
 from utils.util import getprojectpath, setup_logging
@@ -22,7 +22,19 @@ class WanTrainingService():
     def start_train(self, parameter: WanTrainingParameter) -> Task:
         taskid = uuid.uuid4().hex
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        parameter.config.logging_dir = os.path.join(getprojectpath(), "logs", f"wan-{taskid}-{timestamp}")
+        log_prefix = ""
+        if is_wan22_task(parameter.config.task):
+            if is_i2v(parameter.config.task):
+                log_prefix = f'wan22-{"low" if parameter.dit_model_type == "low" else "high"}-i2v-{taskid}-{timestamp}'
+            else:
+                log_prefix = f'wan22-{"low" if parameter.dit_model_type == "low" else "high"}-t2v-{taskid}-{timestamp}'
+        else:
+            if is_i2v(parameter.config.task):
+                log_prefix = f'wan21-i2v-{taskid}-{timestamp}'
+            else:
+                log_prefix = f'wan21-t2v-{taskid}-{timestamp}'
+            
+        parameter.config.logging_dir = os.path.join(getprojectpath(), "logs", log_prefix)
         os.makedirs(parameter.config.logging_dir, exist_ok=True)
         return self.run_train(parameter, task_id=taskid, module_path=self.module_path)
 

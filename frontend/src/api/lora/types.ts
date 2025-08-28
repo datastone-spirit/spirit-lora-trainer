@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-26 16:15:46
+ * @LastEditTime: 2025-08-28 15:45:27
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -417,7 +417,7 @@ export interface StartWanVideoTrainingData {
 		/** 指定要交换的网络块数量，用于调整LoRA模型结构，默认36 */
 		blocks_to_swap: number | undefined;
 		/** wan2.2使用，需清理blocks_to_swap为0，默认值：I2V：0.9,T2V: 0.875 */
-		timestep_boundary: number;
+		timestep_boundary: number | undefined;
 		/** 启用基础FP8模式，目前云端必须开启，默认：true */
 		fp8_base: boolean;
 		/** 启用FP8缩放模式，云端不支持，默认：false */
@@ -483,7 +483,7 @@ export interface StartWanVideoTrainingData {
 		/** wan2.2使用，将不活跃的 DiT 模型卸载到 CPU，节省显存，仅在未指定blocks_to_swap时生效，默认：false */
 		offload_inactive_dit: boolean;
 		// -------	扩散模型参数	-------
-		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：3.0 */
+		/** 用于控制Euler离散调度器的时间步偏移量，主要影响视频生成的噪声调度过程，默认：1.0 */
 		discrete_flow_shift: number;
 		/** 最小扩散时间步长，0-999（控制起始噪声水平），默认：undefined */
 		min_timestep: number | undefined;

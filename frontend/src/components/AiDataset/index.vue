@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-07-31 14:57:18
+ * @LastEditTime: 2025-08-28 15:56:56
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -428,10 +428,9 @@ defineExpose({
 .file-list {
 	height: 100%;
 	display: grid;
-	gap: $zl-padding;
-	grid-template-columns: repeat(auto-fill, $zl-ai-dataset-file-width);
+	gap: 6px;
+	grid-template-columns: repeat(auto-fill, minmax($zl-ai-dataset-file-width, 1fr));
 	grid-auto-rows: $zl-ai-dataset-file-height;
-	justify-content: center;
 	align-items: start;
 }
 

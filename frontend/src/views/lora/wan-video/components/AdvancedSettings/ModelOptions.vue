@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:31:41
- * @LastEditTime: 2025-08-21 11:44:40
+ * @LastEditTime: 2025-08-28 15:26:55
  * @LastEditors: mulingyuer
  * @Description: 模型结构参数设置
  * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\ModelOptions.vue
@@ -91,7 +91,7 @@
 		>
 			<el-input-number
 				v-model.number="ruleForm.config.timestep_boundary"
-				:step="0.001"
+				:step="1"
 				step-strictly
 				:min="0"
 			/>

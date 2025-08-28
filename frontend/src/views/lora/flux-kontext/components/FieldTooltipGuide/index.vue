@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-08-27 11:08:30
+ * @LastEditTime: 2025-08-28 11:59:01
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\FieldTooltipGuide\index.vue
@@ -33,9 +33,9 @@
 				</li>
 				<li>
 					如果你不知道如何使用这个训练器，请观看
-					<el-link type="info" href="https://www.bilibili.com/video/BV1KatjzCEin" target="_blank"
-						>《智灵训练器Kontext LoRA训练，轻松搞定电商产品图！》</el-link
-					>
+					<el-link type="info" :href="videoData.href" target="_blank">
+						《{{ videoData.title }}》
+					</el-link>
 				</li>
 				<li>如果还有其他GPU疑问，请访问我们的B站或添加训练器首页的二维码寻求帮助</li>
 			</ul>
@@ -43,7 +43,11 @@
 	</div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ZL_VIDEO_MAP } from "@/constants";
+
+const videoData = ZL_VIDEO_MAP.FLUX_KONTEXT;
+</script>
 
 <style lang="scss" scoped>
 .field-tooltip-guide {

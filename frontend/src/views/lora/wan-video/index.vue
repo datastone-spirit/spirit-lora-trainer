@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-28 10:42:57
+ * @LastEditTime: 2025-08-28 15:51:06
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -137,7 +137,7 @@ const defaultForm: RuleForm = {
 		network_weights: "",
 		dim_from_weights: false,
 		blocks_to_swap: 36,
-		timestep_boundary: 0,
+		timestep_boundary: undefined,
 		fp8_base: true,
 		fp8_scaled: false,
 		save_every_n_steps: undefined,
@@ -169,7 +169,7 @@ const defaultForm: RuleForm = {
 		split_attn: true,
 		xformers: true,
 		offload_inactive_dit: false,
-		discrete_flow_shift: 3,
+		discrete_flow_shift: 1,
 		min_timestep: undefined,
 		max_timestep: undefined,
 		mode_scale: 1.29,
@@ -491,7 +491,11 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.mixed_precision": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (isWan22.value && settingsStore.whiteCheck && value !== "fp16") {
+				const { dit } = ruleForm.value.config;
+				const emptyDit = typeof dit !== "string" || dit.trim() === "";
+				const isCheck = isWan22.value && settingsStore.whiteCheck && emptyDit && value !== "fp16";
+
+				if (isCheck) {
 					return callback(new Error("Wan2.2任务，mixed_precision必须为fp16"));
 				}
 
@@ -528,58 +532,59 @@ watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 /** 监听表单的一些配置项进行默认值设置 */
 watch([() => ruleForm.value.config.task, () => ruleForm.value.dit_model_type], onDefaultChange);
-const TASK_CONFIGS = {
-	"i2v-14B": { timestep_boundary: 0, discrete_flow_shift: 3 },
-	"t2v-14B": { timestep_boundary: 0, discrete_flow_shift: 3 },
-	"t2v-A14B": { timestep_boundary: 0.875, discrete_flow_shift: 12 },
-	"i2v-A14B": { timestep_boundary: 0.9, discrete_flow_shift: 5 }
-} as const;
-const DIT_MODEL_RANGES = {
-	"t2v-A14B": {
-		low: { min_timestep: 0, max_timestep: 875 },
-		high: { min_timestep: 875, max_timestep: 1000 },
-		both: { min_timestep: 0, max_timestep: 1000 }
-	},
-	"i2v-A14B": {
-		low: { min_timestep: 0, max_timestep: 900 },
-		high: { min_timestep: 900, max_timestep: 1000 },
-		both: { min_timestep: 0, max_timestep: 1000 }
-	}
-} as const;
-const DIT_MODEL_CONFIGS = {
-	low: { offload_inactive_dit: false, blocks_to_swap: 36 },
-	high: { offload_inactive_dit: false, blocks_to_swap: 36 },
-	both: { offload_inactive_dit: true, blocks_to_swap: 0 }
-} as const;
 function onDefaultChange() {
 	const { task } = ruleForm.value.config;
 	const { dit_model_type } = ruleForm.value;
 
-	// 应用任务配置
-	// @ts-expect-error fuck ts type check
-	const taskConfig = TASK_CONFIGS[task];
-	if (!taskConfig) {
-		console.warn(`未处理的任务类型: ${task}`);
-		return;
-	}
-	Object.assign(ruleForm.value.config, taskConfig);
-
-	// 应用特定任务的 timestep 范围配置
-	// @ts-expect-error fuck ts type check
-	const ditRanges = DIT_MODEL_RANGES[task]?.[dit_model_type];
-	if (ditRanges) {
-		Object.assign(ruleForm.value.config, ditRanges);
-	}
-
-	// 应用 dit model 配置
-	// @ts-expect-error fuck ts type check
-	const ditConfig = DIT_MODEL_CONFIGS[dit_model_type];
-	if (ditConfig) {
-		Object.assign(ruleForm.value.config, ditConfig);
+	switch (task) {
+		case "t2v-14B":
+		case "i2v-14B":
+			ruleForm.value.config.timestep_boundary = 0; // 设置为0，提交表单时需要移除该属性
+			ruleForm.value.config.min_timestep = undefined;
+			ruleForm.value.config.max_timestep = undefined;
+			ruleForm.value.config.offload_inactive_dit = false;
+			ruleForm.value.config.blocks_to_swap = 36;
+			ruleForm.value.config.mixed_precision = "bf16";
+			break;
+		case "i2v-A14B":
+		case "t2v-A14B":
+			ruleForm.value.config.mixed_precision = "fp16";
+			break;
+		default:
+			console.warn(`未处理的任务类型: ${task}`);
 	}
 
-	if (isWan22.value && settingsStore.whiteCheck) {
-		ruleForm.value.config.mixed_precision = "fp16";
+	// wan2特殊配置
+	if (isWan22.value) {
+		switch (dit_model_type) {
+			case "low":
+				ruleForm.value.config.offload_inactive_dit = false;
+				ruleForm.value.config.blocks_to_swap = 36;
+				ruleForm.value.config.min_timestep = 0;
+				ruleForm.value.config.max_timestep = 875;
+				ruleForm.value.config.timestep_boundary = undefined;
+				break;
+			case "high":
+				ruleForm.value.config.offload_inactive_dit = false;
+				ruleForm.value.config.blocks_to_swap = 36;
+				ruleForm.value.config.min_timestep = 875;
+				ruleForm.value.config.max_timestep = 1000;
+				ruleForm.value.config.timestep_boundary = undefined;
+				break;
+			case "both":
+				ruleForm.value.config.offload_inactive_dit = true;
+				ruleForm.value.config.blocks_to_swap = 0;
+				ruleForm.value.config.min_timestep = 0;
+				ruleForm.value.config.max_timestep = 1000;
+				if (task === "i2v-A14B") {
+					ruleForm.value.config.timestep_boundary = 900;
+				} else if (task === "t2v-A14B") {
+					ruleForm.value.config.timestep_boundary = 875;
+				}
+				break;
+			default:
+				console.warn(`未处理的DIT模型类型: ${dit_model_type}`);
+		}
 	}
 
 	ElMessage.success("检测到任务类型变化，已应用对应的默认配置");

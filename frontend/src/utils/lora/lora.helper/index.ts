@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 15:10:20
- * @LastEditTime: 2025-08-25 16:50:29
+ * @LastEditTime: 2025-08-28 10:06:31
  * @LastEditors: mulingyuer
  * @Description: 公共的lora帮助方法
  * @FilePath: \frontend\src\utils\lora\lora.helper\index.ts
@@ -12,6 +12,7 @@ import type { RecoveryTaskFormDataOptions } from "./types";
 import { tomlParse } from "@/utils/toml";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 export type * from "./types";
+import { getPreciseType } from "@/utils/tools";
 
 export class LoRAHelper {
 	/** 恢复表单数据的任务黑名单 */
@@ -23,22 +24,67 @@ export class LoRAHelper {
 	}
 
 	/** 合并训练表单数据 */
-	static mergeTrainingFormData(form: Record<string, any>, data: Record<string, any>) {
-		Object.keys(form).forEach((key) => {
-			if (!Object.hasOwn(data, key)) return;
-			const formValue = form[key];
-			const dataValue = data[key];
-			const isFormValueObject = Object.prototype.toString.call(formValue) === "[object Object]";
-			const isDataValueObject = Object.prototype.toString.call(dataValue) === "[object Object]";
+	static mergeTrainingFormData(form: any, data: any) {
+		// 如果源数据为 null 或 undefined，则直接返回目标数据
+		if (data === null || data === void 0) return form;
+		// 如果目标数据为 null 或 undefined，则直接返回源数据
+		if (form === null || form === void 0) return data;
 
-			if (isFormValueObject && isDataValueObject) {
-				LoRAHelper.mergeTrainingFormData(formValue, dataValue);
-			} else {
-				form[key] = dataValue;
-			}
-		});
+		const formType = getPreciseType(form);
+		const dataType = getPreciseType(data);
 
-		return form;
+		// 如果两者都是对象，进行属性合并
+		if (formType === "object" && dataType === "object") {
+			Object.keys(form).forEach((key) => {
+				if (!Object.hasOwn(data, key)) return;
+				const target = form[key];
+				const source = data[key];
+
+				const targetType = getPreciseType(target);
+				const sourceType = getPreciseType(source);
+
+				if (targetType === "object" && sourceType === "object") {
+					form[key] = LoRAHelper.mergeTrainingFormData(target, source);
+				} else if (targetType === "array" && sourceType === "array") {
+					form[key] = LoRAHelper.mergeTrainingFormData(target, source);
+				} else {
+					form[key] = source;
+				}
+			});
+
+			return form;
+		}
+
+		// 如果两者都是数组，进行元素合并
+		if (formType === "array" && dataType === "array") {
+			// 以缓存优先，让form的数组长度与data的数组长度一致
+			form.length = data.length;
+
+			// 遍历源数组，合并或追加元素
+			data.forEach((item: any, index: number) => {
+				const target = form[index];
+				const source = item;
+
+				const targetType = getPreciseType(target);
+				const sourceType = getPreciseType(source);
+
+				if (typeof target === "undefined") {
+					// 如果目标数组在当前索引没有元素，直接追加源元素
+					form[index] = source;
+				} else if (targetType === "object" && sourceType === "object") {
+					form[index] = LoRAHelper.mergeTrainingFormData(target, source);
+				} else if (targetType === "array" && sourceType === "array") {
+					form[index] = LoRAHelper.mergeTrainingFormData(target, source);
+				} else {
+					form[index] = source;
+				}
+			});
+
+			return form;
+		}
+
+		// 如果类型不匹配或不是可合并的复杂类型（对象/数组），则直接用源数据覆盖目标数据
+		return data;
 	}
 
 	/** 恢复表单数据，只有在任务正在进行中时才恢复表单数据 */

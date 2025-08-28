@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-08-25 14:55:46
+ * @LastEditTime: 2025-08-28 09:05:51
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -175,4 +175,13 @@ export function removeEmptyFields(form: any): any {
 	});
 
 	return newObj;
+}
+
+/**
+ * 获取一个值的精确类型字符串。
+ * @param value - 任何 JavaScript 值。
+ * @returns 类型的字符串表示，例如 "object", "array", "string"。
+ */
+export function getPreciseType(value: any): string {
+	return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
 }

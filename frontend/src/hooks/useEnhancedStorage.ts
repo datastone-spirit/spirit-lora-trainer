@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-30 11:31:58
- * @LastEditTime: 2025-08-26 17:19:10
+ * @LastEditTime: 2025-08-28 10:07:26
  * @LastEditors: mulingyuer
  * @Description: 自定义useLocalStorage
  * @FilePath: \frontend\src\hooks\useEnhancedStorage.ts
@@ -24,14 +24,11 @@ export function useEnhancedStorage() {
 
 	/** 检查两个对象是否具有相同的“结构” */
 	function isSameStructure(templateObj: any, dataObj: any): boolean {
-		if (templateObj === null || dataObj === null) {
-			return templateObj === dataObj;
-		}
-
 		// 检查顶级类型是否一致，（例如：一个是对象，另一个是数组或原始类型）
 		const templateType = getPreciseType(templateObj);
 		const dataType = getPreciseType(dataObj);
 
+		if (templateType === "undefined" || templateType === "null") return true;
 		if (templateType !== dataType) return false;
 
 		// 如果是数组
@@ -42,15 +39,13 @@ export function useEnhancedStorage() {
 			if (templateObj.length === 0) {
 				if (dataObj.length === 0) return true;
 
-				// 如果缓存有数据，而模板数组为空，则无法判断结构是否相同，返回 false
-				return false;
+				// 如果缓存有数据，而模板数组为空，预计为相同，返回true
+				return true;
 			} else {
 				// 模板数组有值
 				if (dataObj.length === 0) return false;
-				// 缓存和模板数组长度不一致
-				if (templateObj.length !== dataObj.length) return false;
 
-				// 递归数组每个元素的结构
+				// 递归模板中已有的对象结构
 				for (let i = 0, len = templateObj.length; i < len; i++) {
 					if (!isSameStructure(templateObj[i], dataObj[i])) return false;
 				}

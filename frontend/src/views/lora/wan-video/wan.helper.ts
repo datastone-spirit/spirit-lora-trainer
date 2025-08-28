@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-08-21 17:29:45
+ * @LastEditTime: 2025-08-28 17:44:14
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -13,6 +13,11 @@ import type { RuleForm } from "./types";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 export class WanHelper {
+	/** 是否是wan2 */
+	public isWan2(task: string): boolean {
+		return ["t2v-A14B", "i2v-A14B"].includes(task);
+	}
+
 	/** 数据格式化 */
 	public formatData(data: RuleForm): StartWanVideoTrainingData {
 		const deepCloneForm = structuredClone(toRaw(data));
@@ -56,7 +61,7 @@ export class WanHelper {
 				network_weights: config.network_weights,
 				dim_from_weights: config.dim_from_weights,
 				blocks_to_swap: config.blocks_to_swap,
-				timestep_boundary: Math.floor(config.timestep_boundary * 1000),
+				timestep_boundary: config.timestep_boundary,
 				fp8_base: config.fp8_base,
 				fp8_scaled: config.fp8_scaled,
 				save_every_n_steps: config.save_every_n_steps,
@@ -121,6 +126,11 @@ export class WanHelper {
 					prompt: sample_prompts
 				}
 			]);
+		}
+
+		// wan2.2 且为both模式，才允许添加 timestep_boundary 字段
+		if (!this.isWan2(deepCloneForm.config.task) || deepCloneForm.dit_model_type !== "both") {
+			Reflect.deleteProperty(newData.config, "timestep_boundary");
 		}
 
 		return LoRAHelper.removeEmptyFields(newData);

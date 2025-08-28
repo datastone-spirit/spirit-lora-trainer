@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-26 15:31:41
- * @LastEditTime: 2025-08-28 15:26:55
+ * @LastEditTime: 2025-08-28 17:46:02
  * @LastEditors: mulingyuer
  * @Description: 模型结构参数设置
  * @FilePath: \frontend\src\views\lora\wan-video\components\AdvancedSettings\ModelOptions.vue
@@ -118,13 +118,16 @@
 <script setup lang="ts">
 import type { RuleForm } from "../../types";
 import type { ElSwitch } from "element-plus";
+import { WanHelper } from "../../wan.helper";
 
 type ChangeCallback = InstanceType<typeof ElSwitch>["onChange"];
+
+const wanHelper = new WanHelper();
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 
 /** 是否wan2.2 */
-const isWan22 = computed(() => ["t2v-A14B", "i2v-A14B"].includes(ruleForm.value.config.task));
+const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 
 // 监听fp8_base和fp8_scaled的变化，如果同时启用，则自动关闭另一个
 const onFP8BaseChange: ChangeCallback = (val) => {

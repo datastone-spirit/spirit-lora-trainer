@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-28 15:51:06
+ * @LastEditTime: 2025-08-28 17:54:21
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -93,6 +93,9 @@ const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { wanLoraMonitor } = useWanLora();
+
+/** wan帮助类 */
+const wanHelper = new WanHelper();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -219,7 +222,7 @@ const defaultForm: RuleForm = {
 	skip_cache_text_encoder_latent: false
 };
 const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
-const isWan22 = computed(() => ["t2v-A14B", "i2v-A14B"].includes(ruleForm.value.config.task));
+const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	"config.output_dir": [
@@ -506,8 +509,6 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-/** wan帮助类 */
-const wanHelper = new WanHelper();
 /** AI数据集path */
 const wanDatasetPath = computed(() => {
 	if (ruleForm.value.data_mode === "image") {
@@ -539,7 +540,7 @@ function onDefaultChange() {
 	switch (task) {
 		case "t2v-14B":
 		case "i2v-14B":
-			ruleForm.value.config.timestep_boundary = 0; // 设置为0，提交表单时需要移除该属性
+			ruleForm.value.config.timestep_boundary = undefined;
 			ruleForm.value.config.min_timestep = undefined;
 			ruleForm.value.config.max_timestep = undefined;
 			ruleForm.value.config.offload_inactive_dit = false;

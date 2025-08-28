@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 10:12:06
- * @LastEditTime: 2025-08-25 10:29:29
+ * @LastEditTime: 2025-08-28 17:45:07
  * @LastEditors: mulingyuer
  * @Description: lora基本信息
  * @FilePath: \frontend\src\views\lora\wan-video\components\BasicInfo.vue
@@ -117,8 +117,10 @@
 <script setup lang="ts">
 import { useSettingsStore } from "@/stores";
 import type { RuleForm } from "../types";
+import { WanHelper } from "../wan.helper";
 
 const settingsStore = useSettingsStore();
+const wanHelper = new WanHelper();
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 
@@ -129,7 +131,7 @@ const isI2V = computed(() => ruleForm.value.config.task === "i2v-14B");
 /** 是否是wan2.1 t2v任务 */
 const isT2V = computed(() => ruleForm.value.config.task === "t2v-14B");
 /** 是否wan2.2 */
-const isWan22 = computed(() => ["t2v-A14B", "i2v-A14B"].includes(ruleForm.value.config.task));
+const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 </script>
 
 <style scoped></style>

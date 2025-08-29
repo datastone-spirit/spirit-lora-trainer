@@ -22,7 +22,7 @@ class QwenImageTrainingService():
     def start_train(self, parameter: QWenImageParameter) -> Task:
         taskid = uuid.uuid4().hex
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        parameter.config.logging_dir = os.path.join(getprojectpath(), "logs", f"qwenimage{'-edit' if parameter.config.edit else ''}-{taskid}-{timestamp}")
+        parameter.config.logging_dir = os.path.join(getprojectpath(), "logs", f"qwenimage-{parameter.config.output_name}{'-edit' if parameter.config.edit else ''}-{timestamp}-{taskid}")
         os.makedirs(parameter.config.logging_dir, exist_ok=True)
         return self.run_train(parameter, task_id=taskid, module_path=self.module_path)
 

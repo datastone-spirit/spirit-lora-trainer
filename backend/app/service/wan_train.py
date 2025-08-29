@@ -25,14 +25,14 @@ class WanTrainingService():
         log_prefix = ""
         if is_wan22_task(parameter.config.task):
             if is_i2v(parameter.config.task):
-                log_prefix = f'wan22-{"low" if parameter.dit_model_type == "low" else "high"}-i2v-{taskid}-{timestamp}'
+                log_prefix = f'wan22-{parameter.config.output_name}-{"low" if parameter.dit_model_type == "low" else "high"}-i2v-{timestamp}-{taskid}'
             else:
-                log_prefix = f'wan22-{"low" if parameter.dit_model_type == "low" else "high"}-t2v-{taskid}-{timestamp}'
+                log_prefix = f'wan22-{parameter.config.output_name}-{"low" if parameter.dit_model_type == "low" else "high"}-t2v-{timestamp}-{taskid}'
         else:
             if is_i2v(parameter.config.task):
-                log_prefix = f'wan21-i2v-{taskid}-{timestamp}'
+                log_prefix = f'wan20-{parameter.config.output_name}-i2v-{timestamp}-{taskid}'
             else:
-                log_prefix = f'wan21-t2v-{taskid}-{timestamp}'
+                log_prefix = f'wan21-{parameter.config.output_name}-t2v-{timestamp}-{taskid}'
             
         parameter.config.logging_dir = os.path.join(getprojectpath(), "logs", log_prefix)
         os.makedirs(parameter.config.logging_dir, exist_ok=True)

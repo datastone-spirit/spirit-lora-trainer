@@ -346,6 +346,8 @@ class WanTrainingConfig:
         
         if is_blank(config.dit):
             config.dit = path.join(getprojectpath(), "models", "wan", wan_task_dit(config.task, model_type = dit_model_type))
+            if is_wan22_task(config.task):
+                config.mixed_precision = "fp16" # for wan2.2, use fp16 as default
         
         if not path.exists(config.dit):
             logger.warning(f"dit path does not exist: {config.dit}")

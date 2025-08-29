@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-08-28 12:25:41
+ * @LastEditTime: 2025-08-29 09:40:36
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
  * @FilePath: \frontend\src\views\lora\wan-video\components\FieldTooltipGuide\index.vue
@@ -31,13 +31,13 @@
 					</el-link>
 					脚本
 				</li>
-				<li>
+				<li v-if="videoData1.show">
 					训练 Wan2.1视频教程，请观看
 					<el-link type="info" :href="videoData1.href" target="_blank">
 						《{{ videoData1.title }}》
 					</el-link>
 				</li>
-				<li>
+				<li v-if="videoData2.show">
 					训练 Wan2.2视频教程，请观看
 					<el-link type="info" :href="videoData2.href" target="_blank">
 						《{{ videoData2.title }}》

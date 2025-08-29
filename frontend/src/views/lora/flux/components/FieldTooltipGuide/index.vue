@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-08-28 11:57:10
+ * @LastEditTime: 2025-08-29 09:42:01
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
  * @FilePath: \frontend\src\views\lora\flux\components\FieldTooltipGuide\index.vue
@@ -30,7 +30,7 @@
 					</el-link>
 					脚本
 				</li>
-				<li>
+				<li v-if="videoData.show">
 					如果你不知道如何使用这个训练器，请观看
 					<el-link type="info" :href="videoData.href" target="_blank"
 						>《{{ videoData.title }}》</el-link

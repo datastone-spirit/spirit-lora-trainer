@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-08-28 10:45:43
+ * @LastEditTime: 2025-08-29 16:01:36
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -78,7 +78,7 @@ import type {
 	UploadUserFile
 } from "element-plus";
 import type { TeleportProps } from "vue";
-import { downloadTomlFile, readTomlFile, tomlParse, tomlStringify } from "@/utils/toml";
+import { TomlUtils } from "@/utils/toml";
 import { useGPU } from "@/hooks/task/useGPU";
 import { useTrainingStore } from "@/stores";
 import { useTag } from "@/hooks/task/useTag";
@@ -150,8 +150,8 @@ const onUploadExceed: UploadProps["onExceed"] = (files) => {
 // 上传文件之前的钩子函数
 const onUploadRequest: UploadProps["beforeUpload"] = async (file) => {
 	try {
-		const data = await readTomlFile(file);
-		onMergeData(tomlParse(data));
+		const data = await TomlUtils.readTomlFile(file);
+		onMergeData(TomlUtils.tomlParse(data));
 		// 重置表单
 		if (props.formInstance) props.formInstance?.validate();
 		emits("importConfig");
@@ -177,14 +177,14 @@ function onMergeData(tomlObj: Record<string, any>) {
 // 配置导出
 async function onExportConfig() {
 	try {
-		const tomlStr = tomlStringify(mergeData.value);
+		const tomlStr = TomlUtils.tomlStringify(mergeData.value);
 		let fileNamePrefix = "";
 		if (props.exportFileNamePrefix) {
 			fileNamePrefix = props.exportFileNamePrefix;
 		} else {
 			fileNamePrefix = routeTrainingType.value !== "none" ? routeTrainingType.value : "";
 		}
-		downloadTomlFile({ text: tomlStr, fileNamePrefix });
+		TomlUtils.downloadTomlFile({ text: tomlStr, fileNamePrefix });
 		emits("exportConfig");
 	} catch (error) {
 		ElMessage.error(`配置导出发生错误：${(error as Error)?.message ?? "未知错误"}`);

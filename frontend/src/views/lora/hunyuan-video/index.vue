@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-08-29 11:36:05
+ * @LastEditTime: 2025-08-29 15:14:21
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -38,7 +38,7 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="ruleForm.directory_path" />
+				<SplitRightPanel :form-data="ruleForm" :dir="ruleForm.directory_path" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
@@ -64,19 +64,18 @@ import { useSettingsStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
-import { tomlStringify } from "@/utils/toml";
+import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import HYDataset from "./components/HYDataset/index.vue";
+import HYTrainingLoRAMonitor from "./components/HYTrainingLoRAMonitor/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData } from "./hunyuan.helper";
 import { isDirectoryEmpty, validate } from "./hunyuan.validate";
 import type { RuleForm } from "./types";
-import HYTrainingLoRAMonitor from "./components/HYTrainingLoRAMonitor/index.vue";
-import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
-import { joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
@@ -221,13 +220,6 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-
-/** toml */
-const toml = ref("");
-const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(ruleForm.value);
-}, 300);
-watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 // 折叠
 const openStep1 = ref(true);

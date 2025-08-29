@@ -43,7 +43,7 @@
 				</div>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
+				<SplitRightPanel :form-data="ruleForm" :dir="ruleForm.image_dir" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
@@ -80,17 +80,16 @@ import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
-import { tomlStringify } from "@/utils/toml";
 import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import FluxDataset from "./components/FluxDataset/index.vue";
 import FluxLoRATrainingMonitor from "./components/FluxLoRATrainingMonitor/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import TrainingSamples from "./components/TrainingSamples/index.vue";
-import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import { formatFormData } from "./flux.helper";
 import { validate } from "./flux.validate";
 import type { RuleForm } from "./types";
@@ -478,13 +477,6 @@ const openStep3 = ref(true);
 const openStep4 = ref(true);
 const openStep5 = ref(true);
 const openStep6 = ref(true);
-
-/** toml */
-const toml = ref("");
-const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(ruleForm.value);
-}, 300);
-watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 /** 重置表单 */
 function onResetData() {

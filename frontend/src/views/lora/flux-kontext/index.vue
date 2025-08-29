@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-08-29 11:34:22
+ * @LastEditTime: 2025-08-29 15:14:00
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -41,7 +41,7 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="dir" />
+				<SplitRightPanel :form-data="ruleForm" :dir="dir" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
@@ -77,17 +77,16 @@ import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
-import { tomlStringify } from "@/utils/toml";
 import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import DataSet from "./components/DataSet/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import FluxKontextLoRATrainingMonitor from "./components/FluxKontextLoRATrainingMonitor/index.vue";
 import SampleConfig from "./components/SampleConfig/index.vue";
 import SaveConfig from "./components/SaveConfig/index.vue";
 import TrainingConfig from "./components/TrainingConfig/index.vue";
-import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import { formatFormData, generateDefaultDataset } from "./flex-kontext.helper";
 import { validate } from "./flux-kontext.validate";
 import type { DatasetItem, RuleForm } from "./types";
@@ -240,13 +239,6 @@ const openStep3 = ref(true);
 const openStep4 = ref(true);
 const openStep5 = ref(true);
 const openStep6 = ref(true);
-
-/** toml */
-const toml = ref("");
-const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(ruleForm.value);
-}, 300);
-watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 // 重置表单
 function onResetData() {

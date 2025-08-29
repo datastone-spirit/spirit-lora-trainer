@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-29 11:36:44
+ * @LastEditTime: 2025-08-29 15:15:57
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -38,7 +38,7 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="wanDatasetPath" />
+				<SplitRightPanel :form-data="ruleForm" :dir="wanDatasetPath" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
@@ -75,16 +75,15 @@ import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
-import { tomlStringify } from "@/utils/toml";
 import { generateUUID, isImageFile, joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import SampleValidator from "./components/SampleValidator.vue";
 import TrainingData from "./components/TrainingData.vue";
 import WanDataSet from "./components/WanDataSet/index.vue";
 import WanTrainingLoRAMonitor from "./components/WanTrainingLoRAMonitor/index.vue";
-import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import type { RuleForm, TargetFrames } from "./types";
 import { WanHelper } from "./wan.helper";
 import { validate } from "./wan.validate";
@@ -527,13 +526,6 @@ const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
 const openStep5 = ref(true);
-
-/** toml */
-const toml = ref("");
-const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(ruleForm.value);
-}, 300);
-watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 /** 监听表单的一些配置项进行默认值设置 */
 watch([() => ruleForm.value.config.task, () => ruleForm.value.dit_model_type], onDefaultChange);

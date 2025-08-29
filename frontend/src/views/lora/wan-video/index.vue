@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-29 15:15:57
+ * @LastEditTime: 2025-08-29 17:03:19
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -526,66 +526,6 @@ const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
 const openStep5 = ref(true);
-
-/** 监听表单的一些配置项进行默认值设置 */
-watch([() => ruleForm.value.config.task, () => ruleForm.value.dit_model_type], onDefaultChange);
-function onDefaultChange() {
-	const { task } = ruleForm.value.config;
-	const { dit_model_type } = ruleForm.value;
-
-	switch (task) {
-		case "t2v-14B":
-		case "i2v-14B":
-			ruleForm.value.config.timestep_boundary = undefined;
-			ruleForm.value.config.min_timestep = undefined;
-			ruleForm.value.config.max_timestep = undefined;
-			ruleForm.value.config.offload_inactive_dit = false;
-			ruleForm.value.config.blocks_to_swap = 36;
-			ruleForm.value.config.mixed_precision = "bf16";
-			break;
-		case "i2v-A14B":
-		case "t2v-A14B":
-			ruleForm.value.config.mixed_precision = "fp16";
-			break;
-		default:
-			console.warn(`未处理的任务类型: ${task}`);
-	}
-
-	// wan2特殊配置
-	if (isWan22.value) {
-		switch (dit_model_type) {
-			case "low":
-				ruleForm.value.config.offload_inactive_dit = false;
-				ruleForm.value.config.blocks_to_swap = 36;
-				ruleForm.value.config.min_timestep = 0;
-				ruleForm.value.config.max_timestep = 875;
-				ruleForm.value.config.timestep_boundary = undefined;
-				break;
-			case "high":
-				ruleForm.value.config.offload_inactive_dit = false;
-				ruleForm.value.config.blocks_to_swap = 36;
-				ruleForm.value.config.min_timestep = 875;
-				ruleForm.value.config.max_timestep = 1000;
-				ruleForm.value.config.timestep_boundary = undefined;
-				break;
-			case "both":
-				ruleForm.value.config.offload_inactive_dit = true;
-				ruleForm.value.config.blocks_to_swap = 0;
-				ruleForm.value.config.min_timestep = 0;
-				ruleForm.value.config.max_timestep = 1000;
-				if (task === "i2v-A14B") {
-					ruleForm.value.config.timestep_boundary = 900;
-				} else if (task === "t2v-A14B") {
-					ruleForm.value.config.timestep_boundary = 875;
-				}
-				break;
-			default:
-				console.warn(`未处理的DIT模型类型: ${dit_model_type}`);
-		}
-	}
-
-	ElMessage.success("检测到任务类型变化，已应用对应的默认配置");
-}
 
 /** 重置表单 */
 function onResetData() {

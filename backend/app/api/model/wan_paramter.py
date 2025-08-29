@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, List 
+from typing import Optional, Tuple, List, Any 
 from os import path
 from enum import Enum
 import dacite
@@ -251,7 +251,7 @@ class WanTrainingConfig:
     mixed_precision: str  = "bf16" # use mixed precision
     mode_scale: float = 1.29 # Scale of mode weighting scheme. Only effective when using the `'mode'` as the `weighting_scheme`
     network_alpha: float = 1 # alpha for LoRA weight scaling, default 1 (same as network_dim for same behavior as old version)
-    network_args: str  = None # additional arguments for network (key=value)
+    network_args: Any  = None # additional arguments for network (key=value)
     network_dim: int = None # network dimensions (depends on each network)
     network_dropout: float = None # Drops neurons out of training every step (0 or None is default behavior (no dropout), 1 would drop all neurons)
     network_module: str  = None # network module to train
@@ -259,7 +259,7 @@ class WanTrainingConfig:
     no_metadata: bool = False # do not save metadata in output model
     offload_inactive_dit: bool = False # Offload inactive DiT model to CPU. Cannot be used with block swap
     one_frame: bool = False # Use one frame sampling method for sample generation
-    optimizer_args: str  = None # additional arguments for optimizer (like "weight_decay=0.01 betas=0.9,0.999 ...")
+    optimizer_args: Any  = None # additional arguments for optimizer (like "weight_decay=0.01 betas=0.9,0.999 ...")
     optimizer_type: str  = "" # Optimizer to use
     output_dir: str  = None # directory to output trained model
     output_name: str  = None # base name of trained model file
@@ -449,10 +449,25 @@ class WanTrainingConfig:
             logger.info(f"max_timestamp {config.max_timestep} must greater then min_timestamp {config.min_timestep}")
             raise ValueError(f"max_timestamp {config.max_timestep} must greater then min_timestamp {config.min_timestep}")
         
-        if not is_blank(config.dit) and not is_blank(config.dit_high_noise):
-            # treat this as high/low both training
-            if config.timestep_boundary is None:
-                config.timestep_boundary = 900 if is_i2v(config.task) else 875
+        if is_wan22_task(config.task):
+            if dit_model_type == 'both':
+                if config.timestep_boundary is None:
+                    config.timestep_boundary = 900 if is_i2v(config.task) else 875
+                    logger.info(f"task {config.task} using both high and low noise models, so set timestep_boundary to {config.timestep_boundary}")
+            elif config.timestep_boundary is not None:
+                logger.info(f"task {config.task} using single noise model, so ignore the user set timestep_boundary {config.timestep_boundary}")
+                config.timestep_boundary = None
+        
+
+        if config.optimizer_args is not None and not is_blank(config.optimizer_args):
+            args = config.optimizer_args.split(",")
+            config.optimizer_args = [item for item in args]
+            logger.info(f"optimizer_args is convert to List {config.optimizer_args}")
+
+        if config.network_args is not None and not is_blank(config.network_args):
+            args = config.network_args.split(",")
+            config.network_args = [item for item in args]
+            logger.info(f"network_args is convert to List {config.network_args}")
 
         return config
         

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-08-28 10:43:21
+ * @LastEditTime: 2025-08-29 11:36:05
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -138,10 +138,11 @@ const defaultForm = readonly<RuleForm>({
 	optimizer_weight_decay: 0.01,
 	optimizer_eps: "1e-8"
 });
-const ruleForm = useEnhancedLocalStorage<RuleForm>(
-	localStorageKey,
-	structuredClone(toRaw(defaultForm) as RuleForm)
-);
+const ruleForm = useEnhancedLocalStorage<RuleForm>({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
+	version: "1.0.0"
+});
 const rules = reactive<FormRules<RuleForm>>({
 	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
 	// model_transformer_path: [{ required: true, message: "请选择训练用的底模", trigger: "change" }],

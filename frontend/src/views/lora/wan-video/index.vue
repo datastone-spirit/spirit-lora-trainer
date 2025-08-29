@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-28 17:54:21
+ * @LastEditTime: 2025-08-29 11:36:44
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -221,7 +221,11 @@ const defaultForm: RuleForm = {
 	skip_cache_latent: false,
 	skip_cache_text_encoder_latent: false
 };
-const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
+const ruleForm = useEnhancedLocalStorage({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm)),
+	version: "1.0.0"
+});
 const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],

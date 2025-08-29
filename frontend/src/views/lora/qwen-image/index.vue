@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-28 10:37:05
+ * @LastEditTime: 2025-08-29 11:29:20
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -210,7 +210,11 @@ const defaultForm: RuleForm = {
 		tagger_is_append: false
 	}
 };
-const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
+const ruleForm = useEnhancedLocalStorage({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm)),
+	version: "1.0.0"
+});
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	"config.output_dir": [

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 09:31:33
- * @LastEditTime: 2025-08-28 09:05:51
+ * @LastEditTime: 2025-08-29 11:41:43
  * @LastEditors: mulingyuer
  * @Description: 工具函数
  * @FilePath: \frontend\src\utils\tools.ts
@@ -184,4 +184,110 @@ export function removeEmptyFields(form: any): any {
  */
 export function getPreciseType(value: any): string {
 	return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
+}
+
+/** 深度合并数据 */
+export function deepMerge(template: any, data: any) {
+	// 如果源数据为 null 或 undefined，则直接返回目标数据
+	if (data === null || data === void 0) return template;
+	// 如果目标数据为 null 或 undefined，则直接返回源数据
+	if (template === null || template === void 0) return data;
+
+	const templateType = getPreciseType(template);
+	const dataType = getPreciseType(data);
+
+	// 如果两者都是对象，进行属性合并
+	if (templateType === "object" && dataType === "object") {
+		Object.keys(template).forEach((key) => {
+			if (!Object.hasOwn(data, key)) return;
+			const target = template[key];
+			const source = data[key];
+
+			const targetType = getPreciseType(target);
+			const sourceType = getPreciseType(source);
+
+			if (targetType === "object" && sourceType === "object") {
+				template[key] = deepMerge(target, source);
+			} else if (targetType === "array" && sourceType === "array") {
+				template[key] = deepMerge(target, source);
+			} else {
+				template[key] = source;
+			}
+		});
+
+		return template;
+	}
+
+	// 如果两者都是数组，进行元素合并
+	if (templateType === "array" && dataType === "array") {
+		// 以缓存优先，让form的数组长度与data的数组长度一致
+		template.length = data.length;
+
+		// 遍历源数组，合并或追加元素
+		data.forEach((item: any, index: number) => {
+			const target = template[index];
+			const source = item;
+
+			const targetType = getPreciseType(target);
+			const sourceType = getPreciseType(source);
+
+			if (typeof target === "undefined") {
+				// 如果目标数组在当前索引没有元素，直接追加源元素
+				template[index] = source;
+			} else if (targetType === "object" && sourceType === "object") {
+				template[index] = deepMerge(target, source);
+			} else if (targetType === "array" && sourceType === "array") {
+				template[index] = deepMerge(target, source);
+			} else {
+				template[index] = source;
+			}
+		});
+
+		return template;
+	}
+
+	// 如果类型不匹配或不是可合并的复杂类型（对象/数组），则直接用源数据覆盖目标数据
+	return data;
+}
+
+/** 序列化方法
+ * 用于将undefined也正确存储为string
+ */
+export class SerializeUndefined {
+	/** undefined 占位符 */
+	static readonly UNDEFINED_PLACEHOLDER = "__undefined__";
+
+	/** 递归地将 undefined 转换为占位符 */
+	public static serialize(obj: any): any {
+		if (typeof obj === "undefined") return SerializeUndefined.UNDEFINED_PLACEHOLDER;
+
+		if (Array.isArray(obj)) {
+			return obj.map(SerializeUndefined.serialize);
+		}
+
+		if (getPreciseType(obj) === "object") {
+			return Object.fromEntries(
+				Object.entries(obj).map(([key, value]) => [key, SerializeUndefined.serialize(value)])
+			);
+		}
+
+		return obj;
+	}
+
+	/** 递归地将占位符还原为 undefined */
+	public static deserialize(obj: any): any {
+		if (obj === SerializeUndefined.UNDEFINED_PLACEHOLDER) return undefined;
+
+		if (Array.isArray(obj)) {
+			return obj.map(SerializeUndefined.deserialize);
+		}
+
+		if (getPreciseType(obj) === "object") {
+			return Object.fromEntries(
+				Object.entries(obj).map(([key, value]) => [key, SerializeUndefined.deserialize(value)])
+			);
+		}
+
+		return obj;
+	}
 }

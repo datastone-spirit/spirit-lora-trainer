@@ -1,19 +1,18 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-23 17:50:46
- * @LastEditTime: 2025-08-21 17:31:03
+ * @LastEditTime: 2025-08-29 11:56:50
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 帮助方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flex-kontext.helper.ts
  * 怎么可能会有bug！！！
  */
-import { generateUUID } from "@/utils/tools";
-import type { Datasets, RuleForm, SamplePrompts } from "./types";
-import { getEnv } from "@/utils/env";
 import type { StartFluxKontextTrainingData } from "@/api/lora";
-import { tomlStringify } from "@/utils/toml";
 import { useSettingsStore } from "@/stores";
+import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { generateUUID, SerializeUndefined } from "@/utils/tools";
+import type { Datasets, RuleForm, SamplePrompts } from "./types";
 
 /** 生成默认样本提示对象 */
 export function generateDefaultSamplePrompt(): SamplePrompts[number] {
@@ -133,7 +132,7 @@ export function formatFormData(form: RuleForm): StartFluxKontextTrainingData {
 			name: "",
 			version: ""
 		},
-		frontend_config: tomlStringify(deepCloneForm)
+		frontend_config: JSON.stringify(SerializeUndefined.serialize(deepCloneForm))
 	};
 
 	return LoRAHelper.removeEmptyFields(data);

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-08-28 10:43:34
+ * @LastEditTime: 2025-08-29 11:34:22
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -174,7 +174,11 @@ const defaultForm: RuleForm = {
 		tagger_is_append: false
 	}
 };
-const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
+const ruleForm = useEnhancedLocalStorage({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm)),
+	version: "1.0.0"
+});
 const rules = reactive<FormRules<RuleForm>>({
 	name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	trigger_word: [{ required: true, message: "请输入触发词", trigger: "blur" }],

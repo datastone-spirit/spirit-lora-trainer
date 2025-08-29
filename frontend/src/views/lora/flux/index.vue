@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-08-28 10:43:45
+ * @LastEditTime: 2025-08-29 11:35:03
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -229,10 +229,11 @@ const defaultForm = readonly<RuleForm>({
 	sample_every_n_steps: undefined,
 	sample_prompts: ""
 });
-const ruleForm = useEnhancedLocalStorage<RuleForm>(
-	localStorageKey,
-	structuredClone(toRaw(defaultForm) as RuleForm)
-);
+const ruleForm = useEnhancedLocalStorage<RuleForm>({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
+	version: "1.0.0"
+});
 const rules = reactive<FormRules<RuleForm>>({
 	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],

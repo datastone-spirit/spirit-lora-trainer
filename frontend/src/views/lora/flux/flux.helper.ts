@@ -1,16 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 17:02:12
- * @LastEditTime: 2025-08-21 17:30:35
+ * @LastEditTime: 2025-08-29 11:56:36
  * @LastEditors: mulingyuer
  * @Description: flux helper
  * @FilePath: \frontend\src\views\lora\flux\flux.helper.ts
  * 怎么可能会有bug！！！
  */
 import type { StartFluxTrainingData } from "@/api/lora/types";
-import type { RuleForm } from "./types";
-import { tomlStringify } from "@/utils/toml";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { SerializeUndefined } from "@/utils/tools";
+import type { RuleForm } from "./types";
 
 type Config = StartFluxTrainingData["config"];
 type Dataset = StartFluxTrainingData["dataset"];
@@ -204,7 +204,7 @@ export function formatFormData(form: RuleForm): StartFluxTrainingData {
 	return {
 		config: formatConfig(deepCloneForm),
 		dataset: formatDataset(deepCloneForm),
-		frontend_config: tomlStringify(deepCloneForm)
+		frontend_config: JSON.stringify(SerializeUndefined.serialize(deepCloneForm))
 	};
 }
 

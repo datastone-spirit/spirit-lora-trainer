@@ -1,16 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-08-28 17:44:14
+ * @LastEditTime: 2025-08-29 11:57:35
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
  * 怎么可能会有bug！！！
  */
 import type { StartWanVideoTrainingData, WanVideoVideoDatasetEstimateData } from "@/api/lora";
-import { tomlStringify } from "@/utils/toml";
-import type { RuleForm } from "./types";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { SerializeUndefined } from "@/utils/tools";
+import type { RuleForm } from "./types";
 
 export class WanHelper {
 	/** 是否是wan2 */
@@ -106,7 +106,7 @@ export class WanHelper {
 			dit_model_type: deepCloneForm.dit_model_type,
 			skip_cache_latent: deepCloneForm.skip_cache_latent,
 			skip_cache_text_encoder_latent: deepCloneForm.skip_cache_text_encoder_latent,
-			frontend_config: tomlStringify(deepCloneForm)
+			frontend_config: JSON.stringify(SerializeUndefined.serialize(deepCloneForm))
 		};
 
 		// 采样

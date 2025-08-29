@@ -1,19 +1,18 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-08-26 16:15:57
+ * @LastEditTime: 2025-08-29 11:46:59
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
  * 怎么可能会有bug！！！
  */
-import { getEnv } from "@/utils/env";
-import type { Dataset, DatasetGeneral, DatasetItem, RuleForm } from "./types";
-import { useSettingsStore } from "@/stores";
-import { generateUUID } from "@/utils/tools";
 import type { StartQwenImageTrainingData } from "@/api/lora";
-import { tomlStringify } from "@/utils/toml";
+import { useSettingsStore } from "@/stores";
+import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { generateUUID, SerializeUndefined } from "@/utils/tools";
+import type { Dataset, DatasetGeneral, DatasetItem, RuleForm } from "./types";
 
 /** 依赖注入的key */
 export const QwenImageRuleFormRef = Symbol("QwenImageRuleFormRef");
@@ -181,7 +180,7 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 		},
 		skip_cache_latent: deepCloneForm.skip_cache_latent,
 		skip_cache_text_encoder_latent: deepCloneForm.skip_cache_text_encoder_latent,
-		frontend_config: tomlStringify(deepCloneForm)
+		frontend_config: JSON.stringify(SerializeUndefined.serialize(deepCloneForm))
 	};
 	if (typeof config.network_weights === "string" && config.network_weights.trim() !== "") {
 		data.config.network_weights = config.network_weights;

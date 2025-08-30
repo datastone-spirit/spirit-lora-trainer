@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-08-22 14:28:41
+ * @LastEditTime: 2025-08-29 11:35:03
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -20,6 +20,7 @@
 						label-position="top"
 						size="large"
 					>
+						<FieldTooltipGuide />
 						<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 							<BasicInfo v-model:form="ruleForm" />
 						</Collapse>
@@ -42,12 +43,13 @@
 				</div>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="ruleForm.image_dir" />
+				<SplitRightPanel :form-data="ruleForm" :dir="ruleForm.image_dir" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
+			:form-instance="ruleFormRef"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"
@@ -78,11 +80,11 @@ import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
-import { tomlStringify } from "@/utils/toml";
 import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import FluxDataset from "./components/FluxDataset/index.vue";
 import FluxLoRATrainingMonitor from "./components/FluxLoRATrainingMonitor/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
@@ -226,10 +228,11 @@ const defaultForm = readonly<RuleForm>({
 	sample_every_n_steps: undefined,
 	sample_prompts: ""
 });
-const ruleForm = useEnhancedLocalStorage<RuleForm>(
-	localStorageKey,
-	structuredClone(toRaw(defaultForm) as RuleForm)
-);
+const ruleForm = useEnhancedLocalStorage<RuleForm>({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
+	version: "1.0.0"
+});
 const rules = reactive<FormRules<RuleForm>>({
 	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
@@ -474,13 +477,6 @@ const openStep3 = ref(true);
 const openStep4 = ref(true);
 const openStep5 = ref(true);
 const openStep6 = ref(true);
-
-/** toml */
-const toml = ref("");
-const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(ruleForm.value);
-}, 300);
-watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 /** 重置表单 */
 function onResetData() {

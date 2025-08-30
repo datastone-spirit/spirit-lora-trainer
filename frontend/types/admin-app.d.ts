@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-27 17:02:33
- * @LastEditTime: 2025-08-20 11:26:10
+ * @LastEditTime: 2025-08-25 09:39:16
  * @LastEditors: mulingyuer
  * @Description: 应用全局类型定义
  * @FilePath: \frontend\types\admin-app.d.ts
@@ -17,6 +17,8 @@ declare namespace AdminApp {
 		icon?: string;
 		loRATaskType?: TaskType;
 		children?: Menu[];
+		/** 是否显示新增badge */
+		showNewBadge: boolean;
 	}
 	/** navTab数据类型 */
 	interface NavTabData {

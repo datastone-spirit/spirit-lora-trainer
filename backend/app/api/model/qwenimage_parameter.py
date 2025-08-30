@@ -3,13 +3,84 @@ from app.api.model.base_model import MultiGPUConfig
 
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, List, Any
-from os import path, makedirs
+from os import path, makedirs, listdir
 
 from utils.util import setup_logging, is_blank, getprojectpath
 from app.api.common.utils import generate_sample_prompt_file
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
+
+def validate_image_control_pairs(image_directory: str, control_directory: str) -> bool:
+    """
+    Validate that at least one image pair exists between image_directory and control_directory.
+    The control images are used from the control_directory with the same filename (or different extension) 
+    as the image, for example, image_dir/image1.jpg and control_dir/image1.png.
+    
+    Args:
+        image_directory: Path to the directory containing training images
+        control_directory: Path to the directory containing control images
+        
+    Returns:
+        bool: True if at least one valid image pair is found
+        
+    Raises:
+        ValueError: If directories don't exist or no valid pairs are found
+    """
+    if not path.exists(image_directory):
+        raise ValueError(f"Image directory does not exist: {image_directory}")
+    
+    if not path.exists(control_directory):
+        raise ValueError(f"Control directory does not exist: {control_directory}")
+    
+    # Common image extensions
+    image_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.webp'}
+    
+    try:
+        # Get all image files from image_directory
+        image_files = []
+        for filename in listdir(image_directory):
+            if path.isfile(path.join(image_directory, filename)):
+                _, ext = path.splitext(filename.lower())
+                if ext in image_extensions:
+                    image_files.append(filename)
+        
+        if not image_files:
+            raise ValueError(f"No image files found in image directory: {image_directory}")
+        
+        # Get all control files from control_directory
+        control_files = []
+        for filename in listdir(control_directory):
+            if path.isfile(path.join(control_directory, filename)):
+                _, ext = path.splitext(filename.lower())
+                if ext in image_extensions:
+                    control_files.append(filename)
+        
+        if not control_files:
+            raise ValueError(f"No control image files found in control directory: {control_directory}")
+        
+        # Create mapping of base names (without extension) to full filenames
+        image_basenames = {}
+        for filename in image_files:
+            basename = path.splitext(filename)[0]
+            image_basenames[basename] = filename
+        
+        control_basenames = {}
+        for filename in control_files:
+            basename = path.splitext(filename)[0]
+            control_basenames[basename] = filename
+        
+        # Find matching pairs
+        matched_pairs = []
+        for basename in image_basenames:
+            if is_blank(control_basenames.get(basename, "")):
+                raise ValueError(f"No control image found for training image: {image_basenames.get(basename, '')} ")
+        
+        logger.info(f"Found {len(matched_pairs)} valid image-control pairs for qwen-image-edit training")
+        return True
+        
+    except OSError as e:
+        raise ValueError(f"Error accessing directories: {str(e)}")
 
 @dataclass
 class GeneralConfig:
@@ -51,8 +122,13 @@ class DatasetConfig:
     image_directory: Optional[str] = None
     image_jsonl_file: Optional[str] = None
 
+    control_directory: Optional[str] = None # Must be specified `when` edit is true
+    qwen_image_edit_no_resize_control = False # optional, default is false. Disable resizing of control image
+    qwen_image_edit_control_resolution: Optional[Tuple[int, int]] = None ## optional, default is None. Specify the resolution of the control image. could be specified as [1024, 1024] 
+
+
     @staticmethod
-    def validate(config: 'DatasetConfig', strict_mod : bool = False) -> 'DatasetConfig':
+    def validate(config: 'DatasetConfig', strict_mod : bool = False, edit: bool = False) -> 'DatasetConfig':
         """
         Validate the DatasetConfig instance.
         """
@@ -65,9 +141,14 @@ class DatasetConfig:
         if config.num_repeats is not None and config.num_repeats <= 0:
             raise ValueError("Number of repeats must be a positive integer.")
         
+        if edit and not is_blank(config.image_directory):
+            if is_blank(config.control_directory):
+                raise ValueError("control_directory must be specified when training qwen-image-edit LoRA")
+            
+            # Validate that image pairs exist between image_directory and control_directory
+            validate_image_control_pairs(config.image_directory, config.control_directory)
+        
         return config
-
-
 
 @dataclass
 class QWenImageDataSetConfig:
@@ -75,7 +156,7 @@ class QWenImageDataSetConfig:
     datasets: List[DatasetConfig] = field(default_factory=list)
 
     @staticmethod
-    def validate(config: 'QWenImageDataSetConfig', strict_mod: bool = False ) -> 'QWenImageDataSetConfig':
+    def validate(config: 'QWenImageDataSetConfig', strict_mod: bool = False, edit: bool = False) -> 'QWenImageDataSetConfig':
         """
         Validate the WanDataSetConfig instance.
         """
@@ -91,7 +172,7 @@ class QWenImageDataSetConfig:
             raise ValueError("At least one dataset configuration is required.")
         
         for i in range(len(config.datasets)):
-            config.datasets[i] = DatasetConfig.validate(config.datasets[i], strict_mod = strict_mod)
+            config.datasets[i] = DatasetConfig.validate(config.datasets[i], strict_mod = strict_mod, edit = edit)
         return config
 
 @dataclass
@@ -112,6 +193,7 @@ class QWenImageTrainingConfig:
     dynamo_dynamic: bool = False # use dynamic mode for dynamo
     dynamo_fullgraph: bool = False # use fullgraph mode for dynamo
     dynamo_mode: str  = None # dynamo mode (default is default)
+    edit: bool = False # is Qwen-Image-Edit Lora training
     flash3: bool = False # use FlashAttention 3 for CrossAttention, requires FlashAttention 3, HunyuanVideo does not support this yet
     flash_attn: bool = False # use FlashAttention for CrossAttention, requires FlashAttention
     fp8_base: bool = False # use fp8 for base model
@@ -208,7 +290,10 @@ class QWenImageTrainingConfig:
         Validate the QWenImageTrainingConfig instance.
         """
         if is_blank(config.dit):
-            config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_bf16.safetensors")
+            if config.edit:
+                config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_edit_bf16.safetensors")
+            else:
+                config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_bf16.safetensors")
         
         if not path.exists(config.dit):
             logger.warning(f"dit path does not exist: {config.dit}")
@@ -328,7 +413,6 @@ class QWenImageParameter:
     skip_cache_latent: bool = False # skip cache latent step
     skip_cache_text_encoder_output: bool = False # skip cache text encoder output step
 
-
     @classmethod
     def from_dict(cls, dikt) -> 'QWenImageParameter':
         try: 
@@ -360,7 +444,7 @@ class QWenImageParameter:
         if parameter.multi_gpu_config.multi_gpu_enabled is True: 
             parameter.multi_gpu_config.gradient_accumulation_steps = parameter.config.gradient_accumulation_steps
         
-        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, strict_mod=strict_mod)
+        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, strict_mod=strict_mod, edit = parameter.config.edit)
 
         # network_module is fix string for the specific task. CAN NOT BE CHANGED
         parameter.config.network_module = "networks.lora_qwen_image"

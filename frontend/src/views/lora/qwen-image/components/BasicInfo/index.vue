@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:15:19
- * @LastEditTime: 2025-08-12 17:22:55
+ * @LastEditTime: 2025-08-25 14:47:07
  * @LastEditors: mulingyuer
  * @Description: 基本信息
  * @FilePath: \frontend\src\views\lora\qwen-image\components\BasicInfo\index.vue
@@ -11,6 +11,9 @@
 	<PopoverFormItem label="LoRA 名称" prop="config.output_name" popover-content="output_name">
 		<el-input v-model="ruleForm.config.output_name" placeholder="请输入LoRA名称" />
 	</PopoverFormItem>
+	<PopoverFormItem label="是否训练 Qwen Image Edit" prop="config.edit" popover-content="edit">
+		<el-switch v-model="ruleForm.config.edit" />
+	</PopoverFormItem>
 	<PopoverFormItem v-show="isExpert" label="底模目录" prop="config.dit" popover-content="dit">
 		<FolderSelector
 			v-model="ruleForm.config.dit"
@@ -18,7 +21,10 @@
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem v-show="isExpert" label="VAE模型路径" prop="config.vae" popover-content="vae">
-		<FileSelector v-model="ruleForm.config.vae" placeholder="请选择VAE模型" />
+		<FileSelector
+			v-model="ruleForm.config.vae"
+			placeholder="请选择VAE模型，不知道可以不填，智灵会自动选择合适的模型"
+		/>
 	</PopoverFormItem>
 	<PopoverFormItem
 		v-show="isExpert"
@@ -40,7 +46,7 @@
 	>
 		<FileSelector
 			v-model="ruleForm.config.text_encoder"
-			placeholder="请选择文本编码器模型路径，不知道可以不填"
+			placeholder="请选择文本编码器模型路径，不知道可以不填，智灵会自动选择合适的模型"
 		/>
 	</PopoverFormItem>
 	<PopoverFormItem label="LoRA 保存路径" prop="config.output_dir" popover-content="output_dir">

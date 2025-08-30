@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-08-20 15:30:41
+ * @LastEditTime: 2025-08-29 11:34:04
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -145,10 +145,11 @@ const defaultForm = readonly<RuleForm>({
 	global_prompt: "",
 	is_append: false
 });
-const ruleForm = useEnhancedLocalStorage<RuleForm>(
-	localStorageKey,
-	structuredClone(toRaw(defaultForm) as RuleForm)
-);
+const ruleForm = useEnhancedLocalStorage<RuleForm>({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
+	version: "1.0.0"
+});
 const rules = reactive<FormRules<RuleForm>>({
 	image_path: [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },

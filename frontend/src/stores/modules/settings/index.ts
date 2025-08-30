@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:14:16
- * @LastEditTime: 2025-07-29 09:25:53
+ * @LastEditTime: 2025-08-25 10:10:44
  * @LastEditors: mulingyuer
  * @Description: 设置数据仓库
  * @FilePath: \frontend\src\stores\modules\settings\index.ts
@@ -43,7 +43,8 @@ export const useSettingsStore = defineStore(
 		const trainerSettings = ref<TrainerSettings>({
 			openAnimatedFavicon: true,
 			openFooterBarProgress: true,
-			enableTrainingTaskDataRecovery: true
+			enableTrainingTaskDataRecovery: true,
+			showAsideNewBadge: true
 		});
 
 		/** 是否开启小白校验 */

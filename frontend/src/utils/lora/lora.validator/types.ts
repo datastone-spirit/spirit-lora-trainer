@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 10:43:18
- * @LastEditTime: 2025-07-28 15:42:34
+ * @LastEditTime: 2025-08-26 16:31:55
  * @LastEditors: mulingyuer
  * @Description: 公共的lora校验类型
  * @FilePath: \frontend\src\utils\lora\lora.validator\types.ts
@@ -46,6 +46,16 @@ export interface ValidateLoRaSaveDirOptions {
 
 /** GPU占用校验参数 */
 export interface ValidateGpuOptions {
+	/** 是否显示错误消息弹窗，默认不显示 */
+	shouldShowErrorDialog?: boolean;
+}
+
+/** 数据集与控制数据集校验参数 */
+export interface ValidateControlDatasetOptions {
+	/** 数据集目录 */
+	datasetPath: string;
+	/** 控制数据集目录 */
+	controlPath: string;
 	/** 是否显示错误消息弹窗，默认不显示 */
 	shouldShowErrorDialog?: boolean;
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 16:07:33
- * @LastEditTime: 2025-08-15 11:03:30
+ * @LastEditTime: 2025-08-25 15:57:13
  * @LastEditors: mulingyuer
  * @Description: qwen-image 类型定义
  * @FilePath: \frontend\src\views\lora\qwen-image\types.ts
@@ -10,12 +10,15 @@
 import type { StartQwenImageTrainingData } from "@/api/lora";
 import type { SimplifyDeep, Simplify } from "type-fest";
 
+export type Dataset = StartQwenImageTrainingData["dataset"];
 export type DatasetGeneral = StartQwenImageTrainingData["dataset"]["general"];
 export type DatasetItem = Simplify<
 	StartQwenImageTrainingData["dataset"]["datasets"][number] & {
 		id: string;
 		name: string;
 		index: number;
+		/** 切换右侧数据集预览 */
+		preview: "image_directory" | "control_directory";
 	}
 >;
 

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-23 23:50:59
+ * @LastEditTime: 2025-08-29 17:03:19
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -19,6 +19,7 @@
 					label-position="top"
 					size="large"
 				>
+					<FieldTooltipGuide />
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo v-model:form="ruleForm" />
 					</Collapse>
@@ -37,12 +38,13 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="wanDatasetPath" />
+				<SplitRightPanel :form-data="ruleForm" :dir="wanDatasetPath" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
+			:form-instance="ruleFormRef"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"
@@ -73,11 +75,11 @@ import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
-import { tomlStringify } from "@/utils/toml";
 import { generateUUID, isImageFile, joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import SampleValidator from "./components/SampleValidator.vue";
 import TrainingData from "./components/TrainingData.vue";
 import WanDataSet from "./components/WanDataSet/index.vue";
@@ -90,6 +92,9 @@ const settingsStore = useSettingsStore();
 const trainingStore = useTrainingStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 const { wanLoraMonitor } = useWanLora();
+
+/** wan帮助类 */
+const wanHelper = new WanHelper();
 
 const env = getEnv();
 /** 是否开启小白校验 */
@@ -134,7 +139,7 @@ const defaultForm: RuleForm = {
 		network_weights: "",
 		dim_from_weights: false,
 		blocks_to_swap: 36,
-		timestep_boundary: 0,
+		timestep_boundary: undefined,
 		fp8_base: true,
 		fp8_scaled: false,
 		save_every_n_steps: undefined,
@@ -166,7 +171,7 @@ const defaultForm: RuleForm = {
 		split_attn: true,
 		xformers: true,
 		offload_inactive_dit: false,
-		discrete_flow_shift: 3,
+		discrete_flow_shift: 1,
 		min_timestep: undefined,
 		max_timestep: undefined,
 		mode_scale: 1.29,
@@ -215,8 +220,12 @@ const defaultForm: RuleForm = {
 	skip_cache_latent: false,
 	skip_cache_text_encoder_latent: false
 };
-const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
-const isWan22 = computed(() => ["t2v-A14B", "i2v-A14B"].includes(ruleForm.value.config.task));
+const ruleForm = useEnhancedLocalStorage({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm)),
+	version: "1.0.0"
+});
+const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	"config.output_dir": [
@@ -488,7 +497,11 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.mixed_precision": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (isWan22.value && settingsStore.whiteCheck && value !== "fp16") {
+				const { dit } = ruleForm.value.config;
+				const emptyDit = typeof dit !== "string" || dit.trim() === "";
+				const isCheck = isWan22.value && settingsStore.whiteCheck && emptyDit && value !== "fp16";
+
+				if (isCheck) {
 					return callback(new Error("Wan2.2任务，mixed_precision必须为fp16"));
 				}
 
@@ -499,8 +512,6 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-/** wan帮助类 */
-const wanHelper = new WanHelper();
 /** AI数据集path */
 const wanDatasetPath = computed(() => {
 	if (ruleForm.value.data_mode === "image") {
@@ -515,72 +526,6 @@ const openStep2 = ref(true);
 const openStep3 = ref(true);
 const openStep4 = ref(true);
 const openStep5 = ref(true);
-
-/** toml */
-const toml = ref("");
-const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(ruleForm.value);
-}, 300);
-watch(ruleForm, generateToml, { deep: true, immediate: true });
-
-/** 监听表单的一些配置项进行默认值设置 */
-watch([() => ruleForm.value.config.task, () => ruleForm.value.dit_model_type], onDefaultChange);
-const TASK_CONFIGS = {
-	"i2v-14B": { timestep_boundary: 0, discrete_flow_shift: 3 },
-	"t2v-14B": { timestep_boundary: 0, discrete_flow_shift: 3 },
-	"t2v-A14B": { timestep_boundary: 0.875, discrete_flow_shift: 12 },
-	"i2v-A14B": { timestep_boundary: 0.9, discrete_flow_shift: 5 }
-} as const;
-const DIT_MODEL_RANGES = {
-	"t2v-A14B": {
-		low: { min_timestep: 0, max_timestep: 875 },
-		high: { min_timestep: 875, max_timestep: 1000 },
-		both: { min_timestep: 0, max_timestep: 1000 }
-	},
-	"i2v-A14B": {
-		low: { min_timestep: 0, max_timestep: 900 },
-		high: { min_timestep: 900, max_timestep: 1000 },
-		both: { min_timestep: 0, max_timestep: 1000 }
-	}
-} as const;
-const DIT_MODEL_CONFIGS = {
-	low: { offload_inactive_dit: false, blocks_to_swap: 36 },
-	high: { offload_inactive_dit: false, blocks_to_swap: 36 },
-	both: { offload_inactive_dit: true, blocks_to_swap: 0 }
-} as const;
-function onDefaultChange() {
-	const { task } = ruleForm.value.config;
-	const { dit_model_type } = ruleForm.value;
-
-	// 应用任务配置
-	// @ts-expect-error fuck ts type check
-	const taskConfig = TASK_CONFIGS[task];
-	if (!taskConfig) {
-		console.warn(`未处理的任务类型: ${task}`);
-		return;
-	}
-	Object.assign(ruleForm.value.config, taskConfig);
-
-	// 应用特定任务的 timestep 范围配置
-	// @ts-expect-error fuck ts type check
-	const ditRanges = DIT_MODEL_RANGES[task]?.[dit_model_type];
-	if (ditRanges) {
-		Object.assign(ruleForm.value.config, ditRanges);
-	}
-
-	// 应用 dit model 配置
-	// @ts-expect-error fuck ts type check
-	const ditConfig = DIT_MODEL_CONFIGS[dit_model_type];
-	if (ditConfig) {
-		Object.assign(ruleForm.value.config, ditConfig);
-	}
-
-	if (isWan22.value && settingsStore.whiteCheck) {
-		ruleForm.value.config.mixed_precision = "fp16";
-	}
-
-	ElMessage.success("检测到任务类型变化，已应用对应的默认配置");
-}
 
 /** 重置表单 */
 function onResetData() {

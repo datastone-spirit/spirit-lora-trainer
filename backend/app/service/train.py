@@ -8,10 +8,10 @@ import uuid
 import logging
 import subprocess
 from task.manager import task_decorator
-from task.task import Task
 from task.flux_task import TrainingTask
 from task.manager import tm
 from utils.util import pathFormat
+from datetime import datetime
 
 from utils.util import setup_logging
 setup_logging()
@@ -47,8 +47,10 @@ class TrainingService:
         # for tensorborad log parsing, so the user log_preifix configuration will
         # be overwrited by this taskid value
         #
+        
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         taskid = uuid.uuid4().hex
-        parameters.config.log_prefix = f"{taskid}-"
+        parameters.config.log_prefix = f"flux-{parameters.config.output_name}-{timestamp}-{taskid}"
 
         dataset_path = dataset2toml(parameters.dataset)
         config_file = config2toml(parameters.config, dataset_path)

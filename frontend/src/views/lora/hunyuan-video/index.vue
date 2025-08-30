@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-08-20 15:32:52
+ * @LastEditTime: 2025-08-29 15:14:21
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -19,6 +19,7 @@
 					label-position="top"
 					size="large"
 				>
+					<FieldTooltipGuide />
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo :form="ruleForm" />
 					</Collapse>
@@ -37,12 +38,13 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="ruleForm.directory_path" />
+				<SplitRightPanel :form-data="ruleForm" :dir="ruleForm.directory_path" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
+			:form-instance="ruleFormRef"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"
@@ -62,18 +64,18 @@ import { useSettingsStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
-import { tomlStringify } from "@/utils/toml";
+import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import HYDataset from "./components/HYDataset/index.vue";
+import HYTrainingLoRAMonitor from "./components/HYTrainingLoRAMonitor/index.vue";
 import ModelParameters from "./components/ModelParameters/index.vue";
 import TrainingData from "./components/TrainingData/index.vue";
 import { formatFormData } from "./hunyuan.helper";
 import { isDirectoryEmpty, validate } from "./hunyuan.validate";
 import type { RuleForm } from "./types";
-import HYTrainingLoRAMonitor from "./components/HYTrainingLoRAMonitor/index.vue";
-import { joinPrefixKey } from "@/utils/tools";
 
 const settingsStore = useSettingsStore();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
@@ -135,10 +137,11 @@ const defaultForm = readonly<RuleForm>({
 	optimizer_weight_decay: 0.01,
 	optimizer_eps: "1e-8"
 });
-const ruleForm = useEnhancedLocalStorage<RuleForm>(
-	localStorageKey,
-	structuredClone(toRaw(defaultForm) as RuleForm)
-);
+const ruleForm = useEnhancedLocalStorage<RuleForm>({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
+	version: "1.0.0"
+});
 const rules = reactive<FormRules<RuleForm>>({
 	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
 	// model_transformer_path: [{ required: true, message: "请选择训练用的底模", trigger: "change" }],
@@ -217,13 +220,6 @@ const rules = reactive<FormRules<RuleForm>>({
 });
 /** 是否专家模式 */
 const isExpert = computed(() => settingsStore.isExpert);
-
-/** toml */
-const toml = ref("");
-const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(ruleForm.value);
-}, 300);
-watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 // 折叠
 const openStep1 = ref(true);

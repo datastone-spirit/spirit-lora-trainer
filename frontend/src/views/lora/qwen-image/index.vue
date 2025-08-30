@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-23 21:35:09
+ * @LastEditTime: 2025-08-29 11:29:20
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -19,6 +19,7 @@
 					label-position="top"
 					size="large"
 				>
+					<FieldTooltipGuide />
 					<Collapse v-model="openStep1" title="第1步：LoRA 基本信息">
 						<BasicInfo v-model:form="ruleForm" />
 					</Collapse>
@@ -41,12 +42,13 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :toml="toml" :dir="dir" />
+				<SplitRightPanel :form-data="ruleForm" :dir="dir" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
 			v-model:merge-data="ruleForm"
 			:reset-data="defaultForm"
+			:form-instance="ruleFormRef"
 			:submit-loading="submitLoading"
 			@reset-data="onResetData"
 			@submit="onSubmit"
@@ -76,12 +78,12 @@ import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
-import { tomlStringify } from "@/utils/toml";
 import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
 import DataSet from "./components/DataSet/index.vue";
+import FieldTooltipGuide from "./components/FieldTooltipGuide/index.vue";
 import MultiGpuConfig from "./components/MultiGpuConfig/index.vue";
 import OptimizerLearning from "./components/OptimizerLearning/index.vue";
 import QwenImageTrainingLoRAMonitor from "./components/QwenImageTrainingLoRAMonitor/index.vue";
@@ -90,7 +92,8 @@ import TrainingConfig from "./components/TrainingConfig/index.vue";
 import {
 	formatFormData,
 	generateDefaultDataset,
-	generateDefaultDatasetGeneral
+	generateDefaultDatasetGeneral,
+	QwenImageRuleFormRef
 } from "./qwen-image.helper";
 import { validate } from "./qwen-image.validate";
 import type { DatasetItem, RuleForm } from "./types";
@@ -102,12 +105,14 @@ const { qwenImageLoraMonitor } = useQwenImageLora();
 
 const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
+provide(QwenImageRuleFormRef, ruleFormRef);
 const localStorageKey = joinPrefixKey("qwen_image_form");
 const defaultDatasetGeneral = generateDefaultDatasetGeneral();
 const defaultDatasetItem: DatasetItem = generateDefaultDataset({ general: defaultDatasetGeneral });
 const defaultForm: RuleForm = {
 	config: {
 		output_name: "",
+		edit: false,
 		dit: "",
 		vae: "",
 		vae_dtype: "bfloat16",
@@ -204,7 +209,11 @@ const defaultForm: RuleForm = {
 		tagger_is_append: false
 	}
 };
-const ruleForm = useEnhancedLocalStorage(localStorageKey, structuredClone(toRaw(defaultForm)));
+const ruleForm = useEnhancedLocalStorage({
+	localKey: localStorageKey,
+	defaultValue: structuredClone(toRaw(defaultForm)),
+	version: "1.0.0"
+});
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
 	"config.output_dir": [
@@ -348,6 +357,11 @@ const dir = computed(() => {
 	const activeDatasetId = ruleForm.value.activeDatasetId;
 	const findItem = datasets.find((item) => item.id === activeDatasetId);
 	if (!findItem) return "";
+	if (ruleForm.value.config.edit) {
+		return findItem.preview === "image_directory"
+			? findItem.image_directory
+			: findItem.control_directory;
+	}
 	return findItem.image_directory;
 });
 
@@ -359,13 +373,6 @@ const openStep4 = ref(true);
 const openStep5 = ref(true);
 const openStep6 = ref(true);
 const openStep7 = ref(true);
-
-/** toml */
-const toml = ref("");
-const generateToml = useDebounceFn(() => {
-	toml.value = tomlStringify(ruleForm.value);
-}, 300);
-watch(ruleForm, generateToml, { deep: true, immediate: true });
 
 // 重置表单
 function onResetData() {

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 09:27:58
- * @LastEditTime: 2025-08-13 09:55:17
+ * @LastEditTime: 2025-08-27 09:44:57
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\qwen-image\components\DataSet\Tabs.vue
@@ -25,12 +25,35 @@
 			:name="item.id"
 		>
 			<PopoverFormItem
+				v-show="isEdit"
+				label="切换右侧数据集预览"
+				:prop="`datasets[${index}].preview`"
+				popover-content="preview"
+			>
+				<el-switch
+					v-model="item.preview"
+					inactive-value="image_directory"
+					inactive-text="数据集目录"
+					active-value="control_directory"
+					active-text="控制数据集目录"
+				/>
+			</PopoverFormItem>
+			<PopoverFormItem
 				label="数据集目录"
 				:prop="`dataset.datasets[${index}].image_directory`"
 				popover-content="image_directory"
 				:rules="rules.image_directory"
 			>
 				<FolderSelector v-model="item.image_directory" placeholder="请选择数据集目录" />
+			</PopoverFormItem>
+			<PopoverFormItem
+				v-show="isEdit"
+				label="控制数据集目录"
+				:prop="`dataset.datasets[${index}].control_directory`"
+				popover-content="control_directory"
+				:rules="rules.control_directory"
+			>
+				<FolderSelector v-model="item.control_directory" placeholder="请选择控制数据集目录" />
 			</PopoverFormItem>
 			<el-row :gutter="16">
 				<el-col :span="12">
@@ -69,6 +92,47 @@
 						<el-input-number v-model.number="item.num_repeats" :step="1" step-strictly />
 					</PopoverFormItem>
 				</el-col>
+				<el-col v-show="isEdit" :span="24">
+					<PopoverFormItem
+						label="禁用调整控制数据集图像的大小"
+						:prop="`dataset.datasets[${index}].qwen_image_edit_no_resize_control`"
+						popover-content="qwen_image_edit_no_resize_control"
+						:rules="rulesFn.qwen_image_edit_no_resize_control(index)"
+					>
+						<el-switch
+							v-model="item.qwen_image_edit_no_resize_control"
+							@change="onNoResizeControlChange(index)"
+						/>
+					</PopoverFormItem>
+				</el-col>
+				<el-col v-show="isEdit" :span="12">
+					<PopoverFormItem
+						label="控制数据集图片尺寸-宽度px"
+						:prop="`dataset.datasets[${index}].qwen_image_edit_control_resolution[0]`"
+						popover-content="qwen_image_edit_control_resolution"
+						:rules="rulesFn.qwen_image_edit_control_resolution_width(index)"
+					>
+						<el-input-number
+							v-model.number="item.qwen_image_edit_control_resolution[0]"
+							:controls="false"
+							@change="onControlResolutionChange(index, 0)"
+						/>
+					</PopoverFormItem>
+				</el-col>
+				<el-col v-show="isEdit" :span="12">
+					<PopoverFormItem
+						label="控制数据集图片尺寸-高度px"
+						:prop="`dataset.datasets[${index}].qwen_image_edit_control_resolution[1]`"
+						popover-content="qwen_image_edit_control_resolution"
+						:rules="rulesFn.qwen_image_edit_control_resolution_height(index)"
+					>
+						<el-input-number
+							v-model.number="item.qwen_image_edit_control_resolution[1]"
+							:controls="false"
+							@change="onControlResolutionChange(index, 1)"
+						/>
+					</PopoverFormItem>
+				</el-col>
 				<el-col :span="24">
 					<PopoverFormItem
 						label="启用 arb 桶以允许非固定宽高比的图片"
@@ -102,9 +166,9 @@
 </template>
 
 <script setup lang="ts">
-import type { FormItemRule, TabPaneName } from "element-plus";
+import type { FormInstance, FormItemRule, TabPaneName } from "element-plus";
 import type { RuleForm } from "../../types";
-import { generateDefaultDataset } from "../../qwen-image.helper";
+import { generateDefaultDataset, QwenImageRuleFormRef } from "../../qwen-image.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 
 type DynamicKeys = keyof RuleForm["dataset"]["datasets"][number];
@@ -112,6 +176,8 @@ type DynamicRules = Partial<Record<DynamicKeys, FormItemRule[]>>;
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 const activeTabName = defineModel({ type: String as PropType<TabPaneName>, required: true });
+const isEdit = computed(() => ruleForm.value.config.edit);
+const ruleFormRef = inject<Ref<FormInstance>>(QwenImageRuleFormRef);
 
 // rules
 const rules = reactive<DynamicRules>({
@@ -129,8 +195,135 @@ const rules = reactive<DynamicRules>({
 				});
 			}
 		}
+	],
+	control_directory: [
+		{
+			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+				const { edit } = ruleForm.value.config;
+				if (!edit) return callback();
+
+				if (typeof value !== "string" || value.trim() === "") {
+					return callback(new Error("请选择训练用的控制数据集目录"));
+				}
+
+				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+					if (!valid) {
+						callback(new Error("控制数据集目录不存在"));
+						return;
+					}
+
+					callback();
+				});
+			}
+		}
 	]
 });
+const rulesFn = {
+	qwen_image_edit_no_resize_control: (index: number) => {
+		return [
+			{
+				validator: (_rule: unknown, value: boolean, callback: (error?: Error) => void) => {
+					const findResolution = ruleForm.value.dataset.datasets[
+						index
+					].qwen_image_edit_control_resolution.find((item) => typeof item === "number");
+					if (value && findResolution) {
+						return callback(
+							new Error(
+								"开启禁用调整控制数据集图像的大小，请勿设置控制数据集图片尺寸 (qwen_image_edit_control_resolution)"
+							)
+						);
+					}
+
+					callback();
+				},
+				trigger: "change"
+			}
+		];
+	},
+	qwen_image_edit_control_resolution_width: (index: number) => {
+		return [
+			{
+				validator: (
+					_rule: unknown,
+					value: number | undefined | null,
+					callback: (error?: Error) => void
+				) => {
+					const isOpenNoResize =
+						ruleForm.value.dataset.datasets[index].qwen_image_edit_no_resize_control;
+					const isType = typeof value === "number";
+					const height =
+						ruleForm.value.dataset.datasets[index].qwen_image_edit_control_resolution[1];
+					if (isOpenNoResize) {
+						if (isType) {
+							return callback(new Error("开启禁用调整控制数据集图像的大小，请勿设置该值"));
+						}
+					} else {
+						if (typeof height === "number" && !isType) {
+							return callback(new Error("请设置控制数据集图像宽度"));
+						}
+					}
+
+					callback();
+				}
+			}
+		];
+	},
+	qwen_image_edit_control_resolution_height: (index: number) => {
+		return [
+			{
+				validator: (
+					_rule: unknown,
+					value: number | undefined | null,
+					callback: (error?: Error) => void
+				) => {
+					const isOpenNoResize =
+						ruleForm.value.dataset.datasets[index].qwen_image_edit_no_resize_control;
+					const isType = typeof value === "number";
+					const width =
+						ruleForm.value.dataset.datasets[index].qwen_image_edit_control_resolution[0];
+
+					if (isOpenNoResize) {
+						if (isType) {
+							return callback(new Error("开启禁用调整控制数据集图像的大小，请勿设置该值"));
+						}
+					} else {
+						if (typeof width === "number" && !isType) {
+							return callback(new Error("请设置控制数据集图像高度"));
+						}
+					}
+
+					callback();
+				}
+			}
+		];
+	}
+};
+
+function onNoResizeControlChange(index: number) {
+	// 联动校验
+	ruleFormRef?.value?.validateField(
+		`dataset.datasets[${index}].qwen_image_edit_control_resolution[0]`
+	);
+	ruleFormRef?.value?.validateField(
+		`dataset.datasets[${index}].qwen_image_edit_control_resolution[1]`
+	);
+}
+function onControlResolutionChange(index: number, index2: 0 | 1) {
+	// 联动校验
+	ruleFormRef?.value?.validateField(`dataset.datasets[${index}].qwen_image_edit_no_resize_control`);
+	switch (index2) {
+		case 0:
+			ruleFormRef?.value?.validateField(
+				`dataset.datasets[${index}].qwen_image_edit_control_resolution[1]`
+			);
+			break;
+		case 1:
+			ruleFormRef?.value?.validateField(
+				`dataset.datasets[${index}].qwen_image_edit_control_resolution[0]`
+			);
+			break;
+	}
+}
 
 // tab编辑
 function onTabEdit(paneName: TabPaneName | undefined, action: "remove" | "add") {

@@ -57,7 +57,6 @@ def setup_logging(args=None, log_level=None, reset=False):
      logging.root.setLevel(log_level)
      logging.root.addHandler(handler)
 
-
 def resolveProjectPath(input_path: str) -> str:
      # 判断是否为绝对路径
      if os.path.isabs(input_path):

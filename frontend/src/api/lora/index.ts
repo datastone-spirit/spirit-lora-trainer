@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-20 09:32:40
- * @LastEditTime: 2025-08-15 11:07:39
+ * @LastEditTime: 2025-08-25 11:37:02
  * @LastEditors: mulingyuer
  * @Description: lora api
  * @FilePath: \frontend\src\api\lora\index.ts
@@ -70,7 +70,7 @@ export function startFluxKontextTraining(data: StartFluxKontextTrainingData) {
 	});
 }
 
-/** 启动Qwen Image 训练 */
+/** 启动Qwen Image（edit） 训练 */
 export function startQwenImageTraining(data: StartQwenImageTrainingData) {
 	return request<StartQwenImageTrainingResult>({
 		url: "/training/qwenimage/start",

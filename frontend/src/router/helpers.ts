@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 17:54:10
- * @LastEditTime: 2025-08-20 11:24:52
+ * @LastEditTime: 2025-08-25 09:40:12
  * @LastEditors: mulingyuer
  * @Description: 路由辅助函数
  * @FilePath: \frontend\src\router\helpers.ts
@@ -49,7 +49,8 @@ export function generateMenu(routes: RouteRecordRaw[]): AdminApp.Menu[] {
 			name: (route.name as string) ?? "",
 			title: route.meta?.title ?? "",
 			icon: route.meta?.icon ?? "",
-			loRATaskType: route.meta?.loRATaskType ?? "none"
+			loRATaskType: route.meta?.loRATaskType ?? "none",
+			showNewBadge: route.meta?.showNewBadge ?? false
 		};
 
 		if (route.children && route.children.length > 0) {

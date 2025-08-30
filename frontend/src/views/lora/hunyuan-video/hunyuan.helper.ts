@@ -1,16 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-07 10:00:01
- * @LastEditTime: 2025-08-21 17:31:32
+ * @LastEditTime: 2025-08-29 11:57:09
  * @LastEditors: mulingyuer
  * @Description: 换源视频训练帮助
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.helper.ts
  * 怎么可能会有bug！！！
  */
 import type { StartHyVideoTrainingData } from "@/api/lora";
-import type { RuleForm } from "./types";
-import { tomlStringify } from "@/utils/toml";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { SerializeUndefined } from "@/utils/tools";
+import type { RuleForm } from "./types";
 
 type Config = StartHyVideoTrainingData["config"];
 type Dataset = StartHyVideoTrainingData["dataset"];
@@ -131,7 +131,7 @@ export function formatFormData(form: RuleForm): StartHyVideoTrainingData {
 	return {
 		config: formatConfig(deepCloneForm),
 		dataset: formatDataset(deepCloneForm),
-		frontend_config: tomlStringify(deepCloneForm)
+		frontend_config: JSON.stringify(SerializeUndefined.serialize(deepCloneForm))
 	};
 }
 

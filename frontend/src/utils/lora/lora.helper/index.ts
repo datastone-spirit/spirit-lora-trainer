@@ -1,16 +1,16 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 15:10:20
- * @LastEditTime: 2025-08-21 17:00:39
+ * @LastEditTime: 2025-08-29 11:56:02
  * @LastEditors: mulingyuer
  * @Description: 公共的lora帮助方法
  * @FilePath: \frontend\src\utils\lora\lora.helper\index.ts
  * 怎么可能会有bug！！！
  */
 import { currentTaskFormConfig } from "@/api/task";
-import type { RecoveryTaskFormDataOptions } from "./types";
-import { tomlParse } from "@/utils/toml";
 import { useSettingsStore, useTrainingStore } from "@/stores";
+import { deepMerge, SerializeUndefined } from "@/utils/tools";
+import type { RecoveryTaskFormDataOptions } from "./types";
 export type * from "./types";
 
 export class LoRAHelper {
@@ -23,18 +23,8 @@ export class LoRAHelper {
 	}
 
 	/** 合并训练表单数据 */
-	static mergeTrainingFormData(form: Record<string, any>, data: Record<string, any>) {
-		const formKeys = new Set(Object.keys(form));
-		const dataKeys = Object.keys(data);
-		// 求交集
-		const keys = dataKeys.filter((key) => formKeys.has(key));
-
-		// 合并数据
-		keys.forEach((key) => {
-			form[key] = data[key];
-		});
-
-		return form;
+	static mergeTrainingFormData(form: any, data: any) {
+		return deepMerge(form, data);
 	}
 
 	/** 恢复表单数据，只有在任务正在进行中时才恢复表单数据 */
@@ -63,7 +53,7 @@ export class LoRAHelper {
 			// api
 			const res = await currentTaskFormConfig({ task_id: taskId, show_config: true });
 			if (!res.frontend_config) return;
-			const tomlData = tomlParse(res.frontend_config);
+			const tomlData = SerializeUndefined.deserialize(JSON.parse(res.frontend_config));
 			// 合并数据
 			LoRAHelper.mergeTrainingFormData(formData, tomlData);
 			showTip && ElMessage.success("训练配置已恢复");
@@ -90,7 +80,7 @@ export class LoRAHelper {
 
 		// 使用 Object.prototype.toString.call 精确判断类型
 		const type = Object.prototype.toString.call(form);
-		
+
 		// 如果不是数组也不是普通对象，原样返回
 		if (type !== "[object Array]" && type !== "[object Object]") {
 			return form;

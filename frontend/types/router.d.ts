@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-09-26 14:55:57
- * @LastEditTime: 2025-08-20 11:24:32
+ * @LastEditTime: 2025-08-25 09:38:28
  * @LastEditors: mulingyuer
  * @Description: 路由类型
  * @FilePath: \frontend\types\router.d.ts
@@ -32,6 +32,8 @@ declare module "vue-router" {
 		iframeLink?: string;
 		/** 当前页面的任务类型 */
 		loRATaskType?: TaskType;
+		/** 是否显示新增badge */
+		showNewBadge?: boolean;
 	}
 }
 

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:40:03
- * @LastEditTime: 2024-12-27 11:39:41
+ * @LastEditTime: 2025-08-25 10:00:36
  * @LastEditors: mulingyuer
  * @Description: 菜单
  * @FilePath: \frontend\src\layout\admin-layout\components\Aside\Menu.vue
@@ -30,6 +30,7 @@ import MenuItem from "./MenuItem.vue";
 import { useAppStore } from "@/stores";
 
 const router = useRouter();
+const route = useRoute();
 const appStore = useAppStore();
 
 /** 当前选择的菜单 */
@@ -43,6 +44,8 @@ function onMenuSelect(path: string) {
 	} else {
 		router.push(path);
 	}
+
+	appStore.addOpenedPath(path);
 }
 
 /** 默认打开的菜单：目前全部打开算了 */
@@ -52,6 +55,10 @@ const defaultOpeneds = computed(() => {
 		.map((item) => {
 			return item.path;
 		});
+});
+
+onMounted(() => {
+	appStore.addOpenedPath(route.path);
 });
 </script>
 

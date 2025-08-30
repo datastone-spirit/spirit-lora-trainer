@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 14:50:29
- * @LastEditTime: 2024-12-30 10:33:57
+ * @LastEditTime: 2025-08-29 16:01:09
  * @LastEditors: mulingyuer
  * @Description: 右侧内容
  * @FilePath: \frontend\src\components\Split\SplitRightPanel\index.vue
@@ -38,25 +38,35 @@
 import AiDataset from "@/components/AiDataset/index.vue";
 import { useSettingsStore } from "@/stores";
 import { SplitRightEnum } from "@/enums/split-right.enum";
+import { TomlUtils } from "@/utils/toml";
 
 export interface SplitRightContentProps {
-	toml: string;
+	/** 表单数据，用于生成 toml */
+	formData: any;
 	/** 目录 */
 	dir: string;
 }
 
-defineProps<SplitRightContentProps>();
+const props = defineProps<SplitRightContentProps>();
 
 const settingsStore = useSettingsStore();
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
 const showAIDataset = storeToRefs(settingsStore).showAIDataset;
 const showTomlPreview = storeToRefs(settingsStore).showTomlPreview;
+
 // 打开toml预览
 const openPreview = ref(settingsStore.splitRightType === SplitRightEnum.TOML_PREVIEW);
 function onPreviewChange(val: boolean) {
 	const value = val ? SplitRightEnum.TOML_PREVIEW : SplitRightEnum.AI_DATASET;
 	settingsStore.setSplitRightType(value);
 }
+
+// 生成 toml 内容
+const toml = ref("");
+const generateToml = useDebounceFn(() => {
+	toml.value = TomlUtils.tomlStringify(props.formData);
+}, 300);
+watch(() => props.formData, generateToml, { deep: true, immediate: true });
 </script>
 
 <style lang="scss" scoped>

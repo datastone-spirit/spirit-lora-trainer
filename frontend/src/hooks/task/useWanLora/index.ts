@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-09 16:23:25
- * @LastEditTime: 2025-07-31 15:15:21
+ * @LastEditTime: 2025-09-01 15:15:47
  * @LastEditors: mulingyuer
  * @Description: wan模型训练hooks
  * @FilePath: \frontend\src\hooks\task\useWanLora\index.ts
@@ -109,9 +109,12 @@ class WanLoraMonitor implements TaskImplementation {
 		} = initData;
 
 		// 更新数据
-		this.updateStatus("paused");
+		this.updateStatus("querying");
 		this.setTaskId(taskId);
 		this.updateCurrentTaskInfo(result);
+
+		// 继续查询
+		this.startTimer();
 
 		// 弹窗提示
 		if (showTrainingTip) {

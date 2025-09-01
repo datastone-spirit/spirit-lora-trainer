@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-08-29 11:35:03
+ * @LastEditTime: 2025-09-01 15:11:15
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -522,13 +522,8 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
-	// 监听如果成功恢复，任务信息会被更新
-	fluxLoraMonitor.resume();
 	// 恢复表单数据（前提是任务信息存在）
 	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
-});
-onUnmounted(() => {
-	fluxLoraMonitor.pause();
 });
 </script>
 

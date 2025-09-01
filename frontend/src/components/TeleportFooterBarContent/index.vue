@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-08-29 16:01:36
+ * @LastEditTime: 2025-09-01 14:55:09
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -69,7 +69,9 @@
 </template>
 
 <script setup lang="ts">
-import { genFileId } from "element-plus";
+import { useTrainingStore } from "@/stores";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { TomlUtils } from "@/utils/toml";
 import type {
 	FormInstance,
 	UploadInstance,
@@ -77,12 +79,8 @@ import type {
 	UploadRawFile,
 	UploadUserFile
 } from "element-plus";
+import { genFileId } from "element-plus";
 import type { TeleportProps } from "vue";
-import { TomlUtils } from "@/utils/toml";
-import { useGPU } from "@/hooks/task/useGPU";
-import { useTrainingStore } from "@/stores";
-import { useTag } from "@/hooks/task/useTag";
-import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 export interface ConfigProps {
 	/** 左按钮组teleport节点 */
@@ -129,8 +127,6 @@ const taskMismatchWarning = ref("");
 
 const route = useRoute();
 const trainingStore = useTrainingStore();
-const { gpuMonitor } = useGPU();
-const { tagMonitor } = useTag();
 
 /** 当前路由的训练类型 */
 const routeTrainingType = computed(() => route.meta.loRATaskType ?? "none");
@@ -228,34 +224,6 @@ function onStopTraining() {
 		}
 	}
 })();
-
-// 如果GPU被占用就开始监听
-watch(
-	() => trainingStore.useGPU,
-	(newVal) => {
-		if (newVal) {
-			gpuMonitor.start();
-		} else {
-			gpuMonitor.stop();
-		}
-	},
-	{ immediate: true }
-);
-
-// 组件生命周期
-onMounted(() => {
-	// 恢复打标查询任务
-	tagMonitor.resume();
-	// 存在任务的话就恢复GPU监控
-	if (currentTaskInfo.value.type !== "none") {
-		gpuMonitor.resume();
-	}
-});
-onUnmounted(() => {
-	// 暂停打标查询任务
-	tagMonitor.pause();
-	gpuMonitor.pause();
-});
 </script>
 
 <style lang="scss" scoped>

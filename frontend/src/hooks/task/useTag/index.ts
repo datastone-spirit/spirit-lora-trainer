@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 09:16:38
- * @LastEditTime: 2025-07-31 14:40:11
+ * @LastEditTime: 2025-09-01 14:50:07
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
  * @FilePath: \frontend\src\hooks\task\useTag\index.ts
@@ -175,9 +175,12 @@ class TagMonitor implements TaskImplementation {
 		} = initData;
 
 		// 更新数据
-		this.updateStatus("paused");
+		this.updateStatus("querying");
 		this.setTaskId(taskId);
 		this.updateCurrentTaskInfo(result);
+
+		// 继续查询
+		this.startTimer();
 
 		// 弹窗提示
 		if (showTrainingTip) {

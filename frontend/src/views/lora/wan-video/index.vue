@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-29 17:03:19
+ * @LastEditTime: 2025-09-01 15:16:09
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -574,13 +574,8 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
-	// 监听如果成功恢复，任务信息会被更新
-	wanLoraMonitor.resume();
 	// 恢复表单数据（前提是任务信息存在）
 	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
-});
-onUnmounted(() => {
-	wanLoraMonitor.pause();
 });
 </script>
 

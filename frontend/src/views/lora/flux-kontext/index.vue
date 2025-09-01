@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-08-29 15:14:00
+ * @LastEditTime: 2025-09-01 15:11:35
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -288,13 +288,8 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
-	// 监听如果成功恢复，任务信息会被更新
-	fluxKontextLoraMonitor.resume();
 	// 恢复表单数据（前提是任务信息存在）
 	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
-});
-onUnmounted(() => {
-	fluxKontextLoraMonitor.pause();
 });
 </script>
 

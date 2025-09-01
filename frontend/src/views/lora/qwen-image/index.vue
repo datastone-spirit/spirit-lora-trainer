@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-08-29 11:29:20
+ * @LastEditTime: 2025-09-01 15:15:28
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -418,13 +418,8 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
-	// 监听如果成功恢复，任务信息会被更新
-	qwenImageLoraMonitor.resume();
 	// 恢复表单数据（前提是任务信息存在）
 	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
-});
-onUnmounted(() => {
-	qwenImageLoraMonitor.pause();
 });
 </script>
 

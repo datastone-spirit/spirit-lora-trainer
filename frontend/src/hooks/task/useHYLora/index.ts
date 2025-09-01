@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 14:45:05
- * @LastEditTime: 2025-07-31 15:12:53
+ * @LastEditTime: 2025-09-01 15:13:50
  * @LastEditors: mulingyuer
  * @Description: 混元lora hooks
  * @FilePath: \frontend\src\hooks\task\useHYLora\index.ts
@@ -109,9 +109,12 @@ class HYLoraMonitor implements TaskImplementation {
 		} = initData;
 
 		// 更新数据
-		this.updateStatus("paused");
+		this.updateStatus("querying");
 		this.setTaskId(taskId);
 		this.updateCurrentTaskInfo(result);
+
+		// 继续查询
+		this.startTimer();
 
 		// 弹窗提示
 		if (showTrainingTip) {

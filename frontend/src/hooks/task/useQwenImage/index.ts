@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-13 15:36:13
- * @LastEditTime: 2025-08-15 14:26:17
+ * @LastEditTime: 2025-09-01 15:15:15
  * @LastEditors: mulingyuer
  * @Description: qwen-image lora hooks
  * @FilePath: \frontend\src\hooks\task\useQwenImage\index.ts
@@ -109,9 +109,12 @@ class QwenImageLoraMonitor implements TaskImplementation {
 		} = initData;
 
 		// 更新数据
-		this.updateStatus("paused");
+		this.updateStatus("querying");
 		this.setTaskId(taskId);
 		this.updateCurrentTaskInfo(result);
+
+		// 继续查询
+		this.startTimer();
 
 		// 弹窗提示
 		if (showTrainingTip) {

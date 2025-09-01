@@ -5,6 +5,7 @@ import App from "./App.vue";
 import { setupRouter } from "./router";
 import VueFinder from "vuefinder/dist/vuefinder";
 import { initLoraTrainer } from "./init-lora-trainer";
+import { AnimatedFavicon } from "@/utils/animated-favicon";
 
 // style
 import "@/styles/index.scss";
@@ -27,6 +28,7 @@ async function setupApp() {
 
 	// 初始化
 	await initLoraTrainer();
+	new AnimatedFavicon().init();
 
 	app.mount("#app");
 }

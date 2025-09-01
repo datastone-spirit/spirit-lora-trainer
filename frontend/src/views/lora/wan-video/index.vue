@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-09-01 15:16:09
+ * @LastEditTime: 2025-09-01 17:23:21
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -228,6 +228,24 @@ const ruleForm = useEnhancedLocalStorage({
 const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
+	dit_model_type: [
+		{
+			validator: (_rule, value, callback) => {
+				if (!isWan22.value) {
+					return callback();
+				}
+
+				if (value === "both" && settingsStore.whiteCheck) {
+					return callback(
+						new Error("智灵平台暂时不支持 both 同时训练低噪声模型和高噪声模型（显存不足）。")
+					);
+				}
+
+				callback();
+			},
+			trigger: "change"
+		}
+	],
 	"config.output_dir": [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
@@ -384,10 +402,12 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.blocks_to_swap": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (ruleForm.value.data_mode !== "video") return callback();
-				if (isWan22.value && ruleForm.value.config.offload_inactive_dit && value !== 0) {
+				const isValue = typeof value === "number" && value !== 0;
+				if (isWan22.value && ruleForm.value.config.offload_inactive_dit && isValue) {
 					return callback(
-						new Error("Wan2.2任务，且开启了offload_inactive_dit，blocks_to_swap必须为0")
+						new Error(
+							"Wan2.2任务，检测到开启了offload_inactive_dit选项，请将本选项blocks_to_swap设置为0"
+						)
 					);
 				}
 
@@ -507,6 +527,27 @@ const rules = reactive<FormRules<RuleForm>>({
 
 				callback();
 			}
+		}
+	],
+	"config.offload_inactive_dit": [
+		{
+			validator: (_rule, value, callback) => {
+				if (!isWan22.value || !value || ruleForm.value.dit_model_type !== "both") {
+					return callback();
+				}
+
+				const { blocks_to_swap } = ruleForm.value.config;
+				if (value && typeof blocks_to_swap === "number" && blocks_to_swap > 0) {
+					return callback(
+						new Error(
+							"Wan2.2任务，开启了offload_inactive_dit选项，请前往blocks_to_swap选项将其设置为0"
+						)
+					);
+				}
+
+				callback();
+			},
+			trigger: "change"
 		}
 	]
 });

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 10:12:06
- * @LastEditTime: 2025-08-29 17:03:23
+ * @LastEditTime: 2025-09-01 16:57:04
  * @LastEditors: mulingyuer
  * @Description: lora基本信息
  * @FilePath: \frontend\src\views\lora\wan-video\components\BasicInfo.vue
@@ -144,8 +144,6 @@ function onDefaultChange() {
 			ruleForm.value.config.timestep_boundary = undefined;
 			ruleForm.value.config.min_timestep = undefined;
 			ruleForm.value.config.max_timestep = undefined;
-			ruleForm.value.config.offload_inactive_dit = false;
-			ruleForm.value.config.blocks_to_swap = 36;
 			ruleForm.value.config.mixed_precision = "bf16";
 			break;
 		case "i2v-A14B":
@@ -160,22 +158,16 @@ function onDefaultChange() {
 	if (isWan22.value) {
 		switch (dit_model_type) {
 			case "low":
-				ruleForm.value.config.offload_inactive_dit = false;
-				ruleForm.value.config.blocks_to_swap = 36;
 				ruleForm.value.config.min_timestep = 0;
 				ruleForm.value.config.max_timestep = 875;
 				ruleForm.value.config.timestep_boundary = undefined;
 				break;
 			case "high":
-				ruleForm.value.config.offload_inactive_dit = false;
-				ruleForm.value.config.blocks_to_swap = 36;
 				ruleForm.value.config.min_timestep = 875;
 				ruleForm.value.config.max_timestep = 1000;
 				ruleForm.value.config.timestep_boundary = undefined;
 				break;
 			case "both":
-				ruleForm.value.config.offload_inactive_dit = true;
-				ruleForm.value.config.blocks_to_swap = 0;
 				ruleForm.value.config.min_timestep = 0;
 				ruleForm.value.config.max_timestep = 1000;
 				if (task === "i2v-A14B") {

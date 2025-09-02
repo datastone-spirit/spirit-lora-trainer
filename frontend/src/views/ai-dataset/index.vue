@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-08-29 11:34:04
+ * @LastEditTime: 2025-09-02 10:53:14
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -100,13 +100,12 @@
 
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
-import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useGPU } from "@/hooks/task/useGPU";
 import { useTag } from "@/hooks/task/useTag";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useTrainingStore } from "@/stores";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
-import type { FormInstance, FormRules } from "element-plus";
 import { joinPrefixKey } from "@/utils/tools";
+import type { FormInstance, FormRules } from "element-plus";
 
 interface RuleForm {
 	/** 图片目录 */
@@ -129,7 +128,6 @@ interface RuleForm {
 
 const trainingStore = useTrainingStore();
 const { tag, tagMonitor } = useTag();
-const { gpuMonitor } = useGPU();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
@@ -222,29 +220,6 @@ function onReset() {
 
 	ElMessage.success("重置成功");
 }
-
-// 如果GPU被占用就开始监听
-watch(
-	() => trainingStore.useGPU,
-	(newVal) => {
-		if (newVal) {
-			gpuMonitor.start();
-		} else {
-			gpuMonitor.pause();
-		}
-	},
-	{ immediate: true }
-);
-
-onMounted(() => {
-	// 组件挂载时，开始监听
-	tagMonitor.resume();
-});
-onUnmounted(() => {
-	// 组件销毁时，停止监听
-	tagMonitor.pause();
-	gpuMonitor.pause();
-});
 </script>
 
 <style lang="scss" scoped>

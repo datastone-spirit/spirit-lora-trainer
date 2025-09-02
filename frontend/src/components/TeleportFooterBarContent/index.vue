@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-09-01 14:55:09
+ * @LastEditTime: 2025-09-02 10:19:57
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -45,8 +45,8 @@
 		<div class="footer-button-group-right">
 			<GPUMonitor />
 			<TagMonitor />
-			<div v-if="taskMismatchWarning" class="footer-button-group-right-info">
-				<el-text>{{ taskMismatchWarning }}</el-text>
+			<div v-if="mismatchWarning.show" class="footer-button-group-right-info">
+				<el-text>{{ mismatchWarning.message }}</el-text>
 			</div>
 			<slot name="monitor-progress-bar"></slot>
 			<el-space>
@@ -101,6 +101,9 @@ export interface ConfigProps {
 	exportFileNamePrefix?: string;
 }
 
+const route = useRoute();
+const trainingStore = useTrainingStore();
+
 const props = withDefaults(defineProps<ConfigProps>(), {
 	leftTo: "#footer-bar-teleport-left",
 	leftDefer: true,
@@ -122,16 +125,21 @@ const emits = defineEmits<{
 }>();
 /** 合并的数据 */
 const mergeData = defineModel("mergeData", { type: Object, required: true });
-/** 训练的任务与页面不符的提示 */
-const taskMismatchWarning = ref("");
-
-const route = useRoute();
-const trainingStore = useTrainingStore();
 
 /** 当前路由的训练类型 */
 const routeTrainingType = computed(() => route.meta.loRATaskType ?? "none");
 /** 当前任务信息 */
 const currentTaskInfo = computed(() => trainingStore.currentTaskInfo);
+/** 不匹配的任务提示 */
+const mismatchWarning = computed<{ show: boolean; message: string }>(() => {
+	const { type, name } = currentTaskInfo.value;
+	const blackList: Array<TaskType> = ["none", "tag"];
+	if (blackList.includes(type) || type === routeTrainingType.value) {
+		return { show: false, message: "" };
+	}
+
+	return { show: true, message: `请切换到 ${name} 训练页面查看训练进度` };
+});
 
 // 配置导入
 const uploadRef = ref<UploadInstance>();
@@ -212,18 +220,6 @@ function onStopTraining() {
 		})
 		.catch(() => {});
 }
-
-// 初始化
-(function init() {
-	if (routeTrainingType.value && routeTrainingType.value !== "none") {
-		taskMismatchWarning.value = ""; // 先重置警告信息
-		const { type, name } = currentTaskInfo.value;
-		const blackList: Array<TaskType> = ["none", "tag"];
-		if (!blackList.includes(type) && type !== routeTrainingType.value) {
-			taskMismatchWarning.value = `请切换到 ${name} 训练页面查看训练进度`;
-		}
-	}
-})();
 </script>
 
 <style lang="scss" scoped>

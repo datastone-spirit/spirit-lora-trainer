@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-09-01 15:15:28
+ * @LastEditTime: 2025-09-04 10:08:52
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -199,20 +199,20 @@ const defaultForm: RuleForm = {
 	},
 	skip_cache_latent: false,
 	skip_cache_text_encoder_latent: false,
-	tagConfig: {
-		tagger_model: "joy-caption-alpha-two",
-		joy_caption_prompt_type: "Training Prompt",
-		is_add_global_prompt: false,
+	aiTagRuleForm: {
+		image_path: "",
+		model_name: "joy-caption-alpha-two",
+		prompt_type: "Training Prompt",
+		class_token: "",
 		global_prompt: "",
-		tagger_advanced_settings: false,
-		tagger_global_prompt: "",
-		tagger_is_append: false
+		is_append: false,
+		advanced_setting: ""
 	}
 };
 const ruleForm = useEnhancedLocalStorage({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm)),
-	version: "1.0.0"
+	version: "1.0.1"
 });
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],

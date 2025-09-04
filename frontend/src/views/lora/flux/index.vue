@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-09-01 15:11:15
+ * @LastEditTime: 2025-09-04 09:10:33
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -43,7 +43,7 @@
 				</div>
 			</template>
 			<template #right>
-				<SplitRightPanel :form-data="ruleForm" :dir="ruleForm.image_dir" />
+				<SplitRightPanel :form-data="ruleForm" :dir="ruleForm.aiTagRuleForm.image_path" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
@@ -104,139 +104,130 @@ const env = getEnv();
 const isWhiteCheck = settingsStore.whiteCheck;
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = joinPrefixKey("lora_flux_form");
-const defaultForm = readonly<RuleForm>({
-	output_name: "",
-	class_tokens: "",
-	pretrained_model_name_or_path: "./models/unet/flux1-dev.safetensors",
-	ae: "./models/vae/ae.safetensors",
-	clip_l: "./models/clip/clip_l.safetensors",
-	t5xxl: "./models/clip/t5xxl_fp16.safetensors",
-	resume: "",
-	output_dir: isWhiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
-	save_model_as: "safetensors",
-	save_precision: "bf16",
-	save_state: true,
-	blocks_to_swap: undefined,
-	// -----
-	image_dir: isWhiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
-	tagger_model: "joy-caption-alpha-two",
-	prompt_type: "Training Prompt",
-	output_trigger_words: true,
-	tagger_advanced_settings: false,
-	tagger_global_prompt: "",
-	tagger_is_append: false,
-	num_repeats: 16,
-	max_train_epochs: 24,
-	train_batch_size: 1,
-	resolution_width: 1024,
-	resolution_height: 1024,
-	enable_bucket: false,
-	min_bucket_reso: 256,
-	max_bucket_reso: 1024,
-	bucket_reso_steps: 64,
-	bucket_no_upscale: false,
-	// -----
-	seed: 42,
-	max_data_loader_n_workers: 2,
-	learning_rate: "8e-4",
-	save_every_n_epochs: 4,
-	guidance_scale: 1,
-	timestep_sampling: "shift",
-	network_dim: 64,
-	logit_mean: 0.0,
-	logit_std: 1.0,
-	mode_scale: 1.29,
-	// -----
-	sigmoid_scale: 1,
-	model_prediction_type: "raw",
-	discrete_flow_shift: 3.1582,
-	loss_type: "l2",
-	t5xxl_max_token_length: undefined,
-	highvram: true,
-	// -----
-	gradient_checkpointing: true,
-	gradient_accumulation_steps: 1,
-	network_train_unet_only: false,
-	network_train_text_encoder_only: false,
-	output_config: true,
-	disable_mmap_load_safetensors: false,
-	max_validation_steps: undefined,
-	validate_every_n_epochs: undefined,
-	validate_every_n_steps: undefined,
-	validation_seed: undefined,
-	validation_split: 0.0,
-	// -----
-	unet_lr: null,
-	text_encoder_lr: "1e-4",
-	lr_scheduler: "constant",
-	lr_warmup_steps: 0,
-	lr_scheduler_num_cycles: 0,
-	optimizer_type: "adamw8bit",
-	min_snr_gamma: undefined,
-	optimizer_args: null,
-	weighting_scheme: "uniform",
-	// -----
-	network_module: "networks.lora_flux",
-	network_weights: "",
-	network_alpha: "1",
-	network_dropout: 0,
-	scale_weight_norms: undefined,
-	network_args: null,
-	enable_base_weight: false,
-	base_weights: "",
-	base_weights_multiplier: undefined,
-	// -----
-	enable_preview: false,
-	// -----
-	logging_dir: "./logs",
-	// -----
-	caption_extension: ".txt",
-	shuffle_caption: false,
-	weighted_captions: false,
-	keep_tokens: 0,
-	keep_tokens_separator: "",
-	caption_dropout_rate: undefined,
-	caption_dropout_every_n_epochs: undefined,
-	caption_tag_dropout_rate: 0,
-	// -----
-	color_aug: false,
-	flip_aug: false,
-	random_crop: false,
-	// -----
-	clip_skip: 0,
-	split_mode: false,
-	text_encoder_batch_size: undefined,
-	// -----
-	mixed_precision: "bf16",
-	full_fp16: false,
-	full_bf16: true,
-	fp8_base: true,
-	fp8_base_unet: false,
-	no_half_vae: false,
-	sdpa: true,
-	lowram: false,
-	cache_latents: true,
-	cache_latents_to_disk: true,
-	cache_text_encoder_outputs: true,
-	cache_text_encoder_outputs_to_disk: true,
-	persistent_data_loader_workers: true,
-	vae_batch_size: undefined,
-	// -----
-	ddp_timeout: undefined,
-	ddp_gradient_as_bucket_view: false,
-	// -----
-	sample_every_n_steps: undefined,
-	sample_prompts: ""
-});
+const defaultForm: RuleForm = {
+	config: {
+		pretrained_model_name_or_path: "./models/unet/flux1-dev.safetensors",
+		enable_base_weight: false,
+		base_weights: "",
+		base_weights_multiplier: undefined,
+		enable_bucket: false,
+		bucket_no_upscale: false,
+		bucket_reso_steps: 64,
+		cache_latents: true,
+		cache_latents_to_disk: true,
+		cache_text_encoder_outputs: true,
+		cache_text_encoder_outputs_to_disk: true,
+		caption_extension: ".txt",
+		color_aug: false,
+		ddp_gradient_as_bucket_view: false,
+		discrete_flow_shift: 3.1582,
+		enable_preview: false,
+		flip_aug: false,
+		fp8_base: true,
+		fp8_base_unet: false,
+		full_fp16: false,
+		full_bf16: true,
+		gradient_accumulation_steps: 1,
+		gradient_checkpointing: true,
+		guidance_scale: 1,
+		keep_tokens_separator: "",
+		learning_rate: 0.0008,
+		logging_dir: "./logs",
+		loss_type: "l2",
+		lowram: false,
+		lr_scheduler: "constant",
+		lr_scheduler_num_cycles: 0,
+		lr_warmup_steps: 0,
+		max_bucket_reso: 1024,
+		max_data_loader_n_workers: 2,
+		max_train_epochs: 24,
+		min_bucket_reso: 256,
+		mixed_precision: "bf16",
+		model_prediction_type: "raw",
+		network_alpha: 1,
+		network_args: "",
+		network_dim: 64,
+		network_dropout: 0,
+		network_module: "networks.lora_flux",
+		network_train_text_encoder_only: false,
+		network_train_unet_only: false,
+		network_weights: "",
+		no_half_vae: false,
+		num_repeats: 16,
+		optimizer_args: "",
+		optimizer_type: "adamw8bit",
+		output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		output_name: "",
+		persistent_data_loader_workers: true,
+		random_crop: false,
+		resume: "",
+		save_every_n_epochs: 4,
+		save_model_as: "safetensors",
+		save_precision: "bf16",
+		save_state: true,
+		sdpa: true,
+		seed: 42,
+		shuffle_caption: false,
+		sigmoid_scale: 1,
+		text_encoder_lr: 0.0001,
+		timestep_sampling: "shift",
+		train_batch_size: 1,
+		unet_lr: undefined,
+		weighted_captions: false,
+		ae: "./models/vae/ae.safetensors",
+		clip_l: "./models/clip/clip_l.safetensors",
+		t5xxl: "./models/clip/t5xxl_fp16.safetensors",
+		t5xxl_max_token_length: undefined,
+		highvram: true,
+		min_snr_gamma: undefined,
+		scale_weight_norms: undefined,
+		caption_dropout_rate: undefined,
+		caption_dropout_every_n_epochs: undefined,
+		caption_tag_dropout_rate: 0,
+		clip_skip: 0,
+		vae_batch_size: undefined,
+		ddp_timeout: undefined,
+		resolution: [1024, 1024],
+		output_config: true,
+		sample_every_n_steps: undefined,
+		sample_prompts: "",
+		blocks_to_swap: undefined,
+		logit_mean: 0,
+		logit_std: 1,
+		mode_scale: 1.29,
+		disable_mmap_load_safetensors: false,
+		max_validation_steps: undefined,
+		validate_every_n_epochs: undefined,
+		validate_every_n_steps: undefined,
+		validation_seed: undefined,
+		validation_split: 0,
+		weighting_scheme: "uniform",
+		split_mode: false,
+		text_encoder_batch_size: undefined
+	},
+	aiTagRuleForm: {
+		image_path: isWhiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		model_name: "joy-caption-alpha-two",
+		prompt_type: "Training Prompt",
+		class_token: "",
+		global_prompt: "",
+		is_append: false,
+		advanced_setting: ""
+	},
+	dataset: {
+		keep_tokens: 0,
+		class_tokens: ""
+	}
+};
 const ruleForm = useEnhancedLocalStorage<RuleForm>({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
-	version: "1.0.0"
+	version: "1.0.1"
 });
 const rules = reactive<FormRules<RuleForm>>({
-	output_name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
-	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
-	output_dir: [
+	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
+	"dataset.class_tokens": [{ required: true, message: "请输入触发词", trigger: "blur" }],
+	"config.output_dir": [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
@@ -263,7 +254,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			}
 		}
 	],
-	image_dir: [
+	"aiTagRuleForm.image_path": [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
@@ -278,7 +269,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			}
 		}
 	],
-	resolution_width: [
+	"config.resolution.0": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
 				if (value < 64) {
@@ -294,7 +285,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	resolution_height: [
+	"config.resolution.1": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
 				if (value < 64) {
@@ -310,7 +301,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	lr_scheduler: [
+	"config.lr_scheduler": [
 		{
 			validator: (_rule: any, _value: string, callback: (error?: string | Error) => void) => {
 				// 联动校验
@@ -320,10 +311,10 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	lr_warmup_steps: [
+	"config.lr_warmup_steps": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (ruleForm.value.lr_scheduler === "constant_with_warmup") {
+				if (ruleForm.value.config.lr_scheduler === "constant_with_warmup") {
 					// 学习调度器为该值时lr_warmup_steps预热步数必须大于0
 					if (value <= 0) {
 						callback(new Error("学习率预热步数必须大于0"));
@@ -342,7 +333,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	sample_every_n_steps: [
+	"config.sample_every_n_steps": [
 		{
 			validator: (
 				_rule: any,
@@ -365,10 +356,10 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	sample_prompts: [
+	"config.sample_prompts": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				const sampleSteps = ruleForm.value.sample_every_n_steps ?? 0;
+				const sampleSteps = ruleForm.value.config.sample_every_n_steps ?? 0;
 				const hasPrompt = value.trim().length > 0;
 
 				if (sampleSteps >= 10 && !hasPrompt) {
@@ -382,11 +373,11 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	highvram: [
+	"config.highvram": [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
 				if (!isWhiteCheck) return callback();
-				if (value && ruleForm.value.train_batch_size >= 2) {
+				if (value && ruleForm.value.config.train_batch_size >= 2) {
 					return callback(new Error("批量大小（train_batch_size）大于或等于2时，请关闭高显存模式"));
 				}
 				callback();
@@ -394,7 +385,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	blocks_to_swap: [
+	"config.blocks_to_swap": [
 		{
 			validator: (
 				_rule: any,
@@ -402,7 +393,7 @@ const rules = reactive<FormRules<RuleForm>>({
 				callback: (error?: string | Error) => void
 			) => {
 				if (!isWhiteCheck) return callback();
-				if (ruleForm.value.train_batch_size > 2 && value !== 32) {
+				if (ruleForm.value.config.train_batch_size > 2 && value !== 32) {
 					return callback(
 						new Error("批量大小（train_batch_size）大于2时，请选择32个block进行交换")
 					);
@@ -412,11 +403,11 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	fp8_base: [
+	"config.fp8_base": [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
 				if (!isWhiteCheck) return callback();
-				if (ruleForm.value.train_batch_size > 2 && !value) {
+				if (ruleForm.value.config.train_batch_size > 2 && !value) {
 					return callback(new Error("批量大小（train_batch_size）大于2时，请开启 fp8_base"));
 				}
 				callback();
@@ -424,11 +415,11 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	lowram: [
+	"config.lowram": [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
 				if (!isWhiteCheck) return callback();
-				if (ruleForm.value.train_batch_size > 2 && !value) {
+				if (ruleForm.value.config.train_batch_size > 2 && !value) {
 					return callback(
 						new Error("批量大小（train_batch_size）大于2时，请开启低内存模式（lowram）")
 					);
@@ -438,11 +429,11 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	optimizer_type: [
+	"config.optimizer_type": [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
 				if (!isWhiteCheck) return callback();
-				if (ruleForm.value.train_batch_size > 2 && value !== "adamw8bit") {
+				if (ruleForm.value.config.train_batch_size > 2 && value !== "adamw8bit") {
 					return callback(
 						new Error("批量大小（train_batch_size）大于2时，优化器设置必须设置为 AdamW8bit")
 					);
@@ -452,11 +443,11 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	network_train_unet_only: [
+	"config.network_train_unet_only": [
 		{
 			validator: (_rule: any, value: boolean, callback: (error?: string | Error) => void) => {
 				if (!isWhiteCheck) return callback();
-				if (ruleForm.value.train_batch_size > 2 && !value) {
+				if (ruleForm.value.config.train_batch_size > 2 && !value) {
 					return callback(
 						new Error("批量大小（train_batch_size）大于2时，仅训练 U-Net 开关请开启")
 					);

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-06 15:41:05
- * @LastEditTime: 2025-07-28 09:14:43
+ * @LastEditTime: 2025-09-03 15:10:15
  * @LastEditors: mulingyuer
  * @Description: flux校验相关
  * @FilePath: \frontend\src\views\lora\flux\flux.validate.ts
@@ -89,11 +89,18 @@ export async function validate(data: ValidateData): Promise<ValidationResult> {
 		() => LoRAValidator.validateForm(formInstance, { shouldShowErrorDialog: true }),
 		// LoRA保存路径校验
 		() =>
-			LoRAValidator.validateLoRASaveDir({ path: ruleForm.output_dir, shouldShowErrorDialog: true }),
+			LoRAValidator.validateLoRASaveDir({
+				path: ruleForm.config.output_dir,
+				shouldShowErrorDialog: true
+			}),
 		// GPU占用校验
 		() => LoRAValidator.validateGpu({ shouldShowErrorDialog: true }),
 		// 数据集校验
-		() => LoRAValidator.validateDirectory({ path: ruleForm.image_dir, checkImageAndLabel: true })
+		() =>
+			LoRAValidator.validateDirectory({
+				path: ruleForm.aiTagRuleForm.image_path,
+				checkImageAndLabel: true
+			})
 		// 批量大小相关参数校验
 		// () => validateBatchSizeRules(ruleForm)
 	];

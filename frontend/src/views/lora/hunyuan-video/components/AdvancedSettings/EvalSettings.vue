@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 16:38:54
- * @LastEditTime: 2025-01-06 16:45:12
+ * @LastEditTime: 2025-09-04 08:57:08
  * @LastEditors: mulingyuer
  * @Description: 评估设置
  * @FilePath: \frontend\src\views\lora\hunyuan-video\components\AdvancedSettings\EvalSettings.vue
@@ -11,36 +11,40 @@
 	<FieldSetWrapper title="评估设置">
 		<PopoverFormItem
 			label="每n个epochs评估一次"
-			prop="eval_every_n_epochs"
+			prop="config.eval_every_n_epochs"
 			popover-content="eval_every_n_epochs"
 		>
-			<el-input-number v-model.number="ruleForm.eval_every_n_epochs" :step="1" step-strictly />
+			<el-input-number
+				v-model.number="ruleForm.config.eval_every_n_epochs"
+				:step="1"
+				step-strictly
+			/>
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="第一步前评估"
-			prop="eval_before_first_step"
+			prop="config.eval_before_first_step"
 			popover-content="eval_before_first_step"
 		>
-			<el-switch v-model="ruleForm.eval_before_first_step" />
+			<el-switch v-model="ruleForm.config.eval_before_first_step" />
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="评估每个GPU的微批量大小"
-			prop="eval_micro_batch_size_per_gpu"
+			prop="config.eval_micro_batch_size_per_gpu"
 			popover-content="eval_micro_batch_size_per_gpu"
 		>
 			<el-input-number
-				v-model.number="ruleForm.eval_micro_batch_size_per_gpu"
+				v-model.number="ruleForm.config.eval_micro_batch_size_per_gpu"
 				:step="1"
 				step-strictly
 			/>
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="评估梯度累积步骤"
-			prop="eval_gradient_accumulation_steps"
+			prop="config.eval_gradient_accumulation_steps"
 			popover-content="eval_gradient_accumulation_steps"
 		>
 			<el-input-number
-				v-model.number="ruleForm.eval_gradient_accumulation_steps"
+				v-model.number="ruleForm.config.eval_gradient_accumulation_steps"
 				:step="1"
 				step-strictly
 			/>

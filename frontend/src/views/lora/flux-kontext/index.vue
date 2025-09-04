@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-09-01 15:11:35
+ * @LastEditTime: 2025-09-03 16:34:53
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -164,19 +164,20 @@ const defaultForm: RuleForm = {
 	datasets: [defaultDatasetItem],
 	activeDatasetId: defaultDatasetItem.id,
 	name: "",
-	tagConfig: {
-		tagger_model: "joy-caption-alpha-two",
-		joy_caption_prompt_type: "Training Prompt",
-		is_add_global_prompt: false,
-		tagger_advanced_settings: false,
-		tagger_global_prompt: "",
-		tagger_is_append: false
+	aiTagRuleForm: {
+		image_path: "",
+		model_name: "joy-caption-alpha-two",
+		prompt_type: "Training Prompt",
+		class_token: "",
+		global_prompt: "",
+		is_append: false,
+		advanced_setting: ""
 	}
 };
 const ruleForm = useEnhancedLocalStorage({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm)),
-	version: "1.0.0"
+	version: "1.0.1"
 });
 const rules = reactive<FormRules<RuleForm>>({
 	name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],

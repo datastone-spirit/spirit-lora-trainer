@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:01:31
- * @LastEditTime: 2025-08-29 11:57:35
+ * @LastEditTime: 2025-09-04 10:15:43
  * @LastEditors: mulingyuer
  * @Description: wan helper
  * @FilePath: \frontend\src\views\lora\wan-video\wan.helper.ts
@@ -143,7 +143,7 @@ export class WanHelper {
 
 	/** 格式化dataset数据 */
 	private formatDataset(data: RuleForm): StartWanVideoTrainingData["dataset"] {
-		const { data_mode, dataset } = data;
+		const { data_mode, dataset, aiTagRuleForm } = data;
 		return {
 			general: {
 				resolution: [dataset.general.resolution[0], dataset.general.resolution[1]],
@@ -157,7 +157,7 @@ export class WanHelper {
 				switch (data_mode) {
 					case "image":
 						return {
-							image_directory: item.image_directory
+							image_directory: aiTagRuleForm.image_path
 						};
 					case "video":
 						return {

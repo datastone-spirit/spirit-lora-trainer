@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-09-01 17:23:21
+ * @LastEditTime: 2025-09-04 10:19:02
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -193,7 +193,7 @@ const defaultForm: RuleForm = {
 		},
 		datasets: [
 			{
-				image_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+				image_directory: "", // 使用打标的image_path
 				video_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 				frame_extraction: "head",
 				target_frames: [
@@ -207,14 +207,14 @@ const defaultForm: RuleForm = {
 			}
 		]
 	},
-	tagConfig: {
-		tag_model: "joy-caption-alpha-two",
-		joy_caption_prompt_type: "Training Prompt",
-		is_add_global_prompt: false,
+	aiTagRuleForm: {
+		image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		model_name: "joy-caption-alpha-two",
+		prompt_type: "Training Prompt",
+		class_token: "",
 		global_prompt: "",
-		tag_advanced_settings: false,
-		tag_global_prompt: "",
-		tag_is_append: false
+		is_append: false,
+		advanced_setting: ""
 	},
 	dit_model_type: "low",
 	skip_cache_latent: false,
@@ -420,10 +420,18 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	"dataset.datasets.0.image_directory": [
-		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+	"aiTagRuleForm.image_path": [
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+			trigger: "change",
+			validator: (_rule, value, callback) => {
+				const { data_mode } = ruleForm.value;
+				if (data_mode !== "image") return callback();
+
+				if (typeof value !== "string" || value.trim().length === 0) {
+					callback(new Error("请选择训练用的数据集目录"));
+					return;
+				}
+
 				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
@@ -436,9 +444,17 @@ const rules = reactive<FormRules<RuleForm>>({
 		}
 	],
 	"dataset.datasets.0.video_directory": [
-		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
-			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+			trigger: "change",
+			validator: (_rule, value, callback) => {
+				const { data_mode } = ruleForm.value;
+				if (data_mode !== "video") return callback();
+
+				if (typeof value !== "string" || value.trim().length === 0) {
+					callback(new Error("请选择训练用的数据集目录"));
+					return;
+				}
+
 				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
@@ -556,7 +572,7 @@ const isExpert = computed(() => settingsStore.isExpert);
 /** AI数据集path */
 const wanDatasetPath = computed(() => {
 	if (ruleForm.value.data_mode === "image") {
-		return ruleForm.value.dataset.datasets[0].image_directory;
+		return ruleForm.value.aiTagRuleForm.image_path;
 	}
 	return ruleForm.value.dataset.datasets[0].video_directory;
 });

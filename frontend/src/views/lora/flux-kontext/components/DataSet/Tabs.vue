@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 11:39:51
- * @LastEditTime: 2025-08-04 09:24:58
+ * @LastEditTime: 2025-09-04 09:57:53
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\Tabs.vue
@@ -26,7 +26,7 @@
 		>
 			<PopoverFormItem
 				label="切换右侧数据集预览"
-				:prop="`datasets[${index}].preview`"
+				:prop="`datasets.${index}.preview`"
 				popover-content="preview"
 			>
 				<el-switch
@@ -39,7 +39,7 @@
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="数据集目录"
-				:prop="`datasets[${index}].folder_path`"
+				:prop="`datasets.${index}.folder_path`"
 				popover-content="folder_path"
 				:rules="rules.folder_path"
 			>
@@ -47,7 +47,7 @@
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="控制数据集集目录"
-				:prop="`datasets[${index}].control_path`"
+				:prop="`datasets.${index}.control_path`"
 				popover-content="control_path"
 				:rules="rules.control_path"
 			>
@@ -55,35 +55,35 @@
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="LoRA 权重"
-				:prop="`datasets[${index}].network_weight`"
+				:prop="`datasets.${index}.network_weight`"
 				popover-content="network_weight"
 			>
 				<el-input-number v-model.number="item.network_weight" :step="1" step-strictly />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label=" 标题 Dropout Rate"
-				:prop="`datasets[${index}].caption_dropout_rate`"
+				:prop="`datasets.${index}.caption_dropout_rate`"
 				popover-content="caption_dropout_rate"
 			>
 				<el-input-number v-model.number="item.caption_dropout_rate" :step="0.01" :min="0" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="是否将图像的潜在表示（latents）缓存到磁盘"
-				:prop="`datasets[${index}].cache_latents_to_disk`"
+				:prop="`datasets.${index}.cache_latents_to_disk`"
 				popover-content="cache_latents_to_disk"
 			>
 				<el-switch v-model="item.cache_latents_to_disk" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="是否正则化"
-				:prop="`datasets[${index}].is_reg`"
+				:prop="`datasets.${index}.is_reg`"
 				popover-content="is_reg"
 			>
 				<el-switch v-model="item.is_reg" />
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="分辨率"
-				:prop="`datasets[${index}].resolution`"
+				:prop="`datasets.${index}.resolution`"
 				popover-content="resolution"
 				:rules="rules.resolution"
 			>

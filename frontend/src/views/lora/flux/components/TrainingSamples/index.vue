@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-02-10 09:52:39
- * @LastEditTime: 2025-08-22 09:02:52
+ * @LastEditTime: 2025-09-03 14:47:47
  * @LastEditors: mulingyuer
  * @Description: 训练采样
  * @FilePath: \frontend\src\views\lora\flux\components\TrainingSamples\index.vue
@@ -10,19 +10,19 @@
 <template>
 	<PopoverFormItem
 		label="采样间隔步数"
-		prop="sample_every_n_steps"
+		prop="config.sample_every_n_steps"
 		popover-content="sample_every_n_steps"
 	>
 		<el-input-number
-			v-model.number="ruleForm.sample_every_n_steps"
+			v-model.number="ruleForm.config.sample_every_n_steps"
 			:step="10"
 			step-strictly
 			:min="1"
 		/>
 	</PopoverFormItem>
-	<PopoverFormItem label="采样提示词" prop="sample_prompts" popover-content="sample_prompts">
+	<PopoverFormItem label="采样提示词" prop="config.sample_prompts" popover-content="sample_prompts">
 		<el-input
-			v-model="ruleForm.sample_prompts"
+			v-model="ruleForm.config.sample_prompts"
 			placeholder="请输入采样提示词，多个词用英文逗号分隔"
 			type="textarea"
 			:rows="4"

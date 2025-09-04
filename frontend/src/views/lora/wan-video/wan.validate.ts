@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:02:06
- * @LastEditTime: 2025-08-21 17:26:31
+ * @LastEditTime: 2025-09-04 10:18:32
  * @LastEditors: mulingyuer
  * @Description: wan 校验器
  * @FilePath: \frontend\src\views\lora\wan-video\wan.validate.ts
@@ -20,10 +20,10 @@ export interface ValidateData {
 
 /** 校验数据集目录是否存在素材 */
 async function validateDataset(formData: RuleForm): Promise<ValidationResult> {
-	const { data_mode } = formData;
+	const { data_mode, aiTagRuleForm } = formData;
 	let dir: string;
 	if (data_mode === "image") {
-		dir = formData.dataset.datasets[0].image_directory;
+		dir = aiTagRuleForm.image_path;
 	} else {
 		dir = formData.dataset.datasets[0].video_directory;
 	}

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 09:27:58
- * @LastEditTime: 2025-08-27 09:44:57
+ * @LastEditTime: 2025-09-04 10:10:43
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\qwen-image\components\DataSet\Tabs.vue
@@ -27,7 +27,7 @@
 			<PopoverFormItem
 				v-show="isEdit"
 				label="切换右侧数据集预览"
-				:prop="`datasets[${index}].preview`"
+				:prop="`datasets.${index}.preview`"
 				popover-content="preview"
 			>
 				<el-switch
@@ -40,7 +40,7 @@
 			</PopoverFormItem>
 			<PopoverFormItem
 				label="数据集目录"
-				:prop="`dataset.datasets[${index}].image_directory`"
+				:prop="`dataset.datasets.${index}.image_directory`"
 				popover-content="image_directory"
 				:rules="rules.image_directory"
 			>
@@ -49,7 +49,7 @@
 			<PopoverFormItem
 				v-show="isEdit"
 				label="控制数据集目录"
-				:prop="`dataset.datasets[${index}].control_directory`"
+				:prop="`dataset.datasets.${index}.control_directory`"
 				popover-content="control_directory"
 				:rules="rules.control_directory"
 			>
@@ -59,7 +59,7 @@
 				<el-col :span="12">
 					<PopoverFormItem
 						label="图片尺寸-宽度px"
-						:prop="`dataset.datasets[${index}].resolution[0]`"
+						:prop="`dataset.datasets.${index}.resolution.0`"
 						popover-content="resolution"
 					>
 						<el-input-number v-model.number="item.resolution[0]" :controls="false" />
@@ -68,7 +68,7 @@
 				<el-col :span="12">
 					<PopoverFormItem
 						label="图片尺寸-高度px"
-						:prop="`dataset.datasets[${index}].resolution[1]`"
+						:prop="`dataset.datasets.${index}.resolution.1`"
 						popover-content="resolution"
 					>
 						<el-input-number v-model.number="item.resolution[1]" :controls="false" />
@@ -77,7 +77,7 @@
 				<el-col :span="12">
 					<PopoverFormItem
 						label="批次大小"
-						:prop="`dataset.datasets[${index}].batch_size`"
+						:prop="`dataset.datasets.${index}.batch_size`"
 						popover-content="batch_size"
 					>
 						<el-input-number v-model.number="item.batch_size" :step="1" step-strictly :min="1" />
@@ -86,7 +86,7 @@
 				<el-col :span="12">
 					<PopoverFormItem
 						label="每个图像重复训练次数"
-						:prop="`dataset.datasets[${index}].num_repeats`"
+						:prop="`dataset.datasets.${index}.num_repeats`"
 						popover-content="num_repeats"
 					>
 						<el-input-number v-model.number="item.num_repeats" :step="1" step-strictly />
@@ -95,7 +95,7 @@
 				<el-col v-show="isEdit" :span="24">
 					<PopoverFormItem
 						label="禁用调整控制数据集图像的大小"
-						:prop="`dataset.datasets[${index}].qwen_image_edit_no_resize_control`"
+						:prop="`dataset.datasets.${index}.qwen_image_edit_no_resize_control`"
 						popover-content="qwen_image_edit_no_resize_control"
 						:rules="rulesFn.qwen_image_edit_no_resize_control(index)"
 					>
@@ -108,7 +108,7 @@
 				<el-col v-show="isEdit" :span="12">
 					<PopoverFormItem
 						label="控制数据集图片尺寸-宽度px"
-						:prop="`dataset.datasets[${index}].qwen_image_edit_control_resolution[0]`"
+						:prop="`dataset.datasets.${index}.qwen_image_edit_control_resolution.0`"
 						popover-content="qwen_image_edit_control_resolution"
 						:rules="rulesFn.qwen_image_edit_control_resolution_width(index)"
 					>
@@ -122,7 +122,7 @@
 				<el-col v-show="isEdit" :span="12">
 					<PopoverFormItem
 						label="控制数据集图片尺寸-高度px"
-						:prop="`dataset.datasets[${index}].qwen_image_edit_control_resolution[1]`"
+						:prop="`dataset.datasets.${index}.qwen_image_edit_control_resolution.1`"
 						popover-content="qwen_image_edit_control_resolution"
 						:rules="rulesFn.qwen_image_edit_control_resolution_height(index)"
 					>
@@ -136,7 +136,7 @@
 				<el-col :span="24">
 					<PopoverFormItem
 						label="启用 arb 桶以允许非固定宽高比的图片"
-						:prop="`dataset.datasets[${index}].enable_bucket`"
+						:prop="`dataset.datasets.${index}.enable_bucket`"
 						popover-content="enable_bucket"
 					>
 						<el-switch v-model="item.enable_bucket" />
@@ -145,7 +145,7 @@
 				<el-col :span="24">
 					<PopoverFormItem
 						label="arb 桶不放大图片"
-						:prop="`dataset.datasets[${index}].bucket_no_upscale`"
+						:prop="`dataset.datasets.${index}.bucket_no_upscale`"
 						popover-content="bucket_no_upscale"
 					>
 						<el-switch v-model="item.bucket_no_upscale" />
@@ -154,7 +154,7 @@
 				<el-col :span="24">
 					<PopoverFormItem
 						label="Tag 文件扩展名"
-						:prop="`dataset.datasets[${index}].caption_extension`"
+						:prop="`dataset.datasets.${index}.caption_extension`"
 						popover-content="caption_extension"
 					>
 						<el-input v-model="item.caption_extension" placeholder="请输入Tag 文件扩展名" />

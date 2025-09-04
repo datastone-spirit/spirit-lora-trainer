@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 15:39:43
- * @LastEditTime: 2025-01-10 11:06:10
+ * @LastEditTime: 2025-09-03 15:09:08
  * @LastEditors: mulingyuer
  * @Description: 分布式训练
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\DistributedTrainingOptions.vue
@@ -11,17 +11,22 @@
 	<FieldSetWrapper title="分布式训练">
 		<PopoverFormItem
 			label="分布式训练超时时间（分钟）"
-			prop="ddp_timeout"
+			prop="config.ddp_timeout"
 			popover-content="ddp_timeout"
 		>
-			<el-input-number v-model.number="ruleForm.ddp_timeout" :step="1" step-strictly :min="0" />
+			<el-input-number
+				v-model.number="ruleForm.config.ddp_timeout"
+				:step="1"
+				step-strictly
+				:min="0"
+			/>
 		</PopoverFormItem>
 		<PopoverFormItem
 			label="为 DDP 启用 gradient_as_bucket_view"
-			prop="ddp_gradient_as_bucket_view"
+			prop="config.ddp_gradient_as_bucket_view"
 			popover-content="ddp_gradient_as_bucket_view"
 		>
-			<el-switch v-model="ruleForm.ddp_gradient_as_bucket_view" />
+			<el-switch v-model="ruleForm.config.ddp_gradient_as_bucket_view" />
 		</PopoverFormItem>
 	</FieldSetWrapper>
 </template>

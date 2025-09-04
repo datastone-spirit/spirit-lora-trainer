@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-24 14:42:11
- * @LastEditTime: 2025-07-30 16:02:41
+ * @LastEditTime: 2025-09-04 10:10:33
  * @LastEditors: mulingyuer
  * @Description: 训练用的数据
  * @FilePath: \frontend\src\views\lora\wan-video\components\TrainingData.vue
@@ -44,7 +44,7 @@
 		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-宽度px"
-				prop="dataset.general.resolution[0]"
+				prop="dataset.general.resolution.0"
 				popover-content="resolution"
 			>
 				<el-input-number
@@ -56,7 +56,7 @@
 		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-高度px"
-				prop="dataset.general.resolution[1]"
+				prop="dataset.general.resolution.1"
 				popover-content="resolution"
 			>
 				<el-input-number

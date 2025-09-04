@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-09-04 10:19:02
+ * @LastEditTime: 2025-09-04 15:18:52
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -223,7 +223,7 @@ const defaultForm: RuleForm = {
 const ruleForm = useEnhancedLocalStorage({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm)),
-	version: "1.0.0"
+	version: "1.0.1"
 });
 const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 const rules = reactive<FormRules<RuleForm>>({

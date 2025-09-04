@@ -1,42 +1,21 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 09:16:38
- * @LastEditTime: 2025-09-01 14:50:07
+ * @LastEditTime: 2025-09-04 16:27:13
  * @LastEditors: mulingyuer
  * @Description: 打标hooks
- * @FilePath: \frontend\src\hooks\task\useTag\index.ts
+ * @FilePath: \frontend\src\hooks\task\useTag-v2\index.ts
  * 怎么可能会有bug！！！
  */
 import type { ManualTagInfoResult } from "@/api/monitor";
 import { manualTagInfo } from "@/api/monitor";
 import { batchTag, type BatchTagData } from "@/api/tag";
-import {
-	useModalManagerStore,
-	useTrainingStore,
-	type UseModalManagerStore,
-	type UseTrainingStore
-} from "@/stores";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { useTrainingStore, type UseTrainingStore } from "@/stores";
+import { NetworkDisconnectModal } from "@/utils/modal-manager";
 import { isNetworkError } from "axios-retry";
 import mitt from "mitt";
+import type { SimplifyDeep } from "type-fest";
 import type { TaskEvents, TaskImplementation, TaskStatus } from "../types";
-import { NetworkDisconnectModal } from "@/utils/modal-manager";
-
-interface TagMonitorOptions {
-	/** 数据仓库 */
-	trainingStore: UseTrainingStore;
-	modalManagerStore: UseModalManagerStore;
-	/** 定时器延迟 */
-	delay?: number;
-	/** 当前状态 */
-	status?: TaskStatus;
-	/** 任务id */
-	taskId?: string;
-	/** 任务类型 */
-	taskType?: TaskType;
-	/** 任务进度 */
-	taskProgress?: number;
-}
 
 /** 设置初始数据 */
 export interface InitData {
@@ -51,42 +30,12 @@ export interface InitData {
 }
 
 /** 打标选项 */
-export interface TagOptions {
-	/** 打标模型 */
-	tagModel: string;
-	/** 打标的目录 */
-	tagDir: string;
-	/** 打标模型为：Joy Caption2时，需要具体的打标类型 */
-	joyCaptionPromptType?: string;
-	/** 是否添加原封不动输出到打标内容中 */
-	isAddGlobalPrompt: boolean;
-	/** 原封不动输出到打标内容中的文本，isAddGlobalPrompt为true时有效 */
-	globalPrompt?: string;
-	/** 打标时给AI的提示词（用于生成打标内容） */
-	tagPrompt: string;
-	/** 打标的是内容是否追加到原有内容后面 */
-	isAppend: boolean;
-	/** 是否显示任务开始提示 */
-	showTaskStartPrompt: boolean;
-}
-
-/** 打标校验参数 */
-export interface ValidateTagOptions extends TagOptions {
-	/** 是否显示错误消息弹窗 */
-	showErrorMessage: boolean;
-}
-
-/** 打标校验规则 */
-export type ValidateTagRules = Array<{
-	condition: () => boolean | Promise<boolean>;
-	message: string;
-}>;
-
-/** 打标校验结果 */
-export interface ValidateTagResult {
-	isValid: boolean;
-	message: string;
-}
+export type TagData = SimplifyDeep<
+	BatchTagData & {
+		/** 是否显示任务开始提示 */
+		showTaskStartPrompt?: boolean;
+	}
+>;
 
 class TagMonitor implements TaskImplementation {
 	/** 定时器 */
@@ -95,7 +44,6 @@ class TagMonitor implements TaskImplementation {
 	private readonly delay: number = 8000;
 	/** 数据仓库 */
 	private readonly trainingStore: UseTrainingStore;
-	private readonly modalManagerStore: UseModalManagerStore;
 	/** 当前状态 */
 	private status: TaskStatus = "idle";
 	/** 允许查询的状态数组 */
@@ -109,13 +57,8 @@ class TagMonitor implements TaskImplementation {
 	/** 事件订阅 */
 	public events = mitt<TaskEvents>();
 
-	constructor(options: TagMonitorOptions) {
-		this.delay = options.delay ?? this.delay;
-		this.status = options.status ?? this.status;
-		this.trainingStore = options.trainingStore;
-		this.modalManagerStore = options.modalManagerStore;
-		this.taskId = options.taskId ?? this.taskId;
-		this.taskType = options.taskType ?? this.taskType;
+	constructor() {
+		this.trainingStore = useTrainingStore();
 	}
 
 	start(): void {
@@ -171,7 +114,7 @@ class TagMonitor implements TaskImplementation {
 			taskId,
 			result,
 			showTrainingTip = true,
-			trainingTipText = "当前正在训练..."
+			trainingTipText = "当前正在打标..."
 		} = initData;
 
 		// 更新数据
@@ -336,30 +279,28 @@ class TagMonitor implements TaskImplementation {
 let tagMonitor: TagMonitor | null = null;
 
 export function useTag() {
-	const trainingStore = useTrainingStore();
-	const modalManagerStore = useModalManagerStore();
-
 	/** 打标 */
-	async function tag(options: TagOptions) {
-		// 先校验参数
-		const validateResult = await validateTag({
-			...options,
-			showErrorMessage: true
-		});
-		if (!validateResult.isValid) throw new Error(validateResult.message);
+	async function tag(data: TagData) {
+		const { showTaskStartPrompt = false } = data;
 
-		// api
 		const apiData: BatchTagData = {
-			image_path: options.tagDir,
-			model_name: options.tagModel,
-			prompt_type: options.joyCaptionPromptType ?? "",
-			class_token: options.isAddGlobalPrompt ? (options.globalPrompt ?? "") : "",
-			global_prompt: isJoyCaption2Model(options.tagModel) ? options.tagPrompt : "",
-			is_append: options.isAppend
+			image_path: data.image_path,
+			model_name: data.model_name,
+			prompt_type: data.prompt_type,
+			class_token: data.class_token || void 0,
+			global_prompt: data.global_prompt || void 0,
+			is_append: data.is_append
 		};
+
+		// 非joy2模型打标，删除相关字段
+		if (!isJoyCaption2Model(data.model_name)) {
+			Reflect.deleteProperty(apiData, "prompt_type");
+			Reflect.deleteProperty(apiData, "global_prompt");
+		}
+
 		const apiResult = await batchTag(apiData);
 
-		options.showTaskStartPrompt &&
+		showTaskStartPrompt &&
 			ElMessage({
 				message: "正在打标...",
 				type: "success"
@@ -368,93 +309,18 @@ export function useTag() {
 		return apiResult;
 	}
 
-	/** 打标前校验 */
-	async function validateTag(options: ValidateTagOptions): Promise<ValidateTagResult> {
-		const trainingStore = useTrainingStore();
-		const {
-			tagDir,
-			tagModel,
-			isAddGlobalPrompt,
-			globalPrompt,
-			joyCaptionPromptType,
-			showErrorMessage
-		} = options;
-
-		const rules: ValidateTagRules = [
-			{
-				condition: () => trainingStore.useGPU,
-				message: "GPU已经被占用，请等待对应任务完成再执行打标"
-			},
-			{
-				condition: () => typeof tagDir !== "string" || tagDir.trim() === "",
-				message: "请先选择训练用的数据集目录"
-			},
-			{
-				condition: async () => {
-					const { valid } = await LoRAValidator.validateDirectory({ path: tagDir });
-					return !valid;
-				},
-				message: "数据集目录不存在"
-			},
-			{
-				condition: () => typeof tagModel !== "string" || tagModel.trim() === "",
-				message: "请先选择打标模型"
-			},
-			{
-				condition: () => {
-					if (!isJoyCaption2Model(tagModel)) return false;
-					if (typeof joyCaptionPromptType !== "string" || joyCaptionPromptType.trim() === "")
-						return true;
-
-					return false;
-				},
-				message: "请选择 Joy Caption2 的提示词类型"
-			},
-			{
-				condition: () => {
-					if (!isAddGlobalPrompt) return false;
-					if (typeof globalPrompt !== "string" || globalPrompt.trim() === "") return true;
-					return false;
-				},
-				message: "请填写触发词"
-			}
-		];
-
-		for (const rule of rules) {
-			if (await rule.condition()) {
-				showErrorMessage &&
-					ElMessage({
-						message: rule.message,
-						type: "error"
-					});
-
-				return {
-					isValid: false,
-					message: rule.message
-				};
-			}
-		}
-
-		return {
-			isValid: true,
-			message: ""
-		};
-	}
-
 	/** 是否是Joy Caption2打标模型 */
 	function isJoyCaption2Model(tagModel: string) {
 		return tagModel === "joy-caption-alpha-two";
 	}
 
 	if (!tagMonitor) {
-		tagMonitor = new TagMonitor({
-			trainingStore,
-			modalManagerStore
-		});
+		tagMonitor = new TagMonitor();
 	}
 
 	return {
 		tagMonitor,
-		tag
+		tag,
+		isJoyCaption2Model
 	};
 }

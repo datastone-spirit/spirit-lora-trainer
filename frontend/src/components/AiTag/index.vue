@@ -111,7 +111,7 @@
 import type { BatchTagData } from "@/api/tag";
 import JoyCaptionPromptTypeSelect from "@/components/Form/DataSet-v3/JoyCaptionPromptTypeSelect.vue";
 import ModelSelect from "@/components/Form/DataSet-v3/ModelSelect.vue";
-import { useTag } from "@/hooks/task/useTag-v2";
+import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
 import type { FormInstance, FormRules } from "element-plus";

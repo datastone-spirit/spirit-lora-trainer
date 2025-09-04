@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-04 16:14:16
- * @LastEditTime: 2025-08-25 10:10:44
+ * @LastEditTime: 2025-09-04 16:25:21
  * @LastEditors: mulingyuer
  * @Description: 设置数据仓库
  * @FilePath: \frontend\src\stores\modules\settings\index.ts
@@ -41,7 +41,7 @@ export const useSettingsStore = defineStore(
 
 		/** 训练器设置 */
 		const trainerSettings = ref<TrainerSettings>({
-			openAnimatedFavicon: true,
+			openAnimatedFavicon: import.meta.env.MODE === "development" ? false : true,
 			openFooterBarProgress: true,
 			enableTrainingTaskDataRecovery: true,
 			showAsideNewBadge: true

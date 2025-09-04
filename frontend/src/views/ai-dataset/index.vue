@@ -129,7 +129,7 @@
 
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
-import { useTag } from "@/hooks/task/useTag-v2";
+import { useTag } from "@/hooks/task/useTag";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useTrainingStore, useSettingsStore } from "@/stores";
 import { LoRAValidator } from "@/utils/lora/lora.validator";

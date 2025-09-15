@@ -1,7 +1,6 @@
 // 统一样式入口
 @forward "element-plus/theme-chalk/src/dark/css-vars.scss";
 @forward "./element-plus/element-plus-reset.scss";
-@forward "./theme/light.scss";
-@forward "./theme/dark.scss";
 @forward "./transition.scss";
 @forward "./reset.scss";
+@forward "./custom.scss";

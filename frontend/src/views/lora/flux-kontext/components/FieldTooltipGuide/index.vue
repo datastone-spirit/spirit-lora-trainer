@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-08-29 09:42:13
+ * @LastEditTime: 2025-09-15 11:06:13
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\FieldTooltipGuide\index.vue
@@ -33,9 +33,7 @@
 				</li>
 				<li v-if="videoData.show">
 					如果你不知道如何使用这个训练器，请观看
-					<el-link type="info" :href="videoData.href" target="_blank">
-						《{{ videoData.title }}》
-					</el-link>
+					<a :href="videoData.href" target="_blank"> 《{{ videoData.title }}》 </a>
 				</li>
 				<li>如果还有其他GPU疑问，请访问我们的B站或添加训练器首页的二维码寻求帮助</li>
 			</ul>
@@ -49,31 +47,4 @@ import { ZL_VIDEO_MAP } from "@/constants";
 const videoData = ZL_VIDEO_MAP.FLUX_KONTEXT;
 </script>
 
-<style lang="scss" scoped>
-.field-tooltip-guide {
-	margin-bottom: $zl-collapse-margin;
-	background-color: var(--zl-collapse-bg);
-	border-radius: $zl-border-radius;
-	padding: $zl-padding;
-}
-.field-tooltip-guide-alert {
-	margin-bottom: 22px;
-}
-.field-tooltip-guide-alert-desc {
-	font-size: 14px;
-}
-.field-tooltip-guide-content {
-	font-size: 14px;
-	line-height: 20px;
-	p {
-		margin-bottom: 6px;
-	}
-	ul {
-		list-style: disc;
-		padding-inline-start: 40px;
-	}
-	li + li {
-		margin-top: 6px;
-	}
-}
-</style>
+<style lang="scss" scoped></style>

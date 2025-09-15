@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-08-29 09:40:36
+ * @LastEditTime: 2025-09-15 11:06:57
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
  * @FilePath: \frontend\src\views\lora\wan-video\components\FieldTooltipGuide\index.vue
@@ -33,15 +33,11 @@
 				</li>
 				<li v-if="videoData1.show">
 					训练 Wan2.1视频教程，请观看
-					<el-link type="info" :href="videoData1.href" target="_blank">
-						《{{ videoData1.title }}》
-					</el-link>
+					<a :href="videoData1.href" target="_blank"> 《{{ videoData1.title }}》 </a>
 				</li>
 				<li v-if="videoData2.show">
 					训练 Wan2.2视频教程，请观看
-					<el-link type="info" :href="videoData2.href" target="_blank">
-						《{{ videoData2.title }}》
-					</el-link>
+					<a :href="videoData2.href" target="_blank"> 《{{ videoData2.title }}》 </a>
 				</li>
 				<li>如果还有其他GPU疑问，请访问我们的B站或添加训练器首页的二维码寻求帮助</li>
 			</ul>
@@ -56,31 +52,4 @@ const videoData1 = ZL_VIDEO_MAP.WAN_2_1;
 const videoData2 = ZL_VIDEO_MAP.WAN_2_2;
 </script>
 
-<style lang="scss" scoped>
-.field-tooltip-guide {
-	margin-bottom: $zl-collapse-margin;
-	background-color: var(--zl-collapse-bg);
-	border-radius: $zl-border-radius;
-	padding: $zl-padding;
-}
-.field-tooltip-guide-alert {
-	margin-bottom: 22px;
-}
-.field-tooltip-guide-alert-desc {
-	font-size: 14px;
-}
-.field-tooltip-guide-content {
-	font-size: 14px;
-	line-height: 20px;
-	p {
-		margin-bottom: 6px;
-	}
-	ul {
-		list-style: disc;
-		padding-inline-start: 40px;
-	}
-	li + li {
-		margin-top: 6px;
-	}
-}
-</style>
+<style lang="scss" scoped></style>

@@ -90,7 +90,9 @@ pnpm run build-only
 
 ### 后端配置
 
-我们的训练器基于 [kohya-ss script](https://github.com/kohya-ss/sd-scripts) ，所以你需要先克隆 kohya-ss 仓库。进入到 `backend` 目录，运行以下命令来克隆 kohya-ss 仓库，克隆完毕后并将 kohya-ss 仓库切换到 flux1 训练分支：
+#### kohya-ss script 部署
+
+训练器的 Flux LoRA 训练基于 [kohya-ss script](https://github.com/kohya-ss/sd-scripts) ，所以你需要先克隆 kohya-ss 仓库。进入到 `backend` 目录，运行以下命令来克隆 kohya-ss 仓库，克隆完毕后并将 kohya-ss 仓库切换到 flux1 训练分支：
 
 ```bash
 git clone https://github.com/kohya-ss/sd-scripts
@@ -108,6 +110,86 @@ pip install -r requirements.txt
 
 ```bash
 pip install -r requirements.txt
+```
+
+#### ai-toolkit 部署
+
+训练器的 Flux Kontext LoRA 训练基于 [ai-toolkit](https://github.com/ostris/ai-toolkit) ，所以你需要先克隆 ai-toolkit 仓库。进入到 `backend` 目录，运行以下命令来克隆 ai-toolkit 仓库。
+
+```bash
+git clone https://github.com/ostris/ai-toolkit.git
+```
+
+克隆完毕我们需要安装对应的依赖：
+
+```bash
+cd ai-toolkit/
+python -m venv --system-site-package ./venv
+./venv/bin/python -m pip install uv
+./venv/bin/python -m uv pip install -r requirements.txt
+```
+
+#### diffusion-pipe 部署
+
+训练器的 混元视频 LoRA 训练基于 [diffusion-pipe](https://github.com/tdrussell/diffusion-pipe) ，所以你需要先克隆 diffusion-pipe 仓库。进入到 `backend` 目录，运行以下命令来克隆 diffusion-pipe 仓库。
+
+```bash
+git clone --recurse-submodules https://github.com/zhao-kun/diffusion-pipe
+```
+
+克隆完毕后我们还需要处理相关依赖：
+
+```bash
+ENV SETUPTOOLS_USE_DISTUTILS=stdlib
+cd diffusion-pipe/
+python -m venv --system-site-package ./venv
+./venv/bin/python -m pip install -r requirements.txt
+```
+
+#### musubi-tuner 部署
+
+训练器的 Wan2.1/2.2 和 Qwen Image（Edit）LoRA 训练基于 [kohya-ss/musubi-tuner](https://github.com/kohya-ss/musubi-tuner) ，所以你需要先克隆 musubi-tuner 仓库。进入到 `backend` 目录，运行以下命令来克隆 musubi-tuner 仓库。
+
+```bash
+# 克隆 musubi-tuner 仓库
+git clone https://github.com/kohya-ss/musubi-tuner
+
+# 进入仓库目录
+cd musubi-tuner
+
+# 切换到指定的 v0.2.9 版本
+git checkout -b v0.2.9 tags/v0.2.9
+
+# 返回上一级目录
+cd ..
+```
+
+克隆完毕后我们需要安装相关依赖：
+
+```bash
+export UV_PROJECT_ENVIRONMENT=./musubi-tuner/venv
+
+cd musubi-tuner
+
+python3 -m venv --system-site-packages ./venv
+
+source ./venv/bin/activate
+
+./venv/bin/python -m pip install uv
+
+./venv/bin/python -m uv pip install -r pyproject.toml
+
+./venv/bin/python -m uv pip install tensorboard
+
+./venv/bin/python -m uv pip install "transformers==4.54.1"
+
+./venv/bin/python -m uv pip install "torchvision>=0.22.1"
+
+./venv/bin/python -m uv pip install "optimum-quanto==0.2.4"
+
+./venv/bin/python -m uv pip install "sentencepiece==0.2.0"
+
+./venv/bin/python -m uv pip install "sageattention==1.0.6"
 ```
 
 ### 打标模型配置

@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-09-15 11:05:16
+ * @LastEditTime: 2025-09-15 11:31:49
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
- * @FilePath: \frontend\src\views\lora\qwen-image\components\FieldTooltipGuide\index.vue
+ * @FilePath: \spirit-lora-trainer\frontend\src\views\lora\qwen-image\components\FieldTooltipGuide\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -22,13 +22,9 @@
 			<p>使用支持：</p>
 			<ul>
 				<li>
-					我们训练器采用的是：<el-link
-						type="info"
-						href="https://github.com/kohya-ss/musubi-tuner"
-						target="_blank"
-					>
+					我们训练器采用的是：<a href="https://github.com/kohya-ss/musubi-tuner" target="_blank">
 						musubi-tuner
-					</el-link>
+					</a>
 					脚本
 				</li>
 				<li v-if="videoData1.show">

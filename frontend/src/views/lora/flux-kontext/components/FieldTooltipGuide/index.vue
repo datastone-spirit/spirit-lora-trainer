@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-09-15 11:06:13
+ * @LastEditTime: 2025-09-15 11:30:55
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
- * @FilePath: \frontend\src\views\lora\flux-kontext\components\FieldTooltipGuide\index.vue
+ * @FilePath: \spirit-lora-trainer\frontend\src\views\lora\flux-kontext\components\FieldTooltipGuide\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -22,13 +22,9 @@
 			<p>使用支持：</p>
 			<ul>
 				<li>
-					我们训练器采用的是：<el-link
-						type="info"
-						href="https://github.com/ostris/ai-toolkit"
-						target="_blank"
-					>
+					我们训练器采用的是：<a href="https://github.com/ostris/ai-toolkit" target="_blank">
 						AI Toolkit
-					</el-link>
+					</a>
 					脚本
 				</li>
 				<li v-if="videoData.show">

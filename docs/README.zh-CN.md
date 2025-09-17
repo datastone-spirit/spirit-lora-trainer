@@ -353,7 +353,7 @@ backend/models/kontext-dev
 
 | 模型名称             | 模型路径             | 模型描述                                                | 下载链接                                                                                                          | 类别 |
 | ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
-| hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors | `backend/models/hunyuan/transformer` | 混元模型 | [下载](https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors?download=truetps) | 训练 |
+| hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors | `backend/models/hunyuan/transformer` | 混元模型 | [下载](https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors?download=true) | 训练 |
 | clip-vit-large-patch14  | `backend/models/hunyuan/clip` | 该 clip 模型由 OpenAI 的研究人员开发 | [克隆整个仓库](https://huggingface.co/openai/clip-vit-large-patch14) | 训练 |
 | llava-llama-3-8b-text-encoder-tokenizer | `backend/models/hunyuan/llm` |  | [克隆整个仓库](https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer) | 训练 |
 | hunyuan_video_vae_bf16.safetensors | `backend/models/hunyuan/vae` | 混元官方发布的 VAE 模型 | [下载](https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/vae/hunyuan_video_vae_bf16.safetensors?download=true) | 训练 |

@@ -23,6 +23,15 @@ Spirit Lora Trainer is a robust toolkit for training Flux1-LoRA models with a fo
 
 - **Stable**: Built with a decoupled frontend-backend architecture, Spirit Lora Trainer maintains training status persistence. Resume monitoring your training progress seamlessly even after reopening the frontend page.
 
+## Supported Models for Training
+
+1. Flux
+2. Flux Kontext
+3. Hunyuan Video
+4. Wan 2.1/2.2
+5. Qwen Image (Edit)
+6. Under development...
+
 ## Prerequisite
 
 ### Frontend prerequisite
@@ -82,6 +91,8 @@ pnpm run build-only
 
 ### Backend Setup
 
+#### kohya-ss script Deployment
+
 Our trainer is based on [kohya-ss script](https://github.com/kohya-ss/sd-scripts) , so you should clone the kohya-ss repository firstly. navigate to the `backend` directory and run the following command to clone the kohya-ss repository, and switch to flux1 training branch:
 
 ```bash
@@ -100,6 +111,86 @@ Next, you need to install dependencies for the trainer backend, navigate to the 
 
 ```bash
 pip install -r requirements.txt
+```
+
+#### ai-toolkit Deployment
+
+The trainer's Flux Kontext LoRA training is based on [ai-toolkit](https://github.com/ostris/ai-toolkit), so you need to first clone the ai-toolkit repository. Navigate to the `backend` directory and run the following command to clone the ai-toolkit repository.
+
+```bash
+git clone https://github.com/ostris/ai-toolkit.git
+```
+
+Once cloned, we need to install the corresponding dependencies:
+
+```bash
+cd ai-toolkit/
+python -m venv --system-site-package ./venv
+./venv/bin/python -m pip install uv
+./venv/bin/python -m uv pip install -r requirements.txt
+```
+
+#### diffusion-pipe Deployment
+
+The Hyunwon Video LoRA trainer is based on [diffusion-pipe](https://github.com/tdrussell/diffusion-pipe), so you need to first clone the diffusion-pipe repository. Navigate to the `backend` directory and run the following command to clone the diffusion-pipe repository.
+
+```bash
+git clone --recurse-submodules https://github.com/zhao-kun/diffusion-pipe
+```
+
+Once cloned, we also need to handle the relevant dependencies:
+
+```bash
+ENV SETUPTOOLS_USE_DISTUTILS=stdlib
+cd diffusion-pipe/
+python -m venv --system-site-package ./venv
+./venv/bin/python -m pip install -r requirements.txt
+```
+
+#### musubi-tuner Deployment
+
+The trainer's Wan2.1/2.2 and Qwen Image (Edit) LoRA training is based on [kohya-ss/musubi-tuner](https://github.com/kohya-ss/musubi-tuner), so you need to first clone the musubi-tuner repository. Navigate to the `backend` directory and run the following commands to clone the musubi-tuner repository.
+
+```bash
+# Clone the musubi-tuner repository
+git clone https://github.com/kohya-ss/musubi-tuner
+
+# Enter the repository directory
+cd musubi-tuner
+
+# Switch to the specified v0.2.9 version
+git checkout -b v0.2.9 tags/v0.2.9
+
+# Return to the parent directory
+cd ..
+```
+
+Once cloned, we need to install the relevant dependencies:
+
+```bash
+export UV_PROJECT_ENVIRONMENT=./musubi-tuner/venv
+
+cd musubi-tuner
+
+python3 -m venv --system-site-packages ./venv
+
+source ./venv/bin/activate
+
+./venv/bin/python -m pip install uv
+
+./venv/bin/python -m uv pip install -r pyproject.toml
+
+./venv/bin/python -m uv pip install tensorboard
+
+./venv/bin/python -m uv pip install "transformers==4.54.1"
+
+./venv/bin/python -m uv pip install "torchvision>=0.22.1"
+
+./venv/bin/python -m uv pip install "optimum-quanto==0.2.4"
+
+./venv/bin/python -m uv pip install "sentencepiece==0.2.0"
+
+./venv/bin/python -m uv pip install "sageattention==1.0.6"
 ```
 
 ### Captioning models setup
@@ -157,7 +248,6 @@ Before running the trainer, you need to prepare the models. There are two catego
 | clip_l.safetensors     | `backend/models/clip/` | The Flux Text Encoder model, released by the BlackForestLib      | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
 | t5xxl_fp16.safetensors | `backend/models/clip/` | The Text to Text model, released by the Google                   | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
 
-
 #### Tokenizers
 
 kohya-ss script requires the tokenizersd. If you have not downloaded the tokenizers, the kohya-ss script will download them automatically. but we recommend you download the tokenizers manually and place them in the `backend/models` directory. The following commands will help you download the tokenizers and place it in the proper directory:
@@ -182,7 +272,6 @@ huggingface-cli download google/t5-v1_1-xxl --exclude "*.bin" "*.h5" --local-dir
 
 Before training the Wan2.1 Lora model, you need to download the Wan2.1 model and place it in the proper directory of `backend/models`. The following table will help you download the models and place it in the proper directory:
 
-
 | Model Name             | Model Path             | Model Description                                                | Download Link                                                                                                          | Category |
 | ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
 | umt5_xxl_fp8_e4m3fn_scaled.safetensors | `backend/models/clip/` | The Wan2.1 Text Encoder model, released by the Wan2.1 team      | [Download](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors?download=true)     | Training |
@@ -191,6 +280,95 @@ Before training the Wan2.1 Lora model, you need to download the Wan2.1 model and
 | wan_2.1_vae.safetensors| `backend/models/vae/` | The Wan2.1 vae models| [Download](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors?download=true)     | Training |
 |wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors|`backend/models/wan/`|Wan 2.1 diffusion models, image to video , fp8|[Download](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors?download=true)|     | Training |
 |wan2.1_t2v_14B_fp8_e4m3fn.safetensors?|`backend/models/wan/`|Wan 2.1 diffusion models, image to video , fp8|[Download](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_14B_fp8_e4m3fn.safetensors?download=true)|     | Training |
+
+### Wan2.2 Model Setup
+
+Before training the Wan2.2 LoRA model, you need to download the Wan2.2 model and place it in the correct directory within `backend/models`. The following table will help you download the models and place them in the correct directories:
+
+| Model Name             | Model Path             | Model Description                                                | Download Link                                                                                                           | Category |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| umt5_xxl_fp8_e4m3fn_scaled.safetensors | `backend/models/clip/` | The Wan2.1 Text Encoder model, released by the Wan2.1 team      | [Download](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors?download=true)     | Training |
+| clip_vision_h.safetensors     | `backend/models/clip/` | The Wan2.1 Text Encoder model, released by the Wan2.1 team      | [Download](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors?download=true)     | Training |
+| models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth|`backend/models/clip/`| The Wan2.1 Text Encoder model, released by the Wan2.1 team      | [Download](https://huggingface.co/Wan-AI/Wan2.1-I2V-14B-720P/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth?download=true)     | Training |
+| wan_2.1_vae.safetensors| `backend/models/vae/` | The Wan2.1 vae models| [Download](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors?download=true)     | Training |
+| wan2.2_i2v_high_noise_14B_fp16.safetensors | `backend/models/wan/` | Wan 2.2 I2V High Noise model | [Download](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors?download=true) | Training |
+| wan2.2_i2v_low_noise_14B_fp16.safetensors | `backend/models/wan/` | Wan 2.2 I2V Low Noise model | [Download](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors?download=true) | Training |
+| wan2.2_t2v_high_noise_14B_fp16.safetensors | `backend/models/wan/` | Wan 2.2 T2V High Noise model | [Download](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors?download=true) | Training |
+| wan2.2_t2v_low_noise_14B_fp16.safetensors | `backend/models/wan/` | Wan 2.2 T2V Low Noise model | [Download](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors?download=true) | Training |
+
+### Flux Kontext Model Setup
+
+Before training the Flux Kontext LoRA model, you need to clone the Flux Kontext model repository and place its contents in the `backend/models/kontext-dev` directory.
+
+- Flux Kontext Repository URL: [FLUX.1-Kontext-dev](https://huggingface.co/black-forest-labs/FLUX.1-Kontext-dev)
+
+```bash
+git clone https://huggingface.co/black-forest-labs/FLUX.1-Kontext-dev
+```
+
+Note: After cloning, the `backend/models/kontext-dev` directory should contain the contents of the cloned repository directly, without an additional nested subdirectory . Specifically, the `flux1-kontext-dev.safetensors` model file found in the root of the Flux Kontext repository does not need to be downloaded, as its content (the main `transformer` model weights) is already present within the `transformer` subdirectory of the repository.
+
+Directory Structure:
+
+```bash
+backend/models/kontext-dev
+├── LICENSE.md
+├── README.md
+├── ae.safetensors
+├── model_index.json
+├── scheduler
+│   └── scheduler_config.json
+├── teaser.png
+├── text_encoder
+│   ├── config.json
+│   └── model.safetensors
+├── text_encoder_2
+│   ├── config.json
+│   ├── model-00001-of-00002.safetensors
+│   ├── model-00002-of-00002.safetensors
+│   └── model.safetensors.index.json
+├── tokenizer
+│   ├── merges.txt
+│   ├── special_tokens_map.json
+│   ├── tokenizer_config.json
+│   └── vocab.json
+├── tokenizer_2
+│   ├── special_tokens_map.json
+│   ├── spiece.model
+│   ├── tokenizer.json
+│   └── tokenizer_config.json
+├── transformer
+│   ├── config.json
+│   ├── diffusion_pytorch_model-00001-of-00003.safetensors
+│   ├── diffusion_pytorch_model-00002-of-00003.safetensors
+│   ├── diffusion_pytorch_model-00003-of-00003.safetensors
+│   └── diffusion_pytorch_model.safetensors.index.json
+└── vae
+    ├── config.json
+    └── diffusion_pytorch_model.safetensors
+```
+
+### Hunyuan Video Model Setup
+
+Before training the HunyuanVideo LoRA model, you need to download the relevant files and place them in the correct directory under `backend/models`.
+
+| Model Name                                    | Model Path                     | Model Description                                        | Download Link                                                                                                             | Category  |
+| :-------------------------------------------- | :----------------------------- | :------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ | :-------- |
+| hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors | `backend/models/hunyuan/transformer` | Hunyuan Model                                            | [Download](https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors?download=true) | Training  |
+| clip-vit-large-patch14                        | `backend/models/hunyuan/clip`  | This CLIP model was developed by researchers at OpenAI.  | [Clone the entire repository](https://huggingface.co/openai/clip-vit-large-patch14)                                       | Training  |
+| llava-llama-3-8b-text-encoder-tokenizer       | `backend/models/hunyuan/llm`   |                                                          | [Clone the entire repository](https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer)                       | Training  |
+| hunyuan_video_vae_bf16.safetensors            | `backend/models/hunyuan/vae`   | Official Hunyuan VAE model                               | [Download](https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/vae/hunyuan_video_vae_bf16.safetensors?download=true) | Training  |
+
+### Qwen Image（Edit）Model Setup
+
+When training Qwen Image or Qwen Image Edit LoRA models, you need to download the relevant files and place them in the correct directory under `backend/models`.
+
+| Model Name             | Model Path             | Model Description                                                | Download Link                                                                                                          | Category   |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| qwen_image_bf16.safetensors | `backend/models/qwen-image/transformer` | Qwen Image Base Model | [Download](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_bf16.safetensors?download=true) | Training |
+| qwen_image_edit_bf16.safetensors | `backend/models/qwen-image/transformer` | Qwen Image Edit Base Model | [Download](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_bf16.safetensors?download=true) | Training |
+| diffusion_pytorch_model.safetensors | `backend/models/qwen-image/vae` | Used for image encoding and decoding | [Download](https://huggingface.co/Qwen/Qwen-Image/resolve/main/vae/diffusion_pytorch_model.safetensors?download=true) | Training |
+| qwen_2.5_vl_7b.safetensors | `backend/models/qwen-image/text_encoders/` | Text encoder, processes text prompts | [Download](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b.safetensors?download=true) | Training |
 
 ### Run the Trainer
 
@@ -213,10 +391,20 @@ python -m app.api.run.py
 
 - [ ] Support Windows OS
 - [ ] Support SDXL Model Lora Training
-- [x] Support HunyuanVideo Model Lora Training
-- [x] Support Wan2.1 Model Lora Training
+- [x] Support Chaos Video Model LoRA training
+- [x] Support Flux Kontext Model LoRA training
+- [x] Support Wan2.1 Model LoRA training
+- [x] Support Wan2.2 Model LoRA training
+- [x] Support Qwen Image (Edit) Model LoRA training
 - [ ] Persistence the task status into the database
 
 ## Acknowledge
 
-- [kohya-ss](https://github.com/kohya-ss/sd-scripts) contributed so amazing scripts for the Flux1 training, we leverage the scripts to build the trainer.
+The development and success of this trainer would not have been possible without the valuable support and contributions of the following open-source projects, to which we extend our sincere gratitude:
+
+- **[kohya-ss/sd-scripts](https://github.com/kohya-ss/sd-scripts)**: Its excellent scripts played a crucial role in training the Flux1 model.
+- **[ostris/ai-toolkit](https://github.com/ostris/ai-toolkit)**: Provided important scripts for training the Flux Kontext model.
+- **[tdrussell/diffusion-pipe](https://github.com/tdrussell/diffusion-pipe)**: Provided core scripts for training the Hunyuan Video model.
+- **[kohya-ss/musubi-tuner](https://github.com/kohya-ss/musubi-tuner)**: Its scripts supported the training of Wan2.1/2.2 and Qwen Image (Edit) models.
+
+The contributions of these projects collectively form a solid foundation for the realization and optimization of this trainer.

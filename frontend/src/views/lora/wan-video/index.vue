@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-08-29 17:03:19
+ * @LastEditTime: 2025-09-04 15:18:52
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -193,7 +193,7 @@ const defaultForm: RuleForm = {
 		},
 		datasets: [
 			{
-				image_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+				image_directory: "", // 使用打标的image_path
 				video_directory: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 				frame_extraction: "head",
 				target_frames: [
@@ -207,14 +207,14 @@ const defaultForm: RuleForm = {
 			}
 		]
 	},
-	tagConfig: {
-		tag_model: "joy-caption-alpha-two",
-		joy_caption_prompt_type: "Training Prompt",
-		is_add_global_prompt: false,
+	aiTagRuleForm: {
+		image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		model_name: "joy-caption-alpha-two",
+		prompt_type: "Training Prompt",
+		class_token: "",
 		global_prompt: "",
-		tag_advanced_settings: false,
-		tag_global_prompt: "",
-		tag_is_append: false
+		is_append: false,
+		advanced_setting: ""
 	},
 	dit_model_type: "low",
 	skip_cache_latent: false,
@@ -223,11 +223,29 @@ const defaultForm: RuleForm = {
 const ruleForm = useEnhancedLocalStorage({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm)),
-	version: "1.0.0"
+	version: "1.0.1"
 });
 const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
+	dit_model_type: [
+		{
+			validator: (_rule, value, callback) => {
+				if (!isWan22.value) {
+					return callback();
+				}
+
+				if (value === "both" && settingsStore.whiteCheck) {
+					return callback(
+						new Error("智灵平台暂时不支持 both 同时训练低噪声模型和高噪声模型（显存不足）。")
+					);
+				}
+
+				callback();
+			},
+			trigger: "change"
+		}
+	],
 	"config.output_dir": [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
@@ -384,10 +402,12 @@ const rules = reactive<FormRules<RuleForm>>({
 	"config.blocks_to_swap": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
-				if (ruleForm.value.data_mode !== "video") return callback();
-				if (isWan22.value && ruleForm.value.config.offload_inactive_dit && value !== 0) {
+				const isValue = typeof value === "number" && value !== 0;
+				if (isWan22.value && ruleForm.value.config.offload_inactive_dit && isValue) {
 					return callback(
-						new Error("Wan2.2任务，且开启了offload_inactive_dit，blocks_to_swap必须为0")
+						new Error(
+							"Wan2.2任务，检测到开启了offload_inactive_dit选项，请将本选项blocks_to_swap设置为0"
+						)
 					);
 				}
 
@@ -400,10 +420,18 @@ const rules = reactive<FormRules<RuleForm>>({
 			trigger: "change"
 		}
 	],
-	"dataset.datasets.0.image_directory": [
-		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
+	"aiTagRuleForm.image_path": [
 		{
-			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+			trigger: "change",
+			validator: (_rule, value, callback) => {
+				const { data_mode } = ruleForm.value;
+				if (data_mode !== "image") return callback();
+
+				if (typeof value !== "string" || value.trim().length === 0) {
+					callback(new Error("请选择训练用的数据集目录"));
+					return;
+				}
+
 				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
@@ -416,9 +444,17 @@ const rules = reactive<FormRules<RuleForm>>({
 		}
 	],
 	"dataset.datasets.0.video_directory": [
-		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
-			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+			trigger: "change",
+			validator: (_rule, value, callback) => {
+				const { data_mode } = ruleForm.value;
+				if (data_mode !== "video") return callback();
+
+				if (typeof value !== "string" || value.trim().length === 0) {
+					callback(new Error("请选择训练用的数据集目录"));
+					return;
+				}
+
 				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
@@ -508,6 +544,27 @@ const rules = reactive<FormRules<RuleForm>>({
 				callback();
 			}
 		}
+	],
+	"config.offload_inactive_dit": [
+		{
+			validator: (_rule, value, callback) => {
+				if (!isWan22.value || !value || ruleForm.value.dit_model_type !== "both") {
+					return callback();
+				}
+
+				const { blocks_to_swap } = ruleForm.value.config;
+				if (value && typeof blocks_to_swap === "number" && blocks_to_swap > 0) {
+					return callback(
+						new Error(
+							"Wan2.2任务，开启了offload_inactive_dit选项，请前往blocks_to_swap选项将其设置为0"
+						)
+					);
+				}
+
+				callback();
+			},
+			trigger: "change"
+		}
 	]
 });
 /** 是否专家模式 */
@@ -515,7 +572,7 @@ const isExpert = computed(() => settingsStore.isExpert);
 /** AI数据集path */
 const wanDatasetPath = computed(() => {
 	if (ruleForm.value.data_mode === "image") {
-		return ruleForm.value.dataset.datasets[0].image_directory;
+		return ruleForm.value.aiTagRuleForm.image_path;
 	}
 	return ruleForm.value.dataset.datasets[0].video_directory;
 });
@@ -574,13 +631,8 @@ function onViewSampling() {
 
 // 组件生命周期
 onMounted(() => {
-	// 监听如果成功恢复，任务信息会被更新
-	wanLoraMonitor.resume();
 	// 恢复表单数据（前提是任务信息存在）
 	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
-});
-onUnmounted(() => {
-	wanLoraMonitor.pause();
 });
 </script>
 

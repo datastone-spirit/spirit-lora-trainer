@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-25 09:45:07
- * @LastEditTime: 2025-08-15 16:53:13
+ * @LastEditTime: 2025-09-04 16:42:36
  * @LastEditors: mulingyuer
  * @Description: 训练相关数据
  * @FilePath: \frontend\src\stores\modules\training\index.ts
@@ -33,6 +33,7 @@ import { calculatePercentage } from "@/utils/tools";
 import BigNumber from "bignumber.js";
 export type * from "./types";
 import { resettableRef } from "@/utils/ref";
+import { dynamicTitle } from "@/utils/dynamic-title";
 
 export const useTrainingStore = defineStore("training", () => {
 	/** 当前任务信息 */
@@ -78,6 +79,16 @@ export const useTrainingStore = defineStore("training", () => {
 				console.warn(`未知的任务类型: ${type}`);
 				break;
 		}
+
+		// 进度标题
+		// 所有的训练数据更新完毕后，进度数据是一定有的
+		if (type === "none") {
+			if (dynamicTitle.isModified()) {
+				dynamicTitle.restore();
+			}
+		} else {
+			dynamicTitle.prependTitle(`[${currentTaskInfo.value.progress}%]`);
+		}
 	}
 	function resetCurrentTaskInfo(data: ResetCurrentTaskInfoData) {
 		const { type } = data;
@@ -110,6 +121,11 @@ export const useTrainingStore = defineStore("training", () => {
 			default:
 				console.warn(`未知的任务类型: ${type}`);
 				break;
+		}
+
+		// 还原进度标题
+		if (dynamicTitle.isModified()) {
+			dynamicTitle.delayRestore();
 		}
 	}
 

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-08-29 16:01:36
+ * @LastEditTime: 2025-09-02 10:19:57
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -45,8 +45,8 @@
 		<div class="footer-button-group-right">
 			<GPUMonitor />
 			<TagMonitor />
-			<div v-if="taskMismatchWarning" class="footer-button-group-right-info">
-				<el-text>{{ taskMismatchWarning }}</el-text>
+			<div v-if="mismatchWarning.show" class="footer-button-group-right-info">
+				<el-text>{{ mismatchWarning.message }}</el-text>
 			</div>
 			<slot name="monitor-progress-bar"></slot>
 			<el-space>
@@ -69,7 +69,9 @@
 </template>
 
 <script setup lang="ts">
-import { genFileId } from "element-plus";
+import { useTrainingStore } from "@/stores";
+import { LoRAHelper } from "@/utils/lora/lora.helper";
+import { TomlUtils } from "@/utils/toml";
 import type {
 	FormInstance,
 	UploadInstance,
@@ -77,12 +79,8 @@ import type {
 	UploadRawFile,
 	UploadUserFile
 } from "element-plus";
+import { genFileId } from "element-plus";
 import type { TeleportProps } from "vue";
-import { TomlUtils } from "@/utils/toml";
-import { useGPU } from "@/hooks/task/useGPU";
-import { useTrainingStore } from "@/stores";
-import { useTag } from "@/hooks/task/useTag";
-import { LoRAHelper } from "@/utils/lora/lora.helper";
 
 export interface ConfigProps {
 	/** 左按钮组teleport节点 */
@@ -102,6 +100,9 @@ export interface ConfigProps {
 	/** 导出的配置文件前缀 */
 	exportFileNamePrefix?: string;
 }
+
+const route = useRoute();
+const trainingStore = useTrainingStore();
 
 const props = withDefaults(defineProps<ConfigProps>(), {
 	leftTo: "#footer-bar-teleport-left",
@@ -124,18 +125,21 @@ const emits = defineEmits<{
 }>();
 /** 合并的数据 */
 const mergeData = defineModel("mergeData", { type: Object, required: true });
-/** 训练的任务与页面不符的提示 */
-const taskMismatchWarning = ref("");
-
-const route = useRoute();
-const trainingStore = useTrainingStore();
-const { gpuMonitor } = useGPU();
-const { tagMonitor } = useTag();
 
 /** 当前路由的训练类型 */
 const routeTrainingType = computed(() => route.meta.loRATaskType ?? "none");
 /** 当前任务信息 */
 const currentTaskInfo = computed(() => trainingStore.currentTaskInfo);
+/** 不匹配的任务提示 */
+const mismatchWarning = computed<{ show: boolean; message: string }>(() => {
+	const { type, name } = currentTaskInfo.value;
+	const blackList: Array<TaskType> = ["none", "tag"];
+	if (blackList.includes(type) || type === routeTrainingType.value) {
+		return { show: false, message: "" };
+	}
+
+	return { show: true, message: `请切换到 ${name} 训练页面查看训练进度` };
+});
 
 // 配置导入
 const uploadRef = ref<UploadInstance>();
@@ -216,46 +220,6 @@ function onStopTraining() {
 		})
 		.catch(() => {});
 }
-
-// 初始化
-(function init() {
-	if (routeTrainingType.value && routeTrainingType.value !== "none") {
-		taskMismatchWarning.value = ""; // 先重置警告信息
-		const { type, name } = currentTaskInfo.value;
-		const blackList: Array<TaskType> = ["none", "tag"];
-		if (!blackList.includes(type) && type !== routeTrainingType.value) {
-			taskMismatchWarning.value = `请切换到 ${name} 训练页面查看训练进度`;
-		}
-	}
-})();
-
-// 如果GPU被占用就开始监听
-watch(
-	() => trainingStore.useGPU,
-	(newVal) => {
-		if (newVal) {
-			gpuMonitor.start();
-		} else {
-			gpuMonitor.stop();
-		}
-	},
-	{ immediate: true }
-);
-
-// 组件生命周期
-onMounted(() => {
-	// 恢复打标查询任务
-	tagMonitor.resume();
-	// 存在任务的话就恢复GPU监控
-	if (currentTaskInfo.value.type !== "none") {
-		gpuMonitor.resume();
-	}
-});
-onUnmounted(() => {
-	// 暂停打标查询任务
-	tagMonitor.pause();
-	gpuMonitor.pause();
-});
 </script>
 
 <style lang="scss" scoped>

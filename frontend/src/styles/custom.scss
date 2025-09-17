@@ -1,0 +1,92 @@
+// 自定义全局的样式，比如全局组件的样式等，需要使用全局变量可以use导入
+@use "./variables" as *;
+
+/** 文字dot */
+.text-dot {
+	display: inline-block;
+	height: 1em;
+	line-height: 1;
+	text-align: left;
+	vertical-align: -0.25ex;
+	overflow: hidden;
+}
+.text-dot::after {
+	display: block;
+	content: "...\A..\A.";
+	white-space: pre-wrap;
+	animation: dotdotdot 1s infinite step-start both;
+}
+@keyframes dotdotdot {
+	33% {
+		transform: translateY(-2em);
+	}
+	66% {
+		transform: translateY(-1em);
+	}
+}
+
+.lora-success-message {
+	.lora-success-message-content {
+		word-break: break-all;
+	}
+	.lora-success-message-content code {
+		color: var(--el-color-info);
+		padding: 0 5px;
+		font-weight: bold;
+	}
+}
+
+.no-select {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.wan-warning-dialog .el-message-box__message a {
+	text-decoration: none;
+	color: var(--el-color-primary);
+}
+
+/** 底部间距0 */
+.margin-bottom-0 {
+	margin-bottom: 0 !important;
+}
+
+// lora训练页面 FieldTooltipGuide 组件样式
+.field-tooltip-guide {
+	margin-bottom: $zl-collapse-margin;
+	background-color: var(--zl-collapse-bg);
+	border-radius: $zl-border-radius;
+	padding: $zl-padding;
+}
+.field-tooltip-guide-alert {
+	margin-bottom: 22px;
+}
+.field-tooltip-guide-alert-desc {
+	font-size: 14px;
+}
+.field-tooltip-guide-content {
+	font-size: 14px;
+	line-height: 20px;
+	p {
+		margin-bottom: 6px;
+	}
+	ul {
+		list-style: disc;
+		padding-inline-start: 40px;
+	}
+	li + li {
+		margin-top: 6px;
+	}
+	a {
+		text-decoration: none;
+		color: var(--el-color-info);
+		&:hover {
+			color: var(--el-color-info-light-3);
+			text-decoration: underline;
+		}
+	}
+}

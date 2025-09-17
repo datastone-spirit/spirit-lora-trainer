@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-11 11:52:55
- * @LastEditTime: 2025-07-31 15:11:33
+ * @LastEditTime: 2025-09-01 10:55:05
  * @LastEditors: mulingyuer
  * @Description: flux lora hooks
  * @FilePath: \frontend\src\hooks\task\useFluxLora\index.ts
@@ -109,9 +109,12 @@ class FluxLoraMonitor implements TaskImplementation {
 		} = initData;
 
 		// 更新数据
-		this.updateStatus("paused");
+		this.updateStatus("querying");
 		this.setTaskId(taskId);
 		this.updateCurrentTaskInfo(result);
+
+		// 继续查询
+		this.startTimer();
 
 		// 弹窗提示
 		if (showTrainingTip) {

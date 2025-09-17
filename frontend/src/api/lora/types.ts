@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-08-28 15:45:27
+ * @LastEditTime: 2025-09-03 11:28:20
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -11,7 +11,7 @@
 import type { MultiGpuConfig } from "../types";
 
 /** 启动flux训练参数 */
-export interface StartFluxTrainingData extends Record<string, any> {
+export interface StartFluxTrainingData {
 	config: {
 		/** 底模 */
 		pretrained_model_name_or_path: string;
@@ -94,7 +94,7 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		/** 自定义 network_args
 		 * 示例："context_attn_dim=2" "context_mlp_dim=3" "context_mod_dim=4"
 		 */
-		network_args: string | null;
+		network_args: string | undefined;
 		/** 网络维度，常用 4~128，不是越大越好, 低dim可以降低显存占用 */
 		network_dim: number;
 		/** dropout 概率 （与 lycoris 不兼容，需要用 lycoris 自带的） */
@@ -117,7 +117,7 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		 * 自定义优化器选项参数，可以key=value的格式指定多个值，以空格分隔。
 		 * 示例：weight_decay=0.01 betas=.9,.999
 		 */
-		optimizer_args: string | null;
+		optimizer_args: string | undefined;
 		/** 优化器设置 */
 		optimizer_type: string;
 		/** lora保存路径 */
@@ -162,8 +162,6 @@ export interface StartFluxTrainingData extends Record<string, any> {
 		clip_l: string;
 		/** t5xxl 模型文件路径 */
 		t5xxl: string;
-		/** 打标模型 */
-		tagger_model: string;
 		/** T5XXL 最大 token 长度（不填写使用自动），默认情况下，开发模式为 512，快速模式为 256 */
 		t5xxl_max_token_length: number | undefined;
 		/** 高显存模式 */

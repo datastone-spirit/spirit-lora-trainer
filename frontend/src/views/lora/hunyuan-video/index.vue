@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-08-29 15:14:21
+ * @LastEditTime: 2025-09-04 09:33:38
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -38,7 +38,7 @@
 				</el-form>
 			</template>
 			<template #right>
-				<SplitRightPanel :form-data="ruleForm" :dir="ruleForm.directory_path" />
+				<SplitRightPanel :form-data="ruleForm" :dir="ruleForm.aiTagRuleForm.image_path" />
 			</template>
 		</TwoSplit2>
 		<TeleportFooterBarContent
@@ -64,7 +64,7 @@ import { useSettingsStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
-import { joinPrefixKey } from "@/utils/tools";
+import { generateUUID, joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import AdvancedSettings from "./components/AdvancedSettings/index.vue";
 import BasicInfo from "./components/BasicInfo/index.vue";
@@ -84,68 +84,90 @@ const { hyLoraMonitor } = useHYLora();
 const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = joinPrefixKey("lora_hunyuan_video_form");
-const defaultForm = readonly<RuleForm>({
-	class_tokens: "",
-	model_transformer_path: "",
-	model_vae_path: "",
-	model_llm_path: "",
-	model_clip_path: "",
-	model_dtype: "bfloat16",
-	model_transformer_dtype: "float8",
-	model_timestep_sample_method: "logit_normal",
-	output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
-	directory_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
-	directory_num_repeats: 10,
-	tagger_model: "joy-caption-alpha-two",
-	prompt_type: "Training Prompt",
-	output_trigger_words: true,
-	tagger_advanced_settings: false,
-	tagger_global_prompt: "",
-	tagger_is_append: false,
-	resolution_width: 512,
-	resolution_height: 512,
-	enable_ar_bucket: true,
-	min_ar: 0.5,
-	max_ar: 2.0,
-	num_ar_buckets: 7,
-	frame_buckets: "1, 33, 65",
-	epochs: 128,
-	micro_batch_size_per_gpu: 1,
-	pipeline_stages: 1,
-	gradient_accumulation_steps: 4,
-	gradient_clipping: 1.0,
-	warmup_steps: 100,
-	eval_every_n_epochs: 1,
-	eval_before_first_step: true,
-	eval_micro_batch_size_per_gpu: 1,
-	eval_gradient_accumulation_steps: 1,
-	save_every_n_epochs: 16,
-	checkpoint_every_n_minutes: 120,
-	activation_checkpointing: true,
-	partition_method: "parameters",
-	save_dtype: "bfloat16",
-	caching_batch_size: 1,
-	steps_per_print: 1,
-	video_clip_mode: "single_middle",
-	adapter_type: "lora",
-	adapter_rank: 32,
-	adapter_dtype: "bfloat16",
-	adapter_init_from_existing: "",
-	optimizer_type: "adamw_optimi",
-	optimizer_lr: "2e-5",
-	optimizer_betas: [0.9, 0.99],
-	optimizer_weight_decay: 0.01,
-	optimizer_eps: "1e-8"
-});
+const defaultForm: RuleForm = {
+	config: {
+		model: {
+			type: "hunyuan-video",
+			transformer_path: "",
+			vae_path: "",
+			llm_path: "",
+			clip_path: "",
+			dtype: "bfloat16",
+			transformer_dtype: "float8",
+			timestep_sample_method: "logit_normal"
+		},
+		output_dir: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		epochs: 128,
+		micro_batch_size_per_gpu: 1,
+		pipeline_stages: 1,
+		gradient_accumulation_steps: 4,
+		gradient_clipping: 1,
+		warmup_steps: 100,
+		eval_every_n_epochs: 1,
+		eval_before_first_step: true,
+		eval_micro_batch_size_per_gpu: 1,
+		eval_gradient_accumulation_steps: 1,
+		save_every_n_epochs: 16,
+		checkpoint_every_n_minutes: 120,
+		activation_checkpointing: true,
+		partition_method: "parameters",
+		save_dtype: "bfloat16",
+		caching_batch_size: 1,
+		steps_per_print: 1,
+		video_clip_mode: "single_middle",
+		adapter: {
+			type: "lora",
+			rank: 32,
+			dtype: "bfloat16",
+			init_from_existing: ""
+		},
+		optimizer: {
+			type: "adamw_optimi",
+			lr: 0.00002,
+			betas: [0.9, 0.99],
+			weight_decay: 0.01,
+			eps: 0.00000001
+		}
+	},
+	dataset: {
+		resolutions: [], // 使用directory下的值
+		frame_buckets: [], // 使用directory下的值
+		enable_ar_bucket: true,
+		min_ar: 0.5,
+		max_ar: 2.0,
+		num_ar_buckets: 7,
+		directory: [
+			{
+				path: "", // 用打标image_path
+				num_repeats: 10,
+				resolutions: [512, 512],
+				frame_buckets: [
+					{ key: generateUUID(), value: 1 },
+					{ key: generateUUID(), value: 33 },
+					{ key: generateUUID(), value: 65 }
+				]
+			}
+		]
+	},
+	aiTagRuleForm: {
+		image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
+		model_name: "joy-caption-alpha-two",
+		prompt_type: "Training Prompt",
+		class_token: "",
+		global_prompt: "",
+		is_append: false,
+		advanced_setting: ""
+	}
+};
 const ruleForm = useEnhancedLocalStorage<RuleForm>({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
-	version: "1.0.0"
+	version: "1.0.1"
 });
 const rules = reactive<FormRules<RuleForm>>({
-	class_tokens: [{ required: true, message: "请输入触发词", trigger: "blur" }],
+	"aiTagRuleForm.class_token": [{ required: true, message: "请输入触发词", trigger: "blur" }],
 	// model_transformer_path: [{ required: true, message: "请选择训练用的底模", trigger: "change" }],
-	output_dir: [
+	"config.output_dir": [
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
@@ -184,7 +206,7 @@ const rules = reactive<FormRules<RuleForm>>({
 			}
 		}
 	],
-	directory_path: [
+	"aiTagRuleForm.image_path": [
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
@@ -199,11 +221,11 @@ const rules = reactive<FormRules<RuleForm>>({
 			}
 		}
 	],
-	epochs: [
+	"config.epochs": [
 		{
 			validator: (_rule: any, value: number, callback: (error?: string | Error) => void) => {
 				// 轮数必须大于或等于保存轮数
-				const { save_every_n_epochs } = ruleForm.value;
+				const { save_every_n_epochs } = ruleForm.value.config;
 
 				if (value <= 0) {
 					return callback(new Error("epochs轮数必须是一个正整数"));
@@ -269,13 +291,8 @@ async function onSubmit() {
 
 // 组件生命周期
 onMounted(() => {
-	// 监听如果成功恢复，任务信息会被更新
-	hyLoraMonitor.resume();
 	// 恢复表单数据（前提是任务信息存在）
 	LoRAHelper.recoveryTaskFormData({ formData: ruleForm.value });
-});
-onUnmounted(() => {
-	hyLoraMonitor.pause();
 });
 </script>
 

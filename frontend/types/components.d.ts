@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AiDataset: typeof import('./../src/components/AiDataset/index.vue')['default']
+    AiTag: typeof import('./../src/components/AiTag/index.vue')['default']
     BaseSelector: typeof import('./../src/components/Form/BaseSelector.vue')['default']
     Card: typeof import('./../src/components/Card/Card.vue')['default']
     Collapse: typeof import('./../src/components/Collapse/Collapse.vue')['default']
@@ -77,11 +78,13 @@ declare module 'vue' {
     Icon: typeof import('./../src/components/Icon/Icon.vue')['default']
     ImageFile: typeof import('./../src/components/FileManager/FileItem/ImageFile.vue')['default']
     InputTreeSelector: typeof import('./../src/components/Form/InputTreeSelector.vue')['default']
+    JoyCaptionPromptTypeSelect: typeof import('./../src/components/Form/DataSet-v3/JoyCaptionPromptTypeSelect.vue')['default']
     LoRASavePathWarningDialog: typeof import('./../src/components/Dialog/LoRASavePathWarningDialog.vue')['default']
     LoraTaskLogDialog: typeof import('./../src/components/Dialog/LoraTaskLogDialog.vue')['default']
     LrSchedulerSelect: typeof import('../src/views/lora/flux/components/AdvancedSettings/LRAndOptimizer/LrSchedulerSelect.vue')['default']
     ModelSaveFormatSelector: typeof import('./../src/components/Form/ModelSaveFormatSelector.vue')['default']
     ModelSavePrecisionSelector: typeof import('./../src/components/Form/ModelSavePrecisionSelector.vue')['default']
+    ModelSelect: typeof import('./../src/components/Form/DataSet-v3/ModelSelect.vue')['default']
     MultiGpu: typeof import('./../src/components/Form/MultiGpu/index.vue')['default']
     NetworkRetryDialog: typeof import('./../src/components/Dialog/NetworkRetryDialog.vue')['default']
     OptimizerTypeSelect: typeof import('../src/views/lora/flux/components/AdvancedSettings/LRAndOptimizer/OptimizerTypeSelect.vue')['default']

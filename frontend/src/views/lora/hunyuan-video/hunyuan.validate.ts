@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 16:07:25
- * @LastEditTime: 2025-07-25 17:29:09
+ * @LastEditTime: 2025-09-04 09:26:51
  * @LastEditors: mulingyuer
  * @Description: hunyuan 校验方法
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.validate.ts
@@ -62,7 +62,7 @@ export async function isDirectoryEmpty(
  */
 async function validateEpochs(ruleForm: RuleForm): Promise<ValidationResult> {
 	return new Promise((resolve) => {
-		const { epochs, save_every_n_epochs } = ruleForm;
+		const { epochs, save_every_n_epochs } = ruleForm.config;
 		if (epochs % save_every_n_epochs !== 0) {
 			ElMessageBox.confirm(
 				"当前epochs训练轮数不是save_every_n_epochs的整数倍，会有训练轮次不会保存训练结果！是否继续训练?",
@@ -94,14 +94,17 @@ export async function validate(data: ValidateData): Promise<ValidationResult> {
 		() => LoRAValidator.validateForm(formInstance, { shouldShowErrorDialog: true }),
 		// LoRA保存路径校验
 		() =>
-			LoRAValidator.validateLoRASaveDir({ path: ruleForm.output_dir, shouldShowErrorDialog: true }),
-		() => isDirectoryEmpty({ path: ruleForm.output_dir, shouldShowErrorDialog: true }),
+			LoRAValidator.validateLoRASaveDir({
+				path: ruleForm.config.output_dir,
+				shouldShowErrorDialog: true
+			}),
+		() => isDirectoryEmpty({ path: ruleForm.config.output_dir, shouldShowErrorDialog: true }),
 		// GPU占用校验
 		() => LoRAValidator.validateGpu({ shouldShowErrorDialog: true }),
 		// 数据集校验
 		() =>
 			LoRAValidator.validateDirectory({
-				path: ruleForm.directory_path,
+				path: ruleForm.aiTagRuleForm.image_path,
 				checkImageAndLabel: true,
 				shouldShowErrorDialog: true
 			}),

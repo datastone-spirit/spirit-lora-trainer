@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-09 15:07:57
- * @LastEditTime: 2025-03-06 17:28:14
+ * @LastEditTime: 2025-09-03 15:07:09
  * @LastEditors: mulingyuer
  * @Description: 高级设置
  * @FilePath: \frontend\src\views\lora\flux\components\AdvancedSettings\AdvancedOptions.vue
@@ -12,11 +12,11 @@
 		<PopoverFormItem
 			class="clip-skip"
 			label="CLIP 跳过层数（玄学）"
-			prop="clip_skip"
+			prop="config.clip_skip"
 			popover-content="clip_skip"
 		>
 			<el-slider
-				v-model="ruleForm.clip_skip"
+				v-model="ruleForm.config.clip_skip"
 				:min="0"
 				:max="12"
 				:marks="marks"
@@ -26,19 +26,19 @@
 		<PopoverFormItem
 			v-show="isExpert"
 			label="是否启用分割模式，可能用于模型或数据的特殊处理"
-			prop="split_mode"
+			prop="config.split_mode"
 			popover-content="split_mode"
 		>
-			<el-switch v-model="ruleForm.split_mode" />
+			<el-switch v-model="ruleForm.config.split_mode" />
 		</PopoverFormItem>
 		<PopoverFormItem
 			v-show="isExpert"
 			label="文本编码器的批次大小，影响文本处理效率"
-			prop="text_encoder_batch_size"
+			prop="config.text_encoder_batch_size"
 			popover-content="text_encoder_batch_size"
 		>
 			<el-input-number
-				v-model.number="ruleForm.text_encoder_batch_size"
+				v-model.number="ruleForm.config.text_encoder_batch_size"
 				:step="1"
 				:min="1"
 				step-strictly

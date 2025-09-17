@@ -1,14 +1,14 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-06 08:41:44
- * @LastEditTime: 2025-07-24 09:24:46
+ * @LastEditTime: 2025-09-04 09:49:19
  * @LastEditors: mulingyuer
  * @Description: 表单项组件
  * @FilePath: \frontend\src\components\Form\PopoverFormItem.vue
  * 怎么可能会有bug！！！
 -->
 <template>
-	<el-form-item class="popover-form-item" :prop="prop" :rules="rules">
+	<el-form-item class="popover-form-item" :prop="prop" :rules="rules" :required="required">
 		<template v-if="label" #label>
 			<span class="popover-form-item-label">
 				{{ label }}
@@ -34,9 +34,12 @@ export interface PopoverFormItemProps {
 	prop?: FormItemProps["prop"];
 	popoverContent?: PopoverProps["content"];
 	rules?: FormItemProps["rules"];
+	required?: FormItemProps["required"];
 }
 
-withDefaults(defineProps<PopoverFormItemProps>(), {});
+withDefaults(defineProps<PopoverFormItemProps>(), {
+	required: void 0
+});
 
 const settingsStore = useSettingsStore();
 

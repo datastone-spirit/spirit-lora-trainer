@@ -22,6 +22,15 @@ Spirit Lora Trainer 是一款功能强大的工具，旨在提供简单且可靠
 
 - **稳定**：基于分离式架构设计，确保训练状态持久化。即使在重新打开前端页面后，训练进度也不会丢失。
 
+## 支持训练的模型
+
+1. Flux
+2. Flux Kontext
+3. 混元视频（HunyuanVideo）
+4. Wan2.1/2.2
+5. Qwen Image（Edit）
+6. 开发中...
+
 ## 环境要求
 
 ### 前端环境要求
@@ -81,7 +90,9 @@ pnpm run build-only
 
 ### 后端配置
 
-我们的训练器基于 [kohya-ss script](https://github.com/kohya-ss/sd-scripts) ，所以你需要先克隆 kohya-ss 仓库。进入到 `backend` 目录，运行以下命令来克隆 kohya-ss 仓库，克隆完毕后并将 kohya-ss 仓库切换到 flux1 训练分支：
+#### kohya-ss script 部署
+
+训练器的 Flux LoRA 训练基于 [kohya-ss script](https://github.com/kohya-ss/sd-scripts) ，所以你需要先克隆 kohya-ss 仓库。进入到 `backend` 目录，运行以下命令来克隆 kohya-ss 仓库，克隆完毕后并将 kohya-ss 仓库切换到 flux1 训练分支：
 
 ```bash
 git clone https://github.com/kohya-ss/sd-scripts
@@ -101,42 +112,89 @@ pip install -r requirements.txt
 pip install -r requirements.txt
 ```
 
-### 准备模型
+#### ai-toolkit 部署
 
-在运行训练器之前，你需要准备相应的模型。这些模型分为两类，分别用于训练模型和图片打标。你可以从下表中下载模型，并根据表中的 `模型路径` 将它们放置在 `backend/models` 的相应目录下。
-
-#### 训练模型
-
-| 模型名称               | 模型路径               | 模型描述                                     | 下载链接                                                                                                               | 分类     |
-| ---------------------- | ---------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
-| flux1-dev.safetensors  | `backend/models/unet/` | 由 BlackForestLib 发布的 Unet 模型           | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)       | Training |
-| ae.safetensors         | `backend/models/vae/`  | 由 BlackForestLib 发布的变分自编码器模型     | [Download](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)              | Training |
-| clip_l.safetensors     | `backend/models/clip/` | 由 BlackForestLib 发布的 Flux 文本编码器模型 | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | Training |
-| t5xxl_fp16.safetensors | `backend/models/clip/` | 由 Google 发布的 Text to Text 模型           | [Download](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | Training |
-
-#### 分词器
-
-kohya-ss 脚本需要使用分词器。如果您尚未下载分词器，kohya-ss 脚本会自动下载它们。不过，我们建议您手动下载分词器并将其放置在 `backend/models` 目录下。以下命令将帮助您下载分词器并将它们放置在正确的目录中：
-
-1. 对于 openai/clip-vit-large-patch14，请进入 `backend/models/clip/` 目录并运行以下命令：
+训练器的 Flux Kontext LoRA 训练基于 [ai-toolkit](https://github.com/ostris/ai-toolkit) ，所以你需要先克隆 ai-toolkit 仓库。进入到 `backend` 目录，运行以下命令来克隆 ai-toolkit 仓库。
 
 ```bash
-mkdir -p openai_clip-vit-large-patch14
-cd openai_clip-vit-large-patch14
-huggingface-cli download openai/clip-vit-large-patch14  --exclude "*.bin" "*.msgpack" "*.h5" "*.safetensors"  --local-dir .
+git clone https://github.com/ostris/ai-toolkit.git
 ```
 
-2. 对于 google/t5-v1_1-xxl, 请进入 `backend/models/clip/` 目录并运行以下命令：
+克隆完毕我们需要安装对应的依赖：
 
 ```bash
-mkdir -p google_t5-v1_1-xxl
-cd google_t5-v1_1-xxl
-huggingface-cli download google/t5-v1_1-xxl --exclude "*.bin" "*.h5" --local-dir .
+cd ai-toolkit/
+python -m venv --system-site-package ./venv
+./venv/bin/python -m pip install uv
+./venv/bin/python -m uv pip install -r requirements.txt
 ```
 
-#### 打标模型
+#### diffusion-pipe 部署
 
-##### Florence2
+训练器的 混元视频 LoRA 训练基于 [diffusion-pipe](https://github.com/tdrussell/diffusion-pipe) ，所以你需要先克隆 diffusion-pipe 仓库。进入到 `backend` 目录，运行以下命令来克隆 diffusion-pipe 仓库。
+
+```bash
+git clone --recurse-submodules https://github.com/zhao-kun/diffusion-pipe
+```
+
+克隆完毕后我们还需要处理相关依赖：
+
+```bash
+ENV SETUPTOOLS_USE_DISTUTILS=stdlib
+cd diffusion-pipe/
+python -m venv --system-site-package ./venv
+./venv/bin/python -m pip install -r requirements.txt
+```
+
+#### musubi-tuner 部署
+
+训练器的 Wan2.1/2.2 和 Qwen Image（Edit）LoRA 训练基于 [kohya-ss/musubi-tuner](https://github.com/kohya-ss/musubi-tuner) ，所以你需要先克隆 musubi-tuner 仓库。进入到 `backend` 目录，运行以下命令来克隆 musubi-tuner 仓库。
+
+```bash
+# 克隆 musubi-tuner 仓库
+git clone https://github.com/kohya-ss/musubi-tuner
+
+# 进入仓库目录
+cd musubi-tuner
+
+# 切换到指定的 v0.2.9 版本
+git checkout -b v0.2.9 tags/v0.2.9
+
+# 返回上一级目录
+cd ..
+```
+
+克隆完毕后我们需要安装相关依赖：
+
+```bash
+export UV_PROJECT_ENVIRONMENT=./musubi-tuner/venv
+
+cd musubi-tuner
+
+python3 -m venv --system-site-packages ./venv
+
+source ./venv/bin/activate
+
+./venv/bin/python -m pip install uv
+
+./venv/bin/python -m uv pip install -r pyproject.toml
+
+./venv/bin/python -m uv pip install tensorboard
+
+./venv/bin/python -m uv pip install "transformers==4.54.1"
+
+./venv/bin/python -m uv pip install "torchvision>=0.22.1"
+
+./venv/bin/python -m uv pip install "optimum-quanto==0.2.4"
+
+./venv/bin/python -m uv pip install "sentencepiece==0.2.0"
+
+./venv/bin/python -m uv pip install "sageattention==1.0.6"
+```
+
+### 打标模型配置
+
+#### Florence2
 
 此模型专用于打标。
 
@@ -145,7 +203,7 @@ huggingface-cli download google/t5-v1_1-xxl --exclude "*.bin" "*.h5" --local-dir
 - **模型描述**: Florence2 是一个多模态模型，能够生成图像描述，基于 MultimodalArt。
 - **下载命令**: 进入 `backend/models/florence2/models--multimodalart--Florence-2-large-no-flash-attn` 目录并运行命令: `huggingface-cli download multimodalart/Florence-2-large-no-flash-attn --localdir .`
 
-##### Joy-Caption-Two-Alpha
+#### Joy-Caption-Two-Alpha
 
 Joy-Caption-Two-Alpha 模型在生成图像描述方面表现更佳。此大型模型结构复杂，需要更多资源。要使用 Joy-Caption-Two-Alpha 进行打标，需安装以下依赖项：
 
@@ -176,6 +234,141 @@ siglip-so400m-patch14-384
   - 创建目录 `backend/models/clip/siglip-so400m-patch14-384`
   - 进入目录 `backend/models/clip/siglip-so400m-patch14-384` 并运行命令：`huggingface-cli download google/siglip-so400m-patch14-384 --local-dir .`
 
+### Flux 模型设置
+
+在运行训练器之前，您需要准备模型。有两种类型的模型，训练模型和推理模型。您可以从以下表格下载模型，并根据表格中的 Model Path 将模型放置在 backend/models 的适当目录中。
+
+#### 训练模型
+
+| 模型名称             | 模型路径             | 模型描述                                                | 下载链接                                                                                                          | 类别 |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| flux1-dev.safetensors  | `backend/models/unet/` | BlackForestLib 发布的 Unet 模型                   | [下载](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors?download=true)       | 训练 |
+| ae.safetensors         | `backend/models/vae/`  | Variation Auto Encoder 模型，由 BlackForestLib 发布 | [下载](https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors?download=true)              | 训练 |
+| clip_l.safetensors     | `backend/models/clip/` | Flux Text Encoder 模型，由 BlackForestLib 发布      | [下载](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors?download=true)     | 训练 |
+| t5xxl_fp16.safetensors | `backend/models/clip/` | 文本到文本模型，由谷歌发布                   | [下载](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors?download=true) | 训练 |
+
+#### 分词器
+
+kohya-ss 脚本需要 tokenizers。如果你还没有下载 tokenizers，kohya-ss 脚本会自动下载它们。但我们建议你手动下载 tokenizers 并将其放在 `backend/models` 目录中。以下命令可以帮助你下载 tokenizers 并将其放在正确的位置：
+
+1. openai/clip-vit-large-patch14，进入到 `backend/models/clip/` 目录并运行命令：
+
+    ```bash
+    mkdir -p openai_clip-vit-large-patch14
+    cd openai_clip-vit-large-patch14
+    huggingface-cli download openai/clip-vit-large-patch14  --exclude "*.bin" "*.msgpack" "*.h5" "*.safetensors"  --local-dir .
+    ```
+
+2. google/t5-v1_1-xxl，进入到 `backend/models/clip/` 目录并运行命令：
+
+    ```bash
+    mkdir -p google_t5-v1_1-xxl
+    cd google_t5-v1_1-xxl
+    huggingface-cli download google/t5-v1_1-xxl --exclude "*.bin" "*.h5" --local-dir .
+    ```
+
+### Wan2.1 模型设置
+
+在训练 Wan2.1 LoRA 模型之前，您需要下载 Wan2.1 模型并将其放置在 `backend/models` 的正确目录中。以下表格将帮助您下载模型并放置在正确目录中：
+
+| 模型名称             | 模型路径             | 模型描述                                                | 下载链接                                                                                                           | 类别 |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| umt5_xxl_fp8_e4m3fn_scaled.safetensors | `backend/models/clip/` | Wan2.1 文本编码器模型，由 Wan2.1 团队发布      | [下载](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors?download=true)     | 训练 |
+| clip_vision_h.safetensors     | `backend/models/clip/` | Wan2.1 文本编码器模型，由 Wan2.1 团队发布      | [下载](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors?download=true)     | 训练 |
+| models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth|`backend/models/clip/`| Wan2.1 文本编码器模型，由 Wan2.1 团队发布      | [下载](https://huggingface.co/Wan-AI/Wan2.1-I2V-14B-720P/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth?download=true)     | 训练 |
+| wan_2.1_vae.safetensors| `backend/models/vae/` | Wan2.1 vae 模型 | [下载](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors?download=true)     | 训练 |
+|wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors|`backend/models/wan/`| Wan 2.1 演化模型，图像转视频，fp8 |[下载](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors?download=true)|  训练 |
+|wan2.1_t2v_14B_fp8_e4m3fn.safetensors?|`backend/models/wan/`| Wan 2.1 扩散模型，图像转视频，fp8 |[下载](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_14B_fp8_e4m3fn.safetensors?download=true)|    训练 |
+
+### Wan2.2 模型设置
+
+在训练 Wan2.2 LoRA 模型之前，您需要下载 Wan2.2 模型并将其放置在 `backend/models` 的正确目录中。以下表格将帮助您下载模型并放置在正确目录中：
+
+| 模型名称             | 模型路径             | 模型描述                                                | 下载链接                                                                                                           | 类别 |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| umt5_xxl_fp8_e4m3fn_scaled.safetensors | `backend/models/clip/` | Wan2.1 文本编码器模型，由 Wan2.1 团队发布      | [下载](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors?download=true)     | 训练 |
+| clip_vision_h.safetensors     | `backend/models/clip/` | Wan2.1 文本编码器模型，由 Wan2.1 团队发布      | [下载](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors?download=true)     | 训练 |
+| models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth|`backend/models/clip/`| Wan2.1 文本编码器模型，由 Wan2.1 团队发布      | [下载](https://huggingface.co/Wan-AI/Wan2.1-I2V-14B-720P/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth?download=true)     | 训练 |
+| wan_2.1_vae.safetensors| `backend/models/vae/` | Wan2.1 vae 模型 | [下载](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors?download=true)     | 训练 |
+| wan2.2_i2v_high_noise_14B_fp16.safetensors | `backend/models/wan/` | Wan 2.2 i2v high模型 | [下载](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors?download=true) | 训练 |
+| wan2.2_i2v_low_noise_14B_fp16.safetensors | `backend/models/wan/` | Wan 2.2 i2v low模型 | [下载](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors?download=true) | 训练 |
+| wan2.2_t2v_high_noise_14B_fp16.safetensors | `backend/models/wan/` | Wan 2.2 t2v high模型 | [下载](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors?download=true) | 训练 |
+| wan2.2_t2v_low_noise_14B_fp16.safetensors | `backend/models/wan/` | Wan 2.2 t2v low模型 | [下载](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors?download=true) | 训练 |
+
+### Flux Kontext 模型设置
+
+在训练 Flux Kontext LoRA 模型之前，您需要克隆 Flux Kontext 模型仓库并将其放置在 `backend/models/kontext-dev` 目录中。
+
+- Flux Kontext 仓库地址：[FLUX.1-Kontext-dev](https://huggingface.co/black-forest-labs/FLUX.1-Kontext-dev)
+
+```bash
+git clone https://huggingface.co/black-forest-labs/FLUX.1-Kontext-dev
+```
+
+注意：克隆完后成，`backend/models/kontext-dev` 目录下就是被克隆仓库下的具体文件，不能再嵌套目录了。其中Flux Kontext 模型仓库根目录的 `flux1-kontext-dev.safetensors` 模型文件可以不必下载，因为在该仓库的 `transformers` 中已经存在了。
+
+目录结构：
+
+```bash
+backend/models/kontext-dev
+├── LICENSE.md
+├── README.md
+├── ae.safetensors
+├── model_index.json
+├── scheduler
+│   └── scheduler_config.json
+├── teaser.png
+├── text_encoder
+│   ├── config.json
+│   └── model.safetensors
+├── text_encoder_2
+│   ├── config.json
+│   ├── model-00001-of-00002.safetensors
+│   ├── model-00002-of-00002.safetensors
+│   └── model.safetensors.index.json
+├── tokenizer
+│   ├── merges.txt
+│   ├── special_tokens_map.json
+│   ├── tokenizer_config.json
+│   └── vocab.json
+├── tokenizer_2
+│   ├── special_tokens_map.json
+│   ├── spiece.model
+│   ├── tokenizer.json
+│   └── tokenizer_config.json
+├── transformer
+│   ├── config.json
+│   ├── diffusion_pytorch_model-00001-of-00003.safetensors
+│   ├── diffusion_pytorch_model-00002-of-00003.safetensors
+│   ├── diffusion_pytorch_model-00003-of-00003.safetensors
+│   └── diffusion_pytorch_model.safetensors.index.json
+└── vae
+    ├── config.json
+    └── diffusion_pytorch_model.safetensors
+```
+
+### 混元视频模型设置
+
+在训练混元视频（HunyuanVideo）LoRA 模型之前，您需要下载相关文件并将其放置在 `backend/models` 的正确目录中。
+
+| 模型名称             | 模型路径             | 模型描述                                                | 下载链接                                                                                                          | 类别 |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors | `backend/models/hunyuan/transformer` | 混元模型 | [下载](https://huggingface.co/Kijai/HunyuanVideo_comfy/resolve/main/hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors?download=true) | 训练 |
+| clip-vit-large-patch14  | `backend/models/hunyuan/clip` | 该 clip 模型由 OpenAI 的研究人员开发 | [克隆整个仓库](https://huggingface.co/openai/clip-vit-large-patch14) | 训练 |
+| llava-llama-3-8b-text-encoder-tokenizer | `backend/models/hunyuan/llm` |  | [克隆整个仓库](https://huggingface.co/Kijai/llava-llama-3-8b-text-encoder-tokenizer) | 训练 |
+| hunyuan_video_vae_bf16.safetensors | `backend/models/hunyuan/vae` | 混元官方发布的 VAE 模型 | [下载](https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/vae/hunyuan_video_vae_bf16.safetensors?download=true) | 训练 |
+
+### Qwen Image（Edit）模型设置
+
+在训练 Qwen Image 或 Qwen Image Edit LoRA 模型时，您需要下载相关文件并将其放置在 `backend/models` 的正确目录中。
+
+| 模型名称             | 模型路径             | 模型描述                                                | 下载链接                                                                                                          | 类别 |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- |
+| qwen_image_bf16.safetensors | `backend/models/qwen-image/transformer` | Qwen Image底模 | [下载](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_bf16.safetensors?download=true) | 训练 |
+| qwen_image_edit_bf16.safetensors | `backend/models/qwen-image/transformer` | Qwen Image Edit底模 | [下载](https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_bf16.safetensors?download=true) | 训练 |
+| diffusion_pytorch_model.safetensors | `backend/models/qwen-image/vae` | 用于图像编码解码 | [下载](https://huggingface.co/Qwen/Qwen-Image/resolve/main/vae/diffusion_pytorch_model.safetensors?download=true) | 训练 |
+| qwen_2.5_vl_7b.safetensors | `backend/models/qwen-image/text_encoders/` | 文本编码器，处理文本提示 | [下载](https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b.safetensors?download=true) | 训练 |
+
 ### 运行训练器
 
 完成前端构建及后端设置后，你可以运行训练器。请按以下步骤操作：
@@ -197,9 +390,20 @@ python -m app.api.run.py
 
 - [ ] 支持 Windows 操作系统
 - [ ] 支持 SDXL 模型 Lora 训练
-- [ ] 支持 混元视频模型 Lora 训练
+- [x] 支持混沌视频模型 LoRA 训练
+- [x] 支持 Flux Kontext 模型 LoRA 训练
+- [x] 支持 Wan2.1 模型 LoRA 训练
+- [x] 支持 Wan2.2 模型 LoRA 训练
+- [x] 支持 Qwen Image（Edit）模型 LoRA 训练
 - [ ] 持久化任务状态到数据库
 
 ## 鸣谢
 
-- 感谢 [kohya-ss](https://github.com/kohya-ss/sd-scripts) 为 Flux1 训练贡献了如此优秀的脚本，这些脚本使我们能够构建此训练器。
+本训练器的开发与成功离不开以下开源项目的宝贵支持与贡献，我们在此致以诚挚的感谢：
+
+- **[kohya-ss/sd-scripts](https://github.com/kohya-ss/sd-scripts)**：其卓越的脚本对 Flux1 模型的训练起到了关键作用。
+- **[ostris/ai-toolkit](https://github.com/ostris/ai-toolkit)**：为 Flux Kontext 模型的训练提供了重要脚本。
+- **[tdrussell/diffusion-pipe](https://github.com/tdrussell/diffusion-pipe)**：为 混元视频模型的训练提供了核心脚本。
+- **[kohya-ss/musubi-tuner](https://github.com/kohya-ss/musubi-tuner)**：其脚本支持了 Wan2.1/2.2 及 Qwen Image（Edit）模型的训练。
+
+这些项目的贡献共同构成了本训练器得以实现和优化的坚实基础。

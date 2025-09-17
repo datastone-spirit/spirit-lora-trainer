@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:26:27
- * @LastEditTime: 2025-08-13 10:02:43
+ * @LastEditTime: 2025-09-04 09:16:44
  * @LastEditors: mulingyuer
  * @Description: 数据集公共配置
  * @FilePath: \frontend\src\views\lora\qwen-image\components\DataSet\General.vue
@@ -12,7 +12,7 @@
 		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-宽度px"
-				prop="dataset.general.resolution[0]"
+				prop="dataset.general.resolution.0"
 				popover-content="resolution"
 			>
 				<el-input-number
@@ -24,7 +24,7 @@
 		<el-col :span="12">
 			<PopoverFormItem
 				label="图片尺寸-高度px"
-				prop="dataset.general.resolution[1]"
+				prop="dataset.general.resolution.1"
 				popover-content="resolution"
 			>
 				<el-input-number

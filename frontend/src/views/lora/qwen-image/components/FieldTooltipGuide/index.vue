@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-08-29 09:42:32
+ * @LastEditTime: 2025-09-15 11:31:49
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
- * @FilePath: \frontend\src\views\lora\qwen-image\components\FieldTooltipGuide\index.vue
+ * @FilePath: \spirit-lora-trainer\frontend\src\views\lora\qwen-image\components\FieldTooltipGuide\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -22,20 +22,18 @@
 			<p>使用支持：</p>
 			<ul>
 				<li>
-					我们训练器采用的是：<el-link
-						type="info"
-						href="https://github.com/kohya-ss/musubi-tuner"
-						target="_blank"
-					>
+					我们训练器采用的是：<a href="https://github.com/kohya-ss/musubi-tuner" target="_blank">
 						musubi-tuner
-					</el-link>
+					</a>
 					脚本
 				</li>
-				<li v-if="videoData.show">
-					如果你不知道如何使用这个训练器，请观看
-					<el-link type="info" :href="videoData.href" target="_blank">
-						《{{ videoData.title }}》
-					</el-link>
+				<li v-if="videoData1.show">
+					训练 Qwen Image 视频教程，请观看
+					<a :href="videoData1.href" target="_blank"> 《{{ videoData1.title }}》 </a>
+				</li>
+				<li v-if="videoData2.show">
+					训练 Qwen Image Edit 视频教程，请观看
+					<a :href="videoData2.href" target="_blank"> 《{{ videoData2.title }}》 </a>
 				</li>
 				<li>如果还有其他GPU疑问，请访问我们的B站或添加训练器首页的二维码寻求帮助</li>
 			</ul>
@@ -46,34 +44,8 @@
 <script setup lang="ts">
 import { ZL_VIDEO_MAP } from "@/constants";
 
-const videoData = ZL_VIDEO_MAP.QWEN_IMAGE;
+const videoData1 = ZL_VIDEO_MAP.QWEN_IMAGE;
+const videoData2 = ZL_VIDEO_MAP.QWEN_IMAGE_EDIT;
 </script>
 
-<style lang="scss" scoped>
-.field-tooltip-guide {
-	margin-bottom: $zl-collapse-margin;
-	background-color: var(--zl-collapse-bg);
-	border-radius: $zl-border-radius;
-	padding: $zl-padding;
-}
-.field-tooltip-guide-alert {
-	margin-bottom: 22px;
-}
-.field-tooltip-guide-alert-desc {
-	font-size: 14px;
-}
-.field-tooltip-guide-content {
-	font-size: 14px;
-	line-height: 20px;
-	p {
-		margin-bottom: 6px;
-	}
-	ul {
-		list-style: disc;
-		padding-inline-start: 40px;
-	}
-	li + li {
-		margin-top: 6px;
-	}
-}
-</style>
+<style lang="scss" scoped></style>

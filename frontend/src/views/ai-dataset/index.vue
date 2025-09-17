@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-08-29 11:34:04
+ * @LastEditTime: 2025-09-04 10:50:48
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -18,63 +18,92 @@
 				label-position="top"
 				size="large"
 			>
-				<TagDirectory
-					v-model="ruleForm.image_path"
-					label="数据集目录"
-					prop="image_path"
-					placeholder="请选择训练用的数据集目录"
-				/>
-				<TagModelSelect
-					v-model="ruleForm.model_name"
-					label="打标模型"
-					prop="tagger_model"
-					placeholder="请选择打标模型"
-				/>
-				<TagJoyCaptionPromptTypeSelect
-					v-show="isJoyCaption2Model"
-					v-model="ruleForm.prompt_type"
-					label="Joy Caption 提示词类型"
-					prop="prompt_type"
-					placeholder="请选择Joy Caption 提示词类型"
-				/>
-				<TagAddGlobalPromptSwitch
-					v-model="ruleForm.is_add_global_prompt"
-					label="是否把触发词输出到打标文件中"
-					prop="is_add_global_prompt"
-				/>
-				<TagGlobalPrompt
-					v-show="ruleForm.is_add_global_prompt"
-					v-model="ruleForm.class_token"
-					label="原样保留的打标提示词"
-					prop="class_tokens"
-					placeholder="请输入原样保留的打标提示词"
-				/>
-				<TagAdvancedSwitch
-					v-model="ruleForm.tag_advanced_settings"
-					label="打标高级设置"
-					prop="tag_advanced_settings"
-				/>
-				<template v-if="isAdvancedSetting">
-					<TagJoyCaptionPrompt
-						v-show="isJoyCaption2Model"
-						v-model="ruleForm.global_prompt"
-						label="打标提示词"
-						prop="global_prompt"
-						placeholder="请输入打标提示词"
-					/>
-					<TagAppendSwitch
-						v-model="ruleForm.is_append"
-						label="追加到已有打标文件中"
-						prop="is_append"
-					/>
-				</template>
-				<TagSubmitButton
-					:loading="submitLoading"
-					:disabled="trainingStore.useGPU"
-					:is-bottom-margin="false"
-					@submit="onSubmit"
-				/>
-				<TagResetButton @reset="onReset" />
+				<el-form
+					ref="ruleFormRef"
+					:model="ruleForm"
+					:rules="rules"
+					label-width="auto"
+					label-position="top"
+					size="large"
+				>
+					<PopoverFormItem label="打标目录" prop="image_path" popover-content="image_path">
+						<FolderSelector v-model="ruleForm.image_path" placeholder="请选择打标目录" />
+					</PopoverFormItem>
+					<PopoverFormItem label="打标模型" prop="model_name" popover-content="model_name">
+						<ModelSelect v-model="ruleForm.model_name" />
+					</PopoverFormItem>
+					<PopoverFormItem
+						v-show="isJoy2"
+						label="Joy Caption 提示词类型"
+						prop="prompt_type"
+						popover-content="prompt_type"
+					>
+						<JoyCaptionPromptTypeSelect v-model="ruleForm.prompt_type" />
+					</PopoverFormItem>
+					<PopoverFormItem
+						label="原样输出到打标文件的文本内容"
+						prop="class_token"
+						popover-content="class_token"
+					>
+						<el-input
+							v-model="ruleForm.class_token"
+							:rows="6"
+							type="textarea"
+							placeholder="请输入原样输出到打标文件的文本内容"
+						/>
+					</PopoverFormItem>
+					<el-collapse v-model="ruleForm.advanced_setting" class="ai-tag-advanced-setting">
+						<el-collapse-item title="高级设置" name="advanced_setting">
+							<PopoverFormItem
+								v-show="isJoy2"
+								label="提示词"
+								prop="global_prompt"
+								popover-content="global_prompt"
+							>
+								<el-input
+									v-model="ruleForm.global_prompt"
+									:rows="6"
+									type="textarea"
+									placeholder="请输入打标模型所使用的提示词"
+								/>
+							</PopoverFormItem>
+							<PopoverFormItem label="追加模式" prop="is_append" popover-content="is_append">
+								<el-switch v-model="ruleForm.is_append" />
+							</PopoverFormItem>
+							<PopoverFormItem>
+								<el-alert
+									title="说明：如果之前已经打过标，则在原文本内容后追加打标结果；否则，则直接替换打标结果。"
+									:closable="false"
+								></el-alert>
+							</PopoverFormItem>
+						</el-collapse-item>
+					</el-collapse>
+					<PopoverFormItem>
+						<el-button
+							class="ai-dataset-btn"
+							type="primary"
+							:loading="loading"
+							:disabled="disabled"
+							round
+							@click="onConfirm"
+						>
+							<Icon class="ai-dataset-btn-icon" name="ri-price-tag-3-fill" />
+							{{ hasTag ? "正在打标" : "一键打标" }}
+						</el-button>
+					</PopoverFormItem>
+					<PopoverFormItem>
+						<el-button
+							class="ai-dataset-btn"
+							:loading="loading"
+							:disabled="disabled"
+							round
+							@click="onReset"
+						>
+							<Icon class="ai-dataset-btn-icon" name="ri-reset-left-line" />
+							重置表单
+						</el-button>
+					</PopoverFormItem>
+				</el-form>
 			</el-form>
 			<div class="ai-dataset-page-monitor">
 				<div class="ai-dataset-page-monitor-head">
@@ -100,117 +129,113 @@
 
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
-import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useGPU } from "@/hooks/task/useGPU";
 import { useTag } from "@/hooks/task/useTag";
-import { useTrainingStore } from "@/stores";
+import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
+import { useTrainingStore, useSettingsStore } from "@/stores";
 import { LoRAValidator } from "@/utils/lora/lora.validator";
-import type { FormInstance, FormRules } from "element-plus";
 import { joinPrefixKey } from "@/utils/tools";
-
-interface RuleForm {
-	/** 图片目录 */
-	image_path: string;
-	/** 打标模型 */
-	model_name: string;
-	/** joy-caption-alpha-two打标模型的提示词类型 */
-	prompt_type: string;
-	/** 是否把触发词输出到打标文件中 */
-	is_add_global_prompt: boolean;
-	/** LoRA 触发词 */
-	class_token: string;
-	/** 打标高级设置 */
-	tag_advanced_settings: boolean;
-	/** 打标提示词 */
-	global_prompt: string;
-	/** 是否追加到已有打标文件中 */
-	is_append: boolean;
-}
+import type { FormInstance, FormRules } from "element-plus";
+import type { AiTagRuleForm } from "@/components/AiTag/index.vue";
+import { getEnv } from "@/utils/env";
 
 const trainingStore = useTrainingStore();
-const { tag, tagMonitor } = useTag();
-const { gpuMonitor } = useGPU();
+const settingsStore = useSettingsStore();
+const env = getEnv();
+const { tag, tagMonitor, isJoyCaption2Model } = useTag();
 const { useEnhancedLocalStorage } = useEnhancedStorage();
 
+const loading = ref(false);
+const disabled = computed(() => trainingStore.useGPU);
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
-const ruleFormRef = ref<FormInstance>();
+const ruleFormRef = useTemplateRef<FormInstance>("ruleFormRef");
 const localStorageKey = joinPrefixKey("ai_dataset_form");
-const defaultForm = readonly<RuleForm>({
-	image_path: "/root",
+const defaultForm: AiTagRuleForm = {
+	image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 	model_name: "joy-caption-alpha-two",
 	prompt_type: "Training Prompt",
-	is_add_global_prompt: true,
 	class_token: "",
-	tag_advanced_settings: false,
 	global_prompt: "",
-	is_append: false
-});
-const ruleForm = useEnhancedLocalStorage<RuleForm>({
+	is_append: false,
+	advanced_setting: ""
+};
+const ruleForm = useEnhancedLocalStorage<AiTagRuleForm>({
 	localKey: localStorageKey,
-	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
-	version: "1.0.0"
+	defaultValue: structuredClone(defaultForm),
+	version: "1.0.1"
 });
-const rules = reactive<FormRules<RuleForm>>({
+const rules = ref<FormRules<AiTagRuleForm>>({
 	image_path: [
-		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
-			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
+			required: true,
+			validator: (_rule, value, callback) => {
+				if (typeof value !== "string" || value.trim() === "") {
+					return callback(new Error("请选择打标目录"));
+				}
+
+				callback();
+			},
+			trigger: "change"
+		},
+		{
+			trigger: "change",
+			validator: (_rule, value, callback) => {
 				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
-						callback(new Error("目录不存在"));
+						callback(new Error("打标目录不存在"));
 						return;
 					}
 
 					callback();
 				});
-			},
-			trigger: "change"
+			}
 		}
 	],
 	model_name: [{ required: true, message: "请选择打标模型", trigger: "change" }],
-	class_token: [
+	prompt_type: [
 		{
-			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				if (!ruleForm.value.is_add_global_prompt) return callback();
+			validator: (_rule, value, callback) => {
+				const { model_name } = ruleForm.value;
+				if (!isJoyCaption2Model(model_name)) return callback();
+
 				if (typeof value !== "string" || value.trim() === "") {
-					callback(new Error("请填写触发词"));
-					return;
+					return callback(new Error("请选择提示词类型"));
 				}
-				callback();
+
+				return callback();
 			},
 			trigger: "change"
 		}
 	]
 });
-const submitLoading = ref(false);
-/** 是否是Joy Caption 2.0模型 */
-const isJoyCaption2Model = computed(() => ruleForm.value.model_name === "joy-caption-alpha-two");
-/** 是否开启打标高级设置 */
-const isAdvancedSetting = computed(() => ruleForm.value.tag_advanced_settings);
+const isJoy2 = computed(() => isJoyCaption2Model(ruleForm.value.model_name));
+const hasTag = computed(() => trainingStore.currentTaskInfo.type === "tag");
 
-/** 打标 */
-async function onSubmit() {
+async function onConfirm() {
 	try {
 		if (!ruleFormRef.value) return;
-		submitLoading.value = true;
+		loading.value = true;
+		const validateResult = await LoRAValidator.validateForm(ruleFormRef.value, {
+			shouldShowErrorDialog: true
+		});
+		if (!validateResult.valid) {
+			loading.value = false;
+			return;
+		}
 
-		const tagResult = await tag({
-			tagDir: ruleForm.value.image_path,
-			tagModel: ruleForm.value.model_name,
-			joyCaptionPromptType: ruleForm.value.prompt_type,
-			isAddGlobalPrompt: ruleForm.value.is_add_global_prompt,
-			globalPrompt: ruleForm.value.class_token,
-			tagPrompt: ruleForm.value.global_prompt,
-			isAppend: ruleForm.value.is_append,
+		// api
+		const result = await tag({
+			...ruleForm.value,
 			showTaskStartPrompt: true
 		});
 
 		// 触发查询打标任务
-		tagMonitor.setTaskId(tagResult.task_id).start();
-		submitLoading.value = false;
+		tagMonitor.setTaskId(result.task_id).start();
+
+		loading.value = false;
 	} catch (error) {
-		submitLoading.value = false;
+		loading.value = false;
 		tagMonitor.stop();
+
 		console.error("打标任务创建失败", error);
 	}
 }
@@ -218,33 +243,10 @@ async function onSubmit() {
 /** 重置表单 */
 function onReset() {
 	// 还原数据
-	ruleForm.value = structuredClone(toRaw(defaultForm));
+	ruleForm.value = structuredClone(defaultForm);
 
 	ElMessage.success("重置成功");
 }
-
-// 如果GPU被占用就开始监听
-watch(
-	() => trainingStore.useGPU,
-	(newVal) => {
-		if (newVal) {
-			gpuMonitor.start();
-		} else {
-			gpuMonitor.pause();
-		}
-	},
-	{ immediate: true }
-);
-
-onMounted(() => {
-	// 组件挂载时，开始监听
-	tagMonitor.resume();
-});
-onUnmounted(() => {
-	// 组件销毁时，停止监听
-	tagMonitor.pause();
-	gpuMonitor.pause();
-});
 </script>
 
 <style lang="scss" scoped>
@@ -254,13 +256,26 @@ onUnmounted(() => {
 	height: calc(100vh - 24px);
 }
 .ai-dataset-page-left {
-	width: 320px;
+	width: 360px;
 	height: 100%;
 	background-color: var(--zl-ai-dataset-bg);
 	padding: $zl-padding;
 	border-radius: $zl-border-radius;
 	margin-right: $zl-padding;
 	overflow-y: auto;
+}
+.ai-tag-advanced-setting {
+	margin-bottom: 24px;
+}
+.ai-tag-advanced-setting :deep(.el-collapse-item__content) {
+	padding-left: $zl-padding;
+	padding-right: $zl-padding;
+}
+.ai-dataset-btn {
+	width: 100%;
+}
+.ai-dataset-btn-icon {
+	margin-right: 6px;
 }
 .ai-dataset-page-monitor {
 	margin-top: 24px;

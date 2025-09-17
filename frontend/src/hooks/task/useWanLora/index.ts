@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-09 16:23:25
- * @LastEditTime: 2025-07-31 15:15:21
+ * @LastEditTime: 2025-09-02 09:25:29
  * @LastEditors: mulingyuer
  * @Description: wan模型训练hooks
  * @FilePath: \frontend\src\hooks\task\useWanLora\index.ts
@@ -44,7 +44,7 @@ class WanLoraMonitor implements TaskImplementation {
 	/** 任务类型 */
 	private readonly taskType: TaskType = "wan-video";
 	/** 任务名称 */
-	private readonly taskName: string = "wan视频";
+	private readonly taskName: string = "wan 2.1/2.2";
 	/** 事件订阅 */
 	public events = mitt<TaskEvents>();
 
@@ -109,9 +109,12 @@ class WanLoraMonitor implements TaskImplementation {
 		} = initData;
 
 		// 更新数据
-		this.updateStatus("paused");
+		this.updateStatus("querying");
 		this.setTaskId(taskId);
 		this.updateCurrentTaskInfo(result);
+
+		// 继续查询
+		this.startTimer();
 
 		// 弹窗提示
 		if (showTrainingTip) {

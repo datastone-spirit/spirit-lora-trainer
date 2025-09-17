@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-28 11:42:11
- * @LastEditTime: 2025-08-29 09:41:03
+ * @LastEditTime: 2025-09-15 10:42:55
  * @LastEditors: mulingyuer
  * @Description: 视频信息map
  * @FilePath: \frontend\src\constants\video-map.ts
@@ -34,6 +34,12 @@ export const ZL_VIDEO_MAP = {
 		title: "智灵训练器Qwen-Image-LoRA训练：轻松生成专属模型！",
 		href: "https://www.bilibili.com/video/BV1oJhXzME2p"
 	},
+	/** qwen image edit */
+	QWEN_IMAGE_EDIT: {
+		show: true,
+		title: "智灵训练器Qwen-Image-Edit LoRA训练：get Nano Banana同款手办图片！",
+		href: "https://www.bilibili.com/video/BV1LTHrzLE71"
+	},
 	/** wan 2.1 */
 	WAN_2_1: {
 		show: true,
@@ -42,8 +48,8 @@ export const ZL_VIDEO_MAP = {
 	},
 	/** wan 2.2 */
 	WAN_2_2: {
-		show: false,
-		title: "Wan2.2：用文字和图片召唤“影视大片”！",
-		href: "https://www.bilibili.com/video/BV1hwbGzrEH6"
+		show: true,
+		title: "智灵训练器Wan2.2 LoRA训练：打造你的专属AI演员！",
+		href: "https://www.bilibili.com/video/BV1eCa2zHEYf"
 	}
 } as const;

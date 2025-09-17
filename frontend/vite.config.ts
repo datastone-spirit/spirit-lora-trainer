@@ -63,8 +63,10 @@ export default defineConfig(({ mode }) => {
 			preprocessorOptions: {
 				scss: {
 					additionalData: `
-           @use '@/styles/element-plus/theme-light' as *;
+          @use '@/styles/element-plus/theme-light' as *;
           @use '@/styles/element-plus/theme-dark' as *;
+					@use '@/styles/theme/light' as *;
+					@use '@/styles/theme/dark' as *;
           @use '@/styles/variables' as *;
           @use '@/styles/mixins' as *;
           `,

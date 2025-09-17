@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-09-27 16:40:29
- * @LastEditTime: 2025-08-25 10:12:35
+ * @LastEditTime: 2025-09-02 10:42:24
  * @LastEditors: mulingyuer
  * @Description: 按钮item
  * @FilePath: \frontend\src\layout\admin-layout\components\Aside\MenuItem.vue
@@ -17,10 +17,14 @@
 	</el-sub-menu>
 	<el-menu-item v-else :index="menu.path">
 		<Icon v-if="menu.icon" :name="menu.icon" size="19" />
-		<el-badge class="menu-item-badge" :hidden="!showNewBadge" value="new" type="success">
-			<span class="truncate">{{ menu.title }}</span>
-		</el-badge>
-		<el-tag v-if="showTaskTag" class="task-tag" type="primary" effect="dark" round> 训练中 </el-tag>
+		<span class="truncate">
+			<el-badge class="menu-item-badge" :hidden="!showNewBadge" value="new" type="success">
+				{{ menu.title }}
+			</el-badge>
+			<el-tag v-if="showTaskTag" class="task-tag" type="primary" effect="dark" round>
+				训练中
+			</el-tag>
+		</span>
 	</el-menu-item>
 </template>
 
@@ -70,5 +74,6 @@ const showNewBadge = computed(() => {
 
 .menu-item-badge {
 	line-height: normal;
+	vertical-align: middle;
 }
 </style>

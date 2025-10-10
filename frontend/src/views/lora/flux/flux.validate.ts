@@ -1,13 +1,13 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-06 15:41:05
- * @LastEditTime: 2025-09-03 15:10:15
+ * @LastEditTime: 2025-10-10 09:27:01
  * @LastEditors: mulingyuer
  * @Description: flux校验相关
  * @FilePath: \frontend\src\views\lora\flux\flux.validate.ts
  * 怎么可能会有bug！！！
  */
-import { LoRAValidator, type ValidationResult } from "@/utils/lora/lora.validator";
+import { DatasetValidator, LoRAValidator, type ValidationResult } from "@/utils/lora/validator";
 import type { FormInstance } from "element-plus";
 import type { RuleForm } from "./types";
 
@@ -97,7 +97,7 @@ export async function validate(data: ValidateData): Promise<ValidationResult> {
 		() => LoRAValidator.validateGpu({ shouldShowErrorDialog: true }),
 		// 数据集校验
 		() =>
-			LoRAValidator.validateDirectory({
+			DatasetValidator.validateDirectory({
 				path: ruleForm.aiTagRuleForm.image_path,
 				checkImageAndLabel: true
 			})

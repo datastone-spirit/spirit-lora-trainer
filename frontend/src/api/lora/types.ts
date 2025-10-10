@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-17 10:28:36
- * @LastEditTime: 2025-09-03 11:28:20
+ * @LastEditTime: 2025-10-09 15:05:15
  * @LastEditors: mulingyuer
  * @Description: lora api类型
  * @FilePath: \frontend\src\api\lora\types.ts
@@ -803,7 +803,9 @@ export interface StartQwenImageTrainingData {
 		/** LoRA 模型的名称，默认："" */
 		output_name: string;
 		/** 是否训练Qwen Image Edit，默认：false */
-		edit: boolean;
+		// edit: boolean;
+		/** 训练lora的type */
+		lora_type: "qwen_image" | "qwen_image_edit" | "qwen_image_edit_2509";
 		/** 底模文件路径，默认："" */
 		dit: string;
 		/** VAE模型路径，默认："" */

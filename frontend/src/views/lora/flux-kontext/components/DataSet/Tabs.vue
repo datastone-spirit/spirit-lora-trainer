@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-23 11:39:51
- * @LastEditTime: 2025-09-04 09:57:53
+ * @LastEditTime: 2025-10-10 09:20:44
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\flux-kontext\components\DataSet\Tabs.vue
@@ -101,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { LoRAValidator, DatasetValidator } from "@/utils/lora/validator";
 import type { FormItemRule, TabPaneName } from "element-plus";
 import { generateDefaultDataset } from "../../flex-kontext.helper";
 import type { RuleForm } from "../../types";
@@ -118,7 +118,7 @@ const rules = reactive<DynamicRules>({
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;
@@ -138,7 +138,7 @@ const rules = reactive<DynamicRules>({
 					return;
 				}
 
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("控制数据集目录不存在"));
 						return;

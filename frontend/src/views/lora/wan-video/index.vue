@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-09-04 15:18:52
+ * @LastEditTime: 2025-10-10 09:25:38
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -73,7 +73,7 @@ import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { generateUUID, isImageFile, joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
@@ -250,7 +250,7 @@ const rules = reactive<FormRules<RuleForm>>({
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
 			validator: async (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
 						return;
@@ -432,7 +432,7 @@ const rules = reactive<FormRules<RuleForm>>({
 					return;
 				}
 
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;
@@ -455,7 +455,7 @@ const rules = reactive<FormRules<RuleForm>>({
 					return;
 				}
 
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;

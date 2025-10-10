@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-09-04 09:10:33
+ * @LastEditTime: 2025-10-10 09:24:20
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -78,7 +78,7 @@ import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
@@ -231,7 +231,7 @@ const rules = reactive<FormRules<RuleForm>>({
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
 						return;
@@ -258,7 +258,7 @@ const rules = reactive<FormRules<RuleForm>>({
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-09-04 10:50:48
+ * @LastEditTime: 2025-10-10 09:19:22
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -132,7 +132,7 @@ import AiDataset from "@/components/AiDataset/index.vue";
 import { useTag } from "@/hooks/task/useTag";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useTrainingStore, useSettingsStore } from "@/stores";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
 import type { AiTagRuleForm } from "@/components/AiTag/index.vue";
@@ -179,7 +179,7 @@ const rules = ref<FormRules<AiTagRuleForm>>({
 		{
 			trigger: "change",
 			validator: (_rule, value, callback) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("打标目录不存在"));
 						return;

@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-13 09:27:58
- * @LastEditTime: 2025-09-04 10:10:43
+ * @LastEditTime: 2025-10-10 11:23:24
  * @LastEditors: mulingyuer
  * @Description: 数据集标签页
  * @FilePath: \frontend\src\views\lora\qwen-image\components\DataSet\Tabs.vue
@@ -55,6 +55,16 @@
 			>
 				<FolderSelector v-model="item.control_directory" placeholder="请选择控制数据集目录" />
 			</PopoverFormItem>
+			<el-form-item v-show="ruleForm.config.lora_type === 'qwen_image_edit_2509'">
+				<el-alert
+					class="no-select"
+					title="注意：Qwen-Image-Edit-2509 新增多控制图支持：一张数据集图片（如 1.jpg）可对应多张控制图，命名格式为 1_0.jpg、1_1.jpg、1_2.jpg 或四位编号（如 1_0000.jpg、1_0001.jpg）。所有控制图命名格式必须统一；。"
+					type="warning"
+					:closable="false"
+					show-icon
+					effect="dark"
+				/>
+			</el-form-item>
 			<el-row :gutter="16">
 				<el-col :span="12">
 					<PopoverFormItem
@@ -166,17 +176,17 @@
 </template>
 
 <script setup lang="ts">
+import { DatasetValidator } from "@/utils/lora/validator";
 import type { FormInstance, FormItemRule, TabPaneName } from "element-plus";
-import type { RuleForm } from "../../types";
 import { generateDefaultDataset, QwenImageRuleFormRef } from "../../qwen-image.helper";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import type { RuleForm } from "../../types";
 
 type DynamicKeys = keyof RuleForm["dataset"]["datasets"][number];
 type DynamicRules = Partial<Record<DynamicKeys, FormItemRule[]>>;
 
 const ruleForm = defineModel("form", { type: Object as PropType<RuleForm>, required: true });
 const activeTabName = defineModel({ type: String as PropType<TabPaneName>, required: true });
-const isEdit = computed(() => ruleForm.value.config.edit);
+const isEdit = computed(() => ruleForm.value.config.lora_type !== "qwen_image");
 const ruleFormRef = inject<Ref<FormInstance>>(QwenImageRuleFormRef);
 
 // rules
@@ -185,7 +195,7 @@ const rules = reactive<DynamicRules>({
 		{ required: true, message: "请选择训练用的数据集目录", trigger: "change" },
 		{
 			asyncValidator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("数据集目录不存在"));
 						return;
@@ -199,14 +209,14 @@ const rules = reactive<DynamicRules>({
 	control_directory: [
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				const { edit } = ruleForm.value.config;
-				if (!edit) return callback();
+				const { lora_type } = ruleForm.value.config;
+				if (lora_type === "qwen_image") return callback();
 
 				if (typeof value !== "string" || value.trim() === "") {
 					return callback(new Error("请选择训练用的控制数据集目录"));
 				}
 
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("控制数据集目录不存在"));
 						return;

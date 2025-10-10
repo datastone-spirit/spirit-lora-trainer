@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-08-29 11:46:59
+ * @LastEditTime: 2025-10-09 15:25:10
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
@@ -64,7 +64,7 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 	const data: StartQwenImageTrainingData = {
 		config: {
 			output_name: config.output_name,
-			edit: config.edit,
+			lora_type: config.lora_type,
 			dit: config.dit,
 			vae: config.vae,
 			vae_dtype: config.vae_dtype,
@@ -150,7 +150,7 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 				};
 
 				// 如果没有开启edit训练，就移除相关字段
-				if (!deepCloneForm.config.edit) {
+				if (deepCloneForm.config.lora_type === "qwen_image") {
 					Reflect.deleteProperty(newItem, "control_directory");
 					Reflect.deleteProperty(newItem, "qwen_image_edit_control_resolution");
 				} else {

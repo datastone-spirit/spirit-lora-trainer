@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:15:19
- * @LastEditTime: 2025-08-25 14:47:07
+ * @LastEditTime: 2025-10-09 15:16:01
  * @LastEditors: mulingyuer
  * @Description: 基本信息
  * @FilePath: \frontend\src\views\lora\qwen-image\components\BasicInfo\index.vue
@@ -11,8 +11,12 @@
 	<PopoverFormItem label="LoRA 名称" prop="config.output_name" popover-content="output_name">
 		<el-input v-model="ruleForm.config.output_name" placeholder="请输入LoRA名称" />
 	</PopoverFormItem>
-	<PopoverFormItem label="是否训练 Qwen Image Edit" prop="config.edit" popover-content="edit">
-		<el-switch v-model="ruleForm.config.edit" />
+	<PopoverFormItem label="训练LoRA类型" prop="config.lora_type" popover-content="lora_type">
+		<el-select v-model="ruleForm.config.lora_type" placeholder="请选择训练LoRA类型">
+			<el-option label="Qwen Image" value="qwen_image" />
+			<el-option label="Qwen Image Edit" value="qwen_image_edit" />
+			<el-option label="Qwen Image Edit 2509" value="qwen_image_edit_2509" />
+		</el-select>
 	</PopoverFormItem>
 	<PopoverFormItem v-show="isExpert" label="底模目录" prop="config.dit" popover-content="dit">
 		<FolderSelector

@@ -133,6 +133,11 @@ class QwenImageCacheLatentSubTask(SubTask):
             "--vae",
             task.qwenimage_parameter.config.vae,
         ]
+
+        if task.qwenimage_parameter.config.edit:
+            args.append("--edit")
+        elif task.qwenimage_parameter.config.edit_plus:
+            args.append("--edit_plus")
             
         self.wait(Popen(args, stdout=PIPE, stderr=STDOUT, env=self.customize_env), task=task)
         return task_chain.excute()
@@ -158,8 +163,12 @@ class QwenImageCacheTextEncoderOutputSubTask(SubTask):
             "--text_encoder", 
             task.qwenimage_parameter.config.text_encoder,
         ]
-        
-            
+
+        if task.qwenimage_parameter.config.edit:
+            args.append("--edit")
+        elif task.qwenimage_parameter.config.edit_plus:
+            args.append("--edit_plus")
+
         if task.qwenimage_parameter.config.fp8_vl:
             args.append("--fp8_vl")
             
@@ -182,6 +191,12 @@ class QwenImageTrainingSubTask(SubTask):
                "--config_file", dataset2toml(task.qwenimage_parameter.config),
                "--dataset_config", dataset2toml(task.qwenimage_parameter.dataset),
         ]
+
+        if task.qwenimage_parameter.config.edit:
+            base_args.append("--edit")
+        elif task.qwenimage_parameter.config.edit_plus:
+            base_args.append("--edit_plus")
+
         customize_env = self.customize_env.copy()
 
         args = [self.executable, "launch"]

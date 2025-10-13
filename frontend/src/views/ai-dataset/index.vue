@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-10-10 09:19:22
+ * @LastEditTime: 2025-10-13 12:17:10
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -129,14 +129,14 @@
 
 <script setup lang="ts">
 import AiDataset from "@/components/AiDataset/index.vue";
+import type { AiTagRuleForm } from "@/components/AiTag/types";
 import { useTag } from "@/hooks/task/useTag";
 import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
-import { useTrainingStore, useSettingsStore } from "@/stores";
+import { useSettingsStore, useTrainingStore } from "@/stores";
+import { getEnv } from "@/utils/env";
 import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import { joinPrefixKey } from "@/utils/tools";
-import type { FormInstance, FormRules } from "element-plus";
-import type { AiTagRuleForm } from "@/components/AiTag/index.vue";
-import { getEnv } from "@/utils/env";
+import type { FormRules } from "element-plus";
 
 const trainingStore = useTrainingStore();
 const settingsStore = useSettingsStore();
@@ -147,7 +147,7 @@ const { useEnhancedLocalStorage } = useEnhancedStorage();
 const loading = ref(false);
 const disabled = computed(() => trainingStore.useGPU);
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
-const ruleFormRef = useTemplateRef<FormInstance>("ruleFormRef");
+const ruleFormRef = useTemplateRef("ruleFormRef");
 const localStorageKey = joinPrefixKey("ai_dataset_form");
 const defaultForm: AiTagRuleForm = {
 	image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",

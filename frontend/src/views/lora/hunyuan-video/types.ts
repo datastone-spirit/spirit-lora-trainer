@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-06 10:37:35
- * @LastEditTime: 2025-09-04 09:20:51
+ * @LastEditTime: 2025-10-13 12:17:33
  * @LastEditors: mulingyuer
  * @Description: 混元视频类型定义
  * @FilePath: \frontend\src\views\lora\hunyuan-video\types.ts
@@ -9,7 +9,7 @@
  */
 import type { StartHyVideoTrainingData } from "@/api/lora";
 import type { Merge, SimplifyDeep } from "type-fest";
-import type { AiTagRuleForm } from "@/components/AiTag/index.vue";
+import type { AiTagRuleForm } from "@/components/AiTag/types";
 
 type HyVideoTrainingConfig = Omit<
 	StartHyVideoTrainingData["config"],

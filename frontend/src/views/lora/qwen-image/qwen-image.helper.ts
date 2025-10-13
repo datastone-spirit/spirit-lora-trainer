@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-12 17:01:22
- * @LastEditTime: 2025-10-09 15:25:10
+ * @LastEditTime: 2025-10-13 11:36:37
  * @LastEditors: mulingyuer
  * @Description: qwen-image 帮助函数
  * @FilePath: \frontend\src\views\lora\qwen-image\qwen-image.helper.ts
@@ -64,7 +64,8 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 	const data: StartQwenImageTrainingData = {
 		config: {
 			output_name: config.output_name,
-			lora_type: config.lora_type,
+			edit: false,
+			edit_plus: false,
 			dit: config.dit,
 			vae: config.vae,
 			vae_dtype: config.vae_dtype,
@@ -184,6 +185,21 @@ export function formatFormData(form: RuleForm): StartQwenImageTrainingData {
 	};
 	if (typeof config.network_weights === "string" && config.network_weights.trim() !== "") {
 		data.config.network_weights = config.network_weights;
+	}
+
+	// 根据lora_type设置训练的类型
+	switch (config.lora_type) {
+		case "qwen_image":
+			// 默认已经是false了
+			break;
+		case "qwen_image_edit":
+			data.config.edit = true;
+			data.config.edit_plus = false;
+			break;
+		case "qwen_image_edit_2509":
+			data.config.edit = false;
+			data.config.edit_plus = true;
+			break;
 	}
 
 	return LoRAHelper.removeEmptyFields(data);

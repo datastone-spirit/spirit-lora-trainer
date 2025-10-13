@@ -1,13 +1,13 @@
 /*
  * @Author: mulingyuer
  * @Date: 2024-12-09 10:18:03
- * @LastEditTime: 2025-09-03 15:12:42
+ * @LastEditTime: 2025-10-13 12:17:25
  * @LastEditors: mulingyuer
  * @Description:
  * @FilePath: \frontend\src\views\lora\flux\types.ts
  * 怎么可能会有bug！！！
  */
-import type { AiTagRuleForm } from "@/components/AiTag/index.vue";
+import type { AiTagRuleForm } from "@/components/AiTag/types";
 import type { StartFluxTrainingData } from "@/api/lora";
 import type { SimplifyDeep } from "type-fest";
 

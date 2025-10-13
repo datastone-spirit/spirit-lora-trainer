@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-09-02 15:46:18
- * @LastEditTime: 2025-10-10 09:16:33
+ * @LastEditTime: 2025-10-13 12:16:43
  * @LastEditors: mulingyuer
  * @Description: ai打标
  * @FilePath: \frontend\src\components\AiTag\index.vue
@@ -108,14 +108,13 @@
 </template>
 
 <script setup lang="ts">
-import type { BatchTagData } from "@/api/tag";
 import JoyCaptionPromptTypeSelect from "@/components/Form/DataSet-v3/JoyCaptionPromptTypeSelect.vue";
 import ModelSelect from "@/components/Form/DataSet-v3/ModelSelect.vue";
 import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
-import { LoRAValidator, DatasetValidator } from "@/utils/lora/validator";
-import type { FormInstance, FormRules } from "element-plus";
-import type { SimplifyDeep } from "type-fest";
+import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
+import type { FormRules } from "element-plus";
+import type { AiTagRuleForm } from "./types";
 
 export type AiTagProps = {
 	/** 是否显示获取触发词按钮 */
@@ -125,13 +124,6 @@ export type AiTagProps = {
 	/** 打开drawer之前的回调，用于做一个特殊的处理 */
 	beforeOpen?: () => void;
 };
-
-export type AiTagRuleForm = SimplifyDeep<
-	Required<BatchTagData> & {
-		/** 高级设置，默认："" */
-		advanced_setting: string;
-	}
->;
 
 const trainingStore = useTrainingStore();
 const { tagMonitor, tag, isJoyCaption2Model } = useTag();
@@ -143,7 +135,7 @@ const props = withDefaults(defineProps<AiTagProps>(), {
 const loading = ref(false);
 const disabled = computed(() => trainingStore.useGPU);
 const showDrawer = ref(false);
-const ruleFormRef = useTemplateRef<FormInstance>("ruleFormRef");
+const ruleFormRef = useTemplateRef("ruleFormRef");
 const ruleForm = defineModel<AiTagRuleForm>({ required: true });
 const rules = ref<FormRules<AiTagRuleForm>>({
 	image_path: [

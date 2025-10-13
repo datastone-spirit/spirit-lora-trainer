@@ -122,13 +122,13 @@ class DatasetConfig:
     image_directory: Optional[str] = None
     image_jsonl_file: Optional[str] = None
 
-    control_directory: Optional[str] = None # Must be specified `when` edit is true
+    control_directory: Optional[str] = None # Must be specified `when` edit, or edit_plus is true
     qwen_image_edit_no_resize_control = False # optional, default is false. Disable resizing of control image
     qwen_image_edit_control_resolution: Optional[Tuple[int, int]] = None ## optional, default is None. Specify the resolution of the control image. could be specified as [1024, 1024] 
 
 
     @staticmethod
-    def validate(config: 'DatasetConfig', strict_mod : bool = False, edit: bool = False) -> 'DatasetConfig':
+    def validate(config: 'DatasetConfig', strict_mod : bool = False, edit: bool = False, edit_plus: bool = False) -> 'DatasetConfig':
         """
         Validate the DatasetConfig instance.
         """
@@ -144,9 +144,12 @@ class DatasetConfig:
         if edit and not is_blank(config.image_directory):
             if is_blank(config.control_directory):
                 raise ValueError("control_directory must be specified when training qwen-image-edit LoRA")
-            
             # Validate that image pairs exist between image_directory and control_directory
             validate_image_control_pairs(config.image_directory, config.control_directory)
+
+        if edit_plus and not is_blank(config.image_directory):
+            if is_blank(config.control_directory):
+                raise ValueError("control_directory must be specified when trainiing qwen-image-edit-2509 LoRA")
 
         # We don't validate the image pairs for edit_plus, frontend will check it.
         return config
@@ -157,7 +160,7 @@ class QWenImageDataSetConfig:
     datasets: List[DatasetConfig] = field(default_factory=list)
 
     @staticmethod
-    def validate(config: 'QWenImageDataSetConfig', strict_mod: bool = False, edit: bool = False) -> 'QWenImageDataSetConfig':
+    def validate(config: 'QWenImageDataSetConfig', strict_mod: bool = False, edit: bool = False, edit_plus: bool = False) -> 'QWenImageDataSetConfig':
         """
         Validate the WanDataSetConfig instance.
         """
@@ -173,7 +176,7 @@ class QWenImageDataSetConfig:
             raise ValueError("At least one dataset configuration is required.")
         
         for i in range(len(config.datasets)):
-            config.datasets[i] = DatasetConfig.validate(config.datasets[i], strict_mod = strict_mod, edit = edit)
+            config.datasets[i] = DatasetConfig.validate(config.datasets[i], strict_mod = strict_mod, edit = edit, edit_plus=edit_plus)
         return config
 
 @dataclass
@@ -452,8 +455,11 @@ class QWenImageParameter:
         
         if parameter.multi_gpu_config.multi_gpu_enabled is True: 
             parameter.multi_gpu_config.gradient_accumulation_steps = parameter.config.gradient_accumulation_steps
-        
-        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, strict_mod=strict_mod, edit = parameter.config.edit)
+
+        parameter.dataset = QWenImageDataSetConfig.validate(parameter.dataset, 
+                                                            strict_mod=strict_mod,
+                                                            edit=parameter.config.edit,
+                                                            edit_plus=parameter.config.edit_plus)
 
         # network_module is fix string for the specific task. CAN NOT BE CHANGED
         parameter.config.network_module = "networks.lora_qwen_image"

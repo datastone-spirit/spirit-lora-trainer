@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-09-02 15:46:18
- * @LastEditTime: 2025-10-13 12:16:43
+ * @LastEditTime: 2025-10-13 14:43:51
  * @LastEditors: mulingyuer
  * @Description: ai打标
  * @FilePath: \frontend\src\components\AiTag\index.vue
@@ -113,7 +113,7 @@ import ModelSelect from "@/components/Form/DataSet-v3/ModelSelect.vue";
 import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
 import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
-import type { FormRules } from "element-plus";
+import type { FormInstance, FormRules } from "element-plus";
 import type { AiTagRuleForm } from "./types";
 
 export type AiTagProps = {
@@ -135,7 +135,7 @@ const props = withDefaults(defineProps<AiTagProps>(), {
 const loading = ref(false);
 const disabled = computed(() => trainingStore.useGPU);
 const showDrawer = ref(false);
-const ruleFormRef = useTemplateRef("ruleFormRef");
+const ruleFormRef = useTemplateRef<FormInstance>("ruleFormRef");
 const ruleForm = defineModel<AiTagRuleForm>({ required: true });
 const rules = ref<FormRules<AiTagRuleForm>>({
 	image_path: [

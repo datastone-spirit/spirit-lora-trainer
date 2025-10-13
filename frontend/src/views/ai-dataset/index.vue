@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:59:14
- * @LastEditTime: 2025-10-13 12:17:10
+ * @LastEditTime: 2025-10-13 14:44:00
  * @LastEditors: mulingyuer
  * @Description: AI数据集
  * @FilePath: \frontend\src\views\ai-dataset\index.vue
@@ -136,7 +136,7 @@ import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import { joinPrefixKey } from "@/utils/tools";
-import type { FormRules } from "element-plus";
+import type { FormInstance, FormRules } from "element-plus";
 
 const trainingStore = useTrainingStore();
 const settingsStore = useSettingsStore();
@@ -147,7 +147,7 @@ const { useEnhancedLocalStorage } = useEnhancedStorage();
 const loading = ref(false);
 const disabled = computed(() => trainingStore.useGPU);
 const aiDatasetRef = ref<InstanceType<typeof AiDataset>>();
-const ruleFormRef = useTemplateRef("ruleFormRef");
+const ruleFormRef = useTemplateRef<FormInstance>("ruleFormRef");
 const localStorageKey = joinPrefixKey("ai_dataset_form");
 const defaultForm: AiTagRuleForm = {
 	image_path: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",

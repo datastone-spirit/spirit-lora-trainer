@@ -147,7 +147,8 @@ class DatasetConfig:
             
             # Validate that image pairs exist between image_directory and control_directory
             validate_image_control_pairs(config.image_directory, config.control_directory)
-        
+
+        # We don't validate the image pairs for edit_plus, frontend will check it.
         return config
 
 @dataclass
@@ -194,6 +195,7 @@ class QWenImageTrainingConfig:
     dynamo_fullgraph: bool = False # use fullgraph mode for dynamo
     dynamo_mode: str  = None # dynamo mode (default is default)
     edit: bool = False # is Qwen-Image-Edit Lora training
+    edit_plus: bool = False # is Qwen-Image-Edit-2509 Lora training
     flash3: bool = False # use FlashAttention 3 for CrossAttention, requires FlashAttention 3, HunyuanVideo does not support this yet
     flash_attn: bool = False # use FlashAttention for CrossAttention, requires FlashAttention
     fp8_base: bool = False # use fp8 for base model
@@ -289,9 +291,15 @@ class QWenImageTrainingConfig:
         """
         Validate the QWenImageTrainingConfig instance.
         """
+        if config.edit is True and config.edit_plus is True:
+            logger.warning(f"edit {config.edit} and edit_plus {config.edit_plus} cannot be used together.")
+            raise ValueError("edit and edit_plus cannot be used together.")
+
         if is_blank(config.dit):
             if config.edit:
                 config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_edit_bf16.safetensors")
+            elif config.edit_plus:
+                config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_edit_2509_bf16.safetensors")
             else:
                 config.dit = path.join(getprojectpath(), "models", "qwen-image", "transformer", "qwen_image_bf16.safetensors")
         
@@ -400,6 +408,7 @@ class QWenImageTrainingConfig:
             args = config.network_args.split(",")
             config.network_args = [item for item in args]
             logger.info(f"network_args is convert to List {config.network_args}")
+        
             
         return config
 

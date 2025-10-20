@@ -1,10 +1,10 @@
 /*
  * @Author: mulingyuer
- * @Date: 2025-07-25 10:43:18
- * @LastEditTime: 2025-08-26 16:31:55
+ * @Date: 2025-10-09 16:19:39
+ * @LastEditTime: 2025-10-09 16:23:11
  * @LastEditors: mulingyuer
- * @Description: 公共的lora校验类型
- * @FilePath: \frontend\src\utils\lora\lora.validator\types.ts
+ * @Description: 校验类型
+ * @FilePath: \frontend\src\utils\lora\validator\types.ts
  * 怎么可能会有bug！！！
  */
 import type { MessageOptions } from "element-plus";

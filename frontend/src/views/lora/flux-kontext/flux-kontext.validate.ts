@@ -1,14 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-24 10:25:29
- * @LastEditTime: 2025-07-28 15:53:24
+ * @LastEditTime: 2025-10-10 09:21:13
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 校验方法
  * @FilePath: \frontend\src\views\lora\flux-kontext\flux-kontext.validate.ts
  * 怎么可能会有bug！！！
  */
-import type { ValidationResult } from "@/utils/lora/lora.validator";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import type { ValidationResult } from "@/utils/lora/validator";
+import { LoRAValidator, DatasetValidator } from "@/utils/lora/validator";
 import type { FormInstance } from "element-plus";
 import type { RuleForm } from "./types";
 
@@ -31,7 +31,7 @@ async function validateDataset(ruleForm: RuleForm): Promise<ValidationResult> {
 
 		for (const item of datasets) {
 			// 数据集
-			const hasFolderData = await LoRAValidator.validateDirectory({
+			const hasFolderData = await DatasetValidator.validateDirectory({
 				path: item.folder_path,
 				checkImageAndLabel: true
 			});

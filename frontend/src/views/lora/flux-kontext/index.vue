@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-09-03 16:34:53
+ * @LastEditTime: 2025-10-10 09:21:56
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -75,7 +75,7 @@ import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
@@ -186,7 +186,7 @@ const rules = reactive<FormRules<RuleForm>>({
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
 			validator: (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
 						return;

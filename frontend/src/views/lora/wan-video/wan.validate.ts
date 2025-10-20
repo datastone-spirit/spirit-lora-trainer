@@ -1,13 +1,13 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-27 09:02:06
- * @LastEditTime: 2025-09-04 10:18:32
+ * @LastEditTime: 2025-10-10 09:26:29
  * @LastEditors: mulingyuer
  * @Description: wan 校验器
  * @FilePath: \frontend\src\views\lora\wan-video\wan.validate.ts
  * 怎么可能会有bug！！！
  */
-import { LoRAValidator, type ValidationResult } from "@/utils/lora/lora.validator";
+import { DatasetValidator, LoRAValidator, type ValidationResult } from "@/utils/lora/validator";
 import type { FormInstance } from "element-plus";
 import type { RuleForm } from "./types";
 
@@ -28,7 +28,7 @@ async function validateDataset(formData: RuleForm): Promise<ValidationResult> {
 		dir = formData.dataset.datasets[0].video_directory;
 	}
 
-	const { valid } = await LoRAValidator.validateDirectory({
+	const { valid } = await DatasetValidator.validateDirectory({
 		path: dir,
 		checkImageAndLabel: true,
 		shouldShowErrorDialog: true

@@ -152,6 +152,10 @@
 .el-alert.el-alert--warning.is-dark {
 	background-color: #edbb20;
 }
+.el-form .el-alert.el-alert--warning .el-alert__icon {
+	align-self: flex-start;
+	height: 24px;
+}
 
 // el-image-viewer
 .el-image-viewer__file_name {

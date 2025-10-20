@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-03-20 09:30:27
- * @LastEditTime: 2025-09-04 09:34:23
+ * @LastEditTime: 2025-10-13 12:18:49
  * @LastEditors: mulingyuer
  * @Description: wan类型
  * @FilePath: \frontend\src\views\lora\wan-video\types.ts
@@ -12,7 +12,7 @@ import type {
 	StartWanVideoTrainingImageDataset,
 	StartWanVideoTrainingVideoDataset
 } from "@/api/lora";
-import type { AiTagRuleForm } from "@/components/AiTag/index.vue";
+import type { AiTagRuleForm } from "@/components/AiTag/types";
 
 type StartWanVideoTrainingVideoDataset1 = Omit<
 	StartWanVideoTrainingVideoDataset,

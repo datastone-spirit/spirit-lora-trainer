@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-09-04 10:08:52
+ * @LastEditTime: 2025-10-10 11:24:38
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -76,7 +76,7 @@ import { useEnhancedStorage } from "@/hooks/useEnhancedStorage";
 import { useSettingsStore, useTrainingStore } from "@/stores";
 import { getEnv } from "@/utils/env";
 import { LoRAHelper } from "@/utils/lora/lora.helper";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import { ViewSamplingDrawerModal } from "@/utils/modal-manager";
 import { joinPrefixKey } from "@/utils/tools";
 import type { FormInstance, FormRules } from "element-plus";
@@ -112,7 +112,7 @@ const defaultDatasetItem: DatasetItem = generateDefaultDataset({ general: defaul
 const defaultForm: RuleForm = {
 	config: {
 		output_name: "",
-		edit: false,
+		lora_type: "qwen_image",
 		dit: "",
 		vae: "",
 		vae_dtype: "bfloat16",
@@ -220,7 +220,7 @@ const rules = reactive<FormRules<RuleForm>>({
 		{ required: true, message: "请选择LoRA保存路径", trigger: "blur" },
 		{
 			validator: async (_rule: any, value: string, callback: (error?: string | Error) => void) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("LoRA保存目录不存在"));
 						return;
@@ -357,7 +357,7 @@ const dir = computed(() => {
 	const activeDatasetId = ruleForm.value.activeDatasetId;
 	const findItem = datasets.find((item) => item.id === activeDatasetId);
 	if (!findItem) return "";
-	if (ruleForm.value.config.edit) {
+	if (ruleForm.value.config.lora_type !== "qwen_image") {
 		return findItem.preview === "image_directory"
 			? findItem.image_directory
 			: findItem.control_directory;

@@ -1,14 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 16:07:25
- * @LastEditTime: 2025-09-04 09:26:51
+ * @LastEditTime: 2025-10-10 09:23:44
  * @LastEditors: mulingyuer
  * @Description: hunyuan 校验方法
  * @FilePath: \frontend\src\views\lora\hunyuan-video\hunyuan.validate.ts
  * 怎么可能会有bug！！！
  */
-import type { ValidationResult } from "@/utils/lora/lora.validator";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import type { ValidationResult } from "@/utils/lora/validator";
+import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import type { FormInstance } from "element-plus";
 import type { RuleForm } from "./types";
 import { hyCheckDirectoryExists } from "@/api/common";
@@ -103,7 +103,7 @@ export async function validate(data: ValidateData): Promise<ValidationResult> {
 		() => LoRAValidator.validateGpu({ shouldShowErrorDialog: true }),
 		// 数据集校验
 		() =>
-			LoRAValidator.validateDirectory({
+			DatasetValidator.validateDirectory({
 				path: ruleForm.aiTagRuleForm.image_path,
 				checkImageAndLabel: true,
 				shouldShowErrorDialog: true

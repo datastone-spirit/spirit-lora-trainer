@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-09-02 15:46:18
- * @LastEditTime: 2025-09-04 10:51:25
+ * @LastEditTime: 2025-10-13 14:43:51
  * @LastEditors: mulingyuer
  * @Description: ai打标
  * @FilePath: \frontend\src\components\AiTag\index.vue
@@ -108,14 +108,13 @@
 </template>
 
 <script setup lang="ts">
-import type { BatchTagData } from "@/api/tag";
 import JoyCaptionPromptTypeSelect from "@/components/Form/DataSet-v3/JoyCaptionPromptTypeSelect.vue";
 import ModelSelect from "@/components/Form/DataSet-v3/ModelSelect.vue";
 import { useTag } from "@/hooks/task/useTag";
 import { useTrainingStore } from "@/stores";
-import { LoRAValidator } from "@/utils/lora/lora.validator";
+import { DatasetValidator, LoRAValidator } from "@/utils/lora/validator";
 import type { FormInstance, FormRules } from "element-plus";
-import type { SimplifyDeep } from "type-fest";
+import type { AiTagRuleForm } from "./types";
 
 export type AiTagProps = {
 	/** 是否显示获取触发词按钮 */
@@ -125,13 +124,6 @@ export type AiTagProps = {
 	/** 打开drawer之前的回调，用于做一个特殊的处理 */
 	beforeOpen?: () => void;
 };
-
-export type AiTagRuleForm = SimplifyDeep<
-	Required<BatchTagData> & {
-		/** 高级设置，默认："" */
-		advanced_setting: string;
-	}
->;
 
 const trainingStore = useTrainingStore();
 const { tagMonitor, tag, isJoyCaption2Model } = useTag();
@@ -161,7 +153,7 @@ const rules = ref<FormRules<AiTagRuleForm>>({
 		{
 			trigger: "change",
 			validator: (_rule, value, callback) => {
-				LoRAValidator.validateDirectory({ path: value }).then(({ valid }) => {
+				DatasetValidator.validateDirectory({ path: value }).then(({ valid }) => {
 					if (!valid) {
 						callback(new Error("打标目录不存在"));
 						return;

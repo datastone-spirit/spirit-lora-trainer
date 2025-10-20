@@ -1,14 +1,14 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:55:18
- * @LastEditTime: 2025-09-03 16:35:06
+ * @LastEditTime: 2025-10-13 12:17:17
  * @LastEditors: mulingyuer
  * @Description: flux-kontext 类型
  * @FilePath: \frontend\src\views\lora\flux-kontext\types.ts
  * 怎么可能会有bug！！！
  */
 import type { StartFluxKontextTrainingData } from "@/api/lora";
-import type { AiTagRuleForm } from "@/components/AiTag/index.vue";
+import type { AiTagRuleForm } from "@/components/AiTag/types";
 
 type ProcessType = StartFluxKontextTrainingData["config"]["process"][number];
 

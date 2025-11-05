@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-07 17:09:02
- * @LastEditTime: 2025-09-02 10:19:57
+ * @LastEditTime: 2025-11-05 09:46:06
  * @LastEditors: mulingyuer
  * @Description: 传送至FooterBar组件中的内容
  * @FilePath: \frontend\src\components\TeleportFooterBarContent\index.vue
@@ -166,10 +166,10 @@ const onUploadRequest: UploadProps["beforeUpload"] = async (file) => {
 	return false;
 };
 // 合并数据
-function onMergeData(tomlObj: Record<string, any>) {
+async function onMergeData(tomlObj: Record<string, any>) {
 	try {
 		// 合并数据
-		LoRAHelper.mergeTrainingFormData(mergeData.value, tomlObj);
+		await LoRAHelper.mergeTrainingFormData(mergeData.value, tomlObj);
 
 		ElMessage.success("配置导入成功");
 	} catch (error) {

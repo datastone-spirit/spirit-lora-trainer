@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-03-20 08:58:25
- * @LastEditTime: 2025-10-10 09:25:38
+ * @LastEditTime: 2025-11-05 10:07:46
  * @LastEditors: mulingyuer
  * @Description: wan模型训练页面
  * @FilePath: \frontend\src\views\lora\wan-video\index.vue
@@ -102,6 +102,7 @@ const isWhiteCheck = settingsStore.whiteCheck;
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = joinPrefixKey("lora_wan_form");
 const defaultForm: RuleForm = {
+	formType: "wan-video",
 	config: {
 		task: "i2v-14B",
 		output_name: "",
@@ -223,7 +224,7 @@ const defaultForm: RuleForm = {
 const ruleForm = useEnhancedLocalStorage({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm)),
-	version: "1.0.1"
+	version: "1.0.2"
 });
 const isWan22 = computed(() => wanHelper.isWan2(ruleForm.value.config.task));
 const rules = reactive<FormRules<RuleForm>>({

@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 15:10:20
- * @LastEditTime: 2025-08-29 11:56:02
+ * @LastEditTime: 2025-11-05 09:56:51
  * @LastEditors: mulingyuer
  * @Description: 公共的lora帮助方法
  * @FilePath: \frontend\src\utils\lora\lora.helper\index.ts
@@ -24,7 +24,34 @@ export class LoRAHelper {
 
 	/** 合并训练表单数据 */
 	static mergeTrainingFormData(form: any, data: any) {
-		return deepMerge(form, data);
+		return new Promise((resolve, reject) => {
+			if (!Object.hasOwn(form, "formType")) {
+				return resolve(deepMerge(form, data));
+			}
+
+			// 校验数据来源
+			if (!Object.hasOwn(data, "formType")) {
+				ElMessageBox.confirm(
+					"当前导入的表单数据没有明确表单类型，合并可能会有风险，是否继续？（合并也只会合并相同字段的数据）",
+					"合并警告",
+					{
+						confirmButtonText: "继续",
+						cancelButtonText: "取消",
+						type: "warning"
+					}
+				)
+					.then(() => {
+						return resolve(deepMerge(form, data));
+					})
+					.catch(() => {
+						reject(new Error("用户取消了操作"));
+					});
+			} else if (form.formType !== data.formType) {
+				reject(new Error("当前合并的表单数据不一致，请确认表单数据来源是否正确"));
+			} else {
+				resolve(deepMerge(form, data));
+			}
+		});
 	}
 
 	/** 恢复表单数据，只有在任务正在进行中时才恢复表单数据 */

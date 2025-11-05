@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-01-06 09:23:30
- * @LastEditTime: 2025-10-10 09:24:19
+ * @LastEditTime: 2025-11-05 10:04:34
  * @LastEditors: mulingyuer
  * @Description: 混元视频
  * @FilePath: \frontend\src\views\lora\hunyuan-video\index.vue
@@ -85,6 +85,7 @@ const env = getEnv();
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = joinPrefixKey("lora_hunyuan_video_form");
 const defaultForm: RuleForm = {
+	formType: "hunyuan-video",
 	config: {
 		model: {
 			type: "hunyuan-video",
@@ -162,7 +163,7 @@ const defaultForm: RuleForm = {
 const ruleForm = useEnhancedLocalStorage<RuleForm>({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
-	version: "1.0.1"
+	version: "1.0.2"
 });
 const rules = reactive<FormRules<RuleForm>>({
 	"aiTagRuleForm.class_token": [{ required: true, message: "请输入触发词", trigger: "blur" }],

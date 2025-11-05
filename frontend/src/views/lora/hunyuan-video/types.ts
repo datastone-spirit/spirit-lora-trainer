@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-01-06 10:37:35
- * @LastEditTime: 2025-10-13 12:17:33
+ * @LastEditTime: 2025-11-05 10:04:16
  * @LastEditors: mulingyuer
  * @Description: 混元视频类型定义
  * @FilePath: \frontend\src\views\lora\hunyuan-video\types.ts
@@ -28,6 +28,8 @@ type Dateset = SimplifyDeep<
 
 /** 表单类型 */
 export type RuleForm = SimplifyDeep<{
+	/** 表单类型标识 */
+	formType: Extract<TaskType, "hunyuan-video">;
 	config: HyVideoTrainingConfig;
 	dataset: Dateset;
 	/** 打标配置 */

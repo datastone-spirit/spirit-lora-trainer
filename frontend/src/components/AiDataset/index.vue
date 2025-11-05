@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 16:11:39
- * @LastEditTime: 2025-09-04 16:27:33
+ * @LastEditTime: 2025-11-05 10:38:49
  * @LastEditors: mulingyuer
  * @Description: ai数据集
  * @FilePath: \frontend\src\components\AiDataset\index.vue
@@ -16,7 +16,7 @@
 					<div class="file-list" v-else>
 						<component
 							v-for="(item, index) in list"
-							:key="item.value"
+							:key="item.name"
 							:is="FileItemMap[item.type]"
 							:data="item"
 							:selected="activeItemIndex !== null && activeItemIndex === index"

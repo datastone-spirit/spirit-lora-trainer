@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-04-02 11:25:07
- * @LastEditTime: 2025-04-03 08:51:48
+ * @LastEditTime: 2025-11-05 10:36:14
  * @LastEditors: mulingyuer
  * @Description: 文件管理器
  * @FilePath: \frontend\src\utils\file-manager\index.ts
@@ -30,7 +30,14 @@ export class FileManager {
 			}
 		});
 
-		return list;
+		return this.sort(list);
+	}
+
+	/** 排序 */
+	private sort(list: FileList) {
+		return list.sort((a, b) => {
+			return new Intl.Collator(undefined, { numeric: true }).compare(a.name, b.name);
+		});
 	}
 
 	/** 是否存在text文件 */

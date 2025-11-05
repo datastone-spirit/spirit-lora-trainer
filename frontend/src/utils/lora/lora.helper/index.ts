@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-07-25 15:10:20
- * @LastEditTime: 2025-11-05 09:56:51
+ * @LastEditTime: 2025-11-05 14:14:41
  * @LastEditors: mulingyuer
  * @Description: 公共的lora帮助方法
  * @FilePath: \frontend\src\utils\lora\lora.helper\index.ts
@@ -12,6 +12,7 @@ import { useSettingsStore, useTrainingStore } from "@/stores";
 import { deepMerge, SerializeUndefined } from "@/utils/tools";
 import type { RecoveryTaskFormDataOptions } from "./types";
 export type * from "./types";
+import { TASK_TYPE_NAME } from "@/constants";
 
 export class LoRAHelper {
 	/** 恢复表单数据的任务黑名单 */
@@ -29,10 +30,13 @@ export class LoRAHelper {
 				return resolve(deepMerge(form, data));
 			}
 
+			const formTypeName = TASK_TYPE_NAME[form.formType as TaskType] ?? "";
+			const dataTypeName = TASK_TYPE_NAME[data.formType as TaskType] ?? "";
+
 			// 校验数据来源
 			if (!Object.hasOwn(data, "formType")) {
 				ElMessageBox.confirm(
-					"当前导入的表单数据没有明确表单类型，合并可能会有风险，是否继续？（合并也只会合并相同字段的数据）",
+					`当前导入的${dataTypeName}训练配置，并不是当前页${formTypeName}的训练配置，如果继续合并，系统可能导入错误数据，是否继续？`,
 					"合并警告",
 					{
 						confirmButtonText: "继续",
@@ -47,7 +51,11 @@ export class LoRAHelper {
 						reject(new Error("用户取消了操作"));
 					});
 			} else if (form.formType !== data.formType) {
-				reject(new Error("当前合并的表单数据不一致，请确认表单数据来源是否正确"));
+				reject(
+					new Error(
+						`当前导入的${TASK_TYPE_NAME[data.formType as TaskType]}训练配置，并不是${TASK_TYPE_NAME[form.formType as TaskType]}的训练配置，请检查导入的文件配置是否正确！`
+					)
+				);
 			} else {
 				resolve(deepMerge(form, data));
 			}

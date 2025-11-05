@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-04 09:51:07
- * @LastEditTime: 2025-10-10 09:24:20
+ * @LastEditTime: 2025-11-05 09:45:42
  * @LastEditors: mulingyuer
  * @Description: flux 模型训练页面
  * @FilePath: \frontend\src\views\lora\flux\index.vue
@@ -105,6 +105,7 @@ const isWhiteCheck = settingsStore.whiteCheck;
 const ruleFormRef = ref<FormInstance>();
 const localStorageKey = joinPrefixKey("lora_flux_form");
 const defaultForm: RuleForm = {
+	formType: "flux",
 	config: {
 		pretrained_model_name_or_path: "./models/unet/flux1-dev.safetensors",
 		enable_base_weight: false,
@@ -222,7 +223,7 @@ const defaultForm: RuleForm = {
 const ruleForm = useEnhancedLocalStorage<RuleForm>({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm) as RuleForm),
-	version: "1.0.1"
+	version: "1.0.2"
 });
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],

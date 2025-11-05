@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-07-22 11:51:19
- * @LastEditTime: 2025-10-10 09:21:56
+ * @LastEditTime: 2025-11-05 10:04:45
  * @LastEditors: mulingyuer
  * @Description: flux kontext 训练
  * @FilePath: \frontend\src\views\lora\flux-kontext\index.vue
@@ -101,6 +101,7 @@ const ruleFormRef = ref<FormInstance>();
 const localStorageKey = joinPrefixKey("flux_kontext_form");
 const defaultDatasetItem: DatasetItem = generateDefaultDataset(0);
 const defaultForm: RuleForm = {
+	formType: "flux-kontext",
 	type: "sd_trainer",
 	training_folder: settingsStore.whiteCheck ? env.VITE_APP_LORA_OUTPUT_PARENT_PATH : "",
 	trigger_word: "",
@@ -177,7 +178,7 @@ const defaultForm: RuleForm = {
 const ruleForm = useEnhancedLocalStorage({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm)),
-	version: "1.0.1"
+	version: "1.0.2"
 });
 const rules = reactive<FormRules<RuleForm>>({
 	name: [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],

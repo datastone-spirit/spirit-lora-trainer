@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2024-12-12 10:30:32
- * @LastEditTime: 2025-07-29 10:36:47
+ * @LastEditTime: 2025-11-04 17:24:27
  * @LastEditors: mulingyuer
  * @Description: 底部工具栏
  * @FilePath: \frontend\src\layout\admin-layout\components\FooterBar\index.vue
@@ -12,12 +12,7 @@
 		<footer v-show="appStore.showFooter" class="footer-bar">
 			<div class="footer-bar-content">
 				<div class="footer-bar-left">
-					<ZLSwitch
-						v-model="openComplexity"
-						off-text="新手"
-						on-text="专家"
-						@change="onComplexityChange"
-					/>
+					<ZLSwitch v-model="openComplexity" off-text="新手" on-text="专家" />
 				</div>
 				<div class="footer-bar-right">
 					<div id="footer-bar-teleport-left" class="footer-bar-teleport-left"></div>
@@ -49,11 +44,14 @@ const routeTrainingType = computed(() => route.meta.loRATaskType ?? "none");
 const currentTaskInfo = computed(() => trainingStore.currentTaskInfo);
 
 /** 难度切换 */
-const openComplexity = ref(settingsStore.complexity === ComplexityEnum.EXPERT);
-function onComplexityChange(val: boolean) {
-	const value = val ? ComplexityEnum.EXPERT : ComplexityEnum.BEGINNER;
-	settingsStore.setComplexity(value);
-}
+const openComplexity = computed({
+	get() {
+		return settingsStore.isExpert;
+	},
+	set(val: boolean) {
+		settingsStore.setComplexity(val ? ComplexityEnum.EXPERT : ComplexityEnum.BEGINNER);
+	}
+});
 
 /** 进度条 */
 const showProgress = computed(() => {

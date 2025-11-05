@@ -1,7 +1,7 @@
 /*
  * @Author: mulingyuer
  * @Date: 2025-08-28 11:42:11
- * @LastEditTime: 2025-09-15 10:42:55
+ * @LastEditTime: 2025-11-05 10:11:53
  * @LastEditors: mulingyuer
  * @Description: 视频信息map
  * @FilePath: \frontend\src\constants\video-map.ts
@@ -39,6 +39,12 @@ export const ZL_VIDEO_MAP = {
 		show: true,
 		title: "智灵训练器Qwen-Image-Edit LoRA训练：get Nano Banana同款手办图片！",
 		href: "https://www.bilibili.com/video/BV1LTHrzLE71"
+	},
+	/** qwen image edit 2509 */
+	QWEN_IMAGE_EDIT_2509: {
+		show: true,
+		title: "7分钟上手智灵训练器Qwen Image Edit 2509 LoRA训练！",
+		href: "https://www.bilibili.com/video/BV1GT1yBxE6t"
 	},
 	/** wan 2.1 */
 	WAN_2_1: {

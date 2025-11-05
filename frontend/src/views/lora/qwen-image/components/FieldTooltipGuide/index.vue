@@ -1,10 +1,10 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-27 09:50:40
- * @LastEditTime: 2025-09-15 11:31:49
+ * @LastEditTime: 2025-11-05 10:11:05
  * @LastEditors: mulingyuer
  * @Description: 功能介绍
- * @FilePath: \spirit-lora-trainer\frontend\src\views\lora\qwen-image\components\FieldTooltipGuide\index.vue
+ * @FilePath: \frontend\src\views\lora\qwen-image\components\FieldTooltipGuide\index.vue
  * 怎么可能会有bug！！！
 -->
 <template>
@@ -35,6 +35,10 @@
 					训练 Qwen Image Edit 视频教程，请观看
 					<a :href="videoData2.href" target="_blank"> 《{{ videoData2.title }}》 </a>
 				</li>
+				<li v-if="videoData3.show">
+					训练 Qwen Image Edit 2509 视频教程，请观看
+					<a :href="videoData3.href" target="_blank"> 《{{ videoData3.title }}》 </a>
+				</li>
 				<li>如果还有其他GPU疑问，请访问我们的B站或添加训练器首页的二维码寻求帮助</li>
 			</ul>
 		</div>
@@ -46,6 +50,7 @@ import { ZL_VIDEO_MAP } from "@/constants";
 
 const videoData1 = ZL_VIDEO_MAP.QWEN_IMAGE;
 const videoData2 = ZL_VIDEO_MAP.QWEN_IMAGE_EDIT;
+const videoData3 = ZL_VIDEO_MAP.QWEN_IMAGE_EDIT_2509;
 </script>
 
 <style lang="scss" scoped></style>

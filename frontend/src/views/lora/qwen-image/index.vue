@@ -1,7 +1,7 @@
 <!--
  * @Author: mulingyuer
  * @Date: 2025-08-12 15:51:13
- * @LastEditTime: 2025-10-10 11:24:38
+ * @LastEditTime: 2025-11-05 10:07:04
  * @LastEditors: mulingyuer
  * @Description: qwen-image 模型训练页面
  * @FilePath: \frontend\src\views\lora\qwen-image\index.vue
@@ -110,6 +110,7 @@ const localStorageKey = joinPrefixKey("qwen_image_form");
 const defaultDatasetGeneral = generateDefaultDatasetGeneral();
 const defaultDatasetItem: DatasetItem = generateDefaultDataset({ general: defaultDatasetGeneral });
 const defaultForm: RuleForm = {
+	formType: "qwen-image",
 	config: {
 		output_name: "",
 		lora_type: "qwen_image",
@@ -212,7 +213,7 @@ const defaultForm: RuleForm = {
 const ruleForm = useEnhancedLocalStorage({
 	localKey: localStorageKey,
 	defaultValue: structuredClone(toRaw(defaultForm)),
-	version: "1.0.1"
+	version: "1.0.2"
 });
 const rules = reactive<FormRules<RuleForm>>({
 	"config.output_name": [{ required: true, message: "请输入LoRA名称", trigger: "blur" }],
